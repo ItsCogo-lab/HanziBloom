@@ -109,7 +109,6 @@ export const en = {
   'settings.aboutLicense': 'The dataset built from these sources is shared under CC BY-SA 4.0.',
   'common.cancel': 'Cancel',
 
-  'common.comingSoon': 'This section will be built in an upcoming phase of the MVP.',
 
   'notFound.title': 'Page not found',
   'notFound.description': 'The address you opened does not exist.',

@@ -109,7 +109,6 @@ export const es: Record<MessageKey, string> = {
   'settings.aboutLicense': 'El dataset creado a partir de estas fuentes se comparte con licencia CC BY-SA 4.0.',
   'common.cancel': 'Cancelar',
 
-  'common.comingSoon': 'Esta sección se construirá en una próxima fase del MVP.',
 
   'notFound.title': 'Página no encontrada',
   'notFound.description': 'La dirección que has abierto no existe.',
