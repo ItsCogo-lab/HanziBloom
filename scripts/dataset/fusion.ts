@@ -115,6 +115,11 @@ export interface CharacterSources {
   makeMeAHanzi?: MakeMeAHanziCharacter
   /** Número de trazos según hanzi-writer-data; solo para comprobar el de Unihan. */
   hanziWriterStrokeCount?: number
+  /**
+   * Número Kangxi (según Unihan) del radical que da Make Me a Hanzi. Sirve
+   * para comparar radicales escritos en otra forma: 亻 y 人 son el radical 9.
+   */
+  makeMeAHanziRadicalNumber?: number
 }
 
 /**
@@ -141,7 +146,7 @@ export function enrichCharacter(base: Character, sources: CharacterSources): Cha
  * para que una persona lo revise.
  */
 export function crossCheckCharacter(hanzi: string, sources: CharacterSources): string[] {
-  const { unihan, makeMeAHanzi, hanziWriterStrokeCount } = sources
+  const { unihan, makeMeAHanzi, hanziWriterStrokeCount, makeMeAHanziRadicalNumber } = sources
   const conflicts: string[] = []
   if (unihan?.strokeCount !== undefined && hanziWriterStrokeCount !== undefined) {
     if (unihan.strokeCount !== hanziWriterStrokeCount) {
@@ -150,7 +155,12 @@ export function crossCheckCharacter(hanzi: string, sources: CharacterSources): s
       )
     }
   }
-  if (unihan?.radical !== undefined && makeMeAHanzi !== undefined && unihan.radical !== makeMeAHanzi.radical) {
+  if (
+    unihan?.radical !== undefined &&
+    makeMeAHanzi !== undefined &&
+    unihan.radical !== makeMeAHanzi.radical &&
+    unihan.radicalNumber !== makeMeAHanziRadicalNumber
+  ) {
     conflicts.push(
       `${hanzi}: el radical es ${unihan.radical} en Unihan y ${makeMeAHanzi.radical} en Make Me a Hanzi. Se usa el de Unihan.`,
     )

@@ -76,6 +76,11 @@ describe('crossCheckCharacter', () => {
     ).toEqual([])
   })
 
+  it('no avisa cuando el radical está escrito en otra forma del mismo radical Kangxi', () => {
+    const person = { strokeCount: 5, radical: '人', radicalNumber: 9 }
+    expect(crossCheckCharacter('X', { unihan: person, makeMeAHanzi: { radical: '亻' }, makeMeAHanziRadicalNumber: 9 })).toEqual([])
+  })
+
   it('avisa de los desacuerdos sin corregirlos', () => {
     const conflicts = crossCheckCharacter('X', { unihan, makeMeAHanzi: { radical: '口' }, hanziWriterStrokeCount: 8 })
     expect(conflicts).toEqual([

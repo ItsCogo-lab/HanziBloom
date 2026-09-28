@@ -23,7 +23,7 @@ import { readStrokeData, type StrokeData } from './sources/hanziWriter.ts'
 import { parseHskList } from './sources/hsk.ts'
 import { parseMakeMeAHanzi } from './sources/makemeahanzi.ts'
 import { parseLinkLine, parseSentenceLine, selectExamples, type TatoebaSentence } from './sources/tatoeba.ts'
-import { loadUnihan } from './sources/unihan.ts'
+import { loadUnihan, type UnihanCharacter } from './sources/unihan.ts'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const cacheDir = join(scriptDir, '.cache')
@@ -76,19 +76,21 @@ const base = buildBaseEntries(hskList, cedict, 1)
 const { words, problems } = base
 const hanziSet = new Set(base.characters.map((character) => character.hanzi))
 
-// --- Unihan: trazos, radical, tradicional ----------------------------------
-
-const unihan = skippedSources.has('unihan')
-  ? new Map()
-  : loadUnihan(
-      [readSource('unihan/Unihan_IRGSources.txt'), readSource('unihan/Unihan_Variants.txt')],
-      readSource('unihan/CJKRadicals.txt'),
-      hanziSet,
-    )
-
 // --- Make Me a Hanzi: descomposición y etimología ------------------------
 
 const makeMeAHanzi = parseMakeMeAHanzi(readSource('makemeahanzi-dictionary.txt'), hanziSet)
+
+// --- Unihan: trazos, radical, tradicional ----------------------------------
+// También se lee para los radicales de Make Me a Hanzi, para poder
+// comparar radicales escritos en otra forma (亻 y 人 son el radical 9).
+const makeMeAHanziRadicals = new Set([...makeMeAHanzi.values()].map((entry) => entry.radical))
+const unihan = skippedSources.has('unihan')
+  ? new Map<string, UnihanCharacter>()
+  : loadUnihan(
+      [readSource('unihan/Unihan_IRGSources.txt'), readSource('unihan/Unihan_Variants.txt')],
+      readSource('unihan/CJKRadicals.txt'),
+      new Set([...hanziSet, ...makeMeAHanziRadicals]),
+    )
 
 // --- hanzi-writer-data: trazos (paquete npm fijado en package.json) --------
 
@@ -107,6 +109,10 @@ const characters = base.characters.map((character) => {
     unihan: unihan.get(character.hanzi),
     makeMeAHanzi: makeMeAHanzi.get(character.hanzi),
     hanziWriterStrokeCount: strokeData.get(character.hanzi)?.strokeCount,
+  }
+  const makeMeAHanziRadical = sources.makeMeAHanzi?.radical
+  if (makeMeAHanziRadical !== undefined) {
+    sources.makeMeAHanziRadicalNumber = unihan.get(makeMeAHanziRadical)?.radicalNumber
   }
   conflicts.push(...crossCheckCharacter(character.hanzi, sources))
   return enrichCharacter(character, sources)
