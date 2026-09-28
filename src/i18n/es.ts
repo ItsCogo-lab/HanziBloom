@@ -1,11 +1,11 @@
+import type { MessageKey } from './en.ts'
+
 /**
- * Textos de la interfaz en español.
- *
- * Es el idioma de referencia: las claves que existen aquí son las únicas
- * válidas. Cuando añadamos inglés o catalán, sus archivos tendrán que tener
- * exactamente las mismas claves (TypeScript lo comprobará).
+ * Textos de la interfaz en español. De momento la app está en inglés;
+ * se mantienen para poder activar el español más adelante.
+ * El tipo obliga a tener exactamente las mismas claves que en.ts.
  */
-export const es = {
+export const es: Record<MessageKey, string> = {
   'app.name': 'HanziVocab',
   'app.tagline': 'Aprende y practica caracteres y vocabulario chino.',
   'app.skipToContent': 'Saltar al contenido',
@@ -32,6 +32,4 @@ export const es = {
   'notFound.title': 'Página no encontrada',
   'notFound.description': 'La dirección que has abierto no existe.',
   'notFound.backHome': 'Volver al inicio',
-} as const
-
-export type MessageKey = keyof typeof es
+}

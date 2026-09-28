@@ -1,14 +1,19 @@
-import { es, type MessageKey } from './es.ts'
+import { en, type MessageKey } from './en.ts'
+import { es } from './es.ts'
 
 export type { MessageKey }
 
+export type UiLocale = 'en' | 'es'
+
+const messages: Record<UiLocale, Record<MessageKey, string>> = { en, es }
+
 /**
- * Devuelve el texto de la interfaz para una clave.
- *
- * De momento solo hay español. Para añadir otro idioma bastará con crear
- * su archivo (p. ej. `en.ts` con tipo `Record<MessageKey, string>`) y elegir
- * aquí el diccionario según el idioma activo, sin tocar los componentes.
+ * Idioma activo de la interfaz. De momento es fijo; cuando haya selector de
+ * idioma en Ajustes, este valor vendrá de las preferencias del usuario.
  */
+export const ACTIVE_UI_LOCALE: UiLocale = 'en'
+
+/** Devuelve el texto de la interfaz para una clave en el idioma activo. */
 export function t(key: MessageKey): string {
-  return es[key]
+  return messages[ACTIVE_UI_LOCALE][key]
 }

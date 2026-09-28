@@ -51,8 +51,8 @@ export function validateDictionaryData(characters: readonly Character[], words: 
 }
 
 function validateMeanings(label: string, meanings: Translations): string[] {
-  if (meanings.es.length === 0 || meanings.es.some(isBlank)) {
-    return [`${label}: falta el significado en español`]
+  if (meanings.en.length === 0 || meanings.en.some(isBlank)) {
+    return [`${label}: falta el significado en inglés`]
   }
   return []
 }

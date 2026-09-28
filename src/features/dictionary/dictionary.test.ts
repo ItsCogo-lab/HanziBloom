@@ -46,7 +46,7 @@ describe('listCharacters / listWords', () => {
       id: '吃',
       hanzi: '吃',
       pinyin: ['chī'],
-      meanings: { es: ['comer'] },
+      meanings: { en: ['to eat'] },
       hskLevel: 2,
     }
     const mixed = createDictionary([...testCharacters, level2Character], testWords)
@@ -82,15 +82,15 @@ describe('getWordsWithCharacter', () => {
 })
 
 describe('getMeanings', () => {
-  it('devuelve los significados en español por defecto', () => {
-    expect(getMeanings({ es: ['gracias'], en: ['thanks'] })).toEqual(['gracias'])
+  it('devuelve los significados en inglés por defecto', () => {
+    expect(getMeanings({ en: ['thanks'], es: ['gracias'] })).toEqual(['thanks'])
   })
 
   it('devuelve el idioma pedido si existe', () => {
-    expect(getMeanings({ es: ['gracias'], en: ['thanks'] }, 'en')).toEqual(['thanks'])
+    expect(getMeanings({ en: ['thanks'], es: ['gracias'] }, 'es')).toEqual(['gracias'])
   })
 
-  it('usa el español si falta el idioma pedido', () => {
-    expect(getMeanings({ es: ['gracias'] }, 'ca')).toEqual(['gracias'])
+  it('usa el inglés si falta el idioma pedido', () => {
+    expect(getMeanings({ en: ['thanks'] }, 'ca')).toEqual(['thanks'])
   })
 })

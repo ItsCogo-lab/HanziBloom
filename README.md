@@ -4,7 +4,8 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 4 de 12** del MVP (modelo de datos). La arquitectura y el plan están
+Estado: **Fase 5 de 12** del MVP (dataset HSK 1). De momento la interfaz y los
+significados están en inglés. La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tecnologías
@@ -34,11 +35,14 @@ npm run dev        # servidor de desarrollo en http://localhost:5173
 | `npm test` | Ejecuta los tests una vez |
 | `npm run test:watch` | Tests en modo observación |
 | `npm run check` | Tipos + lint + tests (lo mismo que ejecuta la CI) |
+| `npm run data:fetch` | Descarga las fuentes del dataset (CC-CEDICT y lista HSK) |
+| `npm run data:build` | Regenera el dataset en `src/data/` (ver `docs/DATA_SOURCES.md`) |
 
 ## Estructura
 
 ```
-docs/            Arquitectura y decisiones
+docs/            Arquitectura, decisiones y fuentes de datos
+scripts/dataset/ Script que genera el dataset a partir de las fuentes
 public/          Archivos estáticos (favicon)
 src/
   app/           App, rutas (AppRoutes), secciones del menú (navigation.ts)
@@ -46,13 +50,23 @@ src/
   pages/         Una página por sección de la app
   features/
     dictionary/  Tipos de caracteres y palabras, consultas y validación de datos
+  data/          Dataset generado (HSK 1: 150 palabras, 178 caracteres)
+  lib/           Utilidades sin dominio (conversión de pinyin)
   components/    Componentes compartidos
     ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader
-  i18n/          Textos de la interfaz (es.ts) y función t()
+  i18n/          Textos de la interfaz (en.ts activo, es.ts preparado) y función t()
   test/          Configuración compartida de los tests
   index.css      Tailwind y design tokens (colores, fuentes, foco)
   main.tsx       Punto de entrada
 ```
 
-La estructura completa prevista (features, datos...) está descrita en
+La estructura completa prevista está descrita en
 `docs/ARCHITECTURE.md`; cada carpeta se crea en la fase que la necesita.
+
+## Datos
+
+Los significados y lecturas vienen de [CC-CEDICT](https://cc-cedict.org/wiki/)
+(CC BY-SA 4.0) y la lista de palabras HSK de
+[clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
+Los archivos de `src/data/` se distribuyen bajo CC BY-SA 4.0. Más detalles en
+[`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).

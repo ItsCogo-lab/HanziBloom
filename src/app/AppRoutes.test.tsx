@@ -15,7 +15,7 @@ function renderAt(path: string) {
 }
 
 function getMainNavigation() {
-  return screen.getByRole('navigation', { name: 'Navegación principal' })
+  return screen.getByRole('navigation', { name: 'Main navigation' })
 }
 
 describe('AppRoutes', () => {
@@ -29,31 +29,31 @@ describe('AppRoutes', () => {
     const user = userEvent.setup()
     renderAt('/')
 
-    await user.click(within(getMainNavigation()).getByRole('link', { name: 'Práctica' }))
+    await user.click(within(getMainNavigation()).getByRole('link', { name: 'Practice' }))
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Práctica' })).toBeInTheDocument()
-    expect(within(getMainNavigation()).getByRole('link', { name: 'Práctica' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument()
+    expect(within(getMainNavigation()).getByRole('link', { name: 'Practice' })).toHaveAttribute(
       'aria-current',
       'page',
     )
-    expect(within(getMainNavigation()).getByRole('link', { name: 'Inicio' })).not.toHaveAttribute(
+    expect(within(getMainNavigation()).getByRole('link', { name: 'Home' })).not.toHaveAttribute(
       'aria-current',
     )
   })
 
-  it('el botón «Empezar sesión» del inicio lleva a la práctica', async () => {
+  it('el botón «Start session» del inicio lleva a la práctica', async () => {
     const user = userEvent.setup()
     renderAt('/')
 
-    await user.click(screen.getByRole('link', { name: 'Empezar sesión' }))
+    await user.click(screen.getByRole('link', { name: 'Start session' }))
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Práctica' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument()
   })
 
   it('muestra una página de error en rutas desconocidas', () => {
     renderAt('/no-existe')
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Página no encontrada' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/')
   })
 })
