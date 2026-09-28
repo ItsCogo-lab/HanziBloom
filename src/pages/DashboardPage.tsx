@@ -9,7 +9,7 @@ import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { summarizeItems, type ItemsSummary } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
-import { appStudySets } from '../features/studySets/appStudySets.ts'
+import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { getSetPath } from '../features/studySets/setPaths.ts'
 import { SetSessionButtons } from '../features/studySets/components/SetSessionActions.tsx'
 import { SetProgressBar } from '../features/studySets/components/SetProgressBar.tsx'
@@ -34,10 +34,11 @@ function getTodayMessage(summary: ItemsSummary): MessageKey {
 export function DashboardPage() {
   const { progress } = useProgress()
   const { myStudies } = useMyStudies()
+  const studySets = useStudySets()
   const now = new Date()
   const summary = summarizeItems(hskStudyItems, progress, now)
   const studyingSets = myStudies.sets
-    .map(({ setId }) => getStudySet(appStudySets, setId))
+    .map(({ setId }) => getStudySet(studySets, setId))
     .filter((set) => set !== undefined)
     .slice(0, MAX_SETS_ON_HOME)
 

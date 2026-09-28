@@ -3,7 +3,7 @@ import { ButtonLink } from '../../components/ui/ButtonLink.tsx'
 import { Card } from '../../components/ui/Card.tsx'
 import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../../features/progress/progressContext.ts'
-import { appStudySets } from '../../features/studySets/appStudySets.ts'
+import { useStudySets } from '../../features/studySets/useStudySets.ts'
 import { getSetPath } from '../../features/studySets/setPaths.ts'
 import { SetSessionButtons } from '../../features/studySets/components/SetSessionActions.tsx'
 import { SetItemCount } from '../../features/studySets/components/SetSummary.tsx'
@@ -16,10 +16,11 @@ import { t } from '../../i18n/index.ts'
 /** Los sets que el usuario está estudiando, con su progreso y acciones. */
 export function MyStudiesPage() {
   const { myStudies } = useMyStudies()
+  const studySets = useStudySets()
   const { progress } = useProgress()
   const now = new Date()
   // Un set guardado que ya no existe (p. ej. un tema retirado) simplemente no se muestra
-  const sets = myStudies.sets.map(({ setId }) => getStudySet(appStudySets, setId)).filter((set) => set !== undefined)
+  const sets = myStudies.sets.map(({ setId }) => getStudySet(studySets, setId)).filter((set) => set !== undefined)
 
   if (sets.length === 0) {
     return (

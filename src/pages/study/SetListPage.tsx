@@ -1,5 +1,5 @@
 import { TOPIC_CURATION_NOTE } from '../../data/topics.ts'
-import { appStudySets } from '../../features/studySets/appStudySets.ts'
+import { useStudySets } from '../../features/studySets/useStudySets.ts'
 import { SetCard } from '../../features/studySets/components/SetCard.tsx'
 import { listSetsOfType } from '../../features/studySets/studySets.ts'
 import type { StudySetType } from '../../features/studySets/types.ts'
@@ -7,7 +7,7 @@ import { t } from '../../i18n/index.ts'
 
 /** Lista de sets de un tipo (HSK o temas). Los sets nuevos aparecen solos. */
 export function SetListPage({ type }: { type: Exclude<StudySetType, 'custom'> }) {
-  const sets = listSetsOfType(appStudySets, type)
+  const sets = listSetsOfType(useStudySets(), type)
   return (
     <section aria-labelledby="set-list-title" className="flex flex-col gap-4">
       <div>

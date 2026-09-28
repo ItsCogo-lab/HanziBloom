@@ -1,4 +1,4 @@
-import type { StudyItem } from '../features/dictionary/studyItem.ts'
+import type { StudyItem } from './studyItem.ts'
 
 /** Ruta de la ficha de un carácter o de una palabra. */
 export function getEntryPath(item: StudyItem): string {

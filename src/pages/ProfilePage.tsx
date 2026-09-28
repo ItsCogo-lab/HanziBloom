@@ -9,7 +9,7 @@ import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { getAnswerTotals, summarizeItems } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
-import { appStudySets } from '../features/studySets/appStudySets.ts'
+import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { getSetPath } from '../features/studySets/setPaths.ts'
 import { SetProgressBar } from '../features/studySets/components/SetProgressBar.tsx'
 import { getSetProgress } from '../features/studySets/setProgress.ts'
@@ -26,13 +26,14 @@ const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 export function ProfilePage() {
   const { progress } = useProgress()
   const { myStudies } = useMyStudies()
+  const studySets = useStudySets()
   const now = new Date()
   const overall = summarizeItems(hskStudyItems, progress, now)
   const studyingSets = myStudies.sets
-    .map(({ setId }) => getStudySet(appStudySets, setId))
+    .map(({ setId }) => getStudySet(studySets, setId))
     .filter((set) => set !== undefined)
   const recent = getRecentlyStudied(myStudies).flatMap(({ setId, studiedAt }) => {
-    const set = getStudySet(appStudySets, setId)
+    const set = getStudySet(studySets, setId)
     return set ? [{ set, studiedAt }] : []
   })
 

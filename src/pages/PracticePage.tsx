@@ -13,7 +13,7 @@ import { createSessionExercises } from '../features/practice/session.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import type { ProgressData } from '../features/progress/types.ts'
 import { useSettings } from '../features/settings/settingsContext.ts'
-import { appStudySets } from '../features/studySets/appStudySets.ts'
+import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { SessionTypeLabel } from '../features/studySets/components/SessionTypeLabel.tsx'
 import { getLearnableItems, getReviewItems } from '../features/studySets/sessionItems.ts'
 import { getSetPath, getSetSessionPath } from '../features/studySets/setPaths.ts'
@@ -40,10 +40,11 @@ function createPracticeSession(pool: readonly StudyItem[], progress: ProgressDat
  */
 export function PracticePage() {
   const [searchParams] = useSearchParams()
+  const studySets = useStudySets()
   const setId = searchParams.get('set')
   if (setId === null) return <Practice />
 
-  const set = getStudySet(appStudySets, setId)
+  const set = getStudySet(studySets, setId)
   const mode = searchParams.get('mode') ?? 'study'
   if (!set || (mode !== 'learn' && mode !== 'study')) return <NotFoundPage />
   const reviewAll = searchParams.get('scope') === 'all'

@@ -9,11 +9,14 @@ import { hskDictionary } from '../../features/dictionary/hskDictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../features/dictionary/studyItem.ts'
 import { isStudying } from '../../features/myStudies/myStudies.ts'
 import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
+import { AddVocabulary } from '../../features/customSets/components/AddVocabulary.tsx'
+import { CustomItemList } from '../../features/customSets/components/CustomItemList.tsx'
+import { CustomSetSettings } from '../../features/customSets/components/CustomSetSettings.tsx'
 import { StatusBadge } from '../../features/progress/components/StatusBadge.tsx'
 import { getItemStatus } from '../../features/progress/progress.ts'
 import { useProgress } from '../../features/progress/progressContext.ts'
 import type { ProgressData } from '../../features/progress/types.ts'
-import { appStudySets } from '../../features/studySets/appStudySets.ts'
+import { useStudySets } from '../../features/studySets/useStudySets.ts'
 import { SetSessionActions } from '../../features/studySets/components/SetSessionActions.tsx'
 import { SetItemCount, StudyingBadge } from '../../features/studySets/components/SetSummary.tsx'
 import { SetProgressBar } from '../../features/studySets/components/SetProgressBar.tsx'
@@ -21,7 +24,7 @@ import { StudyToggleButton } from '../../features/studySets/components/StudyTogg
 import { getSetProgress } from '../../features/studySets/setProgress.ts'
 import { getSetItems, getStudySet } from '../../features/studySets/studySets.ts'
 import { t } from '../../i18n/index.ts'
-import { getEntryPath } from '../entryPaths.ts'
+import { getEntryPath } from '../../features/dictionary/entryPaths.ts'
 import { NotFoundPage } from '../NotFoundPage.tsx'
 
 /** Elementos que se muestran de golpe en la lista; el resto, con «Show more». */
@@ -32,7 +35,8 @@ export function SetDetailPage() {
   const { setId = '' } = useParams()
   const { progress } = useProgress()
   const { myStudies } = useMyStudies()
-  const set = getStudySet(appStudySets, setId)
+  const studySets = useStudySets()
+  const set = getStudySet(studySets, setId)
   if (!set) return <NotFoundPage />
 
   const setProgress = getSetProgress(set, progress, new Date())
@@ -44,7 +48,7 @@ export function SetDetailPage() {
     <>
       <PageHeader
         title={set.name}
-        description={set.description}
+        description={set.description || (set.type === 'custom' ? t('custom.label') : undefined)}
         actions={
           <div className="flex flex-wrap gap-2">
             <StudyToggleButton set={set} />
@@ -69,8 +73,20 @@ export function SetDetailPage() {
           </dl>
         </Card>
 
-        {words.length > 0 && <ItemList title={t('sets.vocabulary')} items={words} progress={progress} />}
-        {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
+        {set.type === 'custom' ? (
+          <>
+            <CustomItemList set={set} items={items} />
+            <Card>
+              <AddVocabulary set={set} />
+            </Card>
+            <CustomSetSettings set={set} />
+          </>
+        ) : (
+          <>
+            {words.length > 0 && <ItemList title={t('sets.vocabulary')} items={words} progress={progress} />}
+            {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
+          </>
+        )}
         <Link to="/study" className="self-start text-accent-strong underline underline-offset-2">
           {t('sets.backToStudy')}
         </Link>

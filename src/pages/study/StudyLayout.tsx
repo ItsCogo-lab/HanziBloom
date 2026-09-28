@@ -7,6 +7,7 @@ const STUDY_TABS: readonly { path: string; labelKey: MessageKey }[] = [
   { path: '/study', labelKey: 'study.myStudies' },
   { path: '/study/hsk', labelKey: 'study.hsk' },
   { path: '/study/topics', labelKey: 'study.topics' },
+  { path: '/study/custom', labelKey: 'study.custom' },
 ]
 
 /** Sección Study: My Studies, sets HSK y sets por temas. */

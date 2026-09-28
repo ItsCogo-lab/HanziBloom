@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { KeyValueStorage } from '../lib/storage.ts'
+import { CustomSetsProvider } from '../features/customSets/CustomSetsProvider.tsx'
 import { MyStudiesProvider } from '../features/myStudies/MyStudiesProvider.tsx'
 import { ProgressProvider } from '../features/progress/ProgressProvider.tsx'
 import { SettingsProvider } from '../features/settings/SettingsProvider.tsx'
@@ -15,7 +16,9 @@ export function AppProviders({ children, storage }: AppProvidersProps) {
   return (
     <SettingsProvider storage={storage}>
       <ProgressProvider storage={storage}>
-        <MyStudiesProvider storage={storage}>{children}</MyStudiesProvider>
+        <MyStudiesProvider storage={storage}>
+          <CustomSetsProvider storage={storage}>{children}</CustomSetsProvider>
+        </MyStudiesProvider>
       </ProgressProvider>
     </SettingsProvider>
   )

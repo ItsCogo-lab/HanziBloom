@@ -5,7 +5,7 @@ import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
 import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import type { StudyItem } from '../features/dictionary/studyItem.ts'
 import { t, type MessageKey } from '../i18n/index.ts'
-import { getEntryPath } from './entryPaths.ts'
+import { getEntryPath } from '../features/dictionary/entryPaths.ts'
 
 type KindFilter = 'all' | StudyItem['kind']
 
