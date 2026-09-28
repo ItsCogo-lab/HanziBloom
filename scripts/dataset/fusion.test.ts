@@ -49,6 +49,33 @@ describe('buildBaseEntries', () => {
     expect(characters.find((character) => character.hanzi === '柠')?.hskLevel).toBe(2)
   })
 
+  it('pone primero los significados generales si el carácter también se usa en minúscula', () => {
+    const fixture = createCedictIndex(
+      JSON.stringify([
+        { traditional: '京', simplified: '京', pinyin: 'Jing1', english: ['Jing ethnic minority'] },
+        { traditional: '京', simplified: '京', pinyin: 'jing1', english: ['capital city of a country'] },
+        { traditional: '北', simplified: '北', pinyin: 'bei3', english: ['north'] },
+        { traditional: '北京', simplified: '北京', pinyin: 'Bei3 jing1', english: ['Beijing'] },
+        { traditional: '京劇', simplified: '京剧', pinyin: 'Jing1 ju4', english: ['Beijing opera'] },
+        { traditional: '劇', simplified: '剧', pinyin: 'ju4', english: ['drama'] },
+      ]),
+    )
+    const onlyProper = buildBaseEntries([{ level: 4, words: [{ hanzi: '京剧', pinyin: 'Jīng jù' }] }], fixture)
+    expect(onlyProper.characters[0]!.meanings.en).toEqual(['Jing ethnic minority', 'capital city of a country'])
+
+    const mixed = buildBaseEntries(
+      [
+        { level: 1, words: [{ hanzi: '北京', pinyin: 'Běi jīng' }] },
+        { level: 4, words: [{ hanzi: '京剧', pinyin: 'Jīng jù' }] },
+      ],
+      fixture,
+    )
+    expect(mixed.characters.find((character) => character.hanzi === '京')!.meanings.en).toEqual([
+      'capital city of a country',
+      'Jing ethnic minority',
+    ])
+  })
+
   it('guarda una sola vez las palabras que la lista repite con el mismo pinyin', () => {
     const { words, duplicates } = buildBaseEntries(
       [{ level: 4, words: [{ hanzi: '好', pinyin: 'hǎo' }, { hanzi: '好', pinyin: 'hǎo' }] }],

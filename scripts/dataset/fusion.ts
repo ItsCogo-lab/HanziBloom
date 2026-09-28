@@ -118,6 +118,9 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
   // Caracteres que aparecen en nombres propios (汉语 Hàn yǔ, 中国 Zhōng guó):
   // para ellos también sirven las entradas en mayúscula (汉 "Han; Chinese").
   const properNounCharacters = new Set<string>()
+  // Caracteres que también aparecen en minúscula (京 en 北京 Běi jīng, pero
+  // Jīng en 京剧): sus significados generales van antes que los del nombre propio.
+  const commonNounCharacters = new Set<string>()
 
   for (const { hanzi, pinyin, hskLevel: level } of words) {
     const characters = Array.from(hanzi)
@@ -129,6 +132,7 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
     characters.forEach((character, index) => {
       const syllable = syllables[index]!
       if (syllable !== syllable.toLowerCase()) properNounCharacters.add(character)
+      else commonNounCharacters.add(character)
 
       const reading = readingOf(cedict, character, syllable.toLowerCase())
       if (!reading) {
@@ -142,10 +146,12 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
   }
 
   const characters: Character[] = [...readingsByCharacter].map(([hanzi, { level, readings }]) => {
-    const cedictEntries = readings.flatMap((reading) => [
-      ...(properNounCharacters.has(hanzi) ? findEntries(cedict, hanzi, capitalize(reading)) : []),
-      ...findEntries(cedict, hanzi, reading),
-    ])
+    const cedictEntries = readings.flatMap((reading) => {
+      const common = findEntries(cedict, hanzi, reading)
+      if (!properNounCharacters.has(hanzi)) return common
+      const proper = findEntries(cedict, hanzi, capitalize(reading))
+      return commonNounCharacters.has(hanzi) ? [...common, ...proper] : [...proper, ...common]
+    })
     return { id: hanzi, hanzi, pinyin: readings, meanings: { en: usableMeanings(cedictEntries) }, hskLevel: level }
   })
 
