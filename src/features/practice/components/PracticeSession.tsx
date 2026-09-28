@@ -3,18 +3,21 @@ import { ProgressBar } from '../../../components/ui/ProgressBar.tsx'
 import { t } from '../../../i18n/index.ts'
 import type { Dictionary } from '../../dictionary/dictionary.ts'
 import {
+  createExerciseResult,
   createSessionState,
   getCurrentExercise,
   sessionReducer,
   summarizeResults,
 } from '../session.ts'
-import type { Exercise } from '../types.ts'
+import type { Exercise, ExerciseResult } from '../types.ts'
 import { ExerciseView } from './ExerciseView.tsx'
 import { SessionSummary } from './SessionSummary.tsx'
 
 type PracticeSessionProps = {
   exercises: readonly Exercise[]
   dictionary: Dictionary
+  /** Se llama con cada respuesta, para guardarla en el progreso al momento. */
+  onResult: (result: ExerciseResult) => void
   onRestart: () => void
 }
 
@@ -22,7 +25,7 @@ type PracticeSessionProps = {
  * Una sesión de práctica: muestra los ejercicios uno a uno y, al terminar,
  * el resumen. Toda la lógica está en session.ts; aquí solo se pinta.
  */
-export function PracticeSession({ exercises, dictionary, onRestart }: PracticeSessionProps) {
+export function PracticeSession({ exercises, dictionary, onResult, onRestart }: PracticeSessionProps) {
   const [state, dispatch] = useReducer(sessionReducer, exercises, createSessionState)
   const exercise = getCurrentExercise(state)
 
@@ -49,7 +52,10 @@ export function PracticeSession({ exercises, dictionary, onRestart }: PracticeSe
         key={state.currentIndex}
         exercise={exercise}
         dictionary={dictionary}
-        onAnswer={(correct) => dispatch({ type: 'answer', correct })}
+        onAnswer={(correct) => {
+          onResult(createExerciseResult(exercise, correct))
+          dispatch({ type: 'answer', correct })
+        }}
       />
     </div>
   )

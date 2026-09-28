@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { createDictionary } from '../dictionary/dictionary.ts'
-import { listStudyItems } from '../dictionary/studyItem.ts'
+import { getStudyItemId, listStudyItems, type StudyItem } from '../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { seededRandom } from '../../test/random.ts'
 import type { ExerciseDefinition } from './exerciseDefinitions.ts'
+import { createEmptyProgress, recordAnswer } from '../progress/progress.ts'
 import {
   createSessionExercises,
   createSessionState,
   getCurrentExercise,
   isSessionFinished,
+  selectSessionItems,
   sessionReducer,
   summarizeResults,
 } from './session.ts'
@@ -45,6 +47,43 @@ describe('createSessionExercises', () => {
 
     expect(exercises).toHaveLength(testWords.length)
     expect(exercises.every((exercise) => exercise.item.kind === 'word')).toBe(true)
+  })
+})
+
+describe('selectSessionItems', () => {
+  const monday = new Date(2026, 8, 28, 10, 0)
+  const thursday = new Date(2026, 9, 1, 10, 0)
+  const ids = (items: readonly StudyItem[]) => items.map(getStudyItemId).toSorted()
+
+  // 你 y 好 se fallaron (pendientes ya); 谢 y 了 se acertaron (pendientes desde mañana)
+  let progress = createEmptyProgress()
+  for (const [id, correct] of [
+    ['char:你', false],
+    ['char:好', false],
+    ['char:谢', true],
+    ['char:了', true],
+  ] as const) {
+    progress = recordAnswer(progress, id, correct, monday)
+  }
+
+  it('pone primero los repasos pendientes', () => {
+    expect(ids(selectSessionItems(pool, progress, monday, 2, seededRandom(1)))).toEqual(['char:你', 'char:好'])
+  })
+
+  it('después los elementos nuevos', () => {
+    expect(ids(selectSessionItems(pool, progress, monday, 5, seededRandom(1)))).toEqual(
+      ['char:你', 'char:好', 'word:你好', 'word:好', 'word:谢谢'].toSorted(),
+    )
+  })
+
+  it('y, si faltan, los que aún no tocaban', () => {
+    expect(selectSessionItems(pool, progress, monday, 100, seededRandom(1))).toHaveLength(pool.length)
+  })
+
+  it('cuando llega su fecha, los acertados también son repasos pendientes', () => {
+    expect(ids(selectSessionItems(pool, progress, thursday, 4, seededRandom(1)))).toEqual(
+      ['char:你', 'char:好', 'char:谢', 'char:了'].toSorted(),
+    )
   })
 })
 

@@ -14,10 +14,10 @@ const exercises: Exercise[] = [
   { type: 'flashcard', item: { kind: 'word', entry: testWords[2]! } }, // 谢谢
 ]
 
-function renderSession(onRestart = () => {}) {
+function renderSession({ onRestart = () => {}, onResult = () => {} } = {}) {
   render(
     <MemoryRouter>
-      <PracticeSession exercises={exercises} dictionary={dictionary} onRestart={onRestart} />
+      <PracticeSession exercises={exercises} dictionary={dictionary} onResult={onResult} onRestart={onRestart} />
     </MemoryRouter>,
   )
 }
@@ -57,6 +57,19 @@ describe('PracticeSession', () => {
     expect(screen.queryByText('你')).not.toBeInTheDocument()
   })
 
+  it('avisa de cada respuesta en cuanto se da, para guardarla', async () => {
+    const user = userEvent.setup()
+    const onResult = vi.fn()
+    renderSession({ onResult })
+
+    await answer(user, "I didn't know")
+    expect(onResult).toHaveBeenLastCalledWith({ itemId: 'char:你', exerciseType: 'flashcard', correct: false })
+
+    await answer(user, 'I knew it')
+    expect(onResult).toHaveBeenLastCalledWith({ itemId: 'word:谢谢', exerciseType: 'flashcard', correct: true })
+    expect(onResult).toHaveBeenCalledTimes(2)
+  })
+
   it('funciona igual con ejercicios de opción múltiple', async () => {
     const user = userEvent.setup()
     const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
@@ -65,6 +78,7 @@ describe('PracticeSession', () => {
         <PracticeSession
           exercises={[{ type: 'pinyin-choice', item: characters[0]!, options: characters }]} // 你
           dictionary={dictionary}
+          onResult={() => {}}
           onRestart={() => {}}
         />
       </MemoryRouter>,
@@ -80,7 +94,7 @@ describe('PracticeSession', () => {
   it('«Practice again» pide una sesión nueva', async () => {
     const user = userEvent.setup()
     const onRestart = vi.fn()
-    renderSession(onRestart)
+    renderSession({ onRestart })
 
     await answer(user, 'I knew it')
     await answer(user, 'I knew it')

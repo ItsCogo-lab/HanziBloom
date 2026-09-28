@@ -30,7 +30,7 @@ export type Exercise = FlashcardExercise | ChoiceExercise
 
 export type ExerciseType = Exercise['type']
 
-/** Resultado de responder un ejercicio. Lo usará el sistema de progreso. */
+/** Resultado de responder un ejercicio. Con él se actualiza el progreso. */
 export interface ExerciseResult {
   itemId: StudyItemId
   exerciseType: ExerciseType
