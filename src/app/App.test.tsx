@@ -6,7 +6,7 @@ describe('App', () => {
   it('arranca en el inicio con la navegación principal', () => {
     render(<App />)
 
-    expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 1, name: 'Inicio' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument()
   })
 })
