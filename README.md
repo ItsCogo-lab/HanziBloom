@@ -90,9 +90,9 @@ script; la app no llama a ninguna API externa:
 
 - Significados, lecturas y tradicional de las palabras: [CC-CEDICT](https://cc-cedict.org/wiki/) (CC BY-SA 4.0).
 - Lista de palabras HSK 2.0: [clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
-- Trazos, radicales y tradicional de los caracteres: [Unihan](https://www.unicode.org/reports/tr38/) (Unicode License v3).
+- Radicales y tradicional de los caracteres: [Unihan](https://www.unicode.org/reports/tr38/) (Unicode License v3).
 - Componentes y etimología: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) (LGPL 3.0+).
-- Orden de trazos: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) (Arphic Public License).
+- Orden y número de trazos: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) (Arphic Public License).
 - Frases de ejemplo: [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR).
 
 Cada archivo generado mantiene la licencia de su fuente. Qué fuente manda en

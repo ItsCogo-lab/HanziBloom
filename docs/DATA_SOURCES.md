@@ -64,7 +64,7 @@ rellena.
 | Carácter | `hskLevel` | Lista HSK |
 | Carácter | `pinyin` | CC-CEDICT (la lectura con la que aparece en las palabras de HSK) |
 | Carácter | `meanings.en` | CC-CEDICT |
-| Carácter | `strokeCount` | Unihan `kTotalStrokes` |
+| Carácter | `strokeCount` | hanzi-writer-data (número de trazos de la animación) |
 | Carácter | `radical`, `radicalNumber` | Unihan `kRSUnicode` + `CJKRadicals.txt` |
 | Carácter | `traditional` | Unihan `kTraditionalVariant` |
 | Carácter | `decomposition`, `etymology` | Make Me a Hanzi |
@@ -84,7 +84,8 @@ El build compara:
 - el número de trazos de Unihan con el de hanzi-writer-data;
 - el radical de Unihan con el de Make Me a Hanzi.
 
-Si no coinciden, se usa la fuente dueña (Unihan) y el desacuerdo se apunta en
+Si no coinciden, se usa la fuente dueña del campo (hanzi-writer-data para
+los trazos, Unihan para el radical) y el desacuerdo se apunta en
 [`DATA_CONFLICTS.md`](DATA_CONFLICTS.md) para revisarlo. No se elige en
 silencio.
 
@@ -122,7 +123,7 @@ Reglas del adaptador:
 - **Versión:** Unicode 18.0.0
 - **Licencia:** [Unicode License v3](https://www.unicode.org/license.txt)
 - **Atribución:** incluir el aviso de copyright de Unicode en la documentación (este archivo) y citar la fuente en Ajustes.
-- **Campos:** `strokeCount` (primer valor de `kTotalStrokes`, el de China continental), `radical` y `radicalNumber` (primer valor de `kRSUnicode`; `149'` es la forma simplificada del radical 149, 讠), `traditional` (`kTraditionalVariant`).
+- **Campos:** `radical` y `radicalNumber` (primer valor de `kRSUnicode`; `149'` es la forma simplificada del radical 149, 讠), `traditional` (`kTraditionalVariant`). Su número de trazos (primer valor de `kTotalStrokes`) solo se usa para comprobar el de hanzi-writer-data: en algunos caracteres cuenta un trazo más (菜 12, la animación dibuja 11).
 - **Adaptador:** `sources/unihan.ts`
 - **Descarga:** no accesible desde el entorno en la nube de Claude (ver «Dónde ejecutarlo»).
 
@@ -143,7 +144,7 @@ Es la misma fuente de la que salía la etimología de la app Tofu Learn.
 - **Versión:** `hanzi-writer@3.7.3` (dependencia de la app) y `hanzi-writer-data@2.0.1` (dependencia de desarrollo, solo para el build)
 - **Licencia:** la librería, MIT. Los datos de trazos, [Arphic Public License](https://github.com/chanind/hanzi-writer-data/blob/master/ARPHICPL.TXT) (vienen de Make Me a Hanzi, que los extrajo de fuentes tipográficas de Arphic Technology).
 - **Atribución:** citar hanzi-writer-data y Arphic Technology; se pueden redistribuir y modificar bajo la misma licencia.
-- **Campos:** trazos de cada carácter, copiados sin cambios a `public/strokes/<punto de código>.json` (柠 → `67e0.json`). También se usa su número de trazos para comprobar el de Unihan.
+- **Campos:** trazos de cada carácter, copiados sin cambios a `public/strokes/<punto de código>.json` (柠 → `67e0.json`). También da `strokeCount`, el número de trazos, para que coincida siempre con la animación.
 - **Adaptador:** `sources/hanziWriter.ts`
 
 ### Tatoeba

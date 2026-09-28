@@ -37,7 +37,11 @@ describe('enrichCharacter', () => {
   const makeMeAHanzi = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠']))
 
   it('combina CC-CEDICT, Unihan y Make Me a Hanzi en la ficha de 柠', () => {
-    const enriched = enrichCharacter(ning, { unihan: unihan.get('柠'), makeMeAHanzi: makeMeAHanzi.get('柠') })
+    const enriched = enrichCharacter(ning, {
+      unihan: unihan.get('柠'),
+      makeMeAHanzi: makeMeAHanzi.get('柠'),
+      hanziWriterStrokeCount: 9,
+    })
     // Los tests de la interfaz usan este mismo objeto (testData.ts)
     expect(enriched).toEqual(ningCharacter)
     expect(enriched).toMatchObject({
@@ -50,14 +54,18 @@ describe('enrichCharacter', () => {
     })
   })
 
-  it('añade los campos de Unihan a 柠', () => {
+  it('añade los campos de Unihan a 柠, sin su número de trazos', () => {
     expect(enrichCharacter(ning, { unihan: unihan.get('柠') })).toEqual({
       ...ning,
-      strokeCount: 9,
       radical: '木',
       radicalNumber: 75,
       traditional: ['檸'],
     })
+  })
+
+  it('toma el número de trazos de hanzi-writer-data aunque Unihan diga otro', () => {
+    const sources = { unihan: { strokeCount: 12 }, hanziWriterStrokeCount: 11 }
+    expect(enrichCharacter(ning, sources).strokeCount).toBe(11)
   })
 
   it('no añade campos vacíos si una fuente no tiene el carácter', () => {
@@ -84,7 +92,7 @@ describe('crossCheckCharacter', () => {
   it('avisa de los desacuerdos sin corregirlos', () => {
     const conflicts = crossCheckCharacter('X', { unihan, makeMeAHanzi: { radical: '口' }, hanziWriterStrokeCount: 8 })
     expect(conflicts).toEqual([
-      'X: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de Unihan.',
+      'X: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.',
       'X: el radical es 木 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.',
     ])
   })

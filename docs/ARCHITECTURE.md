@@ -102,7 +102,7 @@ interface Character {
   pinyin: string[]        // puede tener varias lecturas (了: le, liǎo)
   meanings: Translations
   hskLevel: HskLevel
-  strokeCount?: number    // Unihan
+  strokeCount?: number    // hanzi-writer-data
   radical?: string        // Unihan: 木, o su forma simplificada 讠
   radicalNumber?: number  // Unihan: 1-214 (木 → 75)
   frequencyRank?: number  // sin fuente todavía

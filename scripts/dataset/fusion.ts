@@ -19,7 +19,7 @@ export const FIELD_SOURCES = {
     hskLevel: 'HSK list',
     pinyin: 'CC-CEDICT (reading used in the HSK words)',
     meanings: 'CC-CEDICT',
-    strokeCount: 'Unihan',
+    strokeCount: 'hanzi-writer-data',
     radical: 'Unihan',
     radicalNumber: 'Unihan',
     traditional: 'Unihan',
@@ -113,7 +113,10 @@ export function buildBaseEntries(hskList: readonly HskWord[], cedict: CedictInde
 export interface CharacterSources {
   unihan?: UnihanCharacter
   makeMeAHanzi?: MakeMeAHanziCharacter
-  /** Número de trazos según hanzi-writer-data; solo para comprobar el de Unihan. */
+  /**
+   * Número de trazos según hanzi-writer-data. Manda sobre el de Unihan para
+   * que coincida con la animación, que dibuja la forma simplificada.
+   */
   hanziWriterStrokeCount?: number
   /**
    * Número Kangxi (según Unihan) del radical que da Make Me a Hanzi. Sirve
@@ -128,10 +131,10 @@ export interface CharacterSources {
  * se toma el dato de otra fuente.
  */
 export function enrichCharacter(base: Character, sources: CharacterSources): Character {
-  const { unihan, makeMeAHanzi } = sources
+  const { unihan, makeMeAHanzi, hanziWriterStrokeCount } = sources
   return {
     ...base,
-    ...(unihan?.strokeCount !== undefined && { strokeCount: unihan.strokeCount }),
+    ...(hanziWriterStrokeCount !== undefined && { strokeCount: hanziWriterStrokeCount }),
     ...(unihan?.radical !== undefined && { radical: unihan.radical }),
     ...(unihan?.radicalNumber !== undefined && { radicalNumber: unihan.radicalNumber }),
     ...(unihan?.traditional !== undefined && { traditional: unihan.traditional }),
@@ -151,7 +154,7 @@ export function crossCheckCharacter(hanzi: string, sources: CharacterSources): s
   if (unihan?.strokeCount !== undefined && hanziWriterStrokeCount !== undefined) {
     if (unihan.strokeCount !== hanziWriterStrokeCount) {
       conflicts.push(
-        `${hanzi}: Unihan dice ${unihan.strokeCount} trazos y hanzi-writer-data tiene ${hanziWriterStrokeCount}. Se usa el de Unihan.`,
+        `${hanzi}: Unihan dice ${unihan.strokeCount} trazos y hanzi-writer-data tiene ${hanziWriterStrokeCount}. Se usa el de hanzi-writer-data.`,
       )
     }
   }
