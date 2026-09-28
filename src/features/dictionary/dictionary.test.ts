@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   createDictionary,
+  formatPinyin,
   getCharacter,
   getCharactersOfWord,
   getMeanings,
@@ -92,5 +93,15 @@ describe('getMeanings', () => {
 
   it('usa el inglés si falta el idioma pedido', () => {
     expect(getMeanings({ en: ['thanks'] }, 'ca')).toEqual(['thanks'])
+  })
+})
+
+describe('formatPinyin', () => {
+  it('muestra el pinyin de una palabra tal cual', () => {
+    expect(formatPinyin(getWord(dictionary, '你好')!)).toBe('nǐ hǎo')
+  })
+
+  it('separa con comas las lecturas de un carácter', () => {
+    expect(formatPinyin(getCharacter(dictionary, '了')!)).toBe('le, liǎo')
   })
 })
