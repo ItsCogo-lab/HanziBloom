@@ -198,6 +198,22 @@ Por eso los niveles no tienen exactamente el número oficial de palabras
 (150/150/300/600): HSK 1 tiene 150, HSK 2 149, HSK 3 299 (la lista de
 clem109 trae 299) y HSK 4 598 (la lista trae 601, con 3 repeticiones).
 
+## Sets por temas
+
+`src/data/topics.ts` es el único archivo de `src/data` escrito a mano. Define
+17 temas (Food & drink, Family, Travel, School & university, Time & dates,
+Numbers, Weather, Daily life, Emotions, Body & health, Shopping & money,
+Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
+
+- Solo palabras que ya están en el dataset HSK 1-4. El archivo no añade
+  vocabulario, pinyin ni significados. Un test comprueba que cada id existe.
+- Una palabra entra en un tema si alguno de los significados que muestra la
+  app (CC-CEDICT) pertenece al tema. Si ese sentido no aparece, no entra
+  (点 no está en Time).
+- Una palabra puede estar en varios temas; su progreso es uno solo.
+- La app lo indica en la pestaña Topics: son una selección curada, no una
+  lista oficial.
+
 ## Archivos generados
 
 | Archivo | Contenido | Cómo se carga |
@@ -206,6 +222,7 @@ clem109 trae 299) y HSK 4 598 (la lista trae 601, con 3 repeticiones).
 | `public/strokes/*.json` | Trazos de cada carácter | Al abrir la ficha de un carácter |
 | `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Al abrir una ficha |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
+| `src/data/topics.ts` (no generado) | Temas curados a mano | En el bundle, con el dataset |
 
 ## Licencia de los datos
 
@@ -228,4 +245,5 @@ distribuyen bajo los términos de la Unicode License v3
   (`cmn_transcriptions.tsv`); falta decidir si usarlas.
 - **Significados en español:** más adelante, en `meanings.es`.
 - **Calidad de algunos significados:** CC-CEDICT no siempre pone primero el
-  sentido de HSK 1 (点 empieza por «to touch briefly» antes que «o'clock»).
+  sentido de HSK 1 (点 empieza por «to touch briefly» antes que «o'clock»; 咸
+  empieza por «all; everyone» antes que «salted»).
