@@ -31,7 +31,7 @@ export function createCustomSetId(): string {
 
 export function createCustomSet(details: CustomSetDetails, id: string, now: Date): CustomSet {
   const date = now.toISOString()
-  return { id, ...details, itemIds: [], meanings: {}, createdAt: date, updatedAt: date }
+  return { id, ...details, itemIds: [], meanings: {}, sentences: [], createdAt: date, updatedAt: date }
 }
 
 /** Aplica `change` al set con ese id y actualiza su fecha. Los demás no cambian. */
@@ -58,7 +58,11 @@ export function addItem(set: CustomSet, itemId: StudyItemId): CustomSet {
  * el diccionario y su progreso no se toca.
  */
 export function removeItem(set: CustomSet, itemId: StudyItemId): CustomSet {
-  return { ...deleteMeaning(set, itemId), itemIds: set.itemIds.filter((id) => id !== itemId) }
+  return {
+    ...deleteMeaning(set, itemId),
+    itemIds: set.itemIds.filter((id) => id !== itemId),
+    sentences: set.sentences.filter((sentence) => sentence.itemId !== itemId),
+  }
 }
 
 export type MeaningProblem = 'emptyMeaning' | 'meaningTooLong'

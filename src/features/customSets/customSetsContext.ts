@@ -1,6 +1,6 @@
 import { createContext, use } from 'react'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
-import type { CustomSet, CustomSetDetails } from './types.ts'
+import type { CustomSentence, CustomSet, CustomSetDetails } from './types.ts'
 
 export interface CustomSetsContextValue {
   customSets: readonly CustomSet[]
@@ -13,6 +13,10 @@ export interface CustomSetsContextValue {
   /** Guarda un significado propio ya validado (validateMeaning). */
   setMeaning: (setId: string, itemId: StudyItemId, meaning: string) => void
   deleteMeaning: (setId: string, itemId: StudyItemId) => void
+  /** Añade una frase ya procesada (processSentence). */
+  addSentence: (setId: string, sentence: Pick<CustomSentence, 'chinese' | 'tokens' | 'itemId'>) => void
+  updateSentence: (setId: string, sentenceId: string, change: Pick<CustomSentence, 'chinese' | 'tokens'>) => void
+  deleteSentence: (setId: string, sentenceId: string) => void
 }
 
 export const CustomSetsContext = createContext<CustomSetsContextValue | null>(null)

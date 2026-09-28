@@ -4,15 +4,28 @@ import { t } from '../../../i18n/index.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { useCustomSets } from '../customSetsContext.ts'
 import type { CustomSet } from '../types.ts'
+import { getItemSentences } from '../sentences.ts'
 import { MeaningEditor } from './MeaningEditor.tsx'
+import { SentenceEditor } from './SentenceEditor.tsx'
+import { SentenceView } from './SentenceView.tsx'
 
-/** Notas de un elemento en un set propio, editables: su significado propio. */
+const small = 'px-3 py-1.5 text-sm'
+
+/** Notas de un elemento en un set propio, editables: su significado propio y sus frases. */
 export function CustomItemNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <MeaningNote set={set} item={item} />
+      <SentenceNotes set={set} item={item} />
+    </div>
+  )
+}
+
+function MeaningNote({ set, item }: { set: CustomSet; item: StudyItem }) {
   const { setMeaning, deleteMeaning } = useCustomSets()
   const [editingMeaning, setEditingMeaning] = useState(false)
   const itemId = getStudyItemId(item)
   const meaning = set.meanings[itemId]
-  const small = 'px-3 py-1.5 text-sm'
 
   if (editingMeaning) {
     return (
@@ -45,6 +58,75 @@ export function CustomItemNotes({ set, item }: { set: CustomSet; item: StudyItem
           </Button>
         )}
       </div>
+    </div>
+  )
+}
+
+function SentenceNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
+  const { addSentence, updateSentence, deleteSentence } = useCustomSets()
+  // Qué frase se está editando: 'new' para una nueva
+  const [editing, setEditing] = useState<string>()
+  const itemId = getStudyItemId(item)
+  const sentences = getItemSentences(set, itemId)
+
+  return (
+    <div className="flex flex-col gap-2">
+      {sentences.length > 0 && (
+        <>
+          <h3 className="text-sm font-medium text-ink-muted">{t('custom.mySentences')}</h3>
+          <ul className="flex flex-col gap-3">
+            {sentences.map((sentence) => (
+              <li key={sentence.id} className="rounded-xl bg-paper p-3">
+                {editing === sentence.id ? (
+                  <SentenceEditor
+                    initial={sentence.chinese}
+                    onSave={(change) => {
+                      updateSentence(set.id, sentence.id, change)
+                      setEditing(undefined)
+                    }}
+                    onCancel={() => setEditing(undefined)}
+                  />
+                ) : (
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <SentenceView sentence={sentence} />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        className={small}
+                        aria-label={t('custom.editSentenceNamed', { chinese: sentence.chinese })}
+                        onClick={() => setEditing(sentence.id)}
+                      >
+                        {t('custom.editSentence')}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className={small}
+                        aria-label={t('custom.deleteSentenceNamed', { chinese: sentence.chinese })}
+                        onClick={() => deleteSentence(set.id, sentence.id)}
+                      >
+                        {t('custom.deleteSentence')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {editing === 'new' ? (
+        <SentenceEditor
+          onSave={(sentence) => {
+            addSentence(set.id, { ...sentence, itemId })
+            setEditing(undefined)
+          }}
+          onCancel={() => setEditing(undefined)}
+        />
+      ) : (
+        <Button variant="secondary" className={`${small} self-start`} onClick={() => setEditing('new')}>
+          {t('custom.addSentence')}
+        </Button>
+      )}
     </div>
   )
 }

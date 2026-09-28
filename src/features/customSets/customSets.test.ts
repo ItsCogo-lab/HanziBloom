@@ -126,7 +126,7 @@ describe('guardar sets propios', () => {
     )
 
     expect(loadCustomSets(storage)).toEqual([
-      { id: 'custom-a', name: 'Good', description: '', itemIds: ['word:苹果'], meanings: {}, createdAt: 'x', updatedAt: 'x' },
+      { id: 'custom-a', name: 'Good', description: '', itemIds: ['word:苹果'], meanings: {}, sentences: [], createdAt: 'x', updatedAt: 'x' },
     ])
   })
 })

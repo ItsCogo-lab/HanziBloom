@@ -12,6 +12,7 @@ import {
   setMeaning,
   updateCustomSet,
 } from './customSets.ts'
+import { addSentence, createSentence, createSentenceId, deleteSentence, updateSentence } from './sentences.ts'
 import { CustomSetsContext, type CustomSetsContextValue } from './customSetsContext.ts'
 import { loadCustomSets, saveCustomSets } from './storage.ts'
 
@@ -51,6 +52,13 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
       removeItem: (setId, itemId) => update(setId, (set) => removeItem(set, itemId)),
       setMeaning: (setId, itemId, meaning) => update(setId, (set) => setMeaning(set, itemId, meaning)),
       deleteMeaning: (setId, itemId) => update(setId, (set) => deleteMeaning(set, itemId)),
+      addSentence: (setId, input) => {
+        const now = new Date()
+        update(setId, (set) => addSentence(set, createSentence(input, createSentenceId(), now)))
+      },
+      updateSentence: (setId, sentenceId, change) =>
+        update(setId, (set) => updateSentence(set, sentenceId, new Date(), change)),
+      deleteSentence: (setId, sentenceId) => update(setId, (set) => deleteSentence(set, sentenceId)),
     }
   }, [customSets])
 

@@ -162,4 +162,32 @@ describe('Sets propios', () => {
     expect(screen.getByRole('link', { name: 'Back to Travel' })).toBeInTheDocument()
     vi.unstubAllGlobals()
   })
+
+  it('añade, edita y borra una frase propia escribiendo solo el chino', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom', storage)
+    await createSet(user, 'Travel')
+    await addWord(user, 'jichang', '机场')
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add a sentence' }))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), 'hello')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('The sentence needs at least one Chinese character.')
+
+    await user.clear(screen.getByLabelText('Sentence in Chinese'))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), '我在机场等你。')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await within(getVocabulary()).findByRole('button', { name: 'Edit sentence 我在机场等你。' })).toBeInTheDocument()
+    expect(loadCustomSets(storage)[0]?.sentences).toMatchObject([{ chinese: '我在机场等你。', itemId: 'word:机场' }])
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Edit sentence 我在机场等你。' }))
+    await user.clear(screen.getByLabelText('Sentence in Chinese'))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), '机场很大。')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await within(getVocabulary()).findByRole('button', { name: 'Delete sentence 机场很大。' })).toBeInTheDocument()
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Delete sentence 机场很大。' }))
+    expect(loadCustomSets(storage)[0]?.sentences).toEqual([])
+  })
 })

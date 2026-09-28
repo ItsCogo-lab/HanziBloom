@@ -1,6 +1,7 @@
 import { isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
-import type { CustomSet } from './types.ts'
+import { TONES } from '../../lib/tones.ts'
+import type { CustomSentence, CustomSet, SentenceToken } from './types.ts'
 
 const STORAGE_KEY = 'hanzivocab.customSets'
 /** Versión del formato guardado, igual que en progress/storage.ts. */
@@ -29,7 +30,7 @@ export function loadCustomSets(storage?: KeyValueStorage): CustomSet[] {
 
 function parseCustomSet(value: unknown): CustomSet | undefined {
   if (!isRecord(value)) return undefined
-  const { id, name, description, itemIds, meanings, createdAt, updatedAt } = value
+  const { id, name, description, itemIds, meanings, sentences, createdAt, updatedAt } = value
   if (typeof id !== 'string' || !id.startsWith('custom-') || typeof name !== 'string' || name.trim() === '') {
     return undefined
   }
@@ -41,6 +42,7 @@ function parseCustomSet(value: unknown): CustomSet | undefined {
     description: typeof description === 'string' ? description : '',
     itemIds: validItemIds,
     meanings: parseMeanings(meanings, validItemIds),
+    sentences: parseSentences(sentences, validItemIds),
     createdAt,
     updatedAt,
   }
@@ -60,4 +62,32 @@ function parseMeanings(value: unknown, itemIds: readonly StudyItemId[]): CustomS
 
 export function isStudyItemId(value: unknown): value is StudyItemId {
   return typeof value === 'string' && (value.startsWith('char:') || value.startsWith('word:')) && value.length > 5
+}
+
+/** Frases con forma válida, id único y trozos que forman exactamente la frase. */
+function parseSentences(value: unknown, itemIds: readonly StudyItemId[]): CustomSentence[] {
+  if (!Array.isArray(value)) return []
+  const sentences: CustomSentence[] = []
+  for (const sentence of value) {
+    if (!isRecord(sentence)) continue
+    const { id, itemId, chinese, tokens, createdAt, updatedAt } = sentence
+    if (typeof id !== 'string' || sentences.some((other) => other.id === id)) continue
+    if (typeof chinese !== 'string' || typeof createdAt !== 'string' || typeof updatedAt !== 'string') continue
+    if (itemId !== undefined && !(isStudyItemId(itemId) && itemIds.includes(itemId))) continue
+    if (!Array.isArray(tokens) || !tokens.every(isSentenceToken)) continue
+    if (tokens.map((token) => token.text).join('') !== chinese) continue
+    sentences.push({ id, ...(itemId === undefined ? {} : { itemId }), chinese, tokens, createdAt, updatedAt })
+  }
+  return sentences
+}
+
+function isSentenceToken(value: unknown): value is SentenceToken {
+  if (!isRecord(value) || typeof value.text !== 'string' || value.text === '') return false
+  const { pinyin, tone, uncertain, candidates } = value
+  return (
+    (pinyin === undefined || typeof pinyin === 'string') &&
+    (tone === undefined || TONES.includes(tone as never)) &&
+    (uncertain === undefined || typeof uncertain === 'boolean') &&
+    (candidates === undefined || (Array.isArray(candidates) && candidates.every((c) => typeof c === 'string')))
+  )
 }
