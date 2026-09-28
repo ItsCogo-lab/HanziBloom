@@ -33,3 +33,8 @@ export function formatPercent(ratio: number): string {
 export function formatShortDay(date: Date): string {
   return new Intl.DateTimeFormat(ACTIVE_UI_LOCALE, { weekday: 'short', day: 'numeric' }).format(date)
 }
+
+/** Fecha en formato medio del idioma activo: "Sep 28, 2026". */
+export function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat(ACTIVE_UI_LOCALE, { dateStyle: 'medium' }).format(date)
+}
