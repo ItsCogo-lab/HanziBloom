@@ -10,22 +10,67 @@
  * El script no inventa nada: si algo no cuadra, se detiene y dice qué.
  * Fuentes y licencias en docs/DATA_SOURCES.md.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { validateDictionaryData } from '../../src/features/dictionary/validation.ts'
-import { buildBaseEntries } from './fusion.ts'
+import { buildBaseEntries, enrichCharacter } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
 import { parseHskList } from './sources/hsk.ts'
+import { loadUnihan } from './sources/unihan.ts'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const cacheDir = join(scriptDir, '.cache')
 const outputDir = join(scriptDir, '../../src/data/hsk1')
 
-const hskList = parseHskList(readFileSync(join(cacheDir, 'hsk-level-1.json'), 'utf8'))
-const cedict = createCedictIndex(readFileSync(join(cacheDir, 'cedict.json'), 'utf8'))
+/*
+ * `--without=unihan,tatoeba` genera el dataset sin esas fuentes. Solo sirve
+ * para probar el script donde no se pueden descargar (el entorno en la nube
+ * de Claude): el resultado no se debe subir al repositorio.
+ */
+const skippedSources = new Set(
+  process.argv
+    .find((arg) => arg.startsWith('--without='))
+    ?.slice('--without='.length)
+    .split(',') ?? [],
+)
+for (const source of skippedSources) {
+  console.warn(`AVISO: se genera el dataset SIN ${source}. No subas este resultado al repositorio.`)
+}
 
-const { characters, words, problems } = buildBaseEntries(hskList, cedict, 1)
+/** Lee un archivo descargado por data:fetch, o se detiene explicando qué falta. */
+function readSource(file: string): string {
+  const path = join(cacheDir, file)
+  if (!existsSync(path)) {
+    console.error(`Falta ${path}. Ejecuta "npm run data:fetch" (ver docs/DATA_SOURCES.md).`)
+    process.exit(1)
+  }
+  return readFileSync(path, 'utf8')
+}
+
+// --- Fuentes base: lista HSK + CC-CEDICT ----------------------------------
+
+const hskList = parseHskList(readSource('hsk-level-1.json'))
+const cedict = createCedictIndex(readSource('cedict.json'))
+const base = buildBaseEntries(hskList, cedict, 1)
+const { words, problems } = base
+const hanziSet = new Set(base.characters.map((character) => character.hanzi))
+
+// --- Unihan: trazos, radical, tradicional ----------------------------------
+
+const unihan = skippedSources.has('unihan')
+  ? new Map()
+  : loadUnihan(
+      [readSource('unihan/Unihan_IRGSources.txt'), readSource('unihan/Unihan_Variants.txt')],
+      readSource('unihan/CJKRadicals.txt'),
+      hanziSet,
+    )
+
+// --- Fusión ----------------------------------------------------------------
+
+const characters = base.characters.map((character) =>
+  enrichCharacter(character, { unihan: unihan.get(character.hanzi) }),
+)
 
 // --- Validación y escritura ----------------------------------------------
 
@@ -37,6 +82,7 @@ if (problems.length > 0) {
 
 const header = `// Generado por scripts/dataset/build.ts. No editar a mano: cambia el script y vuelve a generarlo.
 // Significados y lecturas: CC-CEDICT (https://cc-cedict.org), licencia CC BY-SA 4.0.
+// Trazos, radicales y formas tradicionales de los caracteres: Unihan de Unicode 18.0 (Unicode License v3).
 // Lista de palabras HSK 2.0: clem109/hsk-vocabulary (MIT). Detalles en docs/DATA_SOURCES.md.
 `
 

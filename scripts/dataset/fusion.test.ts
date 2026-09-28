@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { cedictFixture } from './fixtures/cedict.ts'
-import { buildBaseEntries } from './fusion.ts'
+import { cjkRadicalsFixture, unihanIrgSourcesFixture, unihanVariantsFixture } from './fixtures/unihan.ts'
+import { buildBaseEntries, enrichCharacter } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
+import { loadUnihan } from './sources/unihan.ts'
 
 const cedict = createCedictIndex(cedictFixture)
 
@@ -22,5 +24,27 @@ describe('buildBaseEntries', () => {
     expect(buildBaseEntries([{ hanzi: '好', pinyin: 'hā' }], cedict, 1).problems).toContain(
       'Palabra 好 [hā]: sin entrada en CC-CEDICT',
     )
+  })
+})
+
+describe('enrichCharacter', () => {
+  const { characters } = buildBaseEntries([{ hanzi: '柠檬', pinyin: 'níng méng' }], cedict, 1)
+  const ning = characters[0]!
+  const unihan = loadUnihan([unihanIrgSourcesFixture, unihanVariantsFixture], cjkRadicalsFixture, new Set(['柠']))
+
+  it('añade los campos de Unihan a 柠', () => {
+    expect(enrichCharacter(ning, { unihan: unihan.get('柠') })).toEqual({
+      ...ning,
+      strokeCount: 9,
+      radical: '木',
+      radicalNumber: 75,
+      traditional: ['檸'],
+    })
+  })
+
+  it('no añade campos vacíos si una fuente no tiene el carácter', () => {
+    const enriched = enrichCharacter(ning, {})
+    expect(enriched).toEqual(ning)
+    expect(Object.values(enriched)).not.toContain(undefined)
   })
 })

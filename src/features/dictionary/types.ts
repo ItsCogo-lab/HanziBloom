@@ -24,10 +24,19 @@ export interface Character {
    * Opcionales a propósito: solo se rellenan si tenemos una fuente fiable.
    * Mejor un dato vacío que un dato inventado.
    */
+  /** Número total de trazos (Unihan kTotalStrokes). */
   strokeCount?: number
+  /** Radical Kangxi como carácter normal: 木, o su forma simplificada: 讠 (Unihan kRSUnicode). */
   radical?: string
+  /** Número del radical Kangxi, del 1 al 214: 木 → 75 (Unihan kRSUnicode). */
+  radicalNumber?: number
   /** Posición en una lista de frecuencia (1 = el más frecuente). */
   frequencyRank?: number
+  /**
+   * Formas tradicionales (Unihan kTraditionalVariant): 柠 → ["檸"]. Puede
+   * incluir el propio carácter si también se usa en tradicional.
+   */
+  traditional?: string[]
 }
 
 /** Una palabra del vocabulario, formada por uno o más caracteres. */
@@ -39,4 +48,8 @@ export interface Word {
   pinyin: string
   meanings: Translations
   hskLevel: HskLevel
+  /** Forma tradicional de la palabra (CC-CEDICT): 柠檬 → "檸檬". */
+  traditional?: string
+  /** Posición en una lista de frecuencia (1 = la más frecuente). */
+  frequencyRank?: number
 }

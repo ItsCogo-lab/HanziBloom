@@ -10,6 +10,7 @@
 import type { Character, HskLevel, Word } from '../../src/features/dictionary/types.ts'
 import { findEntries, readingOf, usableMeanings, type CedictIndex } from './sources/cedict.ts'
 import type { HskWord } from './sources/hsk.ts'
+import type { UnihanCharacter } from './sources/unihan.ts'
 
 /** Qué fuente manda en cada campo. Documentado también en docs/DATA_SOURCES.md. */
 export const FIELD_SOURCES = {
@@ -17,6 +18,10 @@ export const FIELD_SOURCES = {
     hskLevel: 'HSK list',
     pinyin: 'CC-CEDICT (reading used in the HSK words)',
     meanings: 'CC-CEDICT',
+    strokeCount: 'Unihan',
+    radical: 'Unihan',
+    radicalNumber: 'Unihan',
+    traditional: 'Unihan',
   },
   word: {
     hskLevel: 'HSK list',
@@ -88,4 +93,25 @@ export function buildBaseEntries(hskList: readonly HskWord[], cedict: CedictInde
   })
 
   return { characters, words, problems }
+}
+
+/** Lo que cada fuente sabe de un carácter. Una fuente sin datos para él queda undefined. */
+export interface CharacterSources {
+  unihan?: UnihanCharacter
+}
+
+/**
+ * Añade a un carácter los campos de las demás fuentes, cada uno de su fuente
+ * dueña. Solo se copian valores que existen: nunca se escribe undefined ni
+ * se toma el dato de otra fuente.
+ */
+export function enrichCharacter(base: Character, sources: CharacterSources): Character {
+  const { unihan } = sources
+  return {
+    ...base,
+    ...(unihan?.strokeCount !== undefined && { strokeCount: unihan.strokeCount }),
+    ...(unihan?.radical !== undefined && { radical: unihan.radical }),
+    ...(unihan?.radicalNumber !== undefined && { radicalNumber: unihan.radicalNumber }),
+    ...(unihan?.traditional !== undefined && { traditional: unihan.traditional }),
+  }
 }

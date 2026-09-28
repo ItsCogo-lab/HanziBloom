@@ -17,4 +17,14 @@ tar -xzf cedict-json-1.3.20251213.tgz package/cedict.json
 mv package/cedict.json cedict.json
 rm -rf package cedict-json-1.3.20251213.tgz
 
+# Unihan y la lista de radicales de Unicode 18.0. Unicode License v3.
+# unicode.org no es accesible desde el entorno en la nube de Claude: este paso
+# se ejecuta en local o en GitHub Actions (.github/workflows/dataset.yml).
+UNICODE_VERSION=18.0.0
+mkdir -p unihan
+curl -sSfL -o Unihan.zip "https://www.unicode.org/Public/${UNICODE_VERSION}/ucd/Unihan.zip"
+unzip -o -q Unihan.zip Unihan_IRGSources.txt Unihan_Variants.txt -d unihan
+rm Unihan.zip
+curl -sSfL -o unihan/CJKRadicals.txt "https://www.unicode.org/Public/${UNICODE_VERSION}/ucd/CJKRadicals.txt"
+
 echo "Fuentes descargadas en $CACHE_DIR"
