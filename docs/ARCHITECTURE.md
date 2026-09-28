@@ -180,10 +180,10 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
 
 1. **Versión de HSK.** Existen dos estándares: HSK 2.0 (nivel 1 = 150 palabras)
    y el nuevo estándar de 2021, "HSK 3.0" (nivel 1 = 500 palabras y 300
-   caracteres, y los niveles no equivalen a los antiguos). Hay que elegir uno
-   antes de la Fase 5. Recomendación: HSK 2.0 para el MVP, porque es más
-   pequeño y es el que usan la mayoría de materiales; el campo `hskLevel` se
-   puede acompañar de un campo de estándar si más adelante incluimos ambos.
+   caracteres, y los niveles no equivalen a los antiguos).
+   **Decidido: HSK 2.0 para el MVP**, porque es más pequeño y es el que usan
+   la mayoría de materiales. El campo `hskLevel` se puede acompañar de un
+   campo de estándar si más adelante incluimos ambos.
 2. **Fuente de los significados en español.** Las fuentes abiertas fiables
    (CC-CEDICT, licencia CC BY-SA 4.0) dan pinyin y significados en **inglés**.
    No conozco un diccionario chino-español abierto con la misma fiabilidad.
