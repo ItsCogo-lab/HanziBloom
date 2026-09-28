@@ -1,0 +1,55 @@
+name: Dataset
+
+# Regenera el dataset desde las fuentes (npm run data:fetch + data:build).
+# Hace falta porque algunas fuentes (unicode.org, tatoeba.org) no son
+# accesibles desde el entorno en la nube de Claude.
+#
+# - En una rama que no es main: si el resultado cambia, lo sube a la rama
+#   en un commit aparte.
+# - En main (lanzado a mano): solo comprueba que el dataset está al día.
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - 'scripts/dataset/**'
+      - '.github/workflows/dataset.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dataset-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run data:fetch
+      - run: npm run data:build
+      - run: npm run data:validate
+      - name: Subir el dataset regenerado
+        if: github.ref != 'refs/heads/main'
+        run: |
+          git add src/data public/strokes public/examples docs/DATA_CONFLICTS.md
+          if git diff --cached --quiet; then
+            echo "El dataset ya estaba al día."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(data): regenerate the dataset from its sources"
+          git push
+      - name: Comprobar que el dataset de main está al día
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git add -N src/data public/strokes public/examples docs/DATA_CONFLICTS.md
+          git diff --exit-code --stat -- src/data public/strokes public/examples docs/DATA_CONFLICTS.md

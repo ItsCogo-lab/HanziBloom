@@ -36,7 +36,8 @@ Dependencias previstas para fases siguientes (se añadirán cuando se necesiten,
 | Fase | Dependencia | Motivo |
 | --- | --- | --- |
 | 3 | `react-router` | Rutas reales (`/characters/好`), botón atrás del navegador y enlaces compartibles. Escribirlo a mano sería reinventar algo estándar. |
-| Futuro (escritura) | `hanzi-writer` (MIT) | Orden y animación de trazos, evaluación de escritura. Se evaluará cuando lleguemos. |
+| Integración de datos | `hanzi-writer` (MIT) | Animación del orden de trazos en la ficha del carácter. Se carga con `import()` solo al abrir una ficha. Más adelante servirá para la práctica de escritura. |
+| Integración de datos | `hanzi-writer-data` (Arphic PL, solo desarrollo) | Datos de trazos que el build copia a `public/strokes/`. |
 
 Descartado a propósito: Redux/Zustand (React Context + hooks basta), i18next
 (un diccionario tipado propio basta para 3 idiomas), librerías de componentes
@@ -101,9 +102,13 @@ interface Character {
   pinyin: string[]        // puede tener varias lecturas (了: le, liǎo)
   meanings: Translations
   hskLevel: HskLevel
-  strokeCount?: number
-  radical?: string
-  frequencyRank?: number
+  strokeCount?: number    // Unihan
+  radical?: string        // Unihan: 木, o su forma simplificada 讠
+  radicalNumber?: number  // Unihan: 1-214 (木 → 75)
+  frequencyRank?: number  // sin fuente todavía
+  traditional?: string[]  // Unihan: 柠 → ["檸"]
+  decomposition?: string  // Make Me a Hanzi: "⿰木宁"
+  etymology?: Etymology   // Make Me a Hanzi: tipo, semántico, fonético
 }
 
 interface Word {
@@ -112,6 +117,19 @@ interface Word {
   pinyin: string          // "nǐ hǎo"
   meanings: Translations
   hskLevel: HskLevel
+  traditional?: string    // CC-CEDICT: "檸檬"
+  frequencyRank?: number
+}
+
+// Frase de ejemplo de Tatoeba, en public/examples/hsk1.json
+interface ExampleSentence {
+  tatoebaId: number
+  zh: string
+  author: string
+  en: string
+  translationTatoebaId: number
+  translationAuthor?: string
+  words: string[]
 }
 
 // Un carácter o una palabra; los ejercicios y el progreso trabajan con esto
@@ -136,8 +154,15 @@ interface ProgressData {
 }
 ```
 
-Los campos opcionales (`strokeCount`, `radical`, `frequencyRank`) son opcionales
-precisamente para no inventar datos: si no tenemos fuente fiable, se quedan vacíos.
+Los campos opcionales son opcionales precisamente para no inventar datos: si
+la fuente dueña de un campo no lo tiene, se queda vacío y la ficha no muestra
+esa sección. Qué fuente manda en cada campo y cómo se genera el dataset
+(adaptadores por fuente, fusión y validación en `scripts/dataset/`) está en
+`docs/DATA_SOURCES.md`.
+
+**Datos grandes, fuera del bundle.** Los trazos (`public/strokes/`) y las
+frases de ejemplo (`public/examples/`) se piden con `fetch` al abrir una ficha.
+La librería Hanzi Writer también se carga en ese momento.
 
 **Datos derivados, no guardados.** Los caracteres que forman una palabra y las
 palabras relacionadas con un carácter no se guardan en el dataset: se calculan
@@ -303,6 +328,9 @@ fichas de Vocabulario y Caracteres y la página de Ajustes, que estaban en la
 tabla de secciones. Revisión final: sin errores de axe-core (accesibilidad) en
 ninguna página, navegable con teclado y probado a 390 px y 1280 px.
 
-**Pendiente para después del MVP:** audio (Web Speech API), escritura de
-trazos, significados en español, datos de trazos y radicales (falta una fuente
-fiable y con licencia compatible), niveles HSK 2-4.
+**Pendiente para después del MVP:** audio (Web Speech API), práctica de
+escritura, significados en español, frecuencia, niveles HSK 2-4.
+
+**Integración de datos (después del MVP):** fichas de caracteres con datos de
+CC-CEDICT, Unihan, Make Me a Hanzi, hanzi-writer-data y Tatoeba, generados con
+el pipeline descrito en `docs/DATA_SOURCES.md`.

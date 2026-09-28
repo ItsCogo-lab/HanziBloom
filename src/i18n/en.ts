@@ -125,7 +125,11 @@ export const en = {
   'settings.about': 'About the data',
   'settings.aboutMeanings': 'Meanings and readings',
   'settings.aboutWordList': 'HSK 1 word list (HSK 2.0)',
-  'settings.aboutLicense': 'The dataset built from these sources is shared under CC BY-SA 4.0.',
+  'settings.aboutCharacterData': 'Strokes, radicals and traditional forms',
+  'settings.aboutEtymology': 'Components and etymology',
+  'settings.aboutStrokeOrder': 'Stroke order',
+  'settings.aboutExamples': 'Example sentences',
+  'settings.aboutLicense': 'Each source keeps its own license. The word and character data derived from CC-CEDICT is shared under CC BY-SA 4.0. Details in docs/DATA_SOURCES.md.',
   'common.cancel': 'Cancel',
 
 

@@ -50,8 +50,9 @@ npm run dev        # servidor de desarrollo en http://localhost:5173
 | `npm test` | Ejecuta los tests una vez |
 | `npm run test:watch` | Tests en modo observación |
 | `npm run check` | Tipos + lint + tests (lo mismo que ejecuta la CI) |
-| `npm run data:fetch` | Descarga las fuentes del dataset (CC-CEDICT y lista HSK) |
-| `npm run data:build` | Regenera el dataset en `src/data/` (ver `docs/DATA_SOURCES.md`) |
+| `npm run data:fetch` | Descarga las fuentes del dataset (lista HSK, CC-CEDICT, Unihan, Make Me a Hanzi, Tatoeba) |
+| `npm run data:build` | Regenera el dataset en `src/data/`, `public/strokes/` y `public/examples/` (ver `docs/DATA_SOURCES.md`) |
+| `npm run data:validate` | Valida el dataset generado sin descargar nada |
 
 ## Estructura
 

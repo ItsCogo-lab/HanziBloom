@@ -15,7 +15,7 @@ import { createInterface } from 'node:readline'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { ExampleSet } from '../../src/features/dictionary/types.ts'
-import { validateDictionaryData } from '../../src/features/dictionary/validation.ts'
+import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import { buildBaseEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
@@ -151,6 +151,7 @@ if (!skippedSources.has('tatoeba')) {
 // --- Validación y escritura ----------------------------------------------
 
 problems.push(...validateDictionaryData(characters, words))
+if (examples) problems.push(...validateExampleSet(examples, words))
 if (problems.length > 0) {
   console.error(`No se ha generado el dataset. Problemas:\n- ${problems.join('\n- ')}`)
   process.exit(1)

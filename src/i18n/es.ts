@@ -125,7 +125,11 @@ export const es: Record<MessageKey, string> = {
   'settings.about': 'Sobre los datos',
   'settings.aboutMeanings': 'Significados y lecturas',
   'settings.aboutWordList': 'Lista de palabras de HSK 1 (HSK 2.0)',
-  'settings.aboutLicense': 'El dataset creado a partir de estas fuentes se comparte con licencia CC BY-SA 4.0.',
+  'settings.aboutCharacterData': 'Trazos, radicales y formas tradicionales',
+  'settings.aboutEtymology': 'Componentes y etimología',
+  'settings.aboutStrokeOrder': 'Orden de trazos',
+  'settings.aboutExamples': 'Frases de ejemplo',
+  'settings.aboutLicense': 'Cada fuente mantiene su licencia. Los datos de palabras y caracteres derivados de CC-CEDICT se comparten con licencia CC BY-SA 4.0. Detalles en docs/DATA_SOURCES.md.',
   'common.cancel': 'Cancelar',
 
 
