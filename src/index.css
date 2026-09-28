@@ -31,6 +31,8 @@
 @layer base {
   html {
     @apply bg-paper font-sans text-ink antialiased;
+    /* En móvil, al mover el foco el navegador deja sitio para la barra inferior fija */
+    @apply scroll-pb-24 md:scroll-pb-0;
   }
 
   /* Foco siempre visible al navegar con teclado */
