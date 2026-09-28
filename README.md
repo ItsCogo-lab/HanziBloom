@@ -4,7 +4,7 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 2 de 12** del MVP (estructura base). La arquitectura y el plan están
+Estado: **Fase 3 de 12** del MVP (layout y navegación). La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tecnologías
@@ -41,11 +41,16 @@ npm run dev        # servidor de desarrollo en http://localhost:5173
 docs/            Arquitectura y decisiones
 public/          Archivos estáticos (favicon)
 src/
-  app/           Componente raíz (más adelante: rutas, layout y navegación)
+  app/           App, rutas (AppRoutes), secciones del menú (navigation.ts)
+    layout/      Estructura común: navegación principal y área de contenido
+  pages/         Una página por sección de la app
+  components/    Componentes compartidos
+    ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader
+  i18n/          Textos de la interfaz (es.ts) y función t()
   test/          Configuración compartida de los tests
   index.css      Tailwind y design tokens (colores, fuentes, foco)
   main.tsx       Punto de entrada
 ```
 
-La estructura completa prevista (features, datos, i18n...) está descrita en
+La estructura completa prevista (features, datos...) está descrita en
 `docs/ARCHITECTURE.md`; cada carpeta se crea en la fase que la necesita.
