@@ -58,7 +58,8 @@ src/
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
     progress/       Registro de progreso, estadísticas, racha, persistencia
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
-    audio/          Servicio de pronunciación + botón reutilizable
+    settings/       Ajustes del usuario (tamaño de sesión), guardados en localStorage
+    audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
   data/             Datasets generados (hsk1/characters.ts, hsk1/words.ts)
@@ -79,10 +80,10 @@ corresponde a una ruta y una responsabilidad:
 | --- | --- | --- |
 | Inicio (Dashboard) | `/` | Progreso general, caracteres y palabras aprendidos, racha, pendientes de repaso, botón «Empezar sesión». |
 | Práctica | `/practice` | Sesión de estudio con ejercicios mezclados. |
-| Vocabulario | `/vocabulary` | Lista y ficha de palabras. |
-| Caracteres | `/characters`, `/characters/:hanzi` | Lista y ficha de cada carácter. |
-| Progreso | `/progress` | Estadísticas básicas. |
-| Ajustes | `/settings` | Tamaño de sesión, reinicio de progreso, (futuro) idioma. |
+| Vocabulario | `/vocabulary`, `/vocabulary/:hanzi` | Lista con buscador y ficha de cada palabra. |
+| Caracteres | `/characters`, `/characters/:hanzi` | Lista con buscador y ficha de cada carácter. |
+| Progreso | `/progress` | Estadísticas básicas: respuestas, acierto, rachas, últimos 7 días, estados y los más fallados. |
+| Ajustes | `/settings` | Tamaño de sesión, borrar el progreso, créditos del dataset, (futuro) idioma. |
 
 Navegación: barra lateral en escritorio, barra inferior en móvil.
 
@@ -92,7 +93,7 @@ El modelo está en `src/features/dictionary/types.ts`. Resumen:
 
 ```ts
 type HskLevel = 1 | 2 | 3 | 4
-type Translations = { es: string[]; en?: string[]; ca?: string[] }
+type Translations = { en: string[]; es?: string[]; ca?: string[] } // en viene de CC-CEDICT
 
 interface Character {
   id: string              // el propio hanzi, p. ej. "好"
@@ -117,15 +118,21 @@ interface Word {
 type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
 type StudyItemId = `char:${string}` | `word:${string}`   // "char:好", "word:好"
 
-// Progreso de un elemento de estudio (se implementa en la Fase 8)
+// Progreso de un elemento estudiado (src/features/progress/types.ts)
 interface ItemProgress {
   itemId: StudyItemId
   timesSeen: number
   timesCorrect: number
   timesWrong: number
-  lastReviewedAt?: string // ISO 8601
-  nextReviewAt?: string
   masteryLevel: number    // 0-5
+  lastReviewedAt: string  // ISO 8601
+  nextReviewAt: string
+}
+
+// Todo el progreso: los elementos que no están en `items` son nuevos
+interface ProgressData {
+  items: Partial<Record<StudyItemId, ItemProgress>>
+  activity: Record<string, { answers: number; correct: number }> // por día "2026-09-28"
 }
 ```
 
@@ -164,6 +171,28 @@ Está en `src/features/practice/`. Cada tipo de ejercicio tiene:
 Añadir un ejercicio nuevo (p. ej. escritura) consiste en esos tres pasos, sin
 tocar los demás. El `random` se inyecta para que los tests sean deterministas.
 
+**Tipos actuales.** `flashcard` (el usuario dice si lo sabía) y tres de opción
+múltiple con cuatro opciones, en `choiceExercises.ts`:
+
+| Tipo | Se muestra | Se elige |
+| --- | --- | --- |
+| `meaning-choice` | hanzi | significado |
+| `pinyin-choice` | hanzi | pinyin |
+| `hanzi-choice` | significado | hanzi |
+
+Reglas de los distractores (cubiertas por tests):
+
+- Son del mismo tipo que la respuesta (carácter o palabra) y, si se puede, con
+  el mismo número de caracteres, para que no se adivine por la forma.
+- No pueden ser también una respuesta válida: se descartan los que comparten
+  un significado (sinónimos), una lectura de pinyin o el mismo hanzi, y
+  tampoco pueden coincidir entre sí.
+- Los significados que citan el propio hanzi ("used in 漂亮") se ocultan; si a
+  un elemento no le queda ninguno (子, 漂, 么), no se pregunta por su
+  significado, solo por su pinyin.
+- En los caracteres con varias lecturas se muestra la primera, para que la
+  opción correcta no se distinga por ser una lista.
+
 **Sesión.** `session.ts` crea los ejercicios (elementos al azar y un tipo
 construible para cada uno) y gestiona el avance con un reducer puro
 (`sessionReducer`), que `PracticeSession` usa con `useReducer`. Cada respuesta
@@ -172,26 +201,47 @@ consumirá el sistema de progreso en la Fase 8.
 
 ### Repetición espaciada
 
-El módulo `srs` expone una sola función:
+`src/features/srs/srs.ts` expone dos funciones:
 
 ```ts
-scheduleNextReview(progress: ItemProgress, wasCorrect: boolean, now: Date): ItemProgress
+scheduleNextReview(masteryLevel: number, wasCorrect: boolean, now: Date): { masteryLevel, nextReviewAt }
+isReviewDue(nextReviewAt: string, now: Date): boolean
 ```
 
 Para el MVP: sistema de cajas tipo Leitner. Acierto → sube un nivel; fallo →
-vuelve a 0. Intervalos por nivel: 0, 1, 3, 7, 14, 30 días. El resto de la app
-solo conoce esta función, así que cambiar a SM-2 o FSRS más adelante no afecta
-a nada más.
+vuelve a 0. Intervalos por nivel: 0, 1, 3, 7, 14, 30 días, contados por días
+del calendario local (el repaso "de mañana" está disponible desde las 00:00).
+El resto de la app solo conoce estas funciones, así que cambiar a SM-2 o FSRS
+más adelante no afecta a nada más.
+
+**Progreso** (`src/features/progress/`):
+
+- `progress.ts`: `recordAnswer` actualiza los contadores del elemento, le
+  pide al SRS su siguiente repaso y suma la respuesta a la actividad del día.
+  Estado de cada elemento: nuevo (nunca visto), en aprendizaje o dominado
+  (nivel 4 o más: siguiente repaso a 14 días o más).
+- `streak.ts`: racha actual y más larga, por días locales. Si hoy aún no has
+  estudiado, la racha de ayer sigue contando.
+- `ProgressProvider` + `useProgress()`: el progreso vive en un Context de
+  React y se guarda en cada cambio. Cada respuesta se guarda al momento, así
+  que salir a mitad de una sesión no pierde nada.
+
+**Qué entra en una sesión** (`selectSessionItems`): primero los repasos
+pendientes (los más atrasados antes), luego elementos nuevos y, si aún faltan,
+los estudiados cuyo repaso está más cerca. Después se barajan.
 
 ### Persistencia
 
-`localStorage` detrás de un pequeño módulo (`loadProgress` / `saveProgress`).
-El objeto guardado lleva un campo `version` para poder migrar datos cuando el
-formato cambie. Si algún día hay backend, se sustituye este módulo.
+`localStorage` detrás de un pequeño módulo (`loadProgress` / `saveProgress`
+en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
+campo `version` para poder migrar datos cuando el formato cambie. Si lo
+guardado está corrupto o localStorage no está disponible (modo privado), la
+app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
+módulo.
 
-### Audio
+### Audio (futuro, fuera del MVP)
 
-Interfaz `speak(text)` implementada con la Web Speech API del navegador
+Idea prevista: interfaz `speak(text)` implementada con la Web Speech API del navegador
 (`speechSynthesis`, voz `zh-CN`): gratis y sin servidor. Limitación: depende de
 las voces instaladas en el sistema. Como toda la app usa la interfaz, más
 adelante se puede cambiar por audios grabados sin tocar los componentes.
@@ -222,10 +272,10 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
    HSK 1. Por eso el progreso usa ids con prefijo (`char:好`, `word:好`) y los
    dos se estudian por separado.
 4. **Varias lecturas de pinyin.** Algunos caracteres tienen más de una
-   pronunciación; en el ejercicio de pinyin se aceptará cualquiera válida y
-   los distractores no pueden coincidir con ninguna.
+   pronunciación; en el ejercicio de pinyin se muestra una y los
+   distractores no pueden coincidir con ninguna. **Resuelto en la fase 7.**
 5. **Distractores.** Las opciones incorrectas no deben ser sinónimos de la
-   correcta ni repetirse. La lógica de selección irá cubierta por tests.
+   correcta ni repetirse. **Resuelto en la fase 7** (ver «Tipos actuales»).
 6. **Fechas y racha.** La racha se calcula por día local, no por UTC; si no,
    estudiar a medianoche daría resultados raros.
 7. **Fuentes chinas.** Se usan fuentes del sistema (PingFang SC, Noto Sans SC,
@@ -247,3 +297,12 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
 | 10 | Estadísticas básicas | Cálculo de estadísticas |
 | 11 | Completar tests de lo crítico | — |
 | 12 | Revisión, refactor, accesibilidad | — |
+
+**Estado: MVP completo (fases 1-12).** Además del plan, se hicieron las listas y
+fichas de Vocabulario y Caracteres y la página de Ajustes, que estaban en la
+tabla de secciones. Revisión final: sin errores de axe-core (accesibilidad) en
+ninguna página, navegable con teclado y probado a 390 px y 1280 px.
+
+**Pendiente para después del MVP:** audio (Web Speech API), escritura de
+trazos, significados en español, datos de trazos y radicales (falta una fuente
+fiable y con licencia compatible), niveles HSK 2-4.

@@ -4,8 +4,23 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 6 de 12** del MVP (flashcards). De momento la interfaz y los
-significados están en inglés. La arquitectura y el plan están
+Estado: **MVP completo** (fases 1 a 12). De momento la interfaz y los
+significados están en inglés.
+
+## Qué se puede hacer
+
+- **Practicar** sesiones de 5, 10 o 20 ejercicios con los 328 caracteres y
+  palabras de HSK 1 (HSK 2.0): flashcards y opción múltiple (hanzi → significado,
+  hanzi → pinyin, significado → hanzi).
+- **Repetición espaciada**: cada respuesta se guarda y decide cuándo vuelve a
+  salir cada elemento; las sesiones empiezan por los repasos pendientes.
+- **Inicio** con lo pendiente para hoy, la racha y el progreso en HSK 1.
+- **Estadísticas**: respuestas, acierto, rachas, últimos 7 días y lo más fallado.
+- **Vocabulario y Caracteres**: listas con buscador (hanzi, pinyin con o sin
+  tonos, significado) y una ficha de cada entrada con tu progreso.
+- **Ajustes**: tamaño de sesión, borrar el progreso y créditos del dataset.
+
+El progreso se guarda en el navegador (localStorage); no hay servidor ni cuentas. La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tecnologías
@@ -49,12 +64,15 @@ src/
     layout/      Estructura común: navegación principal y área de contenido
   pages/         Una página por sección de la app
   features/
-    dictionary/  Tipos de caracteres y palabras, consultas y validación de datos
+    dictionary/  Tipos de caracteres y palabras, consultas, búsqueda y validación de datos
     practice/    Sesiones de estudio: lógica (session.ts), tipos de ejercicio y componentes
+    srs/         Repetición espaciada (cajas de Leitner)
+    progress/    Progreso, rachas, estadísticas y guardado en localStorage
+    settings/    Ajustes del usuario
   data/          Dataset generado (HSK 1: 150 palabras, 178 caracteres)
-  lib/           Utilidades sin dominio (pinyin, aleatoriedad)
+  lib/           Utilidades sin dominio (pinyin, aleatoriedad, fechas, almacenamiento)
   components/    Componentes compartidos
-    ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader, ProgressBar
+    ui/          Piezas visuales genéricas: Button, Card, DataTable, HanziText, PageHeader, ProgressBar, StatCard...
   i18n/          Textos de la interfaz (en.ts activo, es.ts preparado) y función t()
   test/          Configuración compartida de los tests
   index.css      Tailwind y design tokens (colores, fuentes, foco)

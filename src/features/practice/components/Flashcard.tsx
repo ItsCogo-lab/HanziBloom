@@ -2,19 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { t } from '../../../i18n/index.ts'
-import {
-  formatPinyin,
-  getCharactersOfWord,
-  getMeanings,
-  getWordsWithCharacter,
-  type Dictionary,
-} from '../../dictionary/dictionary.ts'
-import type { StudyItem } from '../../dictionary/studyItem.ts'
+import { formatPinyin, getMeanings, type Dictionary } from '../../dictionary/dictionary.ts'
+import { getRelatedItems, type StudyItem } from '../../dictionary/studyItem.ts'
 import type { FlashcardExercise } from '../types.ts'
-import { HanziText } from './HanziText.tsx'
+import { HanziText } from '../../../components/ui/HanziText.tsx'
 
-/** Máximo de palabras relacionadas que se muestran en un carácter. */
-const MAX_RELATED_WORDS = 4
+/** Máximo de elementos relacionados que se muestran (un carácter puede estar en muchas palabras). */
+const MAX_RELATED_ITEMS = 4
 
 type FlashcardProps = {
   exercise: FlashcardExercise
@@ -66,13 +60,7 @@ export function Flashcard({ exercise, dictionary, onAnswer }: FlashcardProps) {
 }
 
 function FlashcardAnswer({ item, dictionary }: { item: StudyItem; dictionary: Dictionary }) {
-  const related =
-    item.kind === 'word'
-      ? getCharactersOfWord(dictionary, item.entry)
-      : getWordsWithCharacter(dictionary, item.entry.id)
-          // 谁 aparece en la palabra 谁: no aporta nada mostrarla
-          .filter((word) => word.hanzi !== item.entry.hanzi)
-          .slice(0, MAX_RELATED_WORDS)
+  const related = getRelatedItems(dictionary, item).slice(0, MAX_RELATED_ITEMS)
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
@@ -89,7 +77,7 @@ function FlashcardAnswer({ item, dictionary }: { item: StudyItem; dictionary: Di
             {t(item.kind === 'word' ? 'practice.charactersInWord' : 'practice.wordsWithCharacter')}
           </p>
           <ul className="flex flex-wrap justify-center gap-2">
-            {related.map((entry) => (
+            {related.map(({ entry }) => (
               <li key={entry.id} className="rounded-lg bg-paper px-3 py-1.5">
                 <HanziText className="mr-2 text-lg">{entry.hanzi}</HanziText>
                 <span className="text-sm text-ink-muted">{formatPinyin(entry)}</span>

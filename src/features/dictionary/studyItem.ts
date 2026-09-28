@@ -1,4 +1,4 @@
-import type { Dictionary } from './dictionary.ts'
+import { getCharacter, getCharactersOfWord, getWord, getWordsWithCharacter, type Dictionary } from './dictionary.ts'
 import type { Character, Word } from './types.ts'
 
 /**
@@ -29,4 +29,28 @@ export function listStudyItems(dictionary: Dictionary): StudyItem[] {
     ...[...dictionary.characters.values()].map((entry): StudyItem => ({ kind: 'character', entry })),
     ...[...dictionary.words.values()].map((entry): StudyItem => ({ kind: 'word', entry })),
   ]
+}
+
+/** Busca un elemento por su id ("char:好" o "word:你好"). */
+export function getStudyItem(dictionary: Dictionary, id: StudyItemId): StudyItem | undefined {
+  if (id.startsWith('char:')) {
+    const entry = getCharacter(dictionary, id.slice('char:'.length))
+    return entry && { kind: 'character', entry }
+  }
+  const entry = getWord(dictionary, id.slice('word:'.length))
+  return entry && { kind: 'word', entry }
+}
+
+/**
+ * Elementos relacionados: los caracteres de una palabra, o las palabras en
+ * las que aparece un carácter. La palabra con el mismo hanzi que el carácter
+ * (谁 carácter y 谁 palabra) no se incluye: no aporta nada.
+ */
+export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyItem[] {
+  if (item.kind === 'word') {
+    return getCharactersOfWord(dictionary, item.entry).map((entry): StudyItem => ({ kind: 'character', entry }))
+  }
+  return getWordsWithCharacter(dictionary, item.entry.id)
+    .filter((word) => word.hanzi !== item.entry.hanzi)
+    .map((entry): StudyItem => ({ kind: 'word', entry }))
 }

@@ -23,3 +23,18 @@ export function t(key: MessageKey, params: Record<string, string | number> = {})
     name in params ? String(params[name]) : placeholder,
   )
 }
+
+/** Porcentaje en el formato del idioma activo: 0.75 → "75%". */
+export function formatPercent(ratio: number): string {
+  return new Intl.NumberFormat(ACTIVE_UI_LOCALE, { style: 'percent' }).format(ratio)
+}
+
+/** Día corto en el idioma activo: "Mon, Sep 28". */
+export function formatShortDay(date: Date): string {
+  return new Intl.DateTimeFormat(ACTIVE_UI_LOCALE, { weekday: 'short', month: 'short', day: 'numeric' }).format(date)
+}
+
+/** Fecha en formato medio del idioma activo: "Sep 28, 2026". */
+export function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat(ACTIVE_UI_LOCALE, { dateStyle: 'medium' }).format(date)
+}

@@ -1,5 +1,6 @@
 import type { Dictionary } from '../../dictionary/dictionary.ts'
 import type { Exercise } from '../types.ts'
+import { ChoiceQuestion } from './ChoiceQuestion.tsx'
 import { Flashcard } from './Flashcard.tsx'
 
 type ExerciseViewProps = {
@@ -17,10 +18,14 @@ export function ExerciseView({ exercise, dictionary, onAnswer }: ExerciseViewPro
   switch (exercise.type) {
     case 'flashcard':
       return <Flashcard exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} />
+    case 'meaning-choice':
+    case 'pinyin-choice':
+    case 'hanzi-choice':
+      return <ChoiceQuestion exercise={exercise} onAnswer={onAnswer} />
     default: {
       // Si falta un caso, `exercise` no sería `never` y TypeScript daría error aquí
-      const missingCase: never = exercise.type
-      throw new Error(`Tipo de ejercicio sin componente: ${String(missingCase)}`)
+      const missingCase: never = exercise
+      throw new Error(`Tipo de ejercicio sin componente: ${JSON.stringify(missingCase)}`)
     }
   }
 }

@@ -5,7 +5,7 @@ import { t } from '../../../i18n/index.ts'
 import { formatPinyin, getMeanings } from '../../dictionary/dictionary.ts'
 import type { StudyItem } from '../../dictionary/studyItem.ts'
 import type { SessionSummary as Summary } from '../session.ts'
-import { HanziText } from './HanziText.tsx'
+import { HanziText } from '../../../components/ui/HanziText.tsx'
 
 type SessionSummaryProps = {
   summary: Summary

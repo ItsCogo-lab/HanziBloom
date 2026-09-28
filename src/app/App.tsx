@@ -1,10 +1,13 @@
 import { BrowserRouter } from 'react-router'
+import { AppProviders } from './AppProviders.tsx'
 import { AppRoutes } from './AppRoutes.tsx'
 
 export function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AppProviders>
+        <AppRoutes />
+      </AppProviders>
     </BrowserRouter>
   )
 }
