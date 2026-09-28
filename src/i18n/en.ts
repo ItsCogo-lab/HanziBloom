@@ -20,6 +20,21 @@ export const en = {
 
   'dashboard.description': 'Your study overview for today.',
   'dashboard.startSession': 'Start session',
+  'dashboard.today': 'Today',
+  'dashboard.message.welcome': 'Welcome! Start your first session to learn HSK 1 characters and words.',
+  'dashboard.message.due': 'Some items are ready for review. Your next session starts with them.',
+  'dashboard.message.learnNew': 'No reviews due right now. Your next session will teach you new items.',
+  'dashboard.message.allDone': "You're all caught up. Come back tomorrow for your next reviews.",
+  'dashboard.overview': 'Overview',
+  'dashboard.hskProgress': 'HSK 1 progress',
+  'dashboard.characters': 'Characters',
+  'dashboard.words': 'Words',
+  'dashboard.kindProgress': '{studied} of {total} studied · {mastered} mastered',
+  'stats.due': 'Due for review',
+  'stats.streak': 'Day streak',
+  'stats.studied': 'Studied',
+  'stats.studiedOf': 'of {total}',
+  'stats.mastered': 'Mastered',
 
   'practice.description': 'Study sessions with varied exercises.',
 

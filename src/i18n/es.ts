@@ -20,6 +20,21 @@ export const es: Record<MessageKey, string> = {
 
   'dashboard.description': 'Tu resumen de estudio de hoy.',
   'dashboard.startSession': 'Empezar sesión',
+  'dashboard.today': 'Hoy',
+  'dashboard.message.welcome': '¡Hola! Empieza tu primera sesión para aprender los caracteres y palabras de HSK 1.',
+  'dashboard.message.due': 'Tienes elementos listos para repasar. Tu próxima sesión empieza por ellos.',
+  'dashboard.message.learnNew': 'Ahora no tienes repasos pendientes. Tu próxima sesión te enseñará elementos nuevos.',
+  'dashboard.message.allDone': 'Lo tienes todo al día. Vuelve mañana para los siguientes repasos.',
+  'dashboard.overview': 'Resumen',
+  'dashboard.hskProgress': 'Progreso en HSK 1',
+  'dashboard.characters': 'Caracteres',
+  'dashboard.words': 'Palabras',
+  'dashboard.kindProgress': '{studied} de {total} estudiados · {mastered} dominados',
+  'stats.due': 'Para repasar',
+  'stats.streak': 'Días de racha',
+  'stats.studied': 'Estudiados',
+  'stats.studiedOf': 'de {total}',
+  'stats.mastered': 'Dominados',
 
   'practice.description': 'Sesiones de estudio con ejercicios variados.',
 
