@@ -79,8 +79,8 @@ export function DictionarySearch({
               >
                 <EntryLabel entry={item.entry} withMeaning />
                 <span className="shrink-0 text-xs text-ink-muted">
-                  {t(item.kind === 'character' ? 'practice.kind.character' : 'practice.kind.word')} ·{' '}
-                  {t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}
+                  {t(item.kind === 'character' ? 'practice.kind.character' : 'practice.kind.word')}
+                  {item.entry.hskLevel !== undefined && ` · ${t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}`}
                 </span>
               </EntryLink>
             </li>

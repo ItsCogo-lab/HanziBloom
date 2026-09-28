@@ -9,7 +9,7 @@
  */
 import { getWordId } from '../../src/features/dictionary/dictionary.ts'
 import type { Character, HskLevel, Word } from '../../src/features/dictionary/types.ts'
-import { findEntries, readingOf, traditionalOf, usableMeanings, type CedictIndex } from './sources/cedict.ts'
+import { findEntries, readingOf, traditionalOf, usableMeanings, type CedictEntry, type CedictIndex } from './sources/cedict.ts'
 import type { HskWord } from './sources/hsk.ts'
 import type { MakeMeAHanziCharacter } from './sources/makemeahanzi.ts'
 import type { UnihanCharacter } from './sources/unihan.ts'
@@ -36,9 +36,12 @@ export const FIELD_SOURCES = {
   },
 } as const
 
+/** Una entrada de HSK 1-4: siempre tiene nivel. */
+export type HskEntry<T extends Character | Word> = T & { hskLevel: HskLevel }
+
 export interface BaseEntries {
-  characters: Character[]
-  words: Word[]
+  characters: HskEntry<Character>[]
+  words: HskEntry<Word>[]
   problems: string[]
   /** Entradas repetidas en la lista HSK (mismo hanzi y pinyin) que se han juntado en una. */
   duplicates: string[]
@@ -95,7 +98,7 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
   const readingsPerHanzi = new Map<string, number>()
   for (const { hanzi } of entries) readingsPerHanzi.set(hanzi, (readingsPerHanzi.get(hanzi) ?? 0) + 1)
 
-  const words: Word[] = []
+  const words: HskEntry<Word>[] = []
   for (const { hanzi, pinyin, level } of entries) {
     const cedictEntries = findEntries(cedict, hanzi, pinyin)
     const meanings = usableMeanings(cedictEntries)
@@ -145,7 +148,7 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
     })
   }
 
-  const characters: Character[] = [...readingsByCharacter].map(([hanzi, { level, readings }]) => {
+  const characters: HskEntry<Character>[] = [...readingsByCharacter].map(([hanzi, { level, readings }]) => {
     const cedictEntries = readings.flatMap((reading) => {
       const common = findEntries(cedict, hanzi, reading)
       if (!properNounCharacters.has(hanzi)) return common
@@ -218,4 +221,98 @@ export function crossCheckCharacter(hanzi: string, sources: CharacterSources): s
     )
   }
   return conflicts
+}
+
+export interface FullEntries {
+  /** Caracteres de CC-CEDICT que no están en HSK 1-4, sin nivel. */
+  characters: Character[]
+  /** Palabras de CC-CEDICT que no están en HSK 1-4, sin nivel. */
+  words: Word[]
+  /** Palabras que se dejan fuera, con el motivo (se listan en docs/DATA_CONFLICTS.md). */
+  leftOut: string[]
+}
+
+const HAN_ONLY = /^\p{Script=Han}+$/u
+/** CC-CEDICT escribe "xx5" cuando no conoce la lectura (々). Sin lectura no hay entrada. */
+const UNKNOWN_READING = /xx/
+
+/**
+ * El resto de CC-CEDICT, para el diccionario completo. Complementa a
+ * buildBaseEntries: lo que ya está en HSK 1-4 no se repite.
+ *
+ * - Solo entradas escritas enteras con caracteres chinos (se quedan fuera
+ *   "T恤", "110" o "%") y con lectura conocida (no "xx5").
+ * - Una entrada de un solo carácter es un carácter; si tiene varias lecturas,
+ *   el carácter las lleva todas. Si alguna está en minúscula, las de nombre
+ *   propio (surname Xxx) no cuentan como lectura, pero sus significados sí
+ *   van detrás.
+ * - Las de dos o más caracteres son palabras: una por cada pinyin distinto
+ *   (mayúsculas incluidas: 苹果 píng guǒ ya está en HSK, 苹果 Píng guǒ
+ *   «Apple» entra aquí).
+ * - Las palabras que ya usa HSK (las mismas entradas que eligió
+ *   buildBaseEntries con findEntries) no se repiten.
+ * - Id: el hanzi, o el hanzi con su pinyin si hay otra palabra con el
+ *   mismo hanzi (en HSK o aquí).
+ * - Una palabra con un carácter que no tiene entrada propia se deja fuera:
+ *   su ficha no podría enseñar ese carácter.
+ */
+export function buildFullEntries(cedict: CedictIndex, hsk: Pick<BaseEntries, 'characters' | 'words'>): FullEntries {
+  const hskCharacters = new Set(hsk.characters.map((character) => character.hanzi))
+  const usedByHsk = new Set(hsk.words.flatMap((word) => findEntries(cedict, word.hanzi, word.pinyin)))
+  const leftOut: string[] = []
+
+  const characters: Character[] = []
+  // Palabras agrupadas por hanzi y pinyin, en el orden de CC-CEDICT
+  const groups = new Map<string, { hanzi: string; pinyin: string; entries: CedictEntry[] }>()
+  for (const [hanzi, allEntries] of cedict) {
+    if (!HAN_ONLY.test(hanzi)) continue
+    const entries = allEntries.filter((entry) => !UNKNOWN_READING.test(entry.pinyin))
+    if (entries.length < allEntries.length) leftOut.push(`${hanzi}: CC-CEDICT no conoce su lectura`)
+    if (Array.from(hanzi).length === 1) {
+      if (hskCharacters.has(hanzi)) continue
+      const common = entries.filter((entry) => entry.pinyin === entry.pinyin.toLowerCase())
+      const proper = entries.filter((entry) => entry.pinyin !== entry.pinyin.toLowerCase())
+      const readings = (common.length > 0 ? common : proper).map((entry) => entry.pinyin.toLowerCase())
+      const meanings = usableMeanings([...common, ...proper])
+      if (entries.length > 0 && meanings.length > 0) characters.push({ id: hanzi, hanzi, pinyin: [...new Set(readings)], meanings: { en: meanings } })
+      continue
+    }
+    for (const entry of entries) {
+      if (usedByHsk.has(entry)) continue
+      const key = `${hanzi} ${entry.pinyin}`
+      const group = groups.get(key)
+      if (group) group.entries.push(entry)
+      else groups.set(key, { hanzi, pinyin: entry.pinyin, entries: [entry] })
+    }
+  }
+
+  const knownCharacters = new Set([...hskCharacters, ...characters.map((character) => character.hanzi)])
+  const kept = [...groups.values()].filter(({ hanzi, pinyin, entries }) => {
+    const missing = Array.from(hanzi).filter((character) => !knownCharacters.has(character))
+    if (missing.length > 0) {
+      leftOut.push(`${hanzi} [${pinyin}]: sin entrada para ${missing.join(', ')}`)
+      return false
+    }
+    if (usableMeanings(entries).length === 0) {
+      leftOut.push(`${hanzi} [${pinyin}]: sin significados`)
+      return false
+    }
+    return true
+  })
+
+  const wordsPerHanzi = new Map<string, number>()
+  for (const { hanzi } of [...hsk.words, ...kept]) wordsPerHanzi.set(hanzi, (wordsPerHanzi.get(hanzi) ?? 0) + 1)
+
+  const words = kept.map(({ hanzi, pinyin, entries }): Word => {
+    const traditional = traditionalOf(entries)
+    return {
+      id: getWordId(hanzi, pinyin, wordsPerHanzi.get(hanzi)! > 1),
+      hanzi,
+      pinyin,
+      meanings: { en: usableMeanings(entries) },
+      ...(traditional !== undefined && { traditional }),
+    }
+  })
+
+  return { characters, words, leftOut }
 }

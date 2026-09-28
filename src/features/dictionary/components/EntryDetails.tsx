@@ -55,7 +55,8 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
       {item.kind === 'character' && (
         <>
           <CharacterFacts character={item.entry} dictionary={dictionary} opener={opener} />
-          <StrokeOrder hanzi={item.entry.hanzi} />
+          {/* public/strokes/ solo tiene los caracteres de HSK 1-4 (ver docs/DATA_SOURCES.md) */}
+          {item.entry.hskLevel !== undefined && <StrokeOrder hanzi={item.entry.hanzi} />}
         </>
       )}
 
@@ -108,7 +109,9 @@ function RelatedWord({ item, opener }: { item: StudyItem; opener: EntryOpener })
       )}
       <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />
       <span className="min-w-0 flex-1 text-ink-muted">{getMeanings(item.entry.meanings)[0]}</span>
-      <span className="text-sm text-ink-muted">{t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}</span>
+      {item.entry.hskLevel !== undefined && (
+        <span className="text-sm text-ink-muted">{t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}</span>
+      )}
     </EntryLink>
   )
 }

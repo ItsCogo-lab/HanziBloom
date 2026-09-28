@@ -26,6 +26,21 @@ describe('adaptador de Make Me a Hanzi', () => {
     expect(parseMakeMeAHanzi(line, new Set(['𠀀'])).get('𠀀')).toEqual({ radical: '一' })
   })
 
+  it('quita los saltos de línea que trae alguna entrada en los componentes', () => {
+    const line = JSON.stringify({
+      character: '瓣',
+      radical: '瓜',
+      decomposition: '⿲辛瓜辛',
+      etymology: { type: 'pictophonetic', phonetic: '\n\n辡', semantic: '瓜', hint: 'melon' },
+    })
+    expect(parseMakeMeAHanzi(line, new Set(['瓣'])).get('瓣')?.etymology).toEqual({
+      type: 'pictophonetic',
+      hint: 'melon',
+      semantic: '瓜',
+      phonetic: '辡',
+    })
+  })
+
   it('falla con un tipo de etimología desconocido', () => {
     const line = JSON.stringify({ character: '𠀀', radical: '一', decomposition: '？', etymology: { type: 'other' } })
     expect(() => parseMakeMeAHanzi(line, new Set(['𠀀']))).toThrow(/other/)

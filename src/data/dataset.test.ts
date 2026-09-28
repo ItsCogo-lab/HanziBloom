@@ -31,6 +31,11 @@ describe('dataset', () => {
     expect(getCharacter(dictionary, '长')?.pinyin).toEqual(['cháng', 'zhǎng'])
   })
 
+  it('da un nivel HSK a cada entrada', () => {
+    const withoutLevel = [...allCharacters, ...allWords].filter((entry) => entry.hskLevel === undefined)
+    expect(withoutLevel.map((entry) => entry.id)).toEqual([])
+  })
+
   it('incluye todos los caracteres de las palabras', () => {
     const charactersInWords = new Set(allWords.flatMap((word) => Array.from(word.hanzi)))
 

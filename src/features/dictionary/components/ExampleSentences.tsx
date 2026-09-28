@@ -3,14 +3,19 @@ import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { t } from '../../../i18n/index.ts'
 import { getExamplesFor, loadExampleSet, tatoebaSentenceUrl } from '../examples.ts'
 import { getStudyItemId, type StudyItem } from '../studyItem.ts'
-import type { ExampleSet } from '../types.ts'
+import type { ExampleSet, HskLevel } from '../types.ts'
 
 /**
  * Frases de ejemplo de Tatoeba, con enlace y autor de cada frase como pide su
  * licencia. Si no hay frases (o no se pueden cargar), no se muestra nada.
+ * Las frases se eligen por nivel HSK: fuera de HSK 1-4 no hay.
  */
 export function ExampleSentences({ item }: { item: StudyItem }) {
   const level = item.entry.hskLevel
+  return level === undefined ? null : <LevelExamples item={item} level={level} />
+}
+
+function LevelExamples({ item, level }: { item: StudyItem; level: HskLevel }) {
   // Se guarda con su nivel para no mezclar datos al cambiar de ficha
   const [loaded, setLoaded] = useState<{ level: number; set: ExampleSet }>()
 

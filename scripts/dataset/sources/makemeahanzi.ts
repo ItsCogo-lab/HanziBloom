@@ -21,17 +21,24 @@ interface RawEntry {
   etymology?: { type: string; hint?: string | null; semantic?: string | null; phonetic?: string | null } | null
 }
 
-/** Quita los null de la fuente: en el dataset, un dato que no existe no aparece. */
+/**
+ * Quita los null de la fuente: en el dataset, un dato que no existe no
+ * aparece. También los espacios y saltos de línea de los extremos, que
+ * alguna entrada trae por error (瓣: fonético "\n\n…辡").
+ */
 function toEtymology(raw: RawEntry['etymology']): Etymology | undefined {
   if (!raw) return undefined
   if (!ETYMOLOGY_TYPES.includes(raw.type as Etymology['type'])) {
     throw new Error(`Make Me a Hanzi: tipo de etimología desconocido "${raw.type}"`)
   }
+  const hint = raw.hint?.trim()
+  const semantic = raw.semantic?.trim()
+  const phonetic = raw.phonetic?.trim()
   return {
     type: raw.type as Etymology['type'],
-    ...(raw.hint && { hint: raw.hint }),
-    ...(raw.semantic && { semantic: raw.semantic }),
-    ...(raw.phonetic && { phonetic: raw.phonetic }),
+    ...(hint && { hint }),
+    ...(semantic && { semantic }),
+    ...(phonetic && { phonetic }),
   }
 }
 

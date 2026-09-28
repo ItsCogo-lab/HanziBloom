@@ -17,7 +17,8 @@ import { fileURLToPath } from 'node:url'
 import type { Character, ExampleSet, HskLevel, Word } from '../../src/features/dictionary/types.ts'
 import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
-import { buildBaseEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
+import { CHUNK_COUNT, chunkFileName, getChunkIndex } from '../../src/features/dictionary/fullDictionary.ts'
+import { buildBaseEntries, buildFullEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
 import { readStrokeData, type StrokeData } from './sources/hanziWriter.ts'
 import { parseHskList } from './sources/hsk.ts'
@@ -31,6 +32,7 @@ const rootDir = join(scriptDir, '../..')
 const dataDir = join(rootDir, 'src/data')
 const strokesDir = join(rootDir, 'public/strokes')
 const examplesDir = join(rootDir, 'public/examples')
+const fullDictionaryDir = join(rootDir, 'public/dictionary')
 const conflictsReport = join(rootDir, 'docs/DATA_CONFLICTS.md')
 const hanziWriterDataDir = join(rootDir, 'node_modules/hanzi-writer-data')
 
@@ -79,9 +81,13 @@ const base = buildBaseEntries(hskLists, cedict)
 const { words, problems, duplicates, leftOut } = base
 const hanziSet = new Set(base.characters.map((character) => character.hanzi))
 
+// El resto de CC-CEDICT, para el diccionario completo (public/dictionary/)
+const full = buildFullEntries(cedict, base)
+const allHanzi = new Set([...hanziSet, ...full.characters.map((character) => character.hanzi)])
+
 // --- Make Me a Hanzi: descomposición y etimología ------------------------
 
-const makeMeAHanzi = parseMakeMeAHanzi(readSource('makemeahanzi-dictionary.txt'), hanziSet)
+const makeMeAHanzi = parseMakeMeAHanzi(readSource('makemeahanzi-dictionary.txt'), allHanzi)
 
 // --- Unihan: radical, tradicional ----------------------------------------
 // También se lee para los radicales de Make Me a Hanzi, para poder
@@ -92,26 +98,35 @@ const unihan = skippedSources.has('unihan')
   : loadUnihan(
       [readSource('unihan/Unihan_IRGSources.txt'), readSource('unihan/Unihan_Variants.txt')],
       readSource('unihan/CJKRadicals.txt'),
-      new Set([...hanziSet, ...makeMeAHanziRadicals]),
+      new Set([...allHanzi, ...makeMeAHanziRadicals]),
     )
 
 // --- hanzi-writer-data: trazos (paquete npm fijado en package.json) --------
 
+/*
+ * Los trazos de HSK 1-4 se copian a public/strokes/. Del resto solo se usa el
+ * número de trazos: copiar los ~9.500 archivos del paquete ocuparía unos 40 MB.
+ */
 const strokeData = new Map<string, StrokeData>()
 for (const hanzi of hanziSet) {
   const data = readStrokeData(hanziWriterDataDir, hanzi)
   if (data) strokeData.set(hanzi, data)
   else problems.push(`Carácter ${hanzi}: sin datos de trazos en hanzi-writer-data`)
 }
+const fullStrokeCounts = new Map<string, number>()
+for (const { hanzi } of full.characters) {
+  const data = readStrokeData(hanziWriterDataDir, hanzi)
+  if (data) fullStrokeCounts.set(hanzi, data.strokeCount)
+}
 
 // --- Fusión y comprobaciones cruzadas --------------------------------------
 
-const conflicts: string[] = []
-const characters = base.characters.map((character) => {
+/** Añade a un carácter los campos de las demás fuentes y apunta los desacuerdos en `conflicts`. */
+function enrich(character: Character, strokeCount: number | undefined, conflicts: string[]): Character {
   const sources: CharacterSources = {
     unihan: unihan.get(character.hanzi),
     makeMeAHanzi: makeMeAHanzi.get(character.hanzi),
-    hanziWriterStrokeCount: strokeData.get(character.hanzi)?.strokeCount,
+    hanziWriterStrokeCount: strokeCount,
   }
   const makeMeAHanziRadical = sources.makeMeAHanzi?.radical
   if (makeMeAHanziRadical !== undefined) {
@@ -119,7 +134,16 @@ const characters = base.characters.map((character) => {
   }
   conflicts.push(...crossCheckCharacter(character.hanzi, sources))
   return enrichCharacter(character, sources)
-})
+}
+
+const conflicts: string[] = []
+const characters = base.characters.map((character) =>
+  enrich(character, strokeData.get(character.hanzi)?.strokeCount, conflicts),
+)
+const fullConflicts: string[] = []
+const fullCharacters = full.characters.map((character) =>
+  enrich(character, fullStrokeCounts.get(character.hanzi), fullConflicts),
+)
 
 // --- Tatoeba: frases de ejemplo --------------------------------------------
 
@@ -157,7 +181,7 @@ if (!skippedSources.has('tatoeba')) {
       sentences: selectExamples({
         words: [...new Set(words.filter((word) => word.hskLevel === level).map((word) => word.hanzi))],
         knownCharacters: new Set(
-          base.characters.filter((character) => character.hskLevel <= level).map((character) => character.hanzi),
+          base.characters.filter((character) => character.hskLevel !== undefined && character.hskLevel <= level).map((character) => character.hanzi),
         ),
         chinese,
         english,
@@ -169,7 +193,8 @@ if (!skippedSources.has('tatoeba')) {
 
 // --- Validación y escritura ----------------------------------------------
 
-problems.push(...validateDictionaryData(characters, words))
+// HSK y el diccionario completo juntos: ids únicos entre los dos y caracteres de cada palabra presentes
+problems.push(...validateDictionaryData([...characters, ...fullCharacters], [...words, ...full.words]))
 for (const examples of examplesByLevel.values()) problems.push(...validateExampleSet(examples, words))
 if (problems.length > 0) {
   console.error(`No se ha generado el dataset. Problemas:\n- ${problems.join('\n- ')}`)
@@ -213,6 +238,21 @@ rmSync(strokesDir, { recursive: true, force: true })
 mkdirSync(strokesDir, { recursive: true })
 for (const [hanzi, data] of strokeData) writeFileSync(join(strokesDir, strokeFileName(hanzi)), data.json)
 
+// Diccionario completo: CHUNK_COUNT archivos, cada entrada en el de su primer carácter
+// (getChunkIndex). Una entrada por línea para que los cambios se lean bien en git.
+const chunks = Array.from({ length: CHUNK_COUNT }, () => ({ characters: [] as Character[], words: [] as Word[] }))
+for (const character of fullCharacters) chunks[getChunkIndex(character.hanzi)]!.characters.push(character)
+for (const word of full.words) chunks[getChunkIndex(word.hanzi)]!.words.push(word)
+const toLines = (entries: readonly object[]) => entries.map((entry) => JSON.stringify(entry)).join(',\n')
+rmSync(fullDictionaryDir, { recursive: true, force: true })
+mkdirSync(fullDictionaryDir, { recursive: true })
+chunks.forEach((chunk, index) => {
+  writeFileSync(
+    join(fullDictionaryDir, chunkFileName(index)),
+    `{"characters":[\n${toLines(chunk.characters)}\n],\n"words":[\n${toLines(chunk.words)}\n]}\n`,
+  )
+})
+
 // Ejemplos: un JSON por nivel, que la ficha pide al abrirse.
 if (examplesByLevel.size > 0) mkdirSync(examplesDir, { recursive: true })
 for (const [level, examples] of examplesByLevel) {
@@ -238,6 +278,16 @@ dónde sacar su significado. Se dejan fuera en lugar de inventarlo.
 
 ${leftOut.length === 0 ? 'Ninguna.' : leftOut.map((word) => `- ${word}`).join('\n')}
 
+## Diccionario completo: desacuerdos entre fuentes
+
+Lo mismo que arriba, para los caracteres del diccionario completo (fuera de HSK 1-4).
+
+${fullConflicts.length === 0 ? 'Ninguno.' : fullConflicts.map((conflict) => `- ${conflict}`).join('\n')}
+
+## Diccionario completo: entradas de CC-CEDICT que se dejan fuera
+
+${full.leftOut.length === 0 ? 'Ninguna.' : full.leftOut.map((entry) => `- ${entry}`).join('\n')}
+
 ## Entradas repetidas en la lista HSK
 
 La lista repite estas palabras con el mismo pinyin (con otro sentido). Se
@@ -248,7 +298,7 @@ ${duplicates.length === 0 ? 'Ninguna.' : duplicates.map((word) => `- ${word}`).j
 )
 
 for (const level of LEVELS) {
-  const count = (entries: readonly { hskLevel: HskLevel }[]) => entries.filter((entry) => entry.hskLevel === level).length
+  const count = (entries: readonly { hskLevel?: HskLevel }[]) => entries.filter((entry) => entry.hskLevel === level).length
   console.log(`HSK ${level}: ${count(words)} palabras y ${count(characters)} caracteres nuevos.`)
 }
 console.log(`Dataset generado: ${words.length} palabras y ${characters.length} caracteres.`)
@@ -256,6 +306,9 @@ if (leftOut.length > 0) console.warn(`Palabras sin entrada en CC-CEDICT, fuera d
 if (duplicates.length > 0) {
   console.log(`Entradas repetidas en la lista HSK, guardadas una vez: ${duplicates.join(', ')}.`)
 }
+console.log(
+  `Diccionario completo (public/dictionary, ${CHUNK_COUNT} archivos): ${full.words.length} palabras y ${fullCharacters.length} caracteres más.`,
+)
 console.log(`Trazos copiados a public/strokes: ${strokeData.size}.`)
 for (const [level, examples] of examplesByLevel) {
   console.log(`Frases de ejemplo de Tatoeba para HSK ${level} (${examples.exportDate}): ${examples.sentences.length}.`)

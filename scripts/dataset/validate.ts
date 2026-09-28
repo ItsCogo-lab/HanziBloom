@@ -2,7 +2,8 @@
  * Valida el dataset ya generado (lo que está en el repositorio), sin
  * descargar nada: `npm run data:validate`.
  *
- * - Caracteres y palabras de src/data (validateDictionaryData).
+ * - Caracteres y palabras de src/data y del diccionario completo de
+ *   public/dictionary, juntos (validateDictionaryData y validateFullDictionary).
  * - Un archivo de trazos en public/strokes por cada carácter.
  * - Las frases de ejemplo de public/examples (validateExampleSet).
  */
@@ -12,11 +13,18 @@ import { fileURLToPath } from 'node:url'
 import { allCharacters, allWords } from '../../src/data/index.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import type { ExampleSet } from '../../src/features/dictionary/types.ts'
-import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
+import { validateDictionaryData, validateExampleSet, validateFullDictionary } from '../../src/features/dictionary/validation.ts'
+import { readFullDictionary } from './fullDictionaryFiles.ts'
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '../../public')
 
-const problems = validateDictionaryData(allCharacters, allWords)
+const chunks = readFullDictionary(join(publicDir, 'dictionary'))
+const fullCharacters = chunks.flatMap((chunk) => chunk.characters)
+const fullWords = chunks.flatMap((chunk) => chunk.words)
+const problems = [
+  ...validateDictionaryData([...allCharacters, ...fullCharacters], [...allWords, ...fullWords]),
+  ...validateFullDictionary(chunks),
+]
 
 for (const character of allCharacters) {
   if (!existsSync(join(publicDir, 'strokes', strokeFileName(character.hanzi)))) {
@@ -37,5 +45,6 @@ if (problems.length > 0) {
   process.exit(1)
 }
 console.log(
-  `Dataset correcto: ${allCharacters.length} caracteres, ${allWords.length} palabras, ${exampleFiles.length} archivos de ejemplos.`,
+  `Dataset correcto: ${allCharacters.length} caracteres, ${allWords.length} palabras, ${exampleFiles.length} archivos de ejemplos. ` +
+    `Diccionario completo: ${fullCharacters.length} caracteres y ${fullWords.length} palabras más.`,
 )

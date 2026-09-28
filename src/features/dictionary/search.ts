@@ -50,29 +50,41 @@ function getSearchFields(entry: Character | Word): SearchFields {
  * 7. significado que lo contiene ("apples", "pineapple")
  */
 export function getSearchRank(entry: Character | Word, query: string): number | undefined {
+  return createMatcher(query)(entry)
+}
+
+/**
+ * Prepara la búsqueda una vez (texto normalizado, expresión regular) y
+ * devuelve la función que puntúa cada entrada. Con el diccionario completo
+ * son más de 100.000 entradas por búsqueda.
+ */
+function createMatcher(query: string): (entry: Character | Word) => number | undefined {
   const text = query.trim().toLowerCase()
-  if (text === '') return undefined
+  if (text === '') return () => undefined
 
   if (HAN.test(text)) {
-    if (entry.hanzi === text) return 0
-    if (entry.hanzi.startsWith(text)) return 1
-    if (entry.hanzi.includes(text)) return 2
+    return (entry) => {
+      if (entry.hanzi === text) return 0
+      if (entry.hanzi.startsWith(text)) return 1
+      if (entry.hanzi.includes(text)) return 2
+      return undefined
+    }
+  }
+
+  const pinyin = normalizePinyin(text)
+  const wholeWord = new RegExp(`(^|[^a-z])${escapeRegExp(text)}($|[^a-z])`)
+  return (entry) => {
+    const { readings, meanings } = getSearchFields(entry)
+    if (pinyin !== '') {
+      if (readings.includes(pinyin)) return 3
+      if (readings.some((reading) => reading.startsWith(pinyin))) return 4
+      // Contener solo cuenta con 2 letras o más: si no, "a" coincidiría con casi todo
+      if (pinyin.length > 1 && readings.some((reading) => reading.includes(pinyin))) return 5
+    }
+    if (meanings.some((meaning) => meaning === text || wholeWord.test(meaning))) return 6
+    if (meanings.some((meaning) => meaning.includes(text))) return 7
     return undefined
   }
-
-  const { readings, meanings } = getSearchFields(entry)
-  const pinyin = normalizePinyin(text)
-  if (pinyin !== '') {
-    if (readings.includes(pinyin)) return 3
-    if (readings.some((reading) => reading.startsWith(pinyin))) return 4
-    // Contener solo cuenta con 2 letras o más: si no, "a" coincidiría con casi todo
-    if (pinyin.length > 1 && readings.some((reading) => reading.includes(pinyin))) return 5
-  }
-
-  const wholeWord = new RegExp(`(^|[^a-z])${escapeRegExp(text)}($|[^a-z])`)
-  if (meanings.some((meaning) => meaning === text || wholeWord.test(meaning))) return 6
-  if (meanings.some((meaning) => meaning.includes(text))) return 7
-  return undefined
 }
 
 function escapeRegExp(text: string): string {
@@ -81,23 +93,33 @@ function escapeRegExp(text: string): string {
 
 /**
  * Busca en el diccionario y ordena por lo bien que coincide (getSearchRank).
- * A igual coincidencia, primero los caracteres y luego las palabras, y cada
- * grupo por nivel HSK, en el orden del dataset. Todo es local: con unos
- * miles de entradas tarda milisegundos.
+ * A igual coincidencia, primero lo que está en HSK 1-4, luego los caracteres
+ * antes que las palabras, y cada grupo por nivel HSK, en el orden del dataset.
  */
 export function searchItems(items: readonly StudyItem[], query: string, limit = Infinity): StudyItem[] {
+  const rankOf = createMatcher(query)
   return items
-    .map((item, index) => ({ item, index, rank: getSearchRank(item.entry, query) }))
+    .map((item, index) => ({ item, index, rank: rankOf(item.entry) }))
     .filter((result) => result.rank !== undefined)
     .sort(
       (a, b) =>
         a.rank! - b.rank! ||
+        outsideHsk(a.item) - outsideHsk(b.item) ||
         kindOrder(a.item) - kindOrder(b.item) ||
-        a.item.entry.hskLevel - b.item.entry.hskLevel ||
+        levelOrder(a.item) - levelOrder(b.item) ||
         a.index - b.index,
     )
     .slice(0, limit)
     .map((result) => result.item)
+}
+
+/** Lo que está en HSK 1-4 va antes que el resto del diccionario. */
+function outsideHsk(item: StudyItem): number {
+  return item.entry.hskLevel === undefined ? 1 : 0
+}
+
+function levelOrder(item: StudyItem): number {
+  return item.entry.hskLevel ?? 0
 }
 
 function kindOrder(item: StudyItem): number {
