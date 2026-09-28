@@ -4,6 +4,8 @@ import { Button } from '../components/ui/Button.tsx'
 import { ButtonLink } from '../components/ui/ButtonLink.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
+import { CustomNotesView } from '../features/customSets/components/CustomNotesView.tsx'
+import { useCustomSet } from '../features/customSets/customSetsContext.ts'
 import { hskDictionary, hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItemId, type StudyItem } from '../features/dictionary/studyItem.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
@@ -148,6 +150,8 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
 /** Learn: presenta elementos del set que aún no se han aprendido. */
 function LearnPractice({ set }: { set: StudySet }) {
   const { progress, introduceItem } = useProgress()
+  // En un set propio, las notas del usuario acompañan a la ficha
+  const customSet = useCustomSet(set.type === 'custom' ? set.id : undefined)
   const { sessionSize } = useSettings().settings
   const markStudied = useMarkSetStudied(set)
 
@@ -175,6 +179,7 @@ function LearnPractice({ set }: { set: StudySet }) {
         introduceItem(getStudyItemId(item))
         markStudied(session.id)
       }}
+      renderExtra={customSet && ((item) => <CustomNotesView set={customSet} item={item} />)}
       summaryActions={
         <>
           <ButtonLink to={getSetSessionPath(set, 'study')} variant="secondary">

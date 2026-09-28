@@ -38,6 +38,7 @@ Dependencias previstas para fases siguientes (se añadirán cuando se necesiten,
 | 3 | `react-router` | Rutas reales (`/characters/好`), botón atrás del navegador y enlaces compartibles. Escribirlo a mano sería reinventar algo estándar. |
 | Integración de datos | `hanzi-writer` (MIT) | Animación del orden de trazos en la ficha del carácter. Se carga con `import()` solo al abrir una ficha. Más adelante servirá para la práctica de escritura. |
 | Integración de datos | `hanzi-writer-data` (Arphic PL, solo desarrollo) | Datos de trazos que el build copia a `public/strokes/`. |
+| Sets propios | `pinyin-pro` 3.29.4 (MIT), versión fija | Pinyin de las frases del usuario. Determinista, con diccionario de palabras para los polifónicos. Se carga con `import()` solo al guardar una frase. |
 
 Descartado a propósito: Redux/Zustand (React Context + hooks basta), i18next
 (un diccionario tipado propio basta para 3 idiomas), librerías de componentes
@@ -81,7 +82,7 @@ Cuatro secciones en la navegación principal; Progreso y Ajustes cuelgan del per
 | Sección | Ruta | Contenido |
 | --- | --- | --- |
 | Home | `/` | Progreso general, racha, repasos pendientes, sets que se estudian. |
-| Study | `/study`, `/study/hsk`, `/study/topics` | Pestañas My Studies, HSK y Topics con tarjetas de set. |
+| Study | `/study`, `/study/hsk`, `/study/topics`, `/study/custom` | Pestañas My Studies, HSK, Topics y My sets con tarjetas de set. `/study/custom/new` crea un set. |
 | Set | `/study/sets/:setId` | Acciones Learn y Study con sus cuentas, progreso (dominados, aprendiendo, sin empezar) y vocabulario. |
 | Sesión | `/study/practice?set=:setId&mode=learn` o `&mode=study` | Learn (vocabulario nuevo) o Study (repaso de lo aprendido) de un set; sin `set`, sesión mezclada de todo el vocabulario. Botón Dictionary. |
 | Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Búsqueda global y fichas. `q` y `kind` van en la URL. |
@@ -105,8 +106,7 @@ en varios sets cuenta en todos sin duplicar datos. Dominado = nivel SRS ≥ 4.
   DATA_SOURCES.md, «Sets por temas»). Añadir un tema es añadir un objeto.
 - `validateStudySets` comprueba ids repetidos, sets vacíos y elementos que no
   existen; un test lo pasa sobre los sets de la app.
-- Sets propios (`custom`): el modelo y la validación ya los admiten; falta la
-  interfaz para crearlos.
+- Sets propios (`custom`): los crea el usuario (ver «Sets propios» más abajo).
 
 My Studies (`features/myStudies`) guarda solo qué sets sigue el usuario y la
 última vez que estudió cada uno (`hanzivocab.studies`). Quitar un set no borra
@@ -140,6 +140,37 @@ que no suma a la actividad ni a la racha. Los filtros están en
 La URL fija el contexto de la sesión: `/study/practice?set=hsk-1&mode=learn`
 o `&mode=study`. El elemento actual y las respuestas viven en el estado del
 componente de la sesión, que sigue montado mientras el diccionario está abierto.
+
+### Sets propios
+
+`features/customSets` guarda los sets del usuario en localStorage
+(`hanzivocab.customSets`, con versión). Un `CustomSet` es JSON puro: nombre,
+descripción, ids de elementos del diccionario y las notas del usuario. `useStudySets()`
+los convierte en `StudySet` de tipo `custom` y los junta con los de la app,
+así que tarjetas, progreso, Learn, Study y My Studies funcionan igual.
+`CustomSetsProvider` es el único sitio que sabe dónde se guardan: para usar
+un servidor más adelante basta con cambiarlo.
+
+- **Vocabulario**: se busca con la misma búsqueda del diccionario y se guarda
+  el id. Nunca se copian ni se editan hanzi, pinyin, significados o trazos.
+  De momento solo hay elementos de HSK 1-4, porque es el dataset que existe.
+- **Significado propio**: `meanings[itemId]` dentro del set. La ficha oficial
+  no cambia; el mismo elemento en otro set tiene sus propias notas. Quitar el
+  elemento del set borra sus notas en ese set.
+- **Frases propias**: `sentences` dentro del set, cada una con `id`, el
+  `itemId` al que acompaña, el chino que escribió el usuario y los `tokens`
+  generados (pinyin y tono por carácter, puntuación aparte). El pinyin se
+  guarda: mostrar una frase no necesita el motor.
+- **Pinyin automático** (`pinyinEngine.ts`): `pinyin-pro` con su diccionario
+  de palabras y los cambios de tono de 一/不. Un carácter con varias lecturas
+  solo se da por seguro si el motor lo lee dentro de una palabra o si coincide
+  con la lectura del dataset en ese punto (la palabra más larga del dataset que
+  empieza ahí, sin homógrafos). Si no, queda marcado como dudoso, sin color, y
+  el usuario elige entre las lecturas posibles; nunca escribe pinyin a mano.
+- **Colores**: los mismos de toda la app (`TONE_TEXT_CLASSES`). Sin color la
+  puntuación y los caracteres dudosos; el pinyin siempre visible.
+- La ficha del diccionario abierta desde un set propio (`?set=custom-...`)
+  añade una tarjeta «My notes in …»; en Learn, las notas van bajo la ficha.
 
 ### Diccionario dentro de la sesión
 

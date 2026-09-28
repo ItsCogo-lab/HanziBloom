@@ -17,6 +17,8 @@ type LearnSessionProps = {
   onLearned: (item: StudyItem) => void
   /** Acciones del resumen final (p. ej. repasar lo aprendido). */
   summaryActions: ReactNode
+  /** Contenido extra bajo la ficha, p. ej. las notas del usuario en un set propio. */
+  renderExtra?: (item: StudyItem) => ReactNode
 }
 
 /**
@@ -24,7 +26,14 @@ type LearnSessionProps = {
  * (la misma del diccionario) y el usuario confirma cuáles ha aprendido. No
  * hay preguntas: eso es Study.
  */
-export function LearnSession({ items, dictionary, dictionaryItems, onLearned, summaryActions }: LearnSessionProps) {
+export function LearnSession({
+  items,
+  dictionary,
+  dictionaryItems,
+  onLearned,
+  summaryActions,
+  renderExtra,
+}: LearnSessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [learned, setLearned] = useState<readonly StudyItem[]>([])
   const item = items[currentIndex]
@@ -76,6 +85,7 @@ export function LearnSession({ items, dictionary, dictionaryItems, onLearned, su
           </p>
           {/* key: cada elemento empieza con su ficha desde arriba */}
           <EntryDetails key={getStudyItemId(item)} item={item} dictionary={dictionary} opener={{ onOpen: lookUp }} />
+          {renderExtra?.(item)}
           <div className="sticky bottom-14 -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 md:bottom-0">
             <Button variant="secondary" onClick={() => next(false)}>
               {t('learn.skip')}

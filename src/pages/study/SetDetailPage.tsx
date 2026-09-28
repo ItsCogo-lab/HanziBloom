@@ -87,7 +87,10 @@ export function SetDetailPage() {
             {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
           </>
         )}
-        <Link to="/study" className="self-start text-accent-strong underline underline-offset-2">
+        <Link
+          to={set.type === 'custom' ? '/study/custom' : '/study'}
+          className="self-start text-accent-strong underline underline-offset-2"
+        >
           {t('sets.backToStudy')}
         </Link>
       </div>
