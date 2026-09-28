@@ -1,4 +1,4 @@
-import type { Character, Word } from './types.ts'
+import type { Character, ExampleSet, Word } from './types.ts'
 
 /*
  * Datos pequeños SOLO para tests. El dataset real de HSK 1 llegará en la
@@ -45,4 +45,21 @@ export const ningmengWord: Word = {
   meanings: { en: ['lemon'] },
   hskLevel: 1,
   traditional: '檸檬',
+}
+
+/** Un archivo de ejemplos con la frase real de Tatoeba 8934441 (CC BY 2.0 FR). */
+export const testExampleSet: ExampleSet = {
+  source: 'Tatoeba',
+  license: 'CC BY 2.0 FR',
+  exportDate: '2026-09-26',
+  sentences: [
+    {
+      tatoebaId: 8934441,
+      zh: '柠檬很酸。',
+      author: 'iiujik',
+      en: 'Lemon is sour.',
+      translationTatoebaId: 29487,
+      words: ['柠檬'],
+    },
+  ],
 }

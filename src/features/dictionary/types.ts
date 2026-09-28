@@ -72,3 +72,30 @@ export interface Word {
   /** Posición en una lista de frecuencia (1 = la más frecuente). */
   frequencyRank?: number
 }
+
+/**
+ * Una frase de ejemplo de Tatoeba con su traducción al inglés. Se guardan
+ * los ids y autores de las dos frases para poder atribuirlas y enlazarlas.
+ */
+export interface ExampleSentence {
+  tatoebaId: number
+  zh: string
+  /** Usuario de Tatoeba que escribió la frase en chino. */
+  author: string
+  en: string
+  translationTatoebaId: number
+  /** Autor de la traducción; algunas traducciones antiguas no tienen (huérfanas). */
+  translationAuthor?: string
+  /** Palabras del dataset para las que se eligió la frase como ejemplo. */
+  words: string[]
+}
+
+/** Archivo de ejemplos de un nivel (public/examples/hsk1.json). */
+export interface ExampleSet {
+  source: 'Tatoeba'
+  /** Todas las frases de Tatoeba tienen esta licencia (algunas, además, CC0). */
+  license: 'CC BY 2.0 FR'
+  /** Fecha de la exportación de Tatoeba usada, "2026-09-26". */
+  exportDate: string
+  sentences: ExampleSentence[]
+}

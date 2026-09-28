@@ -10,9 +10,11 @@
  * El script no inventa nada: si algo no cuadra, se detiene y dice qué.
  * Fuentes y licencias en docs/DATA_SOURCES.md.
  */
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createReadStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createInterface } from 'node:readline'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import type { ExampleSet } from '../../src/features/dictionary/types.ts'
 import { validateDictionaryData } from '../../src/features/dictionary/validation.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import { buildBaseEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
@@ -20,6 +22,7 @@ import { createCedictIndex } from './sources/cedict.ts'
 import { readStrokeData, type StrokeData } from './sources/hanziWriter.ts'
 import { parseHskList } from './sources/hsk.ts'
 import { parseMakeMeAHanzi } from './sources/makemeahanzi.ts'
+import { parseLinkLine, parseSentenceLine, selectExamples, type TatoebaSentence } from './sources/tatoeba.ts'
 import { loadUnihan } from './sources/unihan.ts'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -27,6 +30,7 @@ const cacheDir = join(scriptDir, '.cache')
 const rootDir = join(scriptDir, '../..')
 const outputDir = join(rootDir, 'src/data/hsk1')
 const strokesDir = join(rootDir, 'public/strokes')
+const examplesDir = join(rootDir, 'public/examples')
 const conflictsReport = join(rootDir, 'docs/DATA_CONFLICTS.md')
 const hanziWriterDataDir = join(rootDir, 'node_modules/hanzi-writer-data')
 
@@ -47,12 +51,21 @@ for (const source of skippedSources) {
 
 /** Lee un archivo descargado por data:fetch, o se detiene explicando qué falta. */
 function readSource(file: string): string {
+  return readFileSync(sourcePath(file), 'utf8')
+}
+
+function sourcePath(file: string): string {
   const path = join(cacheDir, file)
   if (!existsSync(path)) {
     console.error(`Falta ${path}. Ejecuta "npm run data:fetch" (ver docs/DATA_SOURCES.md).`)
     process.exit(1)
   }
-  return readFileSync(path, 'utf8')
+  return path
+}
+
+/** Lee un archivo grande línea a línea (las frases en inglés de Tatoeba ocupan cientos de MB). */
+async function* readLines(file: string): AsyncGenerator<string> {
+  yield* createInterface({ input: createReadStream(sourcePath(file), 'utf8'), crlfDelay: Infinity })
 }
 
 // --- Fuentes base: lista HSK + CC-CEDICT ----------------------------------
@@ -99,6 +112,42 @@ const characters = base.characters.map((character) => {
   return enrichCharacter(character, sources)
 })
 
+// --- Tatoeba: frases de ejemplo --------------------------------------------
+
+let examples: ExampleSet | undefined
+if (!skippedSources.has('tatoeba')) {
+  const chinese = new Map<number, TatoebaSentence>()
+  for await (const line of readLines('tatoeba/cmn_sentences_detailed.tsv')) {
+    const sentence = parseSentenceLine(line)
+    if (sentence) chinese.set(sentence.id, sentence)
+  }
+  const translations = new Map<number, number[]>()
+  for await (const line of readLines('tatoeba/cmn-eng_links.tsv')) {
+    const link = parseLinkLine(line)
+    if (!link || !chinese.has(link[0])) continue
+    translations.set(link[0], [...(translations.get(link[0]) ?? []), link[1]])
+  }
+  // Del inglés solo se guardan las frases enlazadas con alguna china
+  const wantedEnglish = new Set([...translations.values()].flat())
+  const english = new Map<number, TatoebaSentence>()
+  for await (const line of readLines('tatoeba/eng_sentences_detailed.tsv')) {
+    const sentence = parseSentenceLine(line)
+    if (sentence && wantedEnglish.has(sentence.id)) english.set(sentence.id, sentence)
+  }
+  examples = {
+    source: 'Tatoeba',
+    license: 'CC BY 2.0 FR',
+    exportDate: readSource('tatoeba/export-date.txt').trim(),
+    sentences: selectExamples({
+      words: words.map((word) => word.hanzi),
+      knownCharacters: hanziSet,
+      chinese,
+      english,
+      translations,
+    }),
+  }
+}
+
 // --- Validación y escritura ----------------------------------------------
 
 problems.push(...validateDictionaryData(characters, words))
@@ -134,6 +183,12 @@ rmSync(strokesDir, { recursive: true, force: true })
 mkdirSync(strokesDir, { recursive: true })
 for (const [hanzi, data] of strokeData) writeFileSync(join(strokesDir, strokeFileName(hanzi)), data.json)
 
+// Ejemplos: un JSON por nivel, que la ficha pide al abrirse.
+if (examples) {
+  mkdirSync(examplesDir, { recursive: true })
+  writeFileSync(join(examplesDir, 'hsk1.json'), `${JSON.stringify(examples, null, 1)}\n`)
+}
+
 writeFileSync(
   conflictsReport,
   `# Desacuerdos entre fuentes
@@ -150,6 +205,7 @@ ${conflicts.length === 0 ? 'Ninguno.' : conflicts.map((conflict) => `- ${conflic
 
 console.log(`Dataset HSK 1 generado: ${words.length} palabras y ${characters.length} caracteres.`)
 console.log(`Trazos copiados a public/strokes: ${strokeData.size}.`)
+if (examples) console.log(`Frases de ejemplo de Tatoeba (${examples.exportDate}): ${examples.sentences.length}.`)
 if (conflicts.length > 0) {
   console.warn(`${conflicts.length} desacuerdos entre fuentes (ver docs/DATA_CONFLICTS.md):\n- ${conflicts.join('\n- ')}`)
 }

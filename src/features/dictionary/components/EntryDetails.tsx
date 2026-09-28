@@ -6,6 +6,7 @@ import { formatPinyin, getMeanings, getTraditionalForms, type Dictionary } from 
 import { getRelatedItems, getStudyItemId, type StudyItem } from '../studyItem.ts'
 import { CharacterFacts } from './CharacterFacts.tsx'
 import { EntryLabel } from './EntryLabel.tsx'
+import { ExampleSentences } from './ExampleSentences.tsx'
 import { StrokeOrder } from './StrokeOrder.tsx'
 
 type EntryDetailsProps = {
@@ -83,6 +84,8 @@ export function EntryDetails({ item, dictionary, getHref }: EntryDetailsProps) {
           )}
         </section>
       )}
+
+      <ExampleSentences item={item} />
     </Card>
   )
 }

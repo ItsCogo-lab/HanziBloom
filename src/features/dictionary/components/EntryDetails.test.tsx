@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getEntryPath } from '../../../pages/entryPaths.ts'
 import { renderWithProviders } from '../../../test/renderWithProviders.tsx'
 import { createDictionary } from '../dictionary.ts'
-import { ningCharacter, ningmengWord, testCharacters, testWords } from '../testData.ts'
+import { ningCharacter, ningmengWord, testCharacters, testExampleSet, testWords } from '../testData.ts'
 import { EntryDetails } from './EntryDetails.tsx'
 
 const dictionary = createDictionary([...testCharacters, ningCharacter], [...testWords, ningmengWord])
@@ -12,6 +12,15 @@ function renderCharacter(entry = ningCharacter) {
   return renderWithProviders(
     <EntryDetails item={{ kind: 'character', entry }} dictionary={dictionary} getHref={getEntryPath} />,
   )
+}
+
+/** Simula el servidor: responde con `files[ruta]` o con un 404. */
+function stubFetch(files: Record<string, unknown>) {
+  const fetchMock = vi.fn(async (url: string) =>
+    url in files ? new Response(JSON.stringify(files[url])) : new Response('', { status: 404 }),
+  )
+  vi.stubGlobal('fetch', fetchMock)
+  return fetchMock
 }
 
 /** Valor de una fila "etiqueta → valor" de la ficha. */
@@ -76,8 +85,7 @@ describe('EntryDetails de un carácter', () => {
 
   it('muestra el orden de trazos cuando hay datos', async () => {
     const strokes = { strokes: ['M 0 0 L 10 10'], medians: [[[0, 0], [10, 10]]] }
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify(strokes)))
-    vi.stubGlobal('fetch', fetchMock)
+    const fetchMock = stubFetch({ '/strokes/67e0.json': strokes })
     renderCharacter()
 
     expect(await screen.findByRole('heading', { name: 'Stroke order' })).toBeInTheDocument()
@@ -85,11 +93,26 @@ describe('EntryDetails de un carácter', () => {
   })
 
   it('no muestra el orden de trazos si no se pueden cargar', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
+    const fetchMock = stubFetch({})
     renderCharacter()
 
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalled())
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     expect(screen.queryByRole('heading', { name: 'Stroke order' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Example sentences' })).not.toBeInTheDocument()
+  })
+
+  it('muestra las frases de ejemplo de Tatoeba con su atribución', async () => {
+    stubFetch({ '/examples/hsk1.json': testExampleSet })
+    renderCharacter()
+
+    expect(await screen.findByRole('heading', { name: 'Example sentences' })).toBeInTheDocument()
+    expect(screen.getByText('柠檬很酸。')).toBeInTheDocument()
+    expect(screen.getByText('Lemon is sour.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toHaveAttribute(
+      'href',
+      'https://tatoeba.org/en/sentences/show/8934441',
+    )
+    expect(screen.getByText(/licensed CC BY 2.0 FR/)).toBeInTheDocument()
   })
 })
 

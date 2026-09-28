@@ -32,4 +32,15 @@ unzip -o -q Unihan.zip Unihan_IRGSources.txt Unihan_Variants.txt -d unihan
 rm Unihan.zip
 curl -sSfL -o unihan/CJKRadicals.txt "https://www.unicode.org/Public/${UNICODE_VERSION}/ucd/CJKRadicals.txt"
 
+# Tatoeba: frases en chino y en inglés y sus enlaces. Licencia CC BY 2.0 FR.
+# Tatoeba publica una exportación nueva cada semana y no guarda las antiguas,
+# así que se anota la fecha de descarga junto a los archivos.
+# tatoeba.org tampoco es accesible desde el entorno en la nube de Claude.
+TATOEBA_EXPORTS=https://downloads.tatoeba.org/exports/per_language
+mkdir -p tatoeba
+for file in cmn/cmn_sentences_detailed cmn/cmn-eng_links eng/eng_sentences_detailed; do
+  curl -sSfL "${TATOEBA_EXPORTS}/${file}.tsv.bz2" | bunzip2 > "tatoeba/$(basename "$file").tsv"
+done
+date -u +%Y-%m-%d > tatoeba/export-date.txt
+
 echo "Fuentes descargadas en $CACHE_DIR"
