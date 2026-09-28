@@ -5,7 +5,8 @@ import { Card } from '../../components/ui/Card.tsx'
 import { PageHeader } from '../../components/ui/PageHeader.tsx'
 import { StatCard } from '../../components/ui/StatCard.tsx'
 import { EntryLabel } from '../../features/dictionary/components/EntryLabel.tsx'
-import { hskDictionary } from '../../features/dictionary/hskDictionary.ts'
+import { LoadEntries } from '../../features/dictionary/components/LoadEntries.tsx'
+import { useDictionary } from '../../features/dictionary/dictionaryContext.ts'
 import { getStudyItemId, type StudyItem } from '../../features/dictionary/studyItem.ts'
 import { isStudying } from '../../features/myStudies/myStudies.ts'
 import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
@@ -33,6 +34,7 @@ const PAGE_SIZE = 100
 /** Página de un set: progreso, acciones y su vocabulario. */
 export function SetDetailPage() {
   const { setId = '' } = useParams()
+  const dictionary = useDictionary()
   const { progress } = useProgress()
   const { myStudies } = useMyStudies()
   const studySets = useStudySets()
@@ -40,7 +42,7 @@ export function SetDetailPage() {
   if (!set) return <NotFoundPage />
 
   const setProgress = getSetProgress(set, progress, new Date())
-  const items = getSetItems(set, hskDictionary)
+  const items = getSetItems(set, dictionary)
   const words = items.filter((item) => item.kind === 'word')
   const characters = items.filter((item) => item.kind === 'character')
 
@@ -75,7 +77,10 @@ export function SetDetailPage() {
 
         {set.type === 'custom' ? (
           <>
-            <CustomItemList set={set} items={items} />
+            {/* Puede tener palabras de fuera de HSK, que se cargan la primera vez */}
+            <LoadEntries itemIds={set.itemIds}>
+              <CustomItemList set={set} items={items} />
+            </LoadEntries>
             <Card>
               <AddVocabulary set={set} />
             </Card>

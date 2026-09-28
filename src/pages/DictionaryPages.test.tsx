@@ -102,9 +102,9 @@ describe('EntryDetailPage', () => {
     expect(screen.getByText('Next review').nextElementSibling).toHaveTextContent('Now')
   })
 
-  it('una entrada que no existe muestra «Page not found»', () => {
+  it('una entrada que no existe muestra «Page not found» después de buscarla en el diccionario completo', async () => {
     renderWithProviders(<AppRoutes />, { path: '/characters/不存在' })
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()
   })
 })

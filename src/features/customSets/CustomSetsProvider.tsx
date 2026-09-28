@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { KeyValueStorage } from '../../lib/storage.ts'
-import { hskDictionary } from '../dictionary/hskDictionary.ts'
+import { useDictionaryStore } from '../dictionary/dictionaryContext.ts'
 import { getStudyItem } from '../dictionary/studyItem.ts'
 import {
   addItem,
@@ -28,6 +28,7 @@ type CustomSetsProviderProps = {
  */
 export function CustomSetsProvider({ children, storage }: CustomSetsProviderProps) {
   const [customSets, setCustomSets] = useState(() => loadCustomSets(storage))
+  const dictionaryStore = useDictionaryStore()
 
   useEffect(() => {
     saveCustomSets(customSets, storage)
@@ -45,9 +46,9 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
       },
       updateDetails: (setId, details) => update(setId, (set) => ({ ...set, ...details })),
       deleteSet: (setId) => setCustomSets((current) => deleteCustomSet(current, setId)),
-      // Solo se añaden elementos que existen en el diccionario
+      // Solo se añaden elementos que existen en el diccionario (ya cargados: se han encontrado al buscar)
       addItem: (setId, itemId) => {
-        if (getStudyItem(hskDictionary, itemId)) update(setId, (set) => addItem(set, itemId))
+        if (getStudyItem(dictionaryStore.getSnapshot(), itemId)) update(setId, (set) => addItem(set, itemId))
       },
       removeItem: (setId, itemId) => update(setId, (set) => removeItem(set, itemId)),
       setMeaning: (setId, itemId, meaning) => update(setId, (set) => setMeaning(set, itemId, meaning)),
@@ -60,7 +61,7 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
         update(setId, (set) => updateSentence(set, sentenceId, new Date(), change)),
       deleteSentence: (setId, sentenceId) => update(setId, (set) => deleteSentence(set, sentenceId)),
     }
-  }, [customSets])
+  }, [customSets, dictionaryStore])
 
   return <CustomSetsContext value={value}>{children}</CustomSetsContext>
 }

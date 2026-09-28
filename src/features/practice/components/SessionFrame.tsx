@@ -3,7 +3,6 @@ import { Button } from '../../../components/ui/Button.tsx'
 import { ProgressBar } from '../../../components/ui/ProgressBar.tsx'
 import { t } from '../../../i18n/index.ts'
 import { DictionaryPanel } from '../../dictionary/components/DictionaryPanel.tsx'
-import type { Dictionary } from '../../dictionary/dictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 
 type SessionFrameProps = {
@@ -11,9 +10,6 @@ type SessionFrameProps = {
   progressText: string
   value: number
   max: number
-  dictionary: Dictionary
-  /** Lo que se puede buscar en el diccionario de la sesión (todo el dataset). */
-  dictionaryItems: readonly StudyItem[]
   /** El contenido recibe `lookUp` para abrir la ficha de un elemento en el panel. */
   children: (lookUp: (item: StudyItem) => void) => ReactNode
 }
@@ -23,7 +19,7 @@ type SessionFrameProps = {
  * panel del diccionario. El panel se abre encima de la sesión: el contenido
  * sigue montado debajo, con su estado, y al cerrar todo sigue igual.
  */
-export function SessionFrame({ progressText, value, max, dictionary, dictionaryItems, children }: SessionFrameProps) {
+export function SessionFrame({ progressText, value, max, children }: SessionFrameProps) {
   const [dictionaryOpen, setDictionaryOpen] = useState<{ item?: StudyItem }>()
   const dictionaryButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -62,8 +58,6 @@ export function SessionFrame({ progressText, value, max, dictionary, dictionaryI
         <DictionaryPanel
           // key: consultar otro elemento abre su ficha aunque el panel ya estuviera abierto
           key={dictionaryOpen.item ? getStudyItemId(dictionaryOpen.item) : 'search'}
-          dictionary={dictionary}
-          items={dictionaryItems}
           initialItem={dictionaryOpen.item}
           onClose={closeDictionary}
         />

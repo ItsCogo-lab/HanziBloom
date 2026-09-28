@@ -59,6 +59,17 @@ describe('searchItems', () => {
     expect(getSearchRank(testWords[0]!, 'hello')).toBeLessThan(getSearchRank(testWords[0]!, 'hell')!)
   })
 
+  it('pone lo que está en HSK antes que el resto del diccionario', () => {
+    const outside = { kind: 'word' as const, entry: { id: '苹果[Píng guǒ]', hanzi: '苹果', pinyin: 'Píng guǒ', meanings: { en: ['Apple (American tech company)'] } } }
+    const results = searchItems([outside, ...hskStudyItems], 'apple')
+    expect(results.map((item) => item.entry.id).slice(0, 2)).toEqual(['苹果', '苹果[Píng guǒ]'])
+  })
+
+  it('una coincidencia exacta va antes que una parcial de fuera de HSK', () => {
+    const banke = { kind: 'word' as const, entry: { id: '版刻', hanzi: '版刻', pinyin: 'bǎn kè', meanings: { en: ['carving'] } } }
+    expect(searchItems([banke, ...hskStudyItems], 'bank')[0]?.entry.hanzi).toBe('银行')
+  })
+
   it('sin coincidencias devuelve una lista vacía', () => {
     expect(searchItems(hskStudyItems, 'zzzz')).toEqual([])
     expect(searchItems(hskStudyItems, '   ')).toEqual([])

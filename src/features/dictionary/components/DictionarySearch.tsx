@@ -1,6 +1,7 @@
-import { useId, useState, type Ref } from 'react'
+import { useDeferredValue, useId, useMemo, useState, type Ref } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
+import { useDictionaryStore, useSearchableItems } from '../dictionaryContext.ts'
 import { searchItems } from '../search.ts'
 import { getStudyItemId, type StudyItem } from '../studyItem.ts'
 import { EntryLabel } from './EntryLabel.tsx'
@@ -10,21 +11,24 @@ import { EntryLink, type EntryOpener } from './EntryLink.tsx'
 const PAGE_SIZE = 50
 
 type DictionarySearchProps = {
-  items: readonly StudyItem[]
+  /** Solo caracteres o solo palabras; sin él, los dos. */
+  kind?: StudyItem['kind']
   query: string
   onQueryChange: (query: string) => void
   opener: EntryOpener
-  /** Sin búsqueda, lista todo (la página) o no muestra nada (el panel de estudio). */
+  /** Sin búsqueda, lista HSK 1-4 (la página) o no muestra nada (el panel de estudio). */
   listAllWhenEmpty?: boolean
   inputRef?: Ref<HTMLInputElement>
 }
 
 /**
  * Buscador del diccionario: hanzi, pinyin (con o sin tonos) o inglés. Lo usan
- * la página Dictionary y el panel de las sesiones de estudio. Todo es local.
+ * la página Dictionary y el panel de las sesiones de estudio. Todo es local:
+ * al empezar a buscar se descarga el diccionario completo (una vez) y, hasta
+ * que llega, se busca en HSK 1-4.
  */
 export function DictionarySearch({
-  items,
+  kind,
   query,
   onQueryChange,
   opener,
@@ -33,7 +37,15 @@ export function DictionarySearch({
 }: DictionarySearchProps) {
   const inputId = useId()
   const hasQuery = query.trim() !== ''
-  const results = hasQuery ? searchItems(items, query) : listAllWhenEmpty ? items : []
+  const { baseItems } = useDictionaryStore()
+  const searchable = useSearchableItems(hasQuery)
+  // Con más de 100.000 entradas, buscar lleva un momento: el campo de texto no espera
+  const deferredQuery = useDeferredValue(query)
+  const results = useMemo(() => {
+    const ofKind = (items: readonly StudyItem[]) => (kind ? items.filter((item) => item.kind === kind) : items)
+    if (deferredQuery.trim() !== '') return searchItems(ofKind(searchable.items), deferredQuery)
+    return listAllWhenEmpty ? ofKind(baseItems) : []
+  }, [searchable.items, baseItems, kind, deferredQuery, listAllWhenEmpty])
   // El número de resultados visibles vuelve a PAGE_SIZE con cada búsqueda nueva
   const [shown, setShown] = useState({ query, count: PAGE_SIZE })
   const count = shown.query === query ? shown.count : PAGE_SIZE
@@ -64,6 +76,11 @@ export function DictionarySearch({
         </p>
       )}
       {!hasQuery && !listAllWhenEmpty && <p className="text-sm text-ink-muted">{t('dictionary.typeToSearch')}</p>}
+      {hasQuery && searchable.status !== 'complete' && (
+        <p className="text-sm text-ink-muted" role="status">
+          {t(searchable.status === 'loading' ? 'dictionary.loadingFull' : 'dictionary.fullUnavailable')}
+        </p>
+      )}
 
       {results.length > 0 && (
         <ul

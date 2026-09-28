@@ -92,9 +92,11 @@ function escapeRegExp(text: string): string {
 }
 
 /**
- * Busca en el diccionario y ordena por lo bien que coincide (getSearchRank).
- * A igual coincidencia, primero lo que está en HSK 1-4, luego los caracteres
- * antes que las palabras, y cada grupo por nivel HSK, en el orden del dataset.
+ * Busca en el diccionario y ordena: primero las coincidencias exactas y
+ * luego las parciales (tier); dentro de cada grupo, lo que está en HSK 1-4
+ * antes que el resto, y después por lo bien que coincide (getSearchRank), los
+ * caracteres antes que las palabras, el nivel HSK (fuera de HSK, las más
+ * cortas primero) y el orden del dataset.
  */
 export function searchItems(items: readonly StudyItem[], query: string, limit = Infinity): StudyItem[] {
   const rankOf = createMatcher(query)
@@ -103,14 +105,25 @@ export function searchItems(items: readonly StudyItem[], query: string, limit = 
     .filter((result) => result.rank !== undefined)
     .sort(
       (a, b) =>
-        a.rank! - b.rank! ||
+        tier(a.rank!) - tier(b.rank!) ||
         outsideHsk(a.item) - outsideHsk(b.item) ||
+        a.rank! - b.rank! ||
         kindOrder(a.item) - kindOrder(b.item) ||
         levelOrder(a.item) - levelOrder(b.item) ||
+        lengthOutsideHsk(a.item) - lengthOutsideHsk(b.item) ||
         a.index - b.index,
     )
     .slice(0, limit)
     .map((result) => result.item)
+}
+
+/**
+ * Coincidencias exactas (hanzi, pinyin o significado entero: 0, 3 y 6)
+ * antes que las parciales. Así «bank» da primero 银行 y no palabras cuyo
+ * pinyin empieza por «bank» (版刻 bǎn kè).
+ */
+function tier(rank: number): number {
+  return rank === 0 || rank === 3 || rank === 6 ? 0 : 1
 }
 
 /** Lo que está en HSK 1-4 va antes que el resto del diccionario. */
@@ -120,6 +133,11 @@ function outsideHsk(item: StudyItem): number {
 
 function levelOrder(item: StudyItem): number {
   return item.entry.hskLevel ?? 0
+}
+
+/** Fuera de HSK, las palabras cortas primero: suelen ser las más comunes. */
+function lengthOutsideHsk(item: StudyItem): number {
+  return item.entry.hskLevel === undefined ? item.entry.hanzi.length : 0
 }
 
 function kindOrder(item: StudyItem): number {

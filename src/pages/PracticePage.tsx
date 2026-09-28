@@ -6,7 +6,9 @@ import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { CustomNotesView } from '../features/customSets/components/CustomNotesView.tsx'
 import { useCustomSet } from '../features/customSets/customSetsContext.ts'
-import { hskDictionary, hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { LoadEntries } from '../features/dictionary/components/LoadEntries.tsx'
+import { useDictionary } from '../features/dictionary/dictionaryContext.ts'
+import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItemId, type StudyItem } from '../features/dictionary/studyItem.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { LearnSession } from '../features/practice/components/LearnSession.tsx'
@@ -56,17 +58,21 @@ export function PracticePage() {
       <div className="mb-6">
         <SessionTypeLabel type={mode} />
       </div>
-      {mode === 'learn' ? (
-        <LearnPractice key={`${set.id}:learn`} set={set} />
-      ) : (
-        <StudyPractice key={`${set.id}:study:${reviewAll}`} set={set} reviewAll={reviewAll} />
-      )}
+      {/* Un set propio puede tener palabras de fuera de HSK: la sesión empieza cuando están cargadas */}
+      <LoadEntries itemIds={set.itemIds}>
+        {mode === 'learn' ? (
+          <LearnPractice key={`${set.id}:learn`} set={set} />
+        ) : (
+          <StudyPractice key={`${set.id}:study:${reviewAll}`} set={set} reviewAll={reviewAll} />
+        )}
+      </LoadEntries>
     </>
   )
 }
 
 /** Sesión mezclada de todo el vocabulario (repasos pendientes y nuevos). */
 function Practice() {
+  const dictionary = useDictionary()
   const { progress, recordAnswer } = useProgress()
   const { sessionSize } = useSettings().settings
   // useState con función: la sesión se crea una vez al entrar, no en cada render.
@@ -80,8 +86,7 @@ function Practice() {
       <PracticeSession
         key={session.id}
         exercises={session.exercises}
-        dictionary={hskDictionary}
-        dictionaryItems={hskStudyItems}
+        dictionary={dictionary}
         onResult={(result) => recordAnswer(result.itemId, result.correct)}
         onRestart={() => setSession(createPracticeSession(hskStudyItems, progress, sessionSize))}
       />
@@ -106,12 +111,13 @@ function useMarkSetStudied(set: StudySet) {
  * pero nunca se cuela un elemento sin aprender.
  */
 function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }) {
+  const dictionary = useDictionary()
   const { progress, recordAnswer } = useProgress()
   const { sessionSize } = useSettings().settings
   const markStudied = useMarkSetStudied(set)
 
   const createSession = (current: ProgressData) => {
-    const { due, upToDate } = getReviewItems(set, hskDictionary, current, new Date())
+    const { due, upToDate } = getReviewItems(set, dictionary, current, new Date())
     const pool = reviewAll ? [...due, ...upToDate] : due
     return { ...createPracticeSession(pool, current, sessionSize), learnedCount: due.length + upToDate.length }
   }
@@ -135,8 +141,7 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
       <PracticeSession
         key={session.id}
         exercises={session.exercises}
-        dictionary={hskDictionary}
-        dictionaryItems={hskStudyItems}
+        dictionary={dictionary}
         onResult={(result) => {
           recordAnswer(result.itemId, result.correct)
           markStudied(session.id)
@@ -149,6 +154,7 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
 
 /** Learn: presenta elementos del set que aún no se han aprendido. */
 function LearnPractice({ set }: { set: StudySet }) {
+  const dictionary = useDictionary()
   const { progress, introduceItem } = useProgress()
   // En un set propio, las notas del usuario acompañan a la ficha
   const customSet = useCustomSet(set.type === 'custom' ? set.id : undefined)
@@ -157,7 +163,7 @@ function LearnPractice({ set }: { set: StudySet }) {
 
   const createSession = (current: ProgressData) => {
     nextSessionId += 1
-    return { id: nextSessionId, items: getLearnableItems(set, hskDictionary, current).slice(0, sessionSize) }
+    return { id: nextSessionId, items: getLearnableItems(set, dictionary, current).slice(0, sessionSize) }
   }
   const [session, setSession] = useState(() => createSession(progress))
 
@@ -173,8 +179,7 @@ function LearnPractice({ set }: { set: StudySet }) {
     <LearnSession
       key={session.id}
       items={session.items}
-      dictionary={hskDictionary}
-      dictionaryItems={hskStudyItems}
+      dictionary={dictionary}
       onLearned={(item) => {
         introduceItem(getStudyItemId(item))
         markStudied(session.id)

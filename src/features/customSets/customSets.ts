@@ -90,15 +90,15 @@ export function deleteMeaning(set: CustomSet, itemId: StudyItemId): CustomSet {
 
 /**
  * El StudySet que usa el resto de la app (tarjetas, progreso, Learn, Study).
- * `exists` filtra ids que ya no estén en el dataset, para que un dato viejo
- * no rompa una sesión.
+ * Guarda todos los ids: las entradas de fuera de HSK se cargan al abrir el
+ * set, y getSetItems ignora un id que ya no exista en el diccionario.
  */
-export function toStudySet(set: CustomSet, exists: (itemId: StudyItemId) => boolean): StudySet {
+export function toStudySet(set: CustomSet): StudySet {
   return {
     id: set.id,
     type: 'custom',
     name: set.name,
     description: set.description,
-    itemIds: set.itemIds.filter(exists),
+    itemIds: set.itemIds,
   }
 }

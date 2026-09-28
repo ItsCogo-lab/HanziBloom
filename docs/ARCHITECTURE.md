@@ -153,7 +153,8 @@ un servidor más adelante basta con cambiarlo.
 
 - **Vocabulario**: se busca con la misma búsqueda del diccionario y se guarda
   el id. Nunca se copian ni se editan hanzi, pinyin, significados o trazos.
-  De momento solo hay elementos de HSK 1-4, porque es el dataset que existe.
+  Se puede añadir cualquier entrada del diccionario completo, no solo de HSK
+  1-4 (ver «Diccionario completo»).
 - **Significado propio**: `meanings[itemId]` dentro del set. La ficha oficial
   no cambia; el mismo elemento en otro set tiene sus propias notas. Quitar el
   elemento del set borra sus notas en ese set.
@@ -171,6 +172,29 @@ un servidor más adelante basta con cambiarlo.
   puntuación y los caracteres dudosos; el pinyin siempre visible.
 - La ficha del diccionario abierta desde un set propio (`?set=custom-...`)
   añade una tarjeta «My notes in …»; en Learn, las notas van bajo la ficha.
+
+### Diccionario completo
+
+HSK 1-4 va en el bundle (`src/data`), porque lo usan los sets, los ejercicios
+y las estadísticas. El resto de CC-CEDICT (unas 108.000 palabras y 9.900
+caracteres) está en `public/dictionary/`, repartido en 32 archivos por el
+primer carácter (`fullDictionary.ts`), y se pide solo cuando hace falta:
+
+- **`dictionaryStore.ts`**: el diccionario de la interfaz. Empieza con HSK y
+  añade cada trozo que llega; nunca pide uno dos veces. Sigue el contrato de
+  `useSyncExternalStore`, así que la interfaz se vuelve a pintar sola.
+- **`DictionaryProvider`** lo comparte con toda la app. Los tests le pasan un
+  `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
+- **`useLoadItems(itemIds)` / `<LoadEntries>`**: para abrir una ficha, un set
+  propio o una sesión de un set propio, carga los trozos de esos elementos y
+  de sus caracteres. Con elementos de HSK está listo al momento.
+- **`useSearchableItems(active)`**: al escribir la primera búsqueda se cargan
+  los 32 trozos (unos 4,7 MB con gzip, una vez por visita); mientras llegan se
+  busca en HSK y se avisa. Sin búsqueda no se descarga nada.
+- **Orden de los resultados**: coincidencias exactas antes que parciales, y
+  dentro de cada grupo HSK antes que el resto.
+- Las entradas de fuera de HSK no tienen nivel, frases de ejemplo ni
+  animación de trazos: la ficha oculta esas secciones.
 
 ### Diccionario dentro de la sesión
 

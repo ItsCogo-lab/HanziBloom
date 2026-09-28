@@ -51,15 +51,18 @@ describe('sets propios', () => {
     expect(removeItem(set, 'word:苹果').itemIds).toEqual(['word:机场'])
   })
 
-  it('se convierte en un StudySet de tipo custom, sin elementos que ya no existan', () => {
-    const set = { ...createCustomSet({ name: 'Mine', description: '' }, 'custom-a', now), itemIds: ['word:苹果' as const, 'word:xyz' as const] }
+  it('se convierte en un StudySet de tipo custom, con elementos de todo el diccionario', () => {
+    const set = {
+      ...createCustomSet({ name: 'Mine', description: '' }, 'custom-a', now),
+      itemIds: ['word:苹果' as const, 'word:苹果[Píng guǒ]' as const],
+    }
 
-    expect(toStudySet(set, (itemId) => itemId !== 'word:xyz')).toEqual({
+    expect(toStudySet(set)).toEqual({
       id: 'custom-a',
       type: 'custom',
       name: 'Mine',
       description: '',
-      itemIds: ['word:苹果'],
+      itemIds: ['word:苹果', 'word:苹果[Píng guǒ]'],
     })
   })
 })

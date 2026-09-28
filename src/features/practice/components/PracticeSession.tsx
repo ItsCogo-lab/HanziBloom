@@ -1,7 +1,6 @@
 import { useReducer } from 'react'
 import { t } from '../../../i18n/index.ts'
 import type { Dictionary } from '../../dictionary/dictionary.ts'
-import type { StudyItem } from '../../dictionary/studyItem.ts'
 import {
   createExerciseResult,
   createSessionState,
@@ -17,8 +16,6 @@ import { SessionSummary } from './SessionSummary.tsx'
 type PracticeSessionProps = {
   exercises: readonly Exercise[]
   dictionary: Dictionary
-  /** Lo que se puede buscar en el diccionario de la sesión (todo el dataset). */
-  dictionaryItems: readonly StudyItem[]
   /** Se llama con cada respuesta, para guardarla en el progreso al momento. */
   onResult: (result: ExerciseResult) => void
   onRestart: () => void
@@ -28,7 +25,7 @@ type PracticeSessionProps = {
  * Una sesión de práctica: muestra los ejercicios uno a uno y, al terminar,
  * el resumen. Toda la lógica está en session.ts; aquí solo se pinta.
  */
-export function PracticeSession({ exercises, dictionary, dictionaryItems, onResult, onRestart }: PracticeSessionProps) {
+export function PracticeSession({ exercises, dictionary, onResult, onRestart }: PracticeSessionProps) {
   const [state, dispatch] = useReducer(sessionReducer, exercises, createSessionState)
   const exercise = getCurrentExercise(state)
 
@@ -47,8 +44,6 @@ export function PracticeSession({ exercises, dictionary, dictionaryItems, onResu
       progressText={t('practice.progress', { current, total })}
       value={state.currentIndex}
       max={total}
-      dictionary={dictionary}
-      dictionaryItems={dictionaryItems}
     >
       {(lookUp) => (
         // key: cada ejercicio es un componente nuevo, así su estado (p. ej. «revelado») empieza de cero

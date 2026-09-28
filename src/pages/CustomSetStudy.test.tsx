@@ -13,6 +13,7 @@ import { hskDictionary } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItem } from '../features/dictionary/studyItem.ts'
 import { loadProgress } from '../features/progress/storage.ts'
 import type { KeyValueStorage } from '../lib/storage.ts'
+import { createChunkLoader } from '../test/dictionaryChunks.ts'
 import { memoryStorage } from '../test/memoryStorage.ts'
 
 const now = new Date(2026, 8, 28)
@@ -36,7 +37,7 @@ function savedMyChinese(): KeyValueStorage {
 function renderAt(path: string, storage: KeyValueStorage) {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <AppProviders storage={storage}>
+      <AppProviders storage={storage} loadChunk={createChunkLoader()}>
         <AppRoutes />
       </AppProviders>
     </MemoryRouter>,
@@ -109,6 +110,23 @@ describe('Learn y Study con un set propio', () => {
     await user.click(within(panel).getByRole('button', { name: 'Close' }))
 
     expect(screen.getByText('Item 1 of 3')).toBeInTheDocument()
+  })
+
+  it('Learn y Study funcionan con palabras de fuera de HSK', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    saveCustomSets([addItem(createCustomSet({ name: 'Zoo', description: '' }, 'custom-zoo', now), 'word:企鹅')], storage)
+    renderAt('/study/practice?set=custom-zoo&mode=learn', storage)
+
+    expect(await screen.findByText('Item 1 of 1')).toBeInTheDocument()
+    expect(screen.getByText('penguin')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: "I've learned it" }))
+    expect(Object.keys(loadProgress(storage).items)).toEqual(['word:企鹅'])
+
+    await user.click(screen.getByRole('link', { name: 'Review them now' }))
+    expect(await screen.findByText('Card 1 of 1')).toBeInTheDocument()
+    await answerCurrentExercise(user)
+    expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
   })
 
   it('la ficha del diccionario lista el set propio y su contenido oficial no cambia', () => {

@@ -12,7 +12,6 @@ type LearnSessionProps = {
   /** Elementos nuevos que presenta la sesión, en orden. */
   items: readonly StudyItem[]
   dictionary: Dictionary
-  dictionaryItems: readonly StudyItem[]
   /** Se llama al confirmar que un elemento está aprendido, para guardarlo al momento. */
   onLearned: (item: StudyItem) => void
   /** Acciones del resumen final (p. ej. repasar lo aprendido). */
@@ -29,7 +28,6 @@ type LearnSessionProps = {
 export function LearnSession({
   items,
   dictionary,
-  dictionaryItems,
   onLearned,
   summaryActions,
   renderExtra,
@@ -75,8 +73,6 @@ export function LearnSession({
       progressText={progressText}
       value={currentIndex}
       max={items.length}
-      dictionary={dictionary}
-      dictionaryItems={dictionaryItems}
     >
       {(lookUp) => (
         <>

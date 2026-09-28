@@ -4,16 +4,18 @@ import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { AppProviders } from '../../app/AppProviders.tsx'
 import { AppRoutes } from '../../app/AppRoutes.tsx'
-import { loadCustomSets } from '../../features/customSets/storage.ts'
+import { addItem, createCustomSet } from '../../features/customSets/customSets.ts'
+import { loadCustomSets, saveCustomSets } from '../../features/customSets/storage.ts'
 import { hskDictionary } from '../../features/dictionary/hskDictionary.ts'
 import { getStudyItem } from '../../features/dictionary/studyItem.ts'
 import type { KeyValueStorage } from '../../lib/storage.ts'
+import { createChunkLoader } from '../../test/dictionaryChunks.ts'
 import { memoryStorage } from '../../test/memoryStorage.ts'
 
 function renderAt(path: string, storage: KeyValueStorage = memoryStorage()) {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <AppProviders storage={storage}>
+      <AppProviders storage={storage} loadChunk={createChunkLoader()}>
         <AppRoutes />
       </AppProviders>
     </MemoryRouter>,
@@ -32,7 +34,7 @@ async function addWord(user: User, query: string, hanzi: string) {
   const search = screen.getByRole('searchbox', { name: 'Search' })
   await user.clear(search)
   await user.type(search, query)
-  await user.click(screen.getByRole('button', { name: `Add ${hanzi} to this set` }))
+  await user.click(screen.getByRole('button', { name: new RegExp(`^Add ${hanzi} \\(`) }))
 }
 
 function getVocabulary() {
@@ -61,6 +63,40 @@ describe('Sets propios', () => {
     expect(getStudyItem(hskDictionary, 'word:苹果')?.entry.meanings.en[0]).toBe('apple')
   })
 
+  it('añade palabras de fuera de HSK desde el diccionario completo y abre su ficha', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom', storage)
+    await createSet(user, 'Zoo')
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'penguin')
+    await user.click(await screen.findByRole('button', { name: 'Add 企鹅 (qǐ é) to this set' }))
+
+    expect(loadCustomSets(storage)[0]?.itemIds).toEqual(['word:企鹅'])
+    const vocabulary = getVocabulary()
+    expect(within(vocabulary).getByText('penguin')).toBeInTheDocument()
+
+    await user.click(within(vocabulary).getByRole('link', { name: /企鹅/ }))
+    expect(await screen.findByRole('heading', { level: 1, name: '企鹅' })).toBeInTheDocument()
+    // Ficha completa: significado y sus caracteres (también de fuera de HSK), sin nivel HSK
+    expect(screen.getByText('penguin')).toBeInTheDocument()
+    const characters = screen.getByRole('heading', { name: 'Characters' }).parentElement!
+    expect(within(characters).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/characters/%E4%BC%81',
+      '/characters/%E9%B9%85',
+    ])
+    expect(screen.queryByText(/^HSK \d/)).not.toBeInTheDocument()
+  })
+
+  it('al recargar, carga del diccionario completo las palabras de fuera de HSK del set', async () => {
+    const storage = memoryStorage()
+    saveCustomSets([addItem(createCustomSet({ name: 'Zoo', description: '' }, 'custom-zoo', new Date()), 'word:企鹅')], storage)
+    renderAt('/study/sets/custom-zoo', storage)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Loading from the dictionary…')
+    expect(await within(await screen.findByRole('region', { name: 'Vocabulary' })).findByText('penguin')).toBeInTheDocument()
+  })
+
   it('no deja añadir dos veces el mismo elemento', async () => {
     const user = userEvent.setup()
     renderAt('/study/custom')
@@ -68,7 +104,7 @@ describe('Sets propios', () => {
     await addWord(user, 'apple', '苹果')
 
     const results = screen.getByRole('list', { name: 'Results' })
-    expect(within(results).queryByRole('button', { name: 'Add 苹果 to this set' })).not.toBeInTheDocument()
+    expect(within(results).queryByRole('button', { name: 'Add 苹果 (píng guǒ) to this set' })).not.toBeInTheDocument()
     expect(within(results).getByText('In set')).toBeInTheDocument()
   })
 
