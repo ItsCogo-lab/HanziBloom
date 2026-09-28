@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createDictionary } from '../../dictionary/dictionary.ts'
+import { listStudyItems } from '../../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../../dictionary/testData.ts'
 import type { Exercise } from '../types.ts'
+import { hanzi } from '../../../test/hanzi.ts'
+import { renderWithProviders } from '../../../test/renderWithProviders.tsx'
 import { PracticeSession } from './PracticeSession.tsx'
 
 const dictionary = createDictionary(testCharacters, testWords)
@@ -14,11 +16,15 @@ const exercises: Exercise[] = [
   { type: 'flashcard', item: { kind: 'word', entry: testWords[2]! } }, // 谢谢
 ]
 
-function renderSession({ onRestart = () => {}, onResult = () => {} } = {}) {
-  render(
-    <MemoryRouter>
-      <PracticeSession exercises={exercises} dictionary={dictionary} onResult={onResult} onRestart={onRestart} />
-    </MemoryRouter>,
+function renderSession({ onRestart = () => {}, onResult = () => {}, sessionExercises = exercises } = {}) {
+  renderWithProviders(
+    <PracticeSession
+      exercises={sessionExercises}
+      dictionary={dictionary}
+      dictionaryItems={listStudyItems(dictionary)}
+      onResult={onResult}
+      onRestart={onRestart}
+    />,
   )
 }
 
@@ -73,16 +79,7 @@ describe('PracticeSession', () => {
   it('funciona igual con ejercicios de opción múltiple', async () => {
     const user = userEvent.setup()
     const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
-    render(
-      <MemoryRouter>
-        <PracticeSession
-          exercises={[{ type: 'pinyin-choice', item: characters[0]!, options: characters }]} // 你
-          dictionary={dictionary}
-          onResult={() => {}}
-          onRestart={() => {}}
-        />
-      </MemoryRouter>,
-    )
+    renderSession({ sessionExercises: [{ type: 'pinyin-choice', item: characters[0]!, options: characters }] }) // 你
 
     await user.click(screen.getByRole('button', { name: 'hǎo' }))
     await user.click(screen.getByRole('button', { name: 'Continue' }))
@@ -102,5 +99,89 @@ describe('PracticeSession', () => {
 
     await user.click(screen.getByRole('button', { name: 'Practice again' }))
     expect(onRestart).toHaveBeenCalledOnce()
+  })
+})
+
+describe('PracticeSession: diccionario sin salir de la sesión', () => {
+  beforeEach(() => {
+    // Las fichas piden trazos y frases al abrirse; aquí no hay servidor
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  function getPanel() {
+    return screen.getByRole('dialog', { name: 'Dictionary' })
+  }
+
+  it('abre el diccionario, busca un carácter y al cerrar sigue en la misma tarjeta', async () => {
+    const user = userEvent.setup()
+    renderSession()
+    await answer(user, 'I knew it') // pasa a la tarjeta 2: 谢谢
+    await user.click(screen.getByRole('button', { name: 'Show answer' }))
+
+    await user.click(screen.getByRole('button', { name: 'Dictionary' }))
+    const search = within(getPanel()).getByRole('searchbox', { name: 'Search' })
+    expect(search).toHaveFocus()
+
+    await user.type(search, '你')
+    const results = within(getPanel()).getByRole('list', { name: 'Results' })
+    await user.click(within(results).getAllByRole('button')[0]!)
+    // La ficha se abre dentro del panel, sin cambiar de página
+    expect(within(getPanel()).getByRole('heading', { name: 'Meanings' })).toBeInTheDocument()
+    expect(within(getPanel()).getByText(hanzi('你'), { selector: '.text-7xl' })).toBeInTheDocument()
+
+    await user.click(within(getPanel()).getByRole('button', { name: 'Close' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // La sesión sigue exactamente igual: tarjeta 2, con la respuesta revelada
+    expect(screen.getByText('Card 2 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'I knew it' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dictionary' })).toHaveFocus()
+  })
+
+  it('consulta un carácter de la respuesta y al cerrar con Escape la respuesta elegida sigue ahí', async () => {
+    const user = userEvent.setup()
+    const onResult = vi.fn()
+    const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
+    renderSession({ onResult, sessionExercises: [{ type: 'meaning-choice', item: characters[2]!, options: characters }] }) // 谢
+
+    await user.click(screen.getByRole('button', { name: 'good; well' })) // respuesta incorrecta
+    expect(screen.getByText('Not quite')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Look up 谢 in the dictionary' }))
+    expect(within(getPanel()).getByRole('heading', { name: 'Meanings' })).toBeInTheDocument()
+    // Desde la ficha se puede seguir a otra (谢 → 谢谢) sin salir del panel
+    await user.click(within(getPanel()).getByRole('button', { name: /谢谢/ }))
+    expect(within(getPanel()).getByText('thanks')).toBeInTheDocument()
+    await user.click(within(getPanel()).getByRole('button', { name: 'Back' }))
+    expect(within(getPanel()).getByText('to thank')).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Not quite')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /good; well/ })).toBeDisabled()
+    // Consultar no cuenta como respuesta: solo se guarda al pulsar Continue
+    expect(onResult).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(onResult).toHaveBeenCalledWith({ itemId: 'char:谢', exerciseType: 'meaning-choice', correct: false })
+  })
+
+  it('no ofrece consultar el elemento antes de responder, para no dar la respuesta', () => {
+    renderSession()
+    expect(screen.queryByRole('button', { name: /^Look up/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dictionary' })).toBeInTheDocument()
+  })
+
+  it('en una palabra ofrece consultar la palabra y cada carácter', async () => {
+    const user = userEvent.setup()
+    renderSession({ sessionExercises: [{ type: 'flashcard', item: { kind: 'word', entry: testWords[0]! } }] }) // 你好
+    await user.click(screen.getByRole('button', { name: 'Show answer' }))
+
+    for (const target of ['你好', '你', '好']) {
+      expect(screen.getByRole('button', { name: `Look up ${target} in the dictionary` })).toBeInTheDocument()
+    }
   })
 })

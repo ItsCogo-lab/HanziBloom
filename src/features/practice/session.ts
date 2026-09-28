@@ -14,6 +14,12 @@ interface CreateSessionOptions {
   /** Progreso del usuario: decide qué elementos entran en la sesión. */
   progress?: ProgressData
   now?: Date
+  /**
+   * De dónde salen las respuestas incorrectas de las preguntas de opciones.
+   * Por defecto, el mismo `pool`. Al estudiar un set pequeño (un tema de 7
+   * palabras) conviene sacarlas de todo el diccionario.
+   */
+  distractorPool?: readonly StudyItem[]
 }
 
 /**
@@ -29,13 +35,14 @@ export function createSessionExercises(
     definitions = EXERCISE_DEFINITIONS,
     progress = createEmptyProgress(),
     now = new Date(),
+    distractorPool = pool,
   }: CreateSessionOptions = {},
 ): Exercise[] {
   const exercises: Exercise[] = []
   for (const item of selectSessionItems(pool, progress, now, size, random)) {
-    const candidates = definitions.filter((definition) => definition.canBuild(item, pool))
+    const candidates = definitions.filter((definition) => definition.canBuild(item, distractorPool))
     const definition = candidates[Math.floor(random() * candidates.length)]
-    if (definition) exercises.push(definition.build(item, pool, random))
+    if (definition) exercises.push(definition.build(item, distractorPool, random))
   }
   return exercises
 }
