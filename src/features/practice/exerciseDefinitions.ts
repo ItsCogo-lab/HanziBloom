@@ -1,5 +1,6 @@
 import type { StudyItem } from '../dictionary/studyItem.ts'
 import type { RandomFn } from '../../lib/random.ts'
+import { hanziChoiceDefinition, meaningChoiceDefinition, pinyinChoiceDefinition } from './choiceExercises.ts'
 import type { Exercise, FlashcardExercise } from './types.ts'
 
 /**
@@ -23,4 +24,9 @@ export const flashcardDefinition: ExerciseDefinition<FlashcardExercise> = {
 }
 
 /** Tipos de ejercicio disponibles. Añadir uno nuevo = añadir su definición aquí. */
-export const EXERCISE_DEFINITIONS: readonly ExerciseDefinition[] = [flashcardDefinition]
+export const EXERCISE_DEFINITIONS: readonly ExerciseDefinition[] = [
+  flashcardDefinition,
+  meaningChoiceDefinition,
+  pinyinChoiceDefinition,
+  hanziChoiceDefinition,
+]

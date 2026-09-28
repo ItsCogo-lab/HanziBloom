@@ -57,6 +57,26 @@ describe('PracticeSession', () => {
     expect(screen.queryByText('你')).not.toBeInTheDocument()
   })
 
+  it('funciona igual con ejercicios de opción múltiple', async () => {
+    const user = userEvent.setup()
+    const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
+    render(
+      <MemoryRouter>
+        <PracticeSession
+          exercises={[{ type: 'pinyin-choice', item: characters[0]!, options: characters }]} // 你
+          dictionary={dictionary}
+          onRestart={() => {}}
+        />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'hǎo' }))
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+
+    expect(screen.getByText('You knew 0 of 1.')).toBeInTheDocument()
+    expect(screen.getByText('你')).toBeInTheDocument()
+  })
+
   it('«Practice again» pide una sesión nueva', async () => {
     const user = userEvent.setup()
     const onRestart = vi.fn()
