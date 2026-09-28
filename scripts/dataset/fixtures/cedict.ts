@@ -48,4 +48,6 @@ export const cedictFixture = JSON.stringify([
     ],
   },
   { traditional: '迴', simplified: '回', pinyin: 'hui2', english: ['to curve', 'to return', 'to revolve'] },
+  { traditional: '關係', simplified: '关系', pinyin: 'guan1 xi5', english: ['relation', 'relationship'] },
+  { traditional: '鑰', simplified: '钥', pinyin: 'yue4', english: ['key', 'also pr. [yao4]'] },
 ])

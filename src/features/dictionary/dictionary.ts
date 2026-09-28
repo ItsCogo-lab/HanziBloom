@@ -11,6 +11,15 @@ export interface Dictionary {
   words: ReadonlyMap<string, Word>
 }
 
+/**
+ * Id de una palabra: su hanzi o, si la misma palabra aparece con varias
+ * pronunciaciones (homógrafos como 长 cháng / zhǎng), el hanzi con su
+ * pinyin entre corchetes, como en CC-CEDICT: "长[cháng]".
+ */
+export function getWordId(hanzi: string, pinyin: string, isHomograph: boolean): string {
+  return isHomograph ? `${hanzi}[${pinyin}]` : hanzi
+}
+
 export function createDictionary(characters: readonly Character[], words: readonly Word[]): Dictionary {
   return {
     characters: new Map(characters.map((character) => [character.id, character])),

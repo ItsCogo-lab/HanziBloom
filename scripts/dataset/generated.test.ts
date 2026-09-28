@@ -10,7 +10,7 @@ import { validateExampleSet } from '../../src/features/dictionary/validation.ts'
 /* Los archivos generados en public/ que carga la ficha. Lo mismo que `npm run data:validate`. */
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '../../public')
-const examplesFile = join(publicDir, 'examples/hsk1.json')
+const exampleFiles = [1, 2, 3, 4].map((level) => join(publicDir, `examples/hsk${level}.json`))
 
 describe('archivos generados en public/', () => {
   it('tienen los trazos de cada carácter', () => {
@@ -20,8 +20,8 @@ describe('archivos generados en public/', () => {
     expect(missing.map((character) => character.hanzi)).toEqual([])
   })
 
-  it.runIf(existsSync(examplesFile))('tienen frases de ejemplo válidas', () => {
-    const set: ExampleSet = JSON.parse(readFileSync(examplesFile, 'utf8'))
+  it.each(exampleFiles.filter((file) => existsSync(file)))('tienen frases de ejemplo válidas (%s)', (file) => {
+    const set: ExampleSet = JSON.parse(readFileSync(file, 'utf8'))
     expect(validateExampleSet(set, allWords)).toEqual([])
   })
 })

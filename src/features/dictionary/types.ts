@@ -60,7 +60,11 @@ export interface Character {
 
 /** Una palabra del vocabulario, formada por uno o más caracteres. */
 export interface Word {
-  /** Identificador único: la propia palabra, p. ej. "你好". */
+  /**
+   * Identificador único: la propia palabra, p. ej. "你好". Si la lista HSK
+   * tiene la misma palabra con dos pronunciaciones (长 cháng «largo» y
+   * 长 zhǎng «crecer»), cada una lleva su pinyin: "长[cháng]" (ver getWordId).
+   */
   id: string
   hanzi: string
   /** Pinyin de la palabra completa con marcas de tono, p. ej. "nǐ hǎo". */
@@ -90,7 +94,7 @@ export interface ExampleSentence {
   words: string[]
 }
 
-/** Archivo de ejemplos de un nivel (public/examples/hsk1.json). */
+/** Archivo de ejemplos de un nivel (public/examples/hsk1.json ... hsk4.json). */
 export interface ExampleSet {
   source: 'Tatoeba'
   /** Todas las frases de Tatoeba tienen esta licencia (algunas, además, CC0). */

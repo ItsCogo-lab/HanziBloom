@@ -42,7 +42,7 @@ describe('DashboardPage', () => {
     expect(getStat('Studied')).toMatch(/^2 of/)
     expect(getStat('Day streak')).toBe('1')
     expect(screen.getByRole('progressbar', { name: /^Characters: 1 of \d+ studied/ })).toBeInTheDocument()
-    expect(screen.getByRole('progressbar', { name: /^Words: 1 of 150 studied/ })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: /^Words: 1 of 1196 studied/ })).toBeInTheDocument()
   })
 
   it('sin repasos pendientes propone aprender elementos nuevos', () => {

@@ -102,13 +102,55 @@ export function usableMeanings(entries: readonly CedictEntry[]): string[] {
   return [...new Set(meanings)].slice(0, MAX_MEANINGS)
 }
 
-/** Entradas de CC-CEDICT de un hanzi con una lectura concreta. */
+/**
+ * Entradas de CC-CEDICT de un hanzi con una lectura concreta. Si no hay
+ * ninguna con ese pinyin exacto, se prueba, en este orden:
+ *
+ * 1. La misma palabra con tono neutro donde la lista HSK pone el tono
+ *    (关系: HSK guān xì, CC-CEDICT guān xi). Es la misma palabra: CC-CEDICT
+ *    anota la pronunciación coloquial.
+ * 2. Entradas que dicen explícitamente que también se pronuncia así
+ *    (钥 yuè: "also pr. [yao4]").
+ */
 export function findEntries(index: CedictIndex, hanzi: string, pinyin: string): CedictEntry[] {
-  const entries = (index.get(hanzi) ?? []).filter(
-    (entry) => comparablePinyin(entry.pinyin) === comparablePinyin(pinyin),
-  )
+  const all = index.get(hanzi) ?? []
+  const exact = all.filter((entry) => comparablePinyin(entry.pinyin) === comparablePinyin(pinyin))
+  const entries =
+    exact.length > 0
+      ? exact
+      : firstNonEmpty(
+          all.filter((entry) => differsOnlyInNeutralTones(entry.pinyin, pinyin)),
+          all.filter((entry) => isAlsoPronounced(entry, pinyin)),
+        )
   const preferred = PREFERRED_TRADITIONAL[hanzi]
   return preferred ? entries.filter((entry) => entry.traditional === preferred) : entries
+}
+
+function firstNonEmpty<T>(...lists: T[][]): T[] {
+  return lists.find((list) => list.length > 0) ?? []
+}
+
+/**
+ * Si el pinyin de CC-CEDICT es el mismo que el de HSK salvo por sílabas que
+ * CC-CEDICT pone en tono neutro: "guān xi" frente a "guān xì".
+ */
+function differsOnlyInNeutralTones(cedictPinyin: string, hskPinyin: string): boolean {
+  const cedictSyllables = cedictPinyin.split(/\s+/)
+  const hskSyllables = hskPinyin.split(/\s+/)
+  if (cedictSyllables.length !== hskSyllables.length) return false
+  return cedictSyllables.every((syllable, index) => {
+    const hskSyllable = hskSyllables[index]!
+    return syllable === hskSyllable || (!hasToneMark(syllable) && removeToneMarks(hskSyllable) === syllable.toLowerCase())
+  })
+}
+
+/** Si la entrada dice "also pr. [yao4]" con esta misma lectura. */
+function isAlsoPronounced(entry: CedictEntry, pinyin: string): boolean {
+  return entry.english.some((meaning) =>
+    [...meaning.matchAll(/also pr\. \[([^\]]+)\]/gi)].some(
+      (match) => comparablePinyin(numberedPinyinToToneMarks(match[1]!)) === comparablePinyin(pinyin),
+    ),
+  )
 }
 
 /**
@@ -133,7 +175,13 @@ export function readingOf(index: CedictIndex, hanzi: string, syllable: string): 
   const candidates = (index.get(hanzi) ?? [])
     .map((entry) => entry.pinyin)
     .filter((pinyin) => pinyin === pinyin.toLowerCase())
-  if (hasToneMark(syllable)) return candidates.find((pinyin) => pinyin === syllable)
+  if (hasToneMark(syllable)) {
+    const exact = candidates.find((pinyin) => pinyin === syllable)
+    if (exact) return exact
+    // 钥 solo tiene la entrada yuè, que dice "also pr. [yao4]": en 钥匙 se lee yào
+    const alsoPronounced = (index.get(hanzi) ?? []).some((entry) => isAlsoPronounced(entry, syllable))
+    return alsoPronounced ? syllable : undefined
+  }
 
   const sameSyllable = candidates.filter((pinyin) => removeToneMarks(pinyin) === syllable)
   return sameSyllable.find((pinyin) => pinyin === syllable) ?? sameSyllable[0]

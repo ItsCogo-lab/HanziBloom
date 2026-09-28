@@ -7,9 +7,13 @@ CACHE_DIR="$(dirname "$0")/.cache"
 mkdir -p "$CACHE_DIR"
 cd "$CACHE_DIR"
 
-# Lista oficial de HSK 2.0 nivel 1 (150 palabras) con el pinyin del examen. Licencia MIT.
-curl -sSfL -o hsk-level-1.json \
-  "https://raw.githubusercontent.com/clem109/hsk-vocabulary/master/hsk-vocab-json/hsk-level-1.json"
+# Listas de HSK 2.0, niveles 1 a 4, con el pinyin del examen. Licencia MIT.
+# Fijadas a un commit para que el resultado sea reproducible.
+HSK_COMMIT=f3dc9d12ae00d04fa3676b0bd4c43cd58de2c264
+for level in 1 2 3 4; do
+  curl -sSfL -o "hsk-level-${level}.json" \
+    "https://raw.githubusercontent.com/clem109/hsk-vocabulary/${HSK_COMMIT}/hsk-vocab-json/hsk-level-${level}.json"
+done
 
 # CC-CEDICT en formato JSON (edición 2025-12-13). Licencia CC BY-SA 4.0.
 npm pack cedict-json@1.3.20251213 --silent > /dev/null

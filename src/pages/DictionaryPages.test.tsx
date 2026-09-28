@@ -12,11 +12,11 @@ describe('VocabularyPage y CharactersPage', () => {
     const user = userEvent.setup()
     renderWithProviders(<AppRoutes />, { path: '/vocabulary' })
 
-    expect(screen.getByText('Showing 150 of 150')).toBeInTheDocument()
+    expect(screen.getByText('Showing 1196 of 1196')).toBeInTheDocument()
 
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'xiexie')
 
-    expect(screen.getByText('Showing 1 of 150')).toBeInTheDocument()
+    expect(screen.getByText('Showing 1 of 1196')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /谢谢/ })).toHaveAttribute('href', '/vocabulary/%E8%B0%A2%E8%B0%A2')
   })
 

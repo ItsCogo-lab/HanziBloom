@@ -12,7 +12,7 @@ const cedict = createCedictIndex(cedictFixture)
 
 describe('buildBaseEntries', () => {
   it('crea la palabra y sus caracteres con datos de CC-CEDICT', () => {
-    const { characters, words, problems } = buildBaseEntries([{ hanzi: '柠檬', pinyin: 'níng méng' }], cedict, 1)
+    const { characters, words, problems } = buildBaseEntries([{ level: 1, words: [{ hanzi: '柠檬', pinyin: 'níng méng' }] }], cedict)
 
     expect(problems).toEqual(['Carácter 檬 [méng] (en 柠檬): sin lectura en CC-CEDICT'])
     expect(words).toEqual([ningmengWord])
@@ -21,17 +21,46 @@ describe('buildBaseEntries', () => {
     ])
   })
 
-  it('avisa de las palabras que no están en CC-CEDICT en lugar de inventarlas', () => {
-    const { problems } = buildBaseEntries([{ hanzi: '好', pinyin: 'hào' }], cedict, 1)
+  it('deja fuera las palabras que no están en CC-CEDICT en lugar de inventarlas, y lo dice', () => {
+    const { problems } = buildBaseEntries([{ level: 1, words: [{ hanzi: '好', pinyin: 'hào' }] }], cedict)
     expect(problems).toEqual([])
-    expect(buildBaseEntries([{ hanzi: '好', pinyin: 'hā' }], cedict, 1).problems).toContain(
-      'Palabra 好 [hā]: sin entrada en CC-CEDICT',
+    const missing = buildBaseEntries([{ level: 3, words: [{ hanzi: '好', pinyin: 'hā' }] }], cedict)
+    expect(missing.words).toEqual([])
+    expect(missing.characters).toEqual([])
+    expect(missing.leftOut).toEqual(['好 [hā] (HSK 3)'])
+  })
+  it('junta varios niveles: cada carácter queda en el primer nivel en que aparece', () => {
+    const { characters, words } = buildBaseEntries(
+      [
+        { level: 1, words: [{ hanzi: '好', pinyin: 'hǎo' }] },
+        { level: 2, words: [{ hanzi: '柠檬', pinyin: 'níng méng' }, { hanzi: '好', pinyin: 'hào' }] },
+      ],
+      cedict,
     )
+    expect(words.map((word) => [word.id, word.hskLevel])).toEqual([
+      ['好[hǎo]', 1],
+      ['柠檬', 2],
+      ['好[hào]', 2],
+    ])
+    expect(characters.find((character) => character.hanzi === '好')).toMatchObject({
+      pinyin: ['hǎo', 'hào'],
+      hskLevel: 1,
+    })
+    expect(characters.find((character) => character.hanzi === '柠')?.hskLevel).toBe(2)
+  })
+
+  it('guarda una sola vez las palabras que la lista repite con el mismo pinyin', () => {
+    const { words, duplicates } = buildBaseEntries(
+      [{ level: 4, words: [{ hanzi: '好', pinyin: 'hǎo' }, { hanzi: '好', pinyin: 'hǎo' }] }],
+      cedict,
+    )
+    expect(words.map((word) => word.id)).toEqual(['好'])
+    expect(duplicates).toEqual(['好 [hǎo] (HSK 4)'])
   })
 })
 
 describe('enrichCharacter', () => {
-  const { characters } = buildBaseEntries([{ hanzi: '柠檬', pinyin: 'níng méng' }], cedict, 1)
+  const { characters } = buildBaseEntries([{ level: 1, words: [{ hanzi: '柠檬', pinyin: 'níng méng' }] }], cedict)
   const ning = characters[0]!
   const unihan = loadUnihan([unihanIrgSourcesFixture, unihanVariantsFixture], cjkRadicalsFixture, new Set(['柠']))
   const makeMeAHanzi = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠']))

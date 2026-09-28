@@ -13,6 +13,20 @@ const MAX_MEANING_LABEL_LENGTH = 40
 // --- Textos que se muestran --------------------------------------------------
 
 /**
+ * Guarda el resultado de `compute` para cada entrada del diccionario. Elegir
+ * distractores compara un elemento con todo el dataset (más de 2000
+ * entradas), así que los textos derivados se calculan una sola vez.
+ * WeakMap: si una entrada deja de existir, su valor se libera.
+ */
+function memoizeByEntry<T>(compute: (item: StudyItem) => T): (item: StudyItem) => T {
+  const cache = new WeakMap<object, T>()
+  return (item) => {
+    if (!cache.has(item.entry)) cache.set(item.entry, compute(item))
+    return cache.get(item.entry)!
+  }
+}
+
+/**
  * Significados que se pueden mostrar sin revelar la respuesta. Algunas
  * entradas de CC-CEDICT citan el propio hanzi ("eldest (as in 大姐)"): se
  * quita el paréntesis que lo cita y, si aun así lo cita ("used in 漂亮"),
@@ -29,14 +43,14 @@ export function getMeaningClues(item: StudyItem): string[] {
 }
 
 /** Texto corto con los primeros significados: siempre el primero y, si caben, más. */
-export function getMeaningLabel(item: StudyItem): string {
+export const getMeaningLabel = memoizeByEntry((item: StudyItem): string => {
   const label: string[] = []
   for (const meaning of getMeaningClues(item)) {
     if (label.length > 0 && [...label, meaning].join('; ').length > MAX_MEANING_LABEL_LENGTH) break
     label.push(meaning)
   }
   return label.join('; ')
-}
+})
 
 /** Lecturas de pinyin: una en las palabras; una o varias en los caracteres. */
 export function getReadings(item: StudyItem): readonly string[] {
@@ -59,12 +73,12 @@ function normalize(text: string): string {
 }
 
 /** Significados sueltos: "to love; to like (sth)" → "to love", "to like". */
-function getGlosses(item: StudyItem): Set<string> {
+const getGlosses = memoizeByEntry((item: StudyItem): ReadonlySet<string> => {
   const glosses = getMeanings(item.entry.meanings)
     .flatMap((meaning) => meaning.split(';'))
     .map((gloss) => normalize(gloss.replace(/\([^()]*\)/g, '')))
   return new Set(glosses.filter((gloss) => gloss !== ''))
-}
+})
 
 function sharesMeaning(a: StudyItem, b: StudyItem): boolean {
   const glossesOfA = getGlosses(a)

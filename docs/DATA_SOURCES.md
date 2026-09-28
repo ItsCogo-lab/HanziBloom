@@ -51,7 +51,7 @@ fuentes están fijadas a una versión (Unicode 18.0.0, un commit concreto de
 Make Me a Hanzi, versiones exactas de los paquetes npm). La excepción es
 Tatoeba, que publica una exportación nueva cada semana y no guarda las
 anteriores: la fecha de la descarga queda en `exportDate` dentro de
-`public/examples/hsk1.json`.
+`public/examples/hsk<n>.json`.
 
 ## Qué fuente manda en cada campo
 
@@ -159,26 +159,52 @@ Es la misma fuente de la que salía la etimología de la app Tofu Learn.
 
 Criterio de selección (determinista): frases chinas con autor, de 16
 caracteres como mucho, sin letras latinas ni cifras y cuyos caracteres chinos
-estén todos en el dataset. Por palabra, las 3 más cortas (a igual longitud, la
+sean todos del mismo nivel HSK o de uno anterior (quien estudia HSK 1 puede
+leer entera una frase de HSK 1). Por palabra, las 3 más cortas (a igual longitud, la
 de id más bajo), con la traducción inglesa de id más bajo. Las frases se copian
 tal cual; el pinyin de las frases no se muestra porque todavía no se usa la
 exportación de transcripciones de Tatoeba.
 
 ### Lista HSK 2.0
 
-- **URL:** https://github.com/clem109/hsk-vocabulary (`hsk-vocab-json/hsk-level-1.json`)
+- **URL:** https://github.com/clem109/hsk-vocabulary (`hsk-vocab-json/hsk-level-1.json` a `hsk-level-4.json`)
+- **Versión:** commit `f3dc9d12ae00d04fa3676b0bd4c43cd58de2c264`
 - **Licencia:** MIT, © 2018 Clement Venard
 - **Atribución:** citar el repositorio.
-- **Campos:** las 150 palabras de HSK 1 y su pinyin de examen. Sus traducciones no se usan.
+- **Campos:** las palabras de HSK 1 a 4 y su pinyin de examen. Sus traducciones no se usan.
 - **Adaptador:** `sources/hsk.ts`
+
+Reglas al juntar los niveles (`buildBaseEntries` en `fusion.ts`):
+
+1. **Nivel de un carácter:** el de la primera palabra en la que aparece
+   (他 es HSK 1 aunque también esté en palabras de HSK 3).
+2. **Homógrafos:** si la lista tiene la misma palabra con dos
+   pronunciaciones (长 *cháng* «largo» y 长 *zhǎng* «crecer»; 得, 还, 只),
+   son dos palabras distintas y su id lleva el pinyin: `长[cháng]`,
+   `长[zhǎng]`. El resto de palabras usa el hanzi como id.
+3. **Repeticiones:** si la lista repite una palabra con el mismo pinyin
+   (等, 对 y 过 en HSK 4, con dos sentidos cada una), se guarda una vez.
+4. **Tono neutro:** la lista HSK pone el tono en algunas sílabas que
+   CC-CEDICT anota en tono neutro (关系 *guān xì* / *guān xi*). Se considera
+   la misma palabra y se muestra el pinyin de la lista HSK.
+5. **«also pr.»:** si CC-CEDICT dice que un carácter también se pronuncia de
+   otra forma (钥 *yuè*: «also pr. [yao4]»), esa lectura vale para las
+   palabras que la usan (钥匙 *yào shi*).
+6. **Sin entrada en CC-CEDICT:** la palabra se deja fuera (no hay de dónde
+   sacar su significado) y aparece en `DATA_CONFLICTS.md`. Hoy es solo
+   打篮球 (HSK 2), que CC-CEDICT no tiene como entrada.
+
+Por eso los niveles no tienen exactamente el número oficial de palabras
+(150/150/300/600): HSK 1 tiene 150, HSK 2 149, HSK 3 299 (la lista de
+clem109 trae 299) y HSK 4 598 (la lista trae 601, con 3 repeticiones).
 
 ## Archivos generados
 
 | Archivo | Contenido | Cómo se carga |
 | --- | --- | --- |
-| `src/data/hsk1/characters.ts`, `words.ts` | Caracteres y palabras | En el bundle (son pequeños) |
+| `src/data/hsk1/` a `hsk4/`: `characters.ts`, `words.ts` | Caracteres y palabras de cada nivel | En el bundle, en un archivo aparte del código de la app |
 | `public/strokes/*.json` | Trazos de cada carácter | Al abrir la ficha de un carácter |
-| `public/examples/hsk1.json` | Frases de ejemplo | Al abrir una ficha |
+| `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Al abrir una ficha |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
 
 ## Licencia de los datos

@@ -42,4 +42,15 @@ describe('adaptador de CC-CEDICT', () => {
     expect(readingOf(index, '柠', 'níng')).toBe('níng')
     expect(readingOf(index, '柠', 'nìng')).toBeUndefined()
   })
+
+  it('acepta el tono neutro de CC-CEDICT donde la lista HSK pone el tono (关系 guān xì)', () => {
+    expect(usableMeanings(findEntries(index, '关系', 'guān xì'))).toEqual(['relation', 'relationship'])
+    expect(findEntries(index, '关系', 'guǎn xì')).toEqual([])
+  })
+
+  it('usa las lecturas que CC-CEDICT anota con "also pr." (钥 yào)', () => {
+    expect(readingOf(index, '钥', 'yào')).toBe('yào')
+    expect(usableMeanings(findEntries(index, '钥', 'yào'))).toEqual(['key'])
+    expect(readingOf(index, '钥', 'yǎo')).toBeUndefined()
+  })
 })
