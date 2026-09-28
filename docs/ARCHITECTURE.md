@@ -145,19 +145,30 @@ tests del dataset la usarán para que un error en los datos haga fallar la CI.
 
 ### Ejercicios extensibles
 
-Cada tipo de ejercicio es un módulo con la misma forma:
+Está en `src/features/practice/`. Cada tipo de ejercicio tiene:
 
-```ts
-interface ExerciseDefinition<E extends Exercise> {
-  type: E['type']                 // 'meaning' | 'pinyin' | 'reverse' | 'flashcard'
-  canBuild(item, pool): boolean   // ¿hay datos suficientes para este ejercicio?
-  build(item, pool, random): E    // genera pregunta y opciones
-}
-```
+1. Su interfaz en `types.ts`, dentro de la unión `Exercise` (discriminada por `type`).
+2. Su definición en `exerciseDefinitions.ts`:
 
-y un componente React que lo pinta. Añadir un ejercicio nuevo (p. ej. escritura)
-consiste en crear un módulo y un componente y registrarlos, sin tocar los
-demás. El `random` se inyecta para que los tests sean deterministas.
+   ```ts
+   interface ExerciseDefinition<E extends Exercise> {
+     type: E['type']
+     canBuild(item, pool): boolean   // ¿hay datos suficientes para este ejercicio?
+     build(item, pool, random): E    // genera pregunta y opciones
+   }
+   ```
+
+3. Su componente, elegido en `components/ExerciseView.tsx` con un `switch` que
+   TypeScript obliga a completar.
+
+Añadir un ejercicio nuevo (p. ej. escritura) consiste en esos tres pasos, sin
+tocar los demás. El `random` se inyecta para que los tests sean deterministas.
+
+**Sesión.** `session.ts` crea los ejercicios (elementos al azar y un tipo
+construible para cada uno) y gestiona el avance con un reducer puro
+(`sessionReducer`), que `PracticeSession` usa con `useReducer`. Cada respuesta
+produce un `ExerciseResult { itemId, exerciseType, correct }`, que es lo que
+consumirá el sistema de progreso en la Fase 8.
 
 ### Repetición espaciada
 

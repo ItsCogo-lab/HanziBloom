@@ -8,6 +8,14 @@ describe('t', () => {
     expect(t('nav.practice')).toBe('Practice')
   })
 
+  it('rellena los huecos con los parámetros', () => {
+    expect(t('practice.progress', { current: 3, total: 10 })).toBe('Card 3 of 10')
+  })
+
+  it('deja el hueco si falta el parámetro', () => {
+    expect(t('practice.progress', { current: 3 })).toBe('Card 3 of {total}')
+  })
+
   it.each([
     ['en', en],
     ['es', es],

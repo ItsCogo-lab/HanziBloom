@@ -1,0 +1,64 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
+import { createDictionary } from '../../dictionary/dictionary.ts'
+import { testCharacters, testWords } from '../../dictionary/testData.ts'
+import type { FlashcardExercise } from '../types.ts'
+import { Flashcard } from './Flashcard.tsx'
+
+const dictionary = createDictionary(testCharacters, testWords)
+
+const wordExercise: FlashcardExercise = { type: 'flashcard', item: { kind: 'word', entry: testWords[0]! } } // 你好
+const characterExercise: FlashcardExercise = {
+  type: 'flashcard',
+  item: { kind: 'character', entry: testCharacters[1]! }, // 好
+}
+
+describe('Flashcard', () => {
+  it('muestra el hanzi y oculta la respuesta hasta pulsar «Show answer»', () => {
+    render(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={() => {}} />)
+
+    expect(screen.getByText('你好')).toBeInTheDocument()
+    expect(screen.queryByText('nǐ hǎo')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'I knew it' })).not.toBeInTheDocument()
+  })
+
+  it('al revelar muestra pinyin, significado y los caracteres de la palabra', async () => {
+    const user = userEvent.setup()
+    render(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={() => {}} />)
+
+    await user.click(screen.getByRole('button', { name: 'Show answer' }))
+
+    expect(screen.getByText('nǐ hǎo')).toBeInTheDocument()
+    expect(screen.getByText('hello')).toBeInTheDocument()
+    expect(screen.getByText('Characters')).toBeInTheDocument()
+    expect(screen.getByText('你')).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Answer' })).toHaveFocus()
+  })
+
+  it('en un carácter muestra las palabras donde aparece', async () => {
+    const user = userEvent.setup()
+    render(<Flashcard exercise={characterExercise} dictionary={dictionary} onAnswer={() => {}} />)
+
+    await user.click(screen.getByRole('button', { name: 'Show answer' }))
+
+    expect(screen.getByText('Appears in')).toBeInTheDocument()
+    expect(screen.getByText('你好')).toBeInTheDocument()
+    // La palabra 好 es el mismo carácter: no se muestra como relacionada
+    expect(screen.getAllByText('好')).toHaveLength(1)
+  })
+
+  it.each([
+    ['I knew it', true],
+    ["I didn't know", false],
+  ])('«%s» responde %s', async (buttonName, expected) => {
+    const user = userEvent.setup()
+    const onAnswer = vi.fn()
+    render(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={onAnswer} />)
+
+    await user.click(screen.getByRole('button', { name: 'Show answer' }))
+    await user.click(screen.getByRole('button', { name: buttonName }))
+
+    expect(onAnswer).toHaveBeenCalledWith(expected)
+  })
+})

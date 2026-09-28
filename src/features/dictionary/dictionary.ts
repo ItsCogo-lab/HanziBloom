@@ -63,3 +63,8 @@ export function getWordsWithCharacter(dictionary: Dictionary, characterId: strin
 export function getMeanings(translations: Translations, locale: ContentLocale = 'en'): string[] {
   return translations[locale] ?? translations.en
 }
+
+/** Pinyin listo para mostrar. Si un carácter tiene varias lecturas, van separadas por comas. */
+export function formatPinyin(entry: Character | Word): string {
+  return typeof entry.pinyin === 'string' ? entry.pinyin : entry.pinyin.join(', ')
+}

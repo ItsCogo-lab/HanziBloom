@@ -1,3 +1,4 @@
+import type { Dictionary } from './dictionary.ts'
 import type { Character, Word } from './types.ts'
 
 /**
@@ -20,4 +21,12 @@ export type StudyItemId = `char:${string}` | `word:${string}`
 
 export function getStudyItemId(item: StudyItem): StudyItemId {
   return item.kind === 'character' ? `char:${item.entry.id}` : `word:${item.entry.id}`
+}
+
+/** Todos los caracteres y palabras del diccionario como elementos de estudio. */
+export function listStudyItems(dictionary: Dictionary): StudyItem[] {
+  return [
+    ...[...dictionary.characters.values()].map((entry): StudyItem => ({ kind: 'character', entry })),
+    ...[...dictionary.words.values()].map((entry): StudyItem => ({ kind: 'word', entry })),
+  ]
 }
