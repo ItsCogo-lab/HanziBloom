@@ -1,0 +1,23 @@
+import type { Character, Word } from './types.ts'
+
+/**
+ * Algo que se puede estudiar: un carácter o una palabra.
+ *
+ * Es una "unión discriminada": el campo `kind` indica cuál de los dos es, y
+ * TypeScript sabe qué tipo tiene `entry` después de comprobar `kind`.
+ * Los ejercicios y el progreso trabajarán con StudyItem para no duplicar
+ * lógica entre caracteres y palabras.
+ */
+export type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
+
+/**
+ * Identificador único de un elemento de estudio, p. ej. "char:好" o "word:好".
+ *
+ * Hace falta el prefijo porque 好 es a la vez un carácter y una palabra de
+ * HSK 1, y su progreso se registra por separado.
+ */
+export type StudyItemId = `char:${string}` | `word:${string}`
+
+export function getStudyItemId(item: StudyItem): StudyItemId {
+  return item.kind === 'character' ? `char:${item.entry.id}` : `word:${item.entry.id}`
+}

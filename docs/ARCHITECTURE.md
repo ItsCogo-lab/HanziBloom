@@ -88,33 +88,38 @@ Navegación: barra lateral en escritorio, barra inferior en móvil.
 
 ## 6. Entidades principales
 
+El modelo está en `src/features/dictionary/types.ts`. Resumen:
+
 ```ts
 type HskLevel = 1 | 2 | 3 | 4
+type Translations = { es: string[]; en?: string[]; ca?: string[] }
 
 interface Character {
   id: string              // el propio hanzi, p. ej. "好"
   hanzi: string
   pinyin: string[]        // puede tener varias lecturas (了: le, liǎo)
-  meanings: Translations  // { es: [...] }, preparado para en/ca
+  meanings: Translations
   hskLevel: HskLevel
   strokeCount?: number
   radical?: string
   frequencyRank?: number
-  relatedWordIds: string[]
 }
 
 interface Word {
   id: string              // p. ej. "你好"
   hanzi: string
-  pinyin: string
+  pinyin: string          // "nǐ hǎo"
   meanings: Translations
   hskLevel: HskLevel
-  characterIds: string[]  // caracteres que la componen
 }
 
-// Progreso de un elemento de estudio (carácter o palabra)
+// Un carácter o una palabra; los ejercicios y el progreso trabajan con esto
+type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
+type StudyItemId = `char:${string}` | `word:${string}`   // "char:好", "word:好"
+
+// Progreso de un elemento de estudio (se implementa en la Fase 8)
 interface ItemProgress {
-  itemId: string          // "char:好" o "word:你好"
+  itemId: StudyItemId
   timesSeen: number
   timesCorrect: number
   timesWrong: number
@@ -126,6 +131,17 @@ interface ItemProgress {
 
 Los campos opcionales (`strokeCount`, `radical`, `frequencyRank`) son opcionales
 precisamente para no inventar datos: si no tenemos fuente fiable, se quedan vacíos.
+
+**Datos derivados, no guardados.** Los caracteres que forman una palabra y las
+palabras relacionadas con un carácter no se guardan en el dataset: se calculan
+a partir de `hanzi` (`getCharactersOfWord`, `getWordsWithCharacter`). Si se
+guardaran, podrían quedar desincronizados al editar los datos.
+
+**Consultas.** `src/features/dictionary/dictionary.ts` construye un
+`Dictionary` (dos `Map` indexados por id) y ofrece funciones puras para buscar
+y listar. `validation.ts` comprueba la coherencia de los datos (ids únicos,
+pinyin y significados presentes, caracteres de cada palabra existentes); los
+tests del dataset la usarán para que un error en los datos haga fallar la CI.
 
 ### Ejercicios extensibles
 

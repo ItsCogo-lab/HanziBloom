@@ -4,7 +4,7 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 3 de 12** del MVP (layout y navegación). La arquitectura y el plan están
+Estado: **Fase 4 de 12** del MVP (modelo de datos). La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tecnologías
@@ -44,6 +44,8 @@ src/
   app/           App, rutas (AppRoutes), secciones del menú (navigation.ts)
     layout/      Estructura común: navegación principal y área de contenido
   pages/         Una página por sección de la app
+  features/
+    dictionary/  Tipos de caracteres y palabras, consultas y validación de datos
   components/    Componentes compartidos
     ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader
   i18n/          Textos de la interfaz (es.ts) y función t()
