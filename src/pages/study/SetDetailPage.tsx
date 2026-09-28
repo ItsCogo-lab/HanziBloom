@@ -1,0 +1,116 @@
+import { useId, useState } from 'react'
+import { Link, useParams } from 'react-router'
+import { Button } from '../../components/ui/Button.tsx'
+import { ButtonLink } from '../../components/ui/ButtonLink.tsx'
+import { Card } from '../../components/ui/Card.tsx'
+import { PageHeader } from '../../components/ui/PageHeader.tsx'
+import { StatCard } from '../../components/ui/StatCard.tsx'
+import { EntryLabel } from '../../features/dictionary/components/EntryLabel.tsx'
+import { hskDictionary } from '../../features/dictionary/hskDictionary.ts'
+import { getStudyItemId, type StudyItem } from '../../features/dictionary/studyItem.ts'
+import { isStudying } from '../../features/myStudies/myStudies.ts'
+import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
+import { StatusBadge } from '../../features/progress/components/StatusBadge.tsx'
+import { getItemStatus } from '../../features/progress/progress.ts'
+import { useProgress } from '../../features/progress/progressContext.ts'
+import type { ProgressData } from '../../features/progress/types.ts'
+import { appStudySets } from '../../features/studySets/appStudySets.ts'
+import { getSetPracticePath } from '../../features/studySets/setPaths.ts'
+import { SetItemCount, StudyingBadge } from '../../features/studySets/components/SetSummary.tsx'
+import { SetProgressBar } from '../../features/studySets/components/SetProgressBar.tsx'
+import { StudyToggleButton } from '../../features/studySets/components/StudyToggleButton.tsx'
+import { getSetProgress } from '../../features/studySets/setProgress.ts'
+import { getSetItems, getStudySet } from '../../features/studySets/studySets.ts'
+import { t } from '../../i18n/index.ts'
+import { getEntryPath } from '../entryPaths.ts'
+import { NotFoundPage } from '../NotFoundPage.tsx'
+
+/** Elementos que se muestran de golpe en la lista; el resto, con «Show more». */
+const PAGE_SIZE = 100
+
+/** Página de un set: progreso, acciones y su vocabulario. */
+export function SetDetailPage() {
+  const { setId = '' } = useParams()
+  const { progress } = useProgress()
+  const { myStudies } = useMyStudies()
+  const set = getStudySet(appStudySets, setId)
+  if (!set) return <NotFoundPage />
+
+  const setProgress = getSetProgress(set, progress, new Date())
+  const items = getSetItems(set, hskDictionary)
+  const words = items.filter((item) => item.kind === 'word')
+  const characters = items.filter((item) => item.kind === 'character')
+
+  return (
+    <>
+      <PageHeader
+        title={set.name}
+        description={set.description}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink to={getSetPracticePath(set)}>
+              {t(setProgress.studied > 0 ? 'sets.continue' : 'sets.start')}
+            </ButtonLink>
+            <StudyToggleButton set={set} />
+          </div>
+        }
+      />
+      <div className="flex flex-col gap-6">
+        <Card className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 className="text-lg font-semibold">{t('sets.progressTitle')}</h2>
+            {isStudying(myStudies, set.id) && <StudyingBadge />}
+            <span className="text-sm text-ink-muted">
+              <SetItemCount set={set} />
+            </span>
+          </div>
+          <SetProgressBar name={set.name} progress={setProgress} />
+          <dl className="grid grid-cols-3 gap-3">
+            <StatCard label={t('sets.learned')} value={setProgress.mastered} />
+            <StatCard label={t('sets.learning')} value={setProgress.learning} />
+            <StatCard label={t('sets.notStarted')} value={setProgress.new} />
+          </dl>
+        </Card>
+
+        {words.length > 0 && <ItemList title={t('sets.vocabulary')} items={words} progress={progress} />}
+        {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
+        <Link to="/study" className="self-start text-accent-strong underline underline-offset-2">
+          {t('sets.backToStudy')}
+        </Link>
+      </div>
+    </>
+  )
+}
+
+type ItemListProps = { title: string; items: readonly StudyItem[]; progress: ProgressData }
+
+/** Lista de elementos del set; cada uno abre su ficha del diccionario. */
+function ItemList({ title, items, progress }: ItemListProps) {
+  const [shown, setShown] = useState(PAGE_SIZE)
+  const titleId = useId()
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-3">
+      <h2 id={titleId} className="text-lg font-semibold">
+        {title}
+      </h2>
+      <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+        {items.slice(0, shown).map((item) => (
+          <li key={getStudyItemId(item)}>
+            <Link to={getEntryPath(item)} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-paper">
+              <EntryLabel entry={item.entry} withMeaning />
+              <StatusBadge status={getItemStatus(progress.items[getStudyItemId(item)])} />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {shown < items.length && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="secondary" onClick={() => setShown(shown + PAGE_SIZE)}>
+            {t('sets.showMore')}
+          </Button>
+          <span className="text-sm text-ink-muted">{t('dictionary.showing', { count: shown, total: items.length })}</span>
+        </div>
+      )}
+    </section>
+  )
+}

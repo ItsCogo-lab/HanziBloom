@@ -23,7 +23,7 @@ export function MainNavigation() {
         {t('app.name')}
       </Link>
 
-      <ul className="grid grid-cols-6 md:flex md:flex-col md:gap-1">
+      <ul className="grid grid-cols-4 md:flex md:flex-col md:gap-1">
         {NAVIGATION_ITEMS.map((item) => (
           <li key={item.path}>
             <NavLink

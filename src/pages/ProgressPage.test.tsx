@@ -23,7 +23,7 @@ describe('ProgressPage', () => {
     renderProgressPage(createEmptyProgress())
 
     expect(screen.getByText(/No statistics yet/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/practice')
+    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
   it('muestra totales, rachas, actividad reciente, estados y los más fallados', () => {

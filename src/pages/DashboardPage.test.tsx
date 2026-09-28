@@ -23,11 +23,11 @@ describe('DashboardPage', () => {
   it('a un usuario nuevo le da la bienvenida y todo a cero', () => {
     renderDashboard()
 
-    expect(screen.getByText(/Start your first session/)).toBeInTheDocument()
+    expect(screen.getByText(/start your first session/)).toBeInTheDocument()
     expect(getStat('Due for review')).toBe('0')
     expect(getStat('Day streak')).toBe('0')
     expect(getStat('Studied')).toBe(`0 of ${hskStudyItems.length}`)
-    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/practice')
+    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
   it('muestra los repasos pendientes, lo estudiado y la racha', () => {

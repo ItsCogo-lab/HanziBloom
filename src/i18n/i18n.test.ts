@@ -5,7 +5,7 @@ import { formatDate, formatPercent, formatShortDay, t } from './index.ts'
 
 describe('t', () => {
   it('devuelve el texto en inglés de una clave', () => {
-    expect(t('nav.practice')).toBe('Practice')
+    expect(t('nav.study')).toBe('Study')
   })
 
   it('rellena los huecos con los parámetros', () => {
