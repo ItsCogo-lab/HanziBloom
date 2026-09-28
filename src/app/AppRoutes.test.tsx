@@ -3,13 +3,17 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { t } from '../i18n/index.ts'
+import { memoryStorage } from '../test/memoryStorage.ts'
+import { AppProviders } from './AppProviders.tsx'
 import { AppRoutes } from './AppRoutes.tsx'
 import { NAVIGATION_ITEMS } from './navigation.ts'
 
 function renderAt(path: string) {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <AppRoutes />
+      <AppProviders storage={memoryStorage()}>
+        <AppRoutes />
+      </AppProviders>
     </MemoryRouter>,
   )
 }
