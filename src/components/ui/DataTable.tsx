@@ -16,7 +16,7 @@ export function DataTable({ labelledBy, headers, rows }: DataTableProps) {
         <thead>
           <tr className="border-b border-line text-sm text-ink-muted">
             {headers.map((header, index) => (
-              <th key={header} scope="col" className={`py-2 font-medium ${index > 0 ? 'text-right' : ''}`}>
+              <th key={header} scope="col" className={`py-2 font-medium ${index > 0 ? 'pl-4 text-right' : 'pr-4'}`}>
                 {header}
               </th>
             ))}
