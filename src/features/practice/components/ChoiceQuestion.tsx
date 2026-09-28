@@ -6,7 +6,7 @@ import { formatPinyin } from '../../dictionary/dictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { getMeaningLabel, getPinyinLabel, isCorrectOption } from '../choiceExercises.ts'
 import type { ChoiceExercise, ChoiceExerciseType } from '../types.ts'
-import { HanziText } from './HanziText.tsx'
+import { HanziText } from '../../../components/ui/HanziText.tsx'
 
 const QUESTIONS: Record<ChoiceExerciseType, MessageKey> = {
   'meaning-choice': 'practice.choice.meaningQuestion',

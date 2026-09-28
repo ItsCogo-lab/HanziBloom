@@ -11,7 +11,7 @@ import {
 } from '../../dictionary/dictionary.ts'
 import type { StudyItem } from '../../dictionary/studyItem.ts'
 import type { FlashcardExercise } from '../types.ts'
-import { HanziText } from './HanziText.tsx'
+import { HanziText } from '../../../components/ui/HanziText.tsx'
 
 /** Máximo de palabras relacionadas que se muestran en un carácter. */
 const MAX_RELATED_WORDS = 4
