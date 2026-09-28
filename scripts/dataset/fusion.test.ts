@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { cedictFixture } from './fixtures/cedict.ts'
+import { makeMeAHanziFixture } from './fixtures/makemeahanzi.ts'
 import { cjkRadicalsFixture, unihanIrgSourcesFixture, unihanVariantsFixture } from './fixtures/unihan.ts'
-import { buildBaseEntries, enrichCharacter } from './fusion.ts'
+import { buildBaseEntries, crossCheckCharacter, enrichCharacter } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
+import { parseMakeMeAHanzi } from './sources/makemeahanzi.ts'
 import { loadUnihan } from './sources/unihan.ts'
 
 const cedict = createCedictIndex(cedictFixture)
@@ -31,6 +33,23 @@ describe('enrichCharacter', () => {
   const { characters } = buildBaseEntries([{ hanzi: '柠檬', pinyin: 'níng méng' }], cedict, 1)
   const ning = characters[0]!
   const unihan = loadUnihan([unihanIrgSourcesFixture, unihanVariantsFixture], cjkRadicalsFixture, new Set(['柠']))
+  const makeMeAHanzi = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠']))
+
+  it('combina CC-CEDICT, Unihan y Make Me a Hanzi en la ficha de 柠', () => {
+    expect(enrichCharacter(ning, { unihan: unihan.get('柠'), makeMeAHanzi: makeMeAHanzi.get('柠') })).toEqual({
+      id: '柠',
+      hanzi: '柠',
+      pinyin: ['níng'],
+      meanings: { en: ['used in 柠檬'] },
+      hskLevel: 1,
+      strokeCount: 9,
+      radical: '木',
+      radicalNumber: 75,
+      traditional: ['檸'],
+      decomposition: '⿰木宁',
+      etymology: { type: 'pictophonetic', hint: 'tree', semantic: '木', phonetic: '宁' },
+    })
+  })
 
   it('añade los campos de Unihan a 柠', () => {
     expect(enrichCharacter(ning, { unihan: unihan.get('柠') })).toEqual({
@@ -46,5 +65,23 @@ describe('enrichCharacter', () => {
     const enriched = enrichCharacter(ning, {})
     expect(enriched).toEqual(ning)
     expect(Object.values(enriched)).not.toContain(undefined)
+  })
+})
+
+describe('crossCheckCharacter', () => {
+  const unihan = { strokeCount: 9, radical: '木', radicalNumber: 75 }
+
+  it('no avisa cuando las fuentes coinciden', () => {
+    expect(
+      crossCheckCharacter('柠', { unihan, makeMeAHanzi: { radical: '木' }, hanziWriterStrokeCount: 9 }),
+    ).toEqual([])
+  })
+
+  it('avisa de los desacuerdos sin corregirlos', () => {
+    const conflicts = crossCheckCharacter('X', { unihan, makeMeAHanzi: { radical: '口' }, hanziWriterStrokeCount: 8 })
+    expect(conflicts).toEqual([
+      'X: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de Unihan.',
+      'X: el radical es 木 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.',
+    ])
   })
 })

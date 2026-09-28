@@ -11,6 +11,19 @@ export type ContentLocale = 'es' | 'en' | 'ca'
  */
 export type Translations = { en: string[] } & Partial<Record<Exclude<ContentLocale, 'en'>, string[]>>
 
+/**
+ * Cómo se formó un carácter (Make Me a Hanzi). En los pictofonéticos, el
+ * componente semántico aporta el significado y el fonético, la pronunciación:
+ * 柠 = 木 (árbol) + 宁 (níng).
+ */
+export interface Etymology {
+  type: 'pictographic' | 'ideographic' | 'pictophonetic'
+  /** Pista breve en inglés: "tree" en 柠, o la explicación en los pictográficos. */
+  hint?: string
+  semantic?: string
+  phonetic?: string
+}
+
 /** Un carácter chino (hanzi) individual. */
 export interface Character {
   /** Identificador único: el propio carácter, p. ej. "好". */
@@ -37,6 +50,12 @@ export interface Character {
    * incluir el propio carácter si también se usa en tradicional.
    */
   traditional?: string[]
+  /**
+   * Descomposición en componentes como secuencia IDS de Unicode (Make Me a
+   * Hanzi): 柠 → "⿰木宁" (木 a la izquierda, 宁 a la derecha).
+   */
+  decomposition?: string
+  etymology?: Etymology
 }
 
 /** Una palabra del vocabulario, formada por uno o más caracteres. */

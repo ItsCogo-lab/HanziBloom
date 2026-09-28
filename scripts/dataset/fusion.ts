@@ -10,6 +10,7 @@
 import type { Character, HskLevel, Word } from '../../src/features/dictionary/types.ts'
 import { findEntries, readingOf, usableMeanings, type CedictIndex } from './sources/cedict.ts'
 import type { HskWord } from './sources/hsk.ts'
+import type { MakeMeAHanziCharacter } from './sources/makemeahanzi.ts'
 import type { UnihanCharacter } from './sources/unihan.ts'
 
 /** Qué fuente manda en cada campo. Documentado también en docs/DATA_SOURCES.md. */
@@ -22,6 +23,9 @@ export const FIELD_SOURCES = {
     radical: 'Unihan',
     radicalNumber: 'Unihan',
     traditional: 'Unihan',
+    decomposition: 'Make Me a Hanzi',
+    etymology: 'Make Me a Hanzi',
+    strokeOrder: 'hanzi-writer-data (public/strokes/)',
   },
   word: {
     hskLevel: 'HSK list',
@@ -98,6 +102,9 @@ export function buildBaseEntries(hskList: readonly HskWord[], cedict: CedictInde
 /** Lo que cada fuente sabe de un carácter. Una fuente sin datos para él queda undefined. */
 export interface CharacterSources {
   unihan?: UnihanCharacter
+  makeMeAHanzi?: MakeMeAHanziCharacter
+  /** Número de trazos según hanzi-writer-data; solo para comprobar el de Unihan. */
+  hanziWriterStrokeCount?: number
 }
 
 /**
@@ -106,12 +113,37 @@ export interface CharacterSources {
  * se toma el dato de otra fuente.
  */
 export function enrichCharacter(base: Character, sources: CharacterSources): Character {
-  const { unihan } = sources
+  const { unihan, makeMeAHanzi } = sources
   return {
     ...base,
     ...(unihan?.strokeCount !== undefined && { strokeCount: unihan.strokeCount }),
     ...(unihan?.radical !== undefined && { radical: unihan.radical }),
     ...(unihan?.radicalNumber !== undefined && { radicalNumber: unihan.radicalNumber }),
     ...(unihan?.traditional !== undefined && { traditional: unihan.traditional }),
+    ...(makeMeAHanzi?.decomposition !== undefined && { decomposition: makeMeAHanzi.decomposition }),
+    ...(makeMeAHanzi?.etymology !== undefined && { etymology: makeMeAHanzi.etymology }),
   }
+}
+
+/**
+ * Compara lo que dicen dos fuentes sobre el mismo dato. No corrige nada: el
+ * dataset usa siempre la fuente dueña y aquí solo se avisa del desacuerdo
+ * para que una persona lo revise.
+ */
+export function crossCheckCharacter(hanzi: string, sources: CharacterSources): string[] {
+  const { unihan, makeMeAHanzi, hanziWriterStrokeCount } = sources
+  const conflicts: string[] = []
+  if (unihan?.strokeCount !== undefined && hanziWriterStrokeCount !== undefined) {
+    if (unihan.strokeCount !== hanziWriterStrokeCount) {
+      conflicts.push(
+        `${hanzi}: Unihan dice ${unihan.strokeCount} trazos y hanzi-writer-data tiene ${hanziWriterStrokeCount}. Se usa el de Unihan.`,
+      )
+    }
+  }
+  if (unihan?.radical !== undefined && makeMeAHanzi !== undefined && unihan.radical !== makeMeAHanzi.radical) {
+    conflicts.push(
+      `${hanzi}: el radical es ${unihan.radical} en Unihan y ${makeMeAHanzi.radical} en Make Me a Hanzi. Se usa el de Unihan.`,
+    )
+  }
+  return conflicts
 }

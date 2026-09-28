@@ -17,6 +17,11 @@ tar -xzf cedict-json-1.3.20251213.tgz package/cedict.json
 mv package/cedict.json cedict.json
 rm -rf package cedict-json-1.3.20251213.tgz
 
+# Make Me a Hanzi, dictionary.txt fijado a un commit. Licencia LGPL 3.0 o posterior.
+MAKEMEAHANZI_COMMIT=bddc96d41bef78427ed0e034e9f7e31d71fd1b92
+curl -sSfL -o makemeahanzi-dictionary.txt \
+  "https://raw.githubusercontent.com/skishore/makemeahanzi/${MAKEMEAHANZI_COMMIT}/dictionary.txt"
+
 # Unihan y la lista de radicales de Unicode 18.0. Unicode License v3.
 # unicode.org no es accesible desde el entorno en la nube de Claude: este paso
 # se ejecuta en local o en GitHub Actions (.github/workflows/dataset.yml).
