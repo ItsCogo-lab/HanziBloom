@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { KeyValueStorage } from '../lib/storage.ts'
 import { ProgressProvider } from '../features/progress/ProgressProvider.tsx'
+import { SettingsProvider } from '../features/settings/SettingsProvider.tsx'
 
 type AppProvidersProps = {
   children: ReactNode
@@ -10,5 +11,9 @@ type AppProvidersProps = {
 
 /** Estado compartido por toda la app. Los tests lo usan igual que <App>. */
 export function AppProviders({ children, storage }: AppProvidersProps) {
-  return <ProgressProvider storage={storage}>{children}</ProgressProvider>
+  return (
+    <SettingsProvider storage={storage}>
+      <ProgressProvider storage={storage}>{children}</ProgressProvider>
+    </SettingsProvider>
+  )
 }
