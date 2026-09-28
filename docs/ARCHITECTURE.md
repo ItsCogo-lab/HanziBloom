@@ -61,8 +61,8 @@ src/
     audio/          Servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
-  data/             Datasets estáticos (hsk1/characters.json, hsk1/words.json)
-  i18n/             Textos de la interfaz (es, más adelante en y ca)
+  data/             Datasets generados (hsk1/characters.ts, hsk1/words.ts)
+  i18n/             Textos de la interfaz (en activo, es preparado, ca más adelante)
   lib/              Utilidades sin dominio: almacenamiento, fechas, aleatoriedad
   test/             Configuración compartida de los tests
 ```
@@ -187,10 +187,11 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
 
 ### Internacionalización
 
-- Textos de la interfaz: `src/i18n/es.ts` es la fuente; otros idiomas deben
-  tener las mismas claves (lo comprueba TypeScript). Función `t('clave')`.
-- Contenido: `meanings` es un objeto por idioma, así que añadir inglés o
-  catalán no cambia el modelo.
+- Textos de la interfaz: `src/i18n/en.ts` es la fuente y el idioma activo;
+  `es.ts` (y más adelante `ca.ts`) deben tener las mismas claves (lo comprueba
+  TypeScript). Función `t('clave')`.
+- Contenido: `meanings` es un objeto por idioma con el inglés obligatorio
+  (viene de CC-CEDICT), así que añadir español o catalán no cambia el modelo.
 
 ## 7. Problemas identificados
 
@@ -200,12 +201,12 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
    **Decidido: HSK 2.0 para el MVP**, porque es más pequeño y es el que usan
    la mayoría de materiales. El campo `hskLevel` se puede acompañar de un
    campo de estándar si más adelante incluimos ambos.
-2. **Fuente de los significados en español.** Las fuentes abiertas fiables
-   (CC-CEDICT, licencia CC BY-SA 4.0) dan pinyin y significados en **inglés**.
-   No conozco un diccionario chino-español abierto con la misma fiabilidad.
-   Propuesta: pinyin de CC-CEDICT, trazos y radicales de Unihan (Unicode), y
-   significados en español traducidos a partir de las glosas de CC-CEDICT,
-   marcados para que los revises. Lo decidimos en la Fase 5.
+2. **Idioma y fuente de los significados.** Las fuentes abiertas fiables
+   (CC-CEDICT, licencia CC BY-SA 4.0) dan los significados en **inglés** y no
+   hay un diccionario chino-español abierto equivalente.
+   **Decidido: de momento la interfaz y los significados están en inglés**,
+   usando CC-CEDICT. El español queda preparado (`i18n/es.ts` y
+   `meanings.es`). Detalles y licencia del dataset en `docs/DATA_SOURCES.md`.
 3. **Carácter y palabra a la vez.** 好 es un carácter y también una palabra
    HSK 1. Por eso el progreso usa ids con prefijo (`char:好`, `word:好`) y los
    dos se estudian por separado.
