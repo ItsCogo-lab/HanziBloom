@@ -1,3 +1,4 @@
+import { getSyllableTone } from '../../lib/tones.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
 import type { CustomSentence, CustomSet, SentenceToken } from './types.ts'
 
@@ -77,4 +78,18 @@ export function deleteSentence(set: CustomSet, sentenceId: string): CustomSet {
 /** Las frases que acompañan a un elemento del set. */
 export function getItemSentences(set: CustomSet, itemId: StudyItemId): CustomSentence[] {
   return set.sentences.filter((sentence) => sentence.itemId === itemId)
+}
+
+/** El usuario elige la lectura de un carácter dudoso entre las posibles: ya no es dudoso. */
+export function chooseReading(tokens: readonly SentenceToken[], index: number, reading: string): SentenceToken[] {
+  return tokens.map((token, i) => {
+    if (i !== index || !token.uncertain || !token.candidates?.includes(reading)) return token
+    const tone = getSyllableTone(reading)
+    return { text: token.text, pinyin: reading, ...(tone === undefined ? {} : { tone }) }
+  })
+}
+
+/** Cuántos caracteres de la frase tienen la lectura sin confirmar. */
+export function countUncertain(tokens: readonly SentenceToken[]): number {
+  return tokens.filter((token) => token.uncertain).length
 }

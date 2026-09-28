@@ -190,4 +190,32 @@ describe('Sets propios', () => {
     await user.click(within(getVocabulary()).getByRole('button', { name: 'Delete sentence 机场很大。' }))
     expect(loadCustomSets(storage)[0]?.sentences).toEqual([])
   })
+
+  it('genera el pinyin de la frase al guardarla y deja elegir la lectura de un carácter dudoso', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom', storage)
+    await createSet(user, 'My Chinese')
+    await addWord(user, '学习', '学习')
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add a sentence' }))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), '我每天学习中文。')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await within(getVocabulary()).findByText('wǒ měi tiān xué xí zhōng wén。')).toBeInTheDocument()
+    const [sentence] = loadCustomSets(storage)[0]!.sentences
+    expect(sentence?.tokens.map((token) => token.tone ?? '-').join('')).toBe('3312212-')
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add a sentence' }))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), '他长大了。')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add a sentence' }))
+    await user.type(screen.getByLabelText('Sentence in Chinese'), '他长得很高。')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await user.selectOptions(await screen.findByLabelText('Pronunciation of 长'), 'zhǎng')
+    const saved = loadCustomSets(storage)[0]!.sentences[2]!
+    expect(saved.tokens[1]).toEqual({ text: '长', pinyin: 'zhǎng', tone: 3 })
+    // El diccionario no cambia: 长 sigue teniendo sus dos lecturas
+    expect(getStudyItem(hskDictionary, 'char:长')?.entry.pinyin).toEqual(['cháng', 'zhǎng'])
+  })
 })

@@ -3,10 +3,11 @@ import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { useCustomSets } from '../customSetsContext.ts'
-import type { CustomSet } from '../types.ts'
+import type { CustomSentence, CustomSet } from '../types.ts'
 import { getItemSentences } from '../sentences.ts'
 import { MeaningEditor } from './MeaningEditor.tsx'
 import { SentenceEditor } from './SentenceEditor.tsx'
+import { PronunciationReview } from './PronunciationReview.tsx'
 import { SentenceView } from './SentenceView.tsx'
 
 const small = 'px-3 py-1.5 text-sm'
@@ -63,9 +64,8 @@ function MeaningNote({ set, item }: { set: CustomSet; item: StudyItem }) {
 }
 
 function SentenceNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
-  const { addSentence, updateSentence, deleteSentence } = useCustomSets()
-  // Qué frase se está editando: 'new' para una nueva
-  const [editing, setEditing] = useState<string>()
+  const { addSentence } = useCustomSets()
+  const [adding, setAdding] = useState(false)
   const itemId = getStudyItemId(item)
   const sentences = getItemSentences(set, itemId)
 
@@ -77,56 +77,74 @@ function SentenceNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
           <ul className="flex flex-col gap-3">
             {sentences.map((sentence) => (
               <li key={sentence.id} className="rounded-xl bg-paper p-3">
-                {editing === sentence.id ? (
-                  <SentenceEditor
-                    initial={sentence.chinese}
-                    onSave={(change) => {
-                      updateSentence(set.id, sentence.id, change)
-                      setEditing(undefined)
-                    }}
-                    onCancel={() => setEditing(undefined)}
-                  />
-                ) : (
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <SentenceView sentence={sentence} />
-                    <div className="flex gap-2">
-                      <Button
-                        variant="secondary"
-                        className={small}
-                        aria-label={t('custom.editSentenceNamed', { chinese: sentence.chinese })}
-                        onClick={() => setEditing(sentence.id)}
-                      >
-                        {t('custom.editSentence')}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        className={small}
-                        aria-label={t('custom.deleteSentenceNamed', { chinese: sentence.chinese })}
-                        onClick={() => deleteSentence(set.id, sentence.id)}
-                      >
-                        {t('custom.deleteSentence')}
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <SentenceNote set={set} sentence={sentence} />
               </li>
             ))}
           </ul>
         </>
       )}
-      {editing === 'new' ? (
+      {adding ? (
         <SentenceEditor
           onSave={(sentence) => {
             addSentence(set.id, { ...sentence, itemId })
-            setEditing(undefined)
+            setAdding(false)
           }}
-          onCancel={() => setEditing(undefined)}
+          onCancel={() => setAdding(false)}
         />
       ) : (
-        <Button variant="secondary" className={`${small} self-start`} onClick={() => setEditing('new')}>
+        <Button variant="secondary" className={`${small} self-start`} onClick={() => setAdding(true)}>
           {t('custom.addSentence')}
         </Button>
       )}
+    </div>
+  )
+}
+
+/** Una frase del set: se ve con su pinyin y tonos, y se puede editar, borrar o revisar su pronunciación. */
+function SentenceNote({ set, sentence }: { set: CustomSet; sentence: CustomSentence }) {
+  const { updateSentence, deleteSentence } = useCustomSets()
+  const [editing, setEditing] = useState(false)
+
+  if (editing) {
+    return (
+      <SentenceEditor
+        initial={sentence.chinese}
+        onSave={(change) => {
+          updateSentence(set.id, sentence.id, change)
+          setEditing(false)
+        }}
+        onCancel={() => setEditing(false)}
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <SentenceView sentence={sentence} />
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            className={small}
+            aria-label={t('custom.editSentenceNamed', { chinese: sentence.chinese })}
+            onClick={() => setEditing(true)}
+          >
+            {t('custom.editSentence')}
+          </Button>
+          <Button
+            variant="secondary"
+            className={small}
+            aria-label={t('custom.deleteSentenceNamed', { chinese: sentence.chinese })}
+            onClick={() => deleteSentence(set.id, sentence.id)}
+          >
+            {t('custom.deleteSentence')}
+          </Button>
+        </div>
+      </div>
+      <PronunciationReview
+        sentence={sentence}
+        onChange={(tokens) => updateSentence(set.id, sentence.id, { chinese: sentence.chinese, tokens })}
+      />
     </div>
   )
 }
