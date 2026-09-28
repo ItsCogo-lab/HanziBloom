@@ -44,6 +44,9 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(screen.getByRole('link', { name: 'CC-CEDICT' })).toHaveAttribute('href', 'https://cc-cedict.org/wiki/')
+    for (const source of ['Unicode Unihan', 'Make Me a Hanzi', 'Hanzi Writer data', 'Tatoeba']) {
+      expect(screen.getByRole('link', { name: source })).toBeInTheDocument()
+    }
     expect(screen.getByText(/CC BY-SA 4\.0\)/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'clem109/hsk-vocabulary' })).toBeInTheDocument()
   })

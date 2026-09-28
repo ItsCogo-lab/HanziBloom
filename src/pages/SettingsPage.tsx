@@ -20,6 +20,30 @@ const DATA_SOURCES = [
     url: 'https://github.com/clem109/hsk-vocabulary',
     license: 'MIT',
   },
+  {
+    labelKey: 'settings.aboutCharacterData',
+    name: 'Unicode Unihan',
+    url: 'https://www.unicode.org/reports/tr38/',
+    license: 'Unicode License v3',
+  },
+  {
+    labelKey: 'settings.aboutEtymology',
+    name: 'Make Me a Hanzi',
+    url: 'https://github.com/skishore/makemeahanzi',
+    license: 'LGPL 3.0+',
+  },
+  {
+    labelKey: 'settings.aboutStrokeOrder',
+    name: 'Hanzi Writer data',
+    url: 'https://github.com/chanind/hanzi-writer-data',
+    license: 'Arphic Public License',
+  },
+  {
+    labelKey: 'settings.aboutExamples',
+    name: 'Tatoeba',
+    url: 'https://tatoeba.org',
+    license: 'CC BY 2.0 FR',
+  },
 ] as const
 
 export function SettingsPage() {

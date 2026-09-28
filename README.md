@@ -50,8 +50,9 @@ npm run dev        # servidor de desarrollo en http://localhost:5173
 | `npm test` | Ejecuta los tests una vez |
 | `npm run test:watch` | Tests en modo observación |
 | `npm run check` | Tipos + lint + tests (lo mismo que ejecuta la CI) |
-| `npm run data:fetch` | Descarga las fuentes del dataset (CC-CEDICT y lista HSK) |
-| `npm run data:build` | Regenera el dataset en `src/data/` (ver `docs/DATA_SOURCES.md`) |
+| `npm run data:fetch` | Descarga las fuentes del dataset (lista HSK, CC-CEDICT, Unihan, Make Me a Hanzi, Tatoeba) |
+| `npm run data:build` | Regenera el dataset en `src/data/`, `public/strokes/` y `public/examples/` (ver `docs/DATA_SOURCES.md`) |
+| `npm run data:validate` | Valida el dataset generado sin descargar nada |
 
 ## Estructura
 
@@ -84,8 +85,16 @@ La estructura completa prevista está descrita en
 
 ## Datos
 
-Los significados y lecturas vienen de [CC-CEDICT](https://cc-cedict.org/wiki/)
-(CC BY-SA 4.0) y la lista de palabras HSK de
-[clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
-Los archivos de `src/data/` se distribuyen bajo CC BY-SA 4.0. Más detalles en
+Todos los datos lingüísticos vienen de fuentes abiertas y se generan con un
+script; la app no llama a ninguna API externa:
+
+- Significados, lecturas y tradicional de las palabras: [CC-CEDICT](https://cc-cedict.org/wiki/) (CC BY-SA 4.0).
+- Lista de palabras HSK 2.0: [clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
+- Radicales y tradicional de los caracteres: [Unihan](https://www.unicode.org/reports/tr38/) (Unicode License v3).
+- Componentes y etimología: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) (LGPL 3.0+).
+- Orden y número de trazos: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) (Arphic Public License).
+- Frases de ejemplo: [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR).
+
+Cada archivo generado mantiene la licencia de su fuente. Qué fuente manda en
+cada campo y cómo se regenera el dataset, en
 [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).
