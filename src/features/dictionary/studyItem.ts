@@ -1,4 +1,4 @@
-import { getCharacter, getWord, type Dictionary } from './dictionary.ts'
+import { getCharacter, getCharactersOfWord, getWord, getWordsWithCharacter, type Dictionary } from './dictionary.ts'
 import type { Character, Word } from './types.ts'
 
 /**
@@ -39,4 +39,18 @@ export function getStudyItem(dictionary: Dictionary, id: StudyItemId): StudyItem
   }
   const entry = getWord(dictionary, id.slice('word:'.length))
   return entry && { kind: 'word', entry }
+}
+
+/**
+ * Elementos relacionados: los caracteres de una palabra, o las palabras en
+ * las que aparece un carácter. La palabra con el mismo hanzi que el carácter
+ * (谁 carácter y 谁 palabra) no se incluye: no aporta nada.
+ */
+export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyItem[] {
+  if (item.kind === 'word') {
+    return getCharactersOfWord(dictionary, item.entry).map((entry): StudyItem => ({ kind: 'character', entry }))
+  }
+  return getWordsWithCharacter(dictionary, item.entry.id)
+    .filter((word) => word.hanzi !== item.entry.hanzi)
+    .map((entry): StudyItem => ({ kind: 'word', entry }))
 }

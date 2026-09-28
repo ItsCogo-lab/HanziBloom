@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createDictionary } from './dictionary.ts'
-import { getStudyItem, getStudyItemId, listStudyItems } from './studyItem.ts'
+import { getRelatedItems, getStudyItem, getStudyItemId, listStudyItems } from './studyItem.ts'
 import { testCharacters, testWords } from './testData.ts'
 
 describe('getStudyItemId', () => {
@@ -33,5 +33,18 @@ describe('getStudyItem', () => {
 
   it('devuelve undefined si no existe', () => {
     expect(getStudyItem(dictionary, 'word:不存在')).toBeUndefined()
+  })
+})
+
+describe('getRelatedItems', () => {
+  const dictionary = createDictionary(testCharacters, testWords)
+  const hanziOf = (items: ReturnType<typeof getRelatedItems>) => items.map((item) => item.entry.hanzi)
+
+  it('de una palabra devuelve sus caracteres', () => {
+    expect(hanziOf(getRelatedItems(dictionary, { kind: 'word', entry: testWords[0]! }))).toEqual(['你', '好'])
+  })
+
+  it('de un carácter devuelve sus palabras, sin la que tiene el mismo hanzi', () => {
+    expect(hanziOf(getRelatedItems(dictionary, { kind: 'character', entry: testCharacters[1]! }))).toEqual(['你好'])
   })
 })
