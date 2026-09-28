@@ -117,15 +117,21 @@ interface Word {
 type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
 type StudyItemId = `char:${string}` | `word:${string}`   // "char:好", "word:好"
 
-// Progreso de un elemento de estudio (se implementa en la Fase 8)
+// Progreso de un elemento estudiado (src/features/progress/types.ts)
 interface ItemProgress {
   itemId: StudyItemId
   timesSeen: number
   timesCorrect: number
   timesWrong: number
-  lastReviewedAt?: string // ISO 8601
-  nextReviewAt?: string
   masteryLevel: number    // 0-5
+  lastReviewedAt: string  // ISO 8601
+  nextReviewAt: string
+}
+
+// Todo el progreso: los elementos que no están en `items` son nuevos
+interface ProgressData {
+  items: Partial<Record<StudyItemId, ItemProgress>>
+  activity: Record<string, { answers: number; correct: number }> // por día "2026-09-28"
 }
 ```
 
@@ -194,22 +200,43 @@ consumirá el sistema de progreso en la Fase 8.
 
 ### Repetición espaciada
 
-El módulo `srs` expone una sola función:
+`src/features/srs/srs.ts` expone dos funciones:
 
 ```ts
-scheduleNextReview(progress: ItemProgress, wasCorrect: boolean, now: Date): ItemProgress
+scheduleNextReview(masteryLevel: number, wasCorrect: boolean, now: Date): { masteryLevel, nextReviewAt }
+isReviewDue(nextReviewAt: string, now: Date): boolean
 ```
 
 Para el MVP: sistema de cajas tipo Leitner. Acierto → sube un nivel; fallo →
-vuelve a 0. Intervalos por nivel: 0, 1, 3, 7, 14, 30 días. El resto de la app
-solo conoce esta función, así que cambiar a SM-2 o FSRS más adelante no afecta
-a nada más.
+vuelve a 0. Intervalos por nivel: 0, 1, 3, 7, 14, 30 días, contados por días
+del calendario local (el repaso "de mañana" está disponible desde las 00:00).
+El resto de la app solo conoce estas funciones, así que cambiar a SM-2 o FSRS
+más adelante no afecta a nada más.
+
+**Progreso** (`src/features/progress/`):
+
+- `progress.ts`: `recordAnswer` actualiza los contadores del elemento, le
+  pide al SRS su siguiente repaso y suma la respuesta a la actividad del día.
+  Estado de cada elemento: nuevo (nunca visto), en aprendizaje o dominado
+  (nivel 4 o más: siguiente repaso a 14 días o más).
+- `streak.ts`: racha actual y más larga, por días locales. Si hoy aún no has
+  estudiado, la racha de ayer sigue contando.
+- `ProgressProvider` + `useProgress()`: el progreso vive en un Context de
+  React y se guarda en cada cambio. Cada respuesta se guarda al momento, así
+  que salir a mitad de una sesión no pierde nada.
+
+**Qué entra en una sesión** (`selectSessionItems`): primero los repasos
+pendientes (los más atrasados antes), luego elementos nuevos y, si aún faltan,
+los estudiados cuyo repaso está más cerca. Después se barajan.
 
 ### Persistencia
 
-`localStorage` detrás de un pequeño módulo (`loadProgress` / `saveProgress`).
-El objeto guardado lleva un campo `version` para poder migrar datos cuando el
-formato cambie. Si algún día hay backend, se sustituye este módulo.
+`localStorage` detrás de un pequeño módulo (`loadProgress` / `saveProgress`
+en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
+campo `version` para poder migrar datos cuando el formato cambie. Si lo
+guardado está corrupto o localStorage no está disponible (modo privado), la
+app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
+módulo.
 
 ### Audio
 
