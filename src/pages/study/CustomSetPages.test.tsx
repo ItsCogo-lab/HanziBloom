@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { AppProviders } from '../../app/AppProviders.tsx'
 import { AppRoutes } from '../../app/AppRoutes.tsx'
 import { loadCustomSets } from '../../features/customSets/storage.ts'
@@ -114,5 +114,52 @@ describe('Sets propios', () => {
 
     expect(screen.getByText("You haven't created any sets yet.")).toBeInTheDocument()
     expect(loadCustomSets(storage)).toEqual([])
+  })
+
+  it('añade, edita y borra un significado propio sin cambiar el del diccionario', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom', storage)
+    await createSet(user, 'Travel')
+    await addWord(user, 'jichang', '机场')
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add my meaning' }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Write a meaning, or cancel.')
+    await user.type(screen.getByLabelText('My meaning for 机场'), 'airport when travelling')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(within(getVocabulary()).getByText('airport when travelling')).toBeInTheDocument()
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Edit my meaning' }))
+    await user.clear(screen.getByLabelText('My meaning for 机场'))
+    await user.type(screen.getByLabelText('My meaning for 机场'), 'airport')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(loadCustomSets(storage)[0]?.meanings).toEqual({ 'word:机场': 'airport' })
+    expect(getStudyItem(hskDictionary, 'word:机场')?.entry.meanings.en).not.toContain('airport when travelling')
+
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Delete my meaning' }))
+    expect(loadCustomSets(storage)[0]?.meanings).toEqual({})
+  })
+
+  it('desde el set, la ficha del diccionario es la de siempre y además muestra las notas del set', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
+    renderAt('/study/custom')
+    await createSet(user, 'Travel')
+    await addWord(user, 'apple', '苹果')
+    await user.click(within(getVocabulary()).getByRole('button', { name: 'Add my meaning' }))
+    await user.type(screen.getByLabelText('My meaning for 苹果'), 'apple for the supermarket')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await user.click(within(getVocabulary()).getByRole('link', { name: 'Open 苹果 in the dictionary' }))
+
+    // La ficha oficial sigue ahí, con el significado del diccionario
+    const meanings = screen.getByRole('heading', { name: 'Meanings' }).parentElement!
+    expect(within(meanings).getByText('apple')).toBeInTheDocument()
+    // Y aparte, las notas del set
+    expect(screen.getByRole('heading', { name: 'My notes in Travel' })).toBeInTheDocument()
+    expect(screen.getByText('apple for the supermarket')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back to Travel' })).toBeInTheDocument()
+    vi.unstubAllGlobals()
   })
 })

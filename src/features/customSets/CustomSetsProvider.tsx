@@ -2,7 +2,16 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { KeyValueStorage } from '../../lib/storage.ts'
 import { hskDictionary } from '../dictionary/hskDictionary.ts'
 import { getStudyItem } from '../dictionary/studyItem.ts'
-import { addItem, createCustomSet, createCustomSetId, deleteCustomSet, removeItem, updateCustomSet } from './customSets.ts'
+import {
+  addItem,
+  createCustomSet,
+  createCustomSetId,
+  deleteCustomSet,
+  deleteMeaning,
+  removeItem,
+  setMeaning,
+  updateCustomSet,
+} from './customSets.ts'
 import { CustomSetsContext, type CustomSetsContextValue } from './customSetsContext.ts'
 import { loadCustomSets, saveCustomSets } from './storage.ts'
 
@@ -40,6 +49,8 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
         if (getStudyItem(hskDictionary, itemId)) update(setId, (set) => addItem(set, itemId))
       },
       removeItem: (setId, itemId) => update(setId, (set) => removeItem(set, itemId)),
+      setMeaning: (setId, itemId, meaning) => update(setId, (set) => setMeaning(set, itemId, meaning)),
+      deleteMeaning: (setId, itemId) => update(setId, (set) => deleteMeaning(set, itemId)),
     }
   }, [customSets])
 

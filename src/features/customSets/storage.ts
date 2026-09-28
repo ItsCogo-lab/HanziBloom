@@ -29,19 +29,33 @@ export function loadCustomSets(storage?: KeyValueStorage): CustomSet[] {
 
 function parseCustomSet(value: unknown): CustomSet | undefined {
   if (!isRecord(value)) return undefined
-  const { id, name, description, itemIds, createdAt, updatedAt } = value
+  const { id, name, description, itemIds, meanings, createdAt, updatedAt } = value
   if (typeof id !== 'string' || !id.startsWith('custom-') || typeof name !== 'string' || name.trim() === '') {
     return undefined
   }
   if (typeof createdAt !== 'string' || typeof updatedAt !== 'string') return undefined
+  const validItemIds = Array.isArray(itemIds) ? [...new Set(itemIds.filter(isStudyItemId))] : []
   return {
     id,
     name,
     description: typeof description === 'string' ? description : '',
-    itemIds: Array.isArray(itemIds) ? [...new Set(itemIds.filter(isStudyItemId))] : [],
+    itemIds: validItemIds,
+    meanings: parseMeanings(meanings, validItemIds),
     createdAt,
     updatedAt,
   }
+}
+
+/** Solo significados de texto no vacío y de elementos que están en el set. */
+function parseMeanings(value: unknown, itemIds: readonly StudyItemId[]): CustomSet['meanings'] {
+  const meanings: CustomSet['meanings'] = {}
+  if (!isRecord(value)) return meanings
+  for (const [itemId, meaning] of Object.entries(value)) {
+    if (isStudyItemId(itemId) && itemIds.includes(itemId) && typeof meaning === 'string' && meaning.trim() !== '') {
+      meanings[itemId] = meaning
+    }
+  }
+  return meanings
 }
 
 export function isStudyItemId(value: unknown): value is StudyItemId {

@@ -13,6 +13,12 @@ export interface CustomSet {
   /** Opcional: puede estar vacía. */
   description: string
   itemIds: StudyItemId[]
+  /**
+   * Significados propios del usuario para elementos de este set. Son notas
+   * suyas: el significado del diccionario no cambia, y el mismo elemento en
+   * otro set tiene sus propias notas.
+   */
+  meanings: Partial<Record<StudyItemId, string>>
   /** Fechas ISO 8601. */
   createdAt: string
   updatedAt: string

@@ -7,13 +7,15 @@ import { StatusBadge } from '../../progress/components/StatusBadge.tsx'
 import { getItemStatus } from '../../progress/progress.ts'
 import { useProgress } from '../../progress/progressContext.ts'
 import type { StudySet } from '../../studySets/types.ts'
-import { useCustomSets } from '../customSetsContext.ts'
+import { useCustomSet, useCustomSets } from '../customSetsContext.ts'
+import { CustomItemNotes } from './CustomItemNotes.tsx'
 import { getCustomEntryPath } from '../customPaths.ts'
 
 /** Vocabulario de un set propio: cada elemento con su progreso, su ficha y el botón para quitarlo. */
 export function CustomItemList({ set, items }: { set: StudySet; items: readonly StudyItem[] }) {
   const { progress } = useProgress()
   const { removeItem } = useCustomSets()
+  const customSet = useCustomSet(set.id)
 
   return (
     <section aria-labelledby="custom-items-title" className="flex flex-col gap-3">
@@ -33,6 +35,7 @@ export function CustomItemList({ set, items }: { set: StudySet; items: readonly 
                   <EntryLabel entry={item.entry} withMeaning />
                   <StatusBadge status={getItemStatus(progress.items[itemId])} />
                 </div>
+                {customSet && <CustomItemNotes set={customSet} item={item} />}
                 <div className="flex flex-wrap gap-2">
                   <Link
                     to={getCustomEntryPath(item, set)}

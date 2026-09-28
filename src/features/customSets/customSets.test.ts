@@ -3,7 +3,10 @@ import {
   addItem,
   createCustomSet,
   deleteCustomSet,
+  deleteMeaning,
   removeItem,
+  setMeaning,
+  validateMeaning,
   toStudySet,
   updateCustomSet,
   validateDetails,
@@ -61,10 +64,46 @@ describe('sets propios', () => {
   })
 })
 
+describe('significados propios', () => {
+  const base = addItem(addItem(createCustomSet({ name: 'Travel', description: '' }, 'custom-a', now), 'word:机场'), 'word:苹果')
+
+  it('se añaden, se editan y se borran por elemento del set', () => {
+    let set = setMeaning(base, 'word:机场', 'airport when travelling')
+    expect(set.meanings).toEqual({ 'word:机场': 'airport when travelling' })
+
+    set = setMeaning(set, 'word:机场', 'the airport')
+    expect(set.meanings['word:机场']).toBe('the airport')
+
+    expect(deleteMeaning(set, 'word:机场').meanings).toEqual({})
+  })
+
+  it('no se puede poner a un elemento que no está en el set', () => {
+    expect(setMeaning(base, 'word:学习', 'to study')).toBe(base)
+  })
+
+  it('al quitar el elemento del set se borra su significado propio', () => {
+    const set = setMeaning(base, 'word:机场', 'airport')
+    expect(removeItem(set, 'word:机场').meanings).toEqual({})
+  })
+
+  it('cada set tiene los suyos: el mismo elemento en otro set no se ve afectado', () => {
+    const other = addItem(createCustomSet({ name: 'Exam', description: '' }, 'custom-b', now), 'word:机场')
+    const sets = updateCustomSet([base, other], 'custom-a', now, (set) => setMeaning(set, 'word:机场', 'airport'))
+
+    expect(sets[0]?.meanings['word:机场']).toBe('airport')
+    expect(sets[1]?.meanings).toEqual({})
+  })
+
+  it('no acepta un significado vacío', () => {
+    expect(validateMeaning('   ')).toEqual({ problem: 'emptyMeaning' })
+    expect(validateMeaning(' apple ')).toEqual({ meaning: 'apple' })
+  })
+})
+
 describe('guardar sets propios', () => {
   it('guarda y carga los sets tal cual', () => {
     const storage = memoryStorage()
-    const sets = [addItem(createCustomSet({ name: 'Mine', description: 'd' }, 'custom-a', now), 'word:苹果')]
+    const sets = [setMeaning(addItem(createCustomSet({ name: 'Mine', description: 'd' }, 'custom-a', now), 'word:苹果'), 'word:苹果', 'my apple')]
     saveCustomSets(sets, storage)
 
     expect(loadCustomSets(storage)).toEqual(sets)
@@ -87,7 +126,7 @@ describe('guardar sets propios', () => {
     )
 
     expect(loadCustomSets(storage)).toEqual([
-      { id: 'custom-a', name: 'Good', description: '', itemIds: ['word:苹果'], createdAt: 'x', updatedAt: 'x' },
+      { id: 'custom-a', name: 'Good', description: '', itemIds: ['word:苹果'], meanings: {}, createdAt: 'x', updatedAt: 'x' },
     ])
   })
 })

@@ -10,6 +10,7 @@ import type { CustomSet, CustomSetDetails } from './types.ts'
 
 export const MAX_NAME_LENGTH = 60
 export const MAX_DESCRIPTION_LENGTH = 200
+export const MAX_MEANING_LENGTH = 200
 
 export type DetailsProblem = 'emptyName' | 'nameTooLong' | 'descriptionTooLong'
 
@@ -30,7 +31,7 @@ export function createCustomSetId(): string {
 
 export function createCustomSet(details: CustomSetDetails, id: string, now: Date): CustomSet {
   const date = now.toISOString()
-  return { id, ...details, itemIds: [], createdAt: date, updatedAt: date }
+  return { id, ...details, itemIds: [], meanings: {}, createdAt: date, updatedAt: date }
 }
 
 /** Aplica `change` al set con ese id y actualiza su fecha. Los demás no cambian. */
@@ -52,9 +53,35 @@ export function addItem(set: CustomSet, itemId: StudyItemId): CustomSet {
   return set.itemIds.includes(itemId) ? set : { ...set, itemIds: [...set.itemIds, itemId] }
 }
 
-/** Quita un elemento del set. El elemento sigue en el diccionario y su progreso no se toca. */
+/**
+ * Quita un elemento del set, con sus notas en este set. El elemento sigue en
+ * el diccionario y su progreso no se toca.
+ */
 export function removeItem(set: CustomSet, itemId: StudyItemId): CustomSet {
-  return { ...set, itemIds: set.itemIds.filter((id) => id !== itemId) }
+  return { ...deleteMeaning(set, itemId), itemIds: set.itemIds.filter((id) => id !== itemId) }
+}
+
+export type MeaningProblem = 'emptyMeaning' | 'meaningTooLong'
+
+/** El significado propio ya limpio, o el problema que tiene. */
+export function validateMeaning(meaning: string): { meaning: string } | { problem: MeaningProblem } {
+  const trimmed = meaning.trim()
+  if (trimmed === '') return { problem: 'emptyMeaning' }
+  if (trimmed.length > MAX_MEANING_LENGTH) return { problem: 'meaningTooLong' }
+  return { meaning: trimmed }
+}
+
+/** Guarda el significado propio de un elemento del set (ya validado). */
+export function setMeaning(set: CustomSet, itemId: StudyItemId, meaning: string): CustomSet {
+  if (!set.itemIds.includes(itemId)) return set
+  return { ...set, meanings: { ...set.meanings, [itemId]: meaning } }
+}
+
+export function deleteMeaning(set: CustomSet, itemId: StudyItemId): CustomSet {
+  if (set.meanings[itemId] === undefined) return set
+  const meanings = { ...set.meanings }
+  delete meanings[itemId]
+  return { ...set, meanings }
 }
 
 /**
