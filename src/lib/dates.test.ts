@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, startOfDay, toDateKey } from './dates.ts'
+import { addDays, fromDateKey, startOfDay, toDateKey } from './dates.ts'
 
 describe('toDateKey', () => {
   it('usa el día local con dos cifras en mes y día', () => {
     expect(toDateKey(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05')
     expect(toDateKey(new Date(2026, 11, 31, 0, 0))).toBe('2026-12-31')
+  })
+})
+
+describe('fromDateKey', () => {
+  it('es la inversa de toDateKey', () => {
+    expect(fromDateKey('2026-01-05')).toEqual(new Date(2026, 0, 5))
+    expect(toDateKey(fromDateKey('2026-12-31'))).toBe('2026-12-31')
   })
 })
 

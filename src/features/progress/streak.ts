@@ -1,4 +1,4 @@
-import { addDays, toDateKey, type DateKey } from '../../lib/dates.ts'
+import { addDays, fromDateKey, toDateKey, type DateKey } from '../../lib/dates.ts'
 import type { DailyActivity } from './types.ts'
 
 /**
@@ -29,9 +29,7 @@ export function getLongestStreak(activity: Record<DateKey, DailyActivity>): numb
   let current = 0
   let previous: DateKey | undefined
   for (const day of days) {
-    // Las claves "YYYY-MM-DD" se leen como fecha local con el constructor por partes
-    const [year, month, date] = day.split('-').map(Number) as [number, number, number]
-    const dayBefore = toDateKey(addDays(new Date(year, month - 1, date), -1))
+    const dayBefore = toDateKey(addDays(fromDateKey(day), -1))
     current = previous === dayBefore ? current + 1 : 1
     longest = Math.max(longest, current)
     previous = day

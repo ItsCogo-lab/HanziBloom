@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { createDictionary } from '../dictionary/dictionary.ts'
-import { listStudyItems } from '../dictionary/studyItem.ts'
+import { listStudyItems, type StudyItemId } from '../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, MASTERED_LEVEL, recordAnswer } from './progress.ts'
-import { summarizeItems } from './stats.ts'
+import { getAnswerTotals, getMostMissed, getRecentActivity, summarizeItems } from './stats.ts'
 import type { ProgressData } from './types.ts'
 
 const items = listStudyItems(createDictionary(testCharacters, testWords)) // 4 caracteres y 3 palabras
@@ -43,5 +43,50 @@ describe('summarizeItems', () => {
 
   it('sin progreso, todo es nuevo', () => {
     expect(summarizeItems(items, createEmptyProgress(), monday)).toMatchObject({ total: 7, new: 7, studied: 0, due: 0 })
+  })
+})
+
+describe('getAnswerTotals', () => {
+  it('suma las respuestas de todos los días', () => {
+    const activity = { '2026-09-27': { answers: 6, correct: 3 }, '2026-09-28': { answers: 4, correct: 4 } }
+    expect(getAnswerTotals(activity)).toEqual({ answers: 10, correct: 7, accuracy: 0.7 })
+  })
+
+  it('sin respuestas no hay porcentaje de acierto', () => {
+    expect(getAnswerTotals({})).toEqual({ answers: 0, correct: 0, accuracy: undefined })
+  })
+})
+
+describe('getRecentActivity', () => {
+  it('devuelve los últimos días en orden, con ceros en los días sin estudiar', () => {
+    const activity = { '2026-09-26': { answers: 5, correct: 4 }, '2026-09-01': { answers: 9, correct: 9 } }
+
+    expect(getRecentActivity(activity, monday, 3)).toEqual([
+      { date: '2026-09-26', answers: 5, correct: 4 },
+      { date: '2026-09-27', answers: 0, correct: 0 },
+      { date: '2026-09-28', answers: 0, correct: 0 },
+    ])
+  })
+
+  it('por defecto, una semana', () => {
+    expect(getRecentActivity({}, monday)).toHaveLength(7)
+  })
+})
+
+describe('getMostMissed', () => {
+  it('ordena por fallos y, a igualdad, por peor acierto', () => {
+    let progress = createEmptyProgress()
+    const answers: [StudyItemId, boolean][] = [
+      ['char:你', false],
+      ['char:你', false],
+      ['char:好', false],
+      ['char:好', true],
+      ['char:谢', false],
+      ['char:了', true],
+    ]
+    for (const [id, correct] of answers) progress = recordAnswer(progress, id, correct, monday)
+
+    expect(getMostMissed(progress).map((item) => item.itemId)).toEqual(['char:你', 'char:谢', 'char:好'])
+    expect(getMostMissed(progress, 1)).toHaveLength(1)
   })
 })

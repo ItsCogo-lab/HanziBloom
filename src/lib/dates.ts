@@ -15,6 +15,12 @@ export function toDateKey(date: Date): DateKey {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
+/** Fecha (00:00 hora local) de una clave "YYYY-MM-DD". */
+export function fromDateKey(key: DateKey): Date {
+  const [year = 0, month = 1, day = 1] = key.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 /** Fecha a las 00:00 (hora local) del día de `date`. */
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
