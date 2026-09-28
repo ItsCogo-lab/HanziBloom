@@ -37,6 +37,11 @@ export function scheduleNextReview(masteryLevel: number, wasCorrect: boolean, no
   }
 }
 
+/** Programación de un elemento recién aprendido: nivel 0, que toca repasar hoy. */
+export function scheduleFirstReview(now: Date): ReviewSchedule {
+  return { masteryLevel: 0, nextReviewAt: addDays(startOfDay(now), REVIEW_INTERVAL_DAYS[0]).toISOString() }
+}
+
 export function isReviewDue(nextReviewAt: string, now: Date): boolean {
   return Date.parse(nextReviewAt) <= now.getTime()
 }

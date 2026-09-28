@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { createEmptyProgress, getItemStatus, isDue, MASTERED_LEVEL, recordAnswer } from './progress.ts'
+import {
+  createEmptyProgress,
+  getItemStatus,
+  introduceItem,
+  isDue,
+  isLearned,
+  MASTERED_LEVEL,
+  recordAnswer,
+} from './progress.ts'
 
 const monday = new Date(2026, 8, 28, 10, 0)
 const tuesday = new Date(2026, 8, 29, 9, 0)
@@ -67,5 +75,25 @@ describe('isDue', () => {
     expect(isDue(progress.items['char:你'], tuesday)).toBe(true)
     expect(isDue(progress.items['char:好'], monday)).toBe(true)
     expect(isDue(undefined, monday)).toBe(false)
+  })
+})
+
+describe('introduceItem', () => {
+  const now = new Date(2026, 8, 28, 12)
+
+  it('marca el elemento como aprendido, con su primer repaso hoy, sin contar como respuesta', () => {
+    const progress = introduceItem(createEmptyProgress(), 'word:你好', now)
+
+    expect(isLearned(progress, 'word:你好')).toBe(true)
+    expect(getItemStatus(progress.items['word:你好'])).toBe('learning')
+    expect(progress.items['word:你好']).toMatchObject({ masteryLevel: 0, timesSeen: 0 })
+    expect(isDue(progress.items['word:你好'], now)).toBe(true)
+    expect(progress.activity).toEqual({})
+  })
+
+  it('no toca un elemento que ya tenía progreso', () => {
+    const progress = recordAnswer(createEmptyProgress(), 'word:你好', true, now)
+
+    expect(introduceItem(progress, 'word:你好', now)).toBe(progress)
   })
 })

@@ -82,10 +82,10 @@ Cuatro secciones en la navegación principal; Progreso y Ajustes cuelgan del per
 | --- | --- | --- |
 | Home | `/` | Progreso general, racha, repasos pendientes, sets que se estudian. |
 | Study | `/study`, `/study/hsk`, `/study/topics` | Pestañas My Studies, HSK y Topics con tarjetas de set. |
-| Set | `/study/sets/:setId` | Progreso del set (aprendidos, aprendiendo, sin empezar), vocabulario y botón de estudiar. |
-| Sesión | `/study/practice?set=:setId` | Sesión con elementos del set (sin `set`, de todo el vocabulario). Botón Dictionary. |
+| Set | `/study/sets/:setId` | Acciones Learn y Study con sus cuentas, progreso (dominados, aprendiendo, sin empezar) y vocabulario. |
+| Sesión | `/study/practice?set=:setId&mode=learn` o `&mode=study` | Learn (vocabulario nuevo) o Study (repaso de lo aprendido) de un set; sin `set`, sesión mezclada de todo el vocabulario. Botón Dictionary. |
 | Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Búsqueda global y fichas. `q` y `kind` van en la URL. |
-| Profile | `/profile` | Resumen local: aprendidos, repasos, racha, sets y recientes. |
+| Profile | `/profile` | Resumen local: dominados, repasos, racha, sets y recientes. |
 | Progreso / Ajustes | `/progress`, `/settings` | Estadísticas detalladas; sesión, tonos, borrar progreso, créditos. |
 
 Las rutas antiguas (`/practice`, `/vocabulary`, `/characters`) redirigen a las nuevas.
@@ -111,6 +111,35 @@ en varios sets cuenta en todos sin duplicar datos. Dominado = nivel SRS ≥ 4.
 My Studies (`features/myStudies`) guarda solo qué sets sigue el usuario y la
 última vez que estudió cada uno (`hanzivocab.studies`). Quitar un set no borra
 el progreso de sus elementos.
+
+### Learn y Study
+
+Cada set tiene dos tipos de sesión, y ninguno se convierte solo en el otro:
+
+- **Learn** presenta elementos nuevos del set con su ficha completa (la misma
+  del diccionario) y el usuario confirma cuáles ha aprendido.
+- **Study** es repaso: solo entran elementos ya aprendidos, primero los que
+  toca repasar. Si no toca ninguno, la interfaz lo dice y ofrece «Review
+  learned vocabulary anyway» (`scope=all`), que sigue usando solo lo aprendido.
+
+Definiciones, sobre el progreso que ya existía (sin campos nuevos):
+
+| Estado | Condición | Dónde |
+| --- | --- | --- |
+| Nuevo (sin aprender) | El elemento no tiene registro en el SRS | `getItemStatus` → `new` |
+| Aprendido | Tiene registro: se confirmó en Learn o ya se respondió alguna vez | `isLearned` |
+| Pendiente de repaso | Aprendido y su `nextReviewAt` ya llegó | `isDue` |
+| Dominado | Nivel SRS ≥ 4 | `MASTERED_LEVEL` |
+
+Confirmar en Learn llama a `introduceItem`: crea el registro con nivel 0 y
+primer repaso hoy (el intervalo del nivel 0 del SRS). No es una respuesta, así
+que no suma a la actividad ni a la racha. Los filtros están en
+`studySets/sessionItems.ts` (`getLearnableItems`, `getReviewItems`,
+`getSetSessionCounts`); ninguna página filtra por su cuenta.
+
+La URL fija el contexto de la sesión: `/study/practice?set=hsk-1&mode=learn`
+o `&mode=study`. El elemento actual y las respuestas viven en el estado del
+componente de la sesión, que sigue montado mientras el diccionario está abierto.
 
 ### Diccionario dentro de la sesión
 

@@ -5,6 +5,8 @@ import type { ProgressData } from './types.ts'
 export interface ProgressContextValue {
   progress: ProgressData
   recordAnswer: (itemId: StudyItemId, correct: boolean) => void
+  /** Marca un elemento como aprendido (sesión Learn). */
+  introduceItem: (itemId: StudyItemId) => void
   resetProgress: () => void
 }
 

@@ -46,12 +46,12 @@ export function ProfilePage() {
           </h2>
           <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard
-              label={t('profile.charactersLearned')}
+              label={t('profile.charactersMastered')}
               value={summarizeItems(characterItems, progress, now).mastered}
               detail={t('stats.studiedOf', { total: characterItems.length })}
             />
             <StatCard
-              label={t('profile.wordsLearned')}
+              label={t('profile.wordsMastered')}
               value={summarizeItems(wordItems, progress, now).mastered}
               detail={t('stats.studiedOf', { total: wordItems.length })}
             />

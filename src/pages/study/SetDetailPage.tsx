@@ -1,7 +1,6 @@
 import { useId, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Button } from '../../components/ui/Button.tsx'
-import { ButtonLink } from '../../components/ui/ButtonLink.tsx'
 import { Card } from '../../components/ui/Card.tsx'
 import { PageHeader } from '../../components/ui/PageHeader.tsx'
 import { StatCard } from '../../components/ui/StatCard.tsx'
@@ -15,7 +14,7 @@ import { getItemStatus } from '../../features/progress/progress.ts'
 import { useProgress } from '../../features/progress/progressContext.ts'
 import type { ProgressData } from '../../features/progress/types.ts'
 import { appStudySets } from '../../features/studySets/appStudySets.ts'
-import { getSetPracticePath } from '../../features/studySets/setPaths.ts'
+import { SetSessionActions } from '../../features/studySets/components/SetSessionActions.tsx'
 import { SetItemCount, StudyingBadge } from '../../features/studySets/components/SetSummary.tsx'
 import { SetProgressBar } from '../../features/studySets/components/SetProgressBar.tsx'
 import { StudyToggleButton } from '../../features/studySets/components/StudyToggleButton.tsx'
@@ -48,14 +47,12 @@ export function SetDetailPage() {
         description={set.description}
         actions={
           <div className="flex flex-wrap gap-2">
-            <ButtonLink to={getSetPracticePath(set)}>
-              {t(setProgress.studied > 0 ? 'sets.continue' : 'sets.start')}
-            </ButtonLink>
             <StudyToggleButton set={set} />
           </div>
         }
       />
       <div className="flex flex-col gap-6">
+        <SetSessionActions set={set} />
         <Card className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 className="text-lg font-semibold">{t('sets.progressTitle')}</h2>
@@ -66,7 +63,7 @@ export function SetDetailPage() {
           </div>
           <SetProgressBar name={set.name} progress={setProgress} />
           <dl className="grid grid-cols-3 gap-3">
-            <StatCard label={t('sets.learned')} value={setProgress.mastered} />
+            <StatCard label={t('sets.mastered')} value={setProgress.mastered} />
             <StatCard label={t('sets.learning')} value={setProgress.learning} />
             <StatCard label={t('sets.notStarted')} value={setProgress.new} />
           </dl>

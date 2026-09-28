@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { KeyValueStorage } from '../../lib/storage.ts'
-import { createEmptyProgress, recordAnswer } from './progress.ts'
+import { createEmptyProgress, introduceItem, recordAnswer } from './progress.ts'
 import { ProgressContext, type ProgressContextValue } from './progressContext.ts'
 import { loadProgress, saveProgress } from './storage.ts'
 
@@ -25,6 +25,7 @@ export function ProgressProvider({ children, storage }: ProgressProviderProps) {
     () => ({
       progress,
       recordAnswer: (itemId, correct) => setProgress((current) => recordAnswer(current, itemId, correct, new Date())),
+      introduceItem: (itemId) => setProgress((current) => introduceItem(current, itemId, new Date())),
       resetProgress: () => setProgress(createEmptyProgress()),
     }),
     [progress],

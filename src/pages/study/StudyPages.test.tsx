@@ -6,7 +6,7 @@ import { AppProviders } from '../../app/AppProviders.tsx'
 import { AppRoutes } from '../../app/AppRoutes.tsx'
 import { topicDefinitions } from '../../data/topics.ts'
 import { loadMyStudies } from '../../features/myStudies/storage.ts'
-import { createEmptyProgress, recordAnswer } from '../../features/progress/progress.ts'
+import { createEmptyProgress, introduceItem, recordAnswer } from '../../features/progress/progress.ts'
 import { saveProgress } from '../../features/progress/storage.ts'
 import type { KeyValueStorage } from '../../lib/storage.ts'
 import { memoryStorage } from '../../test/memoryStorage.ts'
@@ -58,7 +58,9 @@ describe('Study: sets HSK y por temas', () => {
 
     await user.click(within(getStudyTabs()).getByRole('link', { name: 'My Studies' }))
     expect(screen.getByRole('link', { name: 'HSK 2' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Study HSK 2' })).toHaveAttribute('href', '/study/practice?set=hsk-2')
+    // Sin nada aprendido solo se puede aprender: Study no aparece
+    expect(screen.getByRole('link', { name: 'Learn HSK 2' })).toHaveAttribute('href', '/study/practice?set=hsk-2&mode=learn')
+    expect(screen.queryByRole('link', { name: 'Study HSK 2' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Remove HSK 2 from My Studies' }))
     expect(screen.getByRole('heading', { name: 'No sets yet' })).toBeInTheDocument()
@@ -75,7 +77,7 @@ describe('Study: sets HSK y por temas', () => {
     saveProgress(progress, storage)
 
     renderAt('/study/sets/hsk-1', storage)
-    expect(screen.getByText(/· 1 of 328 learned$/)).toBeInTheDocument()
+    expect(screen.getByText(/· 1 of 328 mastered$/)).toBeInTheDocument()
   })
 })
 
@@ -84,10 +86,62 @@ describe('Página de un set', () => {
     renderAt('/study/sets/topic-food')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Food & drink' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Start studying' })).toHaveAttribute('href', '/study/practice?set=topic-food')
+    expect(screen.getByRole('link', { name: 'Learn Food & drink' })).toHaveAttribute(
+      'href',
+      '/study/practice?set=topic-food&mode=learn',
+    )
     const vocabulary = screen.getByRole('region', { name: 'Vocabulary' })
     expect(within(vocabulary).getByRole('link', { name: /苹果/ })).toHaveAttribute('href', `/vocabulary/${encodeURIComponent('苹果')}`)
-    expect(screen.getByText(/· 0 of 51 learned$/)).toBeInTheDocument()
+    expect(screen.getByText(/· 0 of 51 mastered$/)).toBeInTheDocument()
+  })
+
+  it('las acciones Learn y Study cuentan con el progreso real', () => {
+    const storage = memoryStorage()
+    const now = new Date()
+    let progress = createEmptyProgress()
+    progress = introduceItem(progress, 'word:苹果', now) // aprendido: toca repasar hoy
+    progress = recordAnswer(progress, 'word:米饭', true, now) // aprendido: al día
+    saveProgress(progress, storage)
+    renderAt('/study/sets/topic-food', storage)
+
+    const learn = screen.getByRole('heading', { name: 'Learn' }).closest('section')!
+    expect(within(learn).getByText('49 new items to learn')).toBeInTheDocument()
+    const study = screen.getByRole('heading', { name: 'Study' }).closest('section')!
+    expect(within(study).getByText('1 item ready to review')).toBeInTheDocument()
+    expect(within(study).getByRole('link', { name: 'Study Food & drink' })).toHaveAttribute(
+      'href',
+      '/study/practice?set=topic-food&mode=study',
+    )
+  })
+
+  it('sin nada aprendido, Study lo dice y ofrece empezar a aprender', () => {
+    renderAt('/study/sets/topic-colors')
+
+    const study = screen.getByRole('heading', { name: 'Study' }).closest('section')!
+    expect(within(study).getByText("You haven't learned any words from this set yet.")).toBeInTheDocument()
+    expect(within(study).getByRole('link', { name: 'Start learning' })).toHaveAttribute(
+      'href',
+      '/study/practice?set=topic-colors&mode=learn',
+    )
+  })
+
+  it('con todo aprendido y al día, Learn está al día y Study ofrece repasar igualmente', () => {
+    const storage = memoryStorage()
+    const colors = topicDefinitions.find((topic) => topic.id === 'colors')!
+    const progress = colors.words.reduce(
+      (result, word) => recordAnswer(result, `word:${word}`, true, new Date()),
+      createEmptyProgress(),
+    )
+    saveProgress(progress, storage)
+    renderAt('/study/sets/topic-colors', storage)
+
+    expect(screen.getByText("You're caught up. There are no new words to learn in this set.")).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Learn Colors' })).not.toBeInTheDocument()
+    expect(screen.getByText('All learned items are currently up to date.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review learned vocabulary anyway' })).toHaveAttribute(
+      'href',
+      '/study/practice?set=topic-colors&mode=study&scope=all',
+    )
   })
 
   it('un set que no existe muestra la página de no encontrado', () => {

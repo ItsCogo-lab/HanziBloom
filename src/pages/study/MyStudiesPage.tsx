@@ -4,7 +4,8 @@ import { Card } from '../../components/ui/Card.tsx'
 import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../../features/progress/progressContext.ts'
 import { appStudySets } from '../../features/studySets/appStudySets.ts'
-import { getSetPath, getSetPracticePath } from '../../features/studySets/setPaths.ts'
+import { getSetPath } from '../../features/studySets/setPaths.ts'
+import { SetSessionButtons } from '../../features/studySets/components/SetSessionActions.tsx'
 import { SetItemCount } from '../../features/studySets/components/SetSummary.tsx'
 import { SetProgressBar } from '../../features/studySets/components/SetProgressBar.tsx'
 import { StudyToggleButton } from '../../features/studySets/components/StudyToggleButton.tsx'
@@ -60,9 +61,7 @@ export function MyStudiesPage() {
                   <SetProgressBar name={set.name} progress={setProgress} />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <ButtonLink to={getSetPracticePath(set)} aria-label={t('sets.studyNamed', { name: set.name })}>
-                    {t(setProgress.studied > 0 ? 'sets.continue' : 'sets.start')}
-                  </ButtonLink>
+                  <SetSessionButtons set={set} />
                   <StudyToggleButton set={set} />
                 </div>
               </div>
