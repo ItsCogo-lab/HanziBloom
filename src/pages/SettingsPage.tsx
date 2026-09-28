@@ -1,12 +1,134 @@
-import { ComingSoon } from '../components/ComingSoon.tsx'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Button } from '../components/ui/Button.tsx'
+import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
+import { useProgress } from '../features/progress/progressContext.ts'
+import { SESSION_SIZE_OPTIONS } from '../features/settings/settings.ts'
+import { useSettings } from '../features/settings/settingsContext.ts'
 import { t } from '../i18n/index.ts'
+
+const DATA_SOURCES = [
+  {
+    labelKey: 'settings.aboutMeanings',
+    name: 'CC-CEDICT',
+    url: 'https://cc-cedict.org/wiki/',
+    license: 'CC BY-SA 4.0',
+  },
+  {
+    labelKey: 'settings.aboutWordList',
+    name: 'clem109/hsk-vocabulary',
+    url: 'https://github.com/clem109/hsk-vocabulary',
+    license: 'MIT',
+  },
+] as const
 
 export function SettingsPage() {
   return (
     <>
       <PageHeader title={t('nav.settings')} description={t('settings.description')} />
-      <ComingSoon />
+      <div className="flex max-w-2xl flex-col gap-6">
+        <SettingsSection title={t('settings.practice')}>
+          <SessionSizeSetting />
+        </SettingsSection>
+        <SettingsSection title={t('settings.data')}>
+          <ResetProgress />
+        </SettingsSection>
+        <SettingsSection title={t('settings.about')}>
+          <ul className="flex flex-col gap-2">
+            {DATA_SOURCES.map((source) => (
+              <li key={source.name}>
+                {t(source.labelKey)}:{' '}
+                <a href={source.url} className="text-accent-strong underline underline-offset-2">
+                  {source.name}
+                </a>{' '}
+                ({source.license})
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-sm text-ink-muted">{t('settings.aboutLicense')}</p>
+        </SettingsSection>
+      </div>
     </>
+  )
+}
+
+function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <Card>
+      <h2 className="mb-4 text-lg font-semibold">{title}</h2>
+      {children}
+    </Card>
+  )
+}
+
+/** Botones de opción con aspecto de selector segmentado. */
+function SessionSizeSetting() {
+  const { settings, updateSettings } = useSettings()
+  return (
+    <fieldset>
+      <legend className="mb-2 text-ink-muted">{t('settings.sessionSize')}</legend>
+      <div className="flex gap-2">
+        {SESSION_SIZE_OPTIONS.map((size) => (
+          <label
+            key={size}
+            className="cursor-pointer rounded-xl border-2 border-line px-5 py-2 font-medium tabular-nums has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+          >
+            <input
+              type="radio"
+              name="session-size"
+              value={size}
+              checked={settings.sessionSize === size}
+              onChange={() => updateSettings({ sessionSize: size })}
+              className="sr-only"
+            />
+            {size}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+/** Borrar el progreso pide confirmación en dos pasos, porque no se puede deshacer. */
+function ResetProgress() {
+  const { resetProgress } = useProgress()
+  const [step, setStep] = useState<'idle' | 'confirming' | 'done'>('idle')
+  const cancelRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (step === 'confirming') cancelRef.current?.focus()
+  }, [step])
+
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <p className="text-ink-muted">{t('settings.dataDescription')}</p>
+      {step === 'confirming' ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-danger/40 bg-danger/5 p-4">
+          <p>{t('settings.resetConfirm')}</p>
+          <div className="flex flex-wrap gap-3">
+            {/* El foco va a «Cancel»: pulsar Enter sin mirar no debe borrar nada */}
+            <Button ref={cancelRef} variant="secondary" onClick={() => setStep('idle')}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                resetProgress()
+                setStep('done')
+              }}
+            >
+              {t('settings.resetConfirmButton')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button variant="secondary" onClick={() => setStep('confirming')}>
+          {t('settings.reset')}
+        </Button>
+      )}
+      <p role="status" className="text-success">
+        {step === 'done' ? t('settings.resetDone') : ''}
+      </p>
+    </div>
   )
 }
