@@ -1,20 +1,17 @@
 import { useState } from 'react'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
-import { hskDictionary } from '../features/dictionary/hskDictionary.ts'
-import { listStudyItems } from '../features/dictionary/studyItem.ts'
+import { hskDictionary, hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import { PracticeSession } from '../features/practice/components/PracticeSession.tsx'
 import { createSessionExercises } from '../features/practice/session.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import type { ProgressData } from '../features/progress/types.ts'
 import { t } from '../i18n/index.ts'
 
-const studyItems = listStudyItems(hskDictionary)
-
 let nextSessionId = 0
 
 function createSession(progress: ProgressData) {
   nextSessionId += 1
-  return { id: nextSessionId, exercises: createSessionExercises(studyItems, { progress }) }
+  return { id: nextSessionId, exercises: createSessionExercises(hskStudyItems, { progress }) }
 }
 
 export function PracticePage() {
