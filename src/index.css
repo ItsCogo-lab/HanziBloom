@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens de HanziVocab.
+ * Tailwind v4 genera utilidades a partir de estas variables:
+ * --color-ink → text-ink, bg-ink, border-ink...
+ * Cambiar la identidad visual = cambiar estos valores, no los componentes.
+ */
+@theme {
+  /* Papel cálido de fondo y tinta para el texto: pensado para sesiones largas */
+  --color-paper: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-ink: #1f1d1a;
+  --color-ink-muted: #5f5a52;
+  --color-line: #e7e1d7;
+
+  /* Acento bermellón (朱红), con variante oscura para texto sobre fondo claro */
+  --color-accent: #b4412f;
+  --color-accent-strong: #8f3222;
+  --color-accent-soft: #f6e4df;
+
+  /* Estados de respuesta */
+  --color-success: #2f7d4f;
+  --color-danger: #b3261e;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Fuentes chinas del sistema: sin descargas y funciona sin conexión */
+  --font-hanzi: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+}
+
+@layer base {
+  html {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+
+  /* Foco siempre visible al navegar con teclado */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
