@@ -4,7 +4,7 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 5 de 12** del MVP (dataset HSK 1). De momento la interfaz y los
+Estado: **Fase 6 de 12** del MVP (flashcards). De momento la interfaz y los
 significados están en inglés. La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -50,10 +50,11 @@ src/
   pages/         Una página por sección de la app
   features/
     dictionary/  Tipos de caracteres y palabras, consultas y validación de datos
+    practice/    Sesiones de estudio: lógica (session.ts), tipos de ejercicio y componentes
   data/          Dataset generado (HSK 1: 150 palabras, 178 caracteres)
-  lib/           Utilidades sin dominio (conversión de pinyin)
+  lib/           Utilidades sin dominio (pinyin, aleatoriedad)
   components/    Componentes compartidos
-    ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader
+    ui/          Piezas visuales genéricas: Button, ButtonLink, Card, PageHeader, ProgressBar
   i18n/          Textos de la interfaz (en.ts activo, es.ts preparado) y función t()
   test/          Configuración compartida de los tests
   index.css      Tailwind y design tokens (colores, fuentes, foco)
