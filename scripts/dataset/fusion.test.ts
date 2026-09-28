@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ningCharacter, ningmengWord } from '../../src/features/dictionary/testData.ts'
 import { cedictFixture } from './fixtures/cedict.ts'
 import { makeMeAHanziFixture } from './fixtures/makemeahanzi.ts'
 import { cjkRadicalsFixture, unihanIrgSourcesFixture, unihanVariantsFixture } from './fixtures/unihan.ts'
@@ -14,7 +15,7 @@ describe('buildBaseEntries', () => {
     const { characters, words, problems } = buildBaseEntries([{ hanzi: '柠檬', pinyin: 'níng méng' }], cedict, 1)
 
     expect(problems).toEqual(['Carácter 檬 [méng] (en 柠檬): sin lectura en CC-CEDICT'])
-    expect(words).toEqual([{ id: '柠檬', hanzi: '柠檬', pinyin: 'níng méng', meanings: { en: ['lemon'] }, hskLevel: 1 }])
+    expect(words).toEqual([ningmengWord])
     expect(characters).toEqual([
       { id: '柠', hanzi: '柠', pinyin: ['níng'], meanings: { en: ['used in 柠檬'] }, hskLevel: 1 },
     ])
@@ -36,18 +37,16 @@ describe('enrichCharacter', () => {
   const makeMeAHanzi = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠']))
 
   it('combina CC-CEDICT, Unihan y Make Me a Hanzi en la ficha de 柠', () => {
-    expect(enrichCharacter(ning, { unihan: unihan.get('柠'), makeMeAHanzi: makeMeAHanzi.get('柠') })).toEqual({
-      id: '柠',
-      hanzi: '柠',
+    const enriched = enrichCharacter(ning, { unihan: unihan.get('柠'), makeMeAHanzi: makeMeAHanzi.get('柠') })
+    // Los tests de la interfaz usan este mismo objeto (testData.ts)
+    expect(enriched).toEqual(ningCharacter)
+    expect(enriched).toMatchObject({
       pinyin: ['níng'],
-      meanings: { en: ['used in 柠檬'] },
-      hskLevel: 1,
-      strokeCount: 9,
+      traditional: ['檸'],
       radical: '木',
       radicalNumber: 75,
-      traditional: ['檸'],
       decomposition: '⿰木宁',
-      etymology: { type: 'pictophonetic', hint: 'tree', semantic: '木', phonetic: '宁' },
+      etymology: { type: 'pictophonetic', semantic: '木', phonetic: '宁' },
     })
   })
 

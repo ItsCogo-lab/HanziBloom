@@ -87,13 +87,17 @@ function hasToneMark(syllable: string): boolean {
   return removeToneMarks(syllable) !== syllable.toLowerCase()
 }
 
+function isTranslation(meaning: string): boolean {
+  return !NON_TRANSLATION_MEANINGS.some((pattern) => pattern.test(meaning))
+}
+
 /**
  * Significados útiles para estudiar. Si una lectura solo tiene notas (漂 piào:
  * "used in 漂亮"), se conservan las notas: dicen algo cierto y útil.
  */
 export function usableMeanings(entries: readonly CedictEntry[]): string[] {
   const all = entries.flatMap((entry) => entry.english)
-  const translations = all.filter((meaning) => !NON_TRANSLATION_MEANINGS.some((pattern) => pattern.test(meaning)))
+  const translations = all.filter(isTranslation)
   const meanings = (translations.length > 0 ? translations : all).map(cleanMeaning).filter((meaning) => meaning !== '')
   return [...new Set(meanings)].slice(0, MAX_MEANINGS)
 }
@@ -108,12 +112,13 @@ export function findEntries(index: CedictIndex, hanzi: string, pinyin: string): 
 }
 
 /**
- * Forma tradicional de un grupo de entradas. Solo se devuelve si todas
- * coinciden: si CC-CEDICT da dos formas distintas para la misma lectura, no
- * elegimos una a escondidas.
+ * Forma tradicional de un grupo de entradas. Se ignoran las entradas que solo
+ * son notas ("variant of 吃"), igual que al elegir los significados. Si aun
+ * así CC-CEDICT da dos formas distintas, no se elige una a escondidas.
  */
 export function traditionalOf(entries: readonly CedictEntry[]): string | undefined {
-  const forms = new Set(entries.map((entry) => entry.traditional))
+  const withTranslations = entries.filter((entry) => entry.english.some(isTranslation))
+  const forms = new Set((withTranslations.length > 0 ? withTranslations : entries).map((entry) => entry.traditional))
   return forms.size === 1 ? [...forms][0] : undefined
 }
 

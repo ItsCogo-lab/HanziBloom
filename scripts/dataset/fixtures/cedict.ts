@@ -30,4 +30,22 @@ export const cedictFixture = JSON.stringify([
     english: ['lining', 'interior', 'inside', 'internal', 'also written 裏|里[li3]'],
   },
   { traditional: '里', simplified: '里', pinyin: 'Li3', english: ['Li (surname)'] },
+  {
+    traditional: '回',
+    simplified: '回',
+    pinyin: 'hui2',
+    english: [
+      'to circle',
+      'to go back',
+      'to turn around',
+      'to answer',
+      'to return',
+      'to revolve',
+      'Hui ethnic group (Chinese Muslims)',
+      'time',
+      'classifier for acts of a play',
+      'section or chapter (of a classic book)',
+    ],
+  },
+  { traditional: '迴', simplified: '回', pinyin: 'hui2', english: ['to curve', 'to return', 'to revolve'] },
 ])

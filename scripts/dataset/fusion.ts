@@ -8,7 +8,7 @@
  * - Todo es determinista: mismo orden de entrada, mismo resultado.
  */
 import type { Character, HskLevel, Word } from '../../src/features/dictionary/types.ts'
-import { findEntries, readingOf, usableMeanings, type CedictIndex } from './sources/cedict.ts'
+import { findEntries, readingOf, traditionalOf, usableMeanings, type CedictIndex } from './sources/cedict.ts'
 import type { HskWord } from './sources/hsk.ts'
 import type { MakeMeAHanziCharacter } from './sources/makemeahanzi.ts'
 import type { UnihanCharacter } from './sources/unihan.ts'
@@ -31,6 +31,7 @@ export const FIELD_SOURCES = {
     hskLevel: 'HSK list',
     pinyin: 'HSK list',
     meanings: 'CC-CEDICT',
+    traditional: 'CC-CEDICT',
   },
 } as const
 
@@ -56,9 +57,18 @@ export function buildBaseEntries(hskList: readonly HskWord[], cedict: CedictInde
   const problems: string[] = []
 
   const words: Word[] = hskList.map(({ hanzi, pinyin }) => {
-    const meanings = usableMeanings(findEntries(cedict, hanzi, pinyin))
+    const entries = findEntries(cedict, hanzi, pinyin)
+    const meanings = usableMeanings(entries)
     if (meanings.length === 0) problems.push(`Palabra ${hanzi} [${pinyin}]: sin entrada en CC-CEDICT`)
-    return { id: hanzi, hanzi, pinyin, meanings: { en: meanings }, hskLevel: level }
+    const traditional = traditionalOf(entries)
+    return {
+      id: hanzi,
+      hanzi,
+      pinyin,
+      meanings: { en: meanings },
+      hskLevel: level,
+      ...(traditional !== undefined && { traditional }),
+    }
   })
 
   const readingsByCharacter = new Map<string, string[]>()

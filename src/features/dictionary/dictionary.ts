@@ -68,3 +68,13 @@ export function getMeanings(translations: Translations, locale: ContentLocale = 
 export function formatPinyin(entry: Character | Word): string {
   return typeof entry.pinyin === 'string' ? entry.pinyin : entry.pinyin.join(', ')
 }
+
+/**
+ * Formas tradicionales que se escriben distinto del simplificado: 柠 → [檸],
+ * 八 → []. Si un carácter se escribe igual en ambos sistemas, no hay nada
+ * que enseñar.
+ */
+export function getTraditionalForms(entry: Character | Word): string[] {
+  const forms = typeof entry.traditional === 'string' ? [entry.traditional] : (entry.traditional ?? [])
+  return forms.filter((form) => form !== entry.hanzi)
+}

@@ -19,9 +19,14 @@ describe('adaptador de CC-CEDICT', () => {
     expect(findEntries(index, '里', 'lǐ').map((entry) => entry.traditional)).toEqual(['裡'])
   })
 
-  it('no elige forma tradicional si las entradas no coinciden', () => {
-    const both = index.get('里')!.filter((entry) => entry.pinyin === 'lǐ')
-    expect(traditionalOf(both)).toBeUndefined()
+  it('ignora las entradas que solo son notas al elegir la forma tradicional', () => {
+    const entries = index.get('里')!.filter((entry) => entry.pinyin === 'lǐ')
+    expect(entries.map((entry) => entry.traditional)).toEqual(['裏', '裡'])
+    expect(traditionalOf(entries)).toBe('裡')
+  })
+
+  it('no elige forma tradicional si CC-CEDICT da dos (回 y 迴)', () => {
+    expect(traditionalOf(findEntries(index, '回', 'huí'))).toBeUndefined()
   })
 
   it('conserva las notas si una lectura solo tiene notas (柠: "used in 柠檬")', () => {

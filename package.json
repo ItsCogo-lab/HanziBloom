@@ -19,6 +19,7 @@
     "data:build": "node scripts/dataset/build.ts"
   },
   "dependencies": {
+    "hanzi-writer": "3.7.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0"
