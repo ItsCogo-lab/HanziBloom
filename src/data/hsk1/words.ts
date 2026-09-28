@@ -1,7 +1,8 @@
 // Generado por scripts/dataset/build.ts. No editar a mano: cambia el script y vuelve a generarlo.
 // Significados y lecturas: CC-CEDICT (https://cc-cedict.org), licencia CC BY-SA 4.0.
-// Trazos, radicales y formas tradicionales de los caracteres: Unihan de Unicode 18.0 (Unicode License v3).
+// Radicales y formas tradicionales de los caracteres: Unihan de Unicode 18.0 (Unicode License v3).
 // Descomposición y etimología: Make Me a Hanzi (LGPL 3.0 o posterior).
+// Número de trazos: hanzi-writer-data (Arphic Public License).
 // Lista de palabras HSK 2.0: clem109/hsk-vocabulary (MIT). Detalles en docs/DATA_SOURCES.md.
 import type { Word } from '../../features/dictionary/types.ts'
 
