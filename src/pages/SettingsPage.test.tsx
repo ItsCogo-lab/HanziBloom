@@ -21,6 +21,24 @@ describe('SettingsPage', () => {
     expect(loadSettings(storage).sessionSize).toBe(20)
   })
 
+  it('activa y desactiva los colores y los números de tono', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderWithProviders(<SettingsPage />, { storage })
+
+    const colors = screen.getByRole('checkbox', { name: /Color characters by tone/ })
+    const numbers = screen.getByRole('checkbox', { name: /Show tone numbers/ })
+    expect(colors).toBeChecked()
+    expect(numbers).not.toBeChecked()
+
+    await user.click(colors)
+    await user.click(numbers)
+
+    expect(loadSettings(storage)).toMatchObject({ toneColors: false, toneNumbers: true })
+    // La leyenda explica los tonos también con texto, no solo con color
+    expect(screen.getByText('mā')).toBeInTheDocument()
+  })
+
   it('borra el progreso solo después de confirmar', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()

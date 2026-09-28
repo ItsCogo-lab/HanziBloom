@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '../components/ui/Button.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
+import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { SESSION_SIZE_OPTIONS } from '../features/settings/settings.ts'
 import { useSettings } from '../features/settings/settingsContext.ts'
@@ -53,6 +54,13 @@ export function SettingsPage() {
       <div className="flex max-w-2xl flex-col gap-6">
         <SettingsSection title={t('settings.practice')}>
           <SessionSizeSetting />
+        </SettingsSection>
+        <SettingsSection title={t('settings.tones')}>
+          <div className="flex flex-col gap-4">
+            <ToggleSetting setting="toneColors" label={t('settings.toneColors')} hint={t('settings.toneColorsHint')} />
+            <ToggleSetting setting="toneNumbers" label={t('settings.toneNumbers')} hint={t('settings.toneNumbersHint')} />
+            <ToneLegend className="border-t border-line pt-4" />
+          </div>
         </SettingsSection>
         <SettingsSection title={t('settings.data')}>
           <ResetProgress />
@@ -110,6 +118,31 @@ function SessionSizeSetting() {
         ))}
       </div>
     </fieldset>
+  )
+}
+
+type ToggleSettingProps = {
+  setting: 'toneColors' | 'toneNumbers'
+  label: string
+  hint: string
+}
+
+/** Un ajuste de sí o no, con una casilla nativa (accesible con teclado y lector de pantalla). */
+function ToggleSetting({ setting, label, hint }: ToggleSettingProps) {
+  const { settings, updateSettings } = useSettings()
+  return (
+    <label className="flex cursor-pointer items-start gap-3">
+      <input
+        type="checkbox"
+        checked={settings[setting]}
+        onChange={(event) => updateSettings({ [setting]: event.target.checked })}
+        className="mt-1 size-5 shrink-0 accent-accent"
+      />
+      <span>
+        <span className="font-medium">{label}</span>
+        <span className="block text-sm text-ink-muted">{hint}</span>
+      </span>
+    </label>
   )
 }
 

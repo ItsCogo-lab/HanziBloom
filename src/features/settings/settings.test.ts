@@ -5,13 +5,18 @@ import { DEFAULT_SETTINGS, isSessionSize, loadSettings, saveSettings } from './s
 describe('saveSettings / loadSettings', () => {
   it('guarda y recupera los ajustes', () => {
     const storage = memoryStorage()
-    saveSettings({ sessionSize: 20 }, storage)
+    saveSettings({ sessionSize: 20, toneColors: false, toneNumbers: true }, storage)
 
-    expect(loadSettings(storage)).toEqual({ sessionSize: 20 })
+    expect(loadSettings(storage)).toEqual({ sessionSize: 20, toneColors: false, toneNumbers: true })
   })
 
   it('sin ajustes guardados usa los de por defecto', () => {
     expect(loadSettings(memoryStorage())).toEqual(DEFAULT_SETTINGS)
+  })
+
+  it('los ajustes guardados antes de existir los tonos toman los valores por defecto', () => {
+    const storage = memoryStorage({ 'hanzivocab.settings': JSON.stringify({ version: 1, sessionSize: 5 }) })
+    expect(loadSettings(storage)).toEqual({ sessionSize: 5, toneColors: true, toneNumbers: false })
   })
 
   it('ignora valores no válidos', () => {
