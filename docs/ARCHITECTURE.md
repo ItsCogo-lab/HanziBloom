@@ -58,7 +58,8 @@ src/
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
     progress/       Registro de progreso, estadísticas, racha, persistencia
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
-    audio/          Servicio de pronunciación + botón reutilizable
+    settings/       Ajustes del usuario (tamaño de sesión), guardados en localStorage
+    audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
   data/             Datasets generados (hsk1/characters.ts, hsk1/words.ts)
@@ -79,10 +80,10 @@ corresponde a una ruta y una responsabilidad:
 | --- | --- | --- |
 | Inicio (Dashboard) | `/` | Progreso general, caracteres y palabras aprendidos, racha, pendientes de repaso, botón «Empezar sesión». |
 | Práctica | `/practice` | Sesión de estudio con ejercicios mezclados. |
-| Vocabulario | `/vocabulary` | Lista y ficha de palabras. |
-| Caracteres | `/characters`, `/characters/:hanzi` | Lista y ficha de cada carácter. |
-| Progreso | `/progress` | Estadísticas básicas. |
-| Ajustes | `/settings` | Tamaño de sesión, reinicio de progreso, (futuro) idioma. |
+| Vocabulario | `/vocabulary`, `/vocabulary/:hanzi` | Lista con buscador y ficha de cada palabra. |
+| Caracteres | `/characters`, `/characters/:hanzi` | Lista con buscador y ficha de cada carácter. |
+| Progreso | `/progress` | Estadísticas básicas: respuestas, acierto, rachas, últimos 7 días, estados y los más fallados. |
+| Ajustes | `/settings` | Tamaño de sesión, borrar el progreso, créditos del dataset, (futuro) idioma. |
 
 Navegación: barra lateral en escritorio, barra inferior en móvil.
 
@@ -92,7 +93,7 @@ El modelo está en `src/features/dictionary/types.ts`. Resumen:
 
 ```ts
 type HskLevel = 1 | 2 | 3 | 4
-type Translations = { es: string[]; en?: string[]; ca?: string[] }
+type Translations = { en: string[]; es?: string[]; ca?: string[] } // en viene de CC-CEDICT
 
 interface Character {
   id: string              // el propio hanzi, p. ej. "好"
@@ -238,9 +239,9 @@ guardado está corrupto o localStorage no está disponible (modo privado), la
 app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
 módulo.
 
-### Audio
+### Audio (futuro, fuera del MVP)
 
-Interfaz `speak(text)` implementada con la Web Speech API del navegador
+Idea prevista: interfaz `speak(text)` implementada con la Web Speech API del navegador
 (`speechSynthesis`, voz `zh-CN`): gratis y sin servidor. Limitación: depende de
 las voces instaladas en el sistema. Como toda la app usa la interfaz, más
 adelante se puede cambiar por audios grabados sin tocar los componentes.
@@ -296,3 +297,12 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
 | 10 | Estadísticas básicas | Cálculo de estadísticas |
 | 11 | Completar tests de lo crítico | — |
 | 12 | Revisión, refactor, accesibilidad | — |
+
+**Estado: MVP completo (fases 1-12).** Además del plan, se hicieron las listas y
+fichas de Vocabulario y Caracteres y la página de Ajustes, que estaban en la
+tabla de secciones. Revisión final: sin errores de axe-core (accesibilidad) en
+ninguna página, navegable con teclado y probado a 390 px y 1280 px.
+
+**Pendiente para después del MVP:** audio (Web Speech API), escritura de
+trazos, significados en español, datos de trazos y radicales (falta una fuente
+fiable y con licencia compatible), niveles HSK 2-4.
