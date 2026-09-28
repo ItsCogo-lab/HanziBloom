@@ -164,6 +164,28 @@ Está en `src/features/practice/`. Cada tipo de ejercicio tiene:
 Añadir un ejercicio nuevo (p. ej. escritura) consiste en esos tres pasos, sin
 tocar los demás. El `random` se inyecta para que los tests sean deterministas.
 
+**Tipos actuales.** `flashcard` (el usuario dice si lo sabía) y tres de opción
+múltiple con cuatro opciones, en `choiceExercises.ts`:
+
+| Tipo | Se muestra | Se elige |
+| --- | --- | --- |
+| `meaning-choice` | hanzi | significado |
+| `pinyin-choice` | hanzi | pinyin |
+| `hanzi-choice` | significado | hanzi |
+
+Reglas de los distractores (cubiertas por tests):
+
+- Son del mismo tipo que la respuesta (carácter o palabra) y, si se puede, con
+  el mismo número de caracteres, para que no se adivine por la forma.
+- No pueden ser también una respuesta válida: se descartan los que comparten
+  un significado (sinónimos), una lectura de pinyin o el mismo hanzi, y
+  tampoco pueden coincidir entre sí.
+- Los significados que citan el propio hanzi ("used in 漂亮") se ocultan; si a
+  un elemento no le queda ninguno (子, 漂, 么), no se pregunta por su
+  significado, solo por su pinyin.
+- En los caracteres con varias lecturas se muestra la primera, para que la
+  opción correcta no se distinga por ser una lista.
+
 **Sesión.** `session.ts` crea los ejercicios (elementos al azar y un tipo
 construible para cada uno) y gestiona el avance con un reducer puro
 (`sessionReducer`), que `PracticeSession` usa con `useReducer`. Cada respuesta
@@ -222,10 +244,10 @@ adelante se puede cambiar por audios grabados sin tocar los componentes.
    HSK 1. Por eso el progreso usa ids con prefijo (`char:好`, `word:好`) y los
    dos se estudian por separado.
 4. **Varias lecturas de pinyin.** Algunos caracteres tienen más de una
-   pronunciación; en el ejercicio de pinyin se aceptará cualquiera válida y
-   los distractores no pueden coincidir con ninguna.
+   pronunciación; en el ejercicio de pinyin se muestra una y los
+   distractores no pueden coincidir con ninguna. **Resuelto en la fase 7.**
 5. **Distractores.** Las opciones incorrectas no deben ser sinónimos de la
-   correcta ni repetirse. La lógica de selección irá cubierta por tests.
+   correcta ni repetirse. **Resuelto en la fase 7** (ver «Tipos actuales»).
 6. **Fechas y racha.** La racha se calcula por día local, no por UTC; si no,
    estudiar a medianoche daría resultados raros.
 7. **Fuentes chinas.** Se usan fuentes del sistema (PingFang SC, Noto Sans SC,

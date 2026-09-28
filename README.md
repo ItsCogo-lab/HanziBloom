@@ -4,7 +4,7 @@ Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura
 y pronunciación.
 
-Estado: **Fase 6 de 12** del MVP (flashcards). De momento la interfaz y los
+Estado: **Fase 7 de 12** del MVP (ejercicios de reconocimiento). De momento la interfaz y los
 significados están en inglés. La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
