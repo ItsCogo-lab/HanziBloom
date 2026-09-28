@@ -23,7 +23,7 @@ describe('ProgressPage', () => {
     renderProgressPage(createEmptyProgress())
 
     expect(screen.getByText(/No statistics yet/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/practice')
+    expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
   it('muestra totales, rachas, actividad reciente, estados y los más fallados', () => {
@@ -50,8 +50,8 @@ describe('ProgressPage', () => {
 
     const byStatus = screen.getByRole('table', { name: 'By status' })
     const wordsRow = within(byStatus).getByRole('rowheader', { name: 'Words' }).closest('tr')!
-    // 150 palabras: 149 nuevas, 1 aprendiendo (谢谢), 0 dominadas
-    expect(within(wordsRow).getAllByRole('cell').map((cell) => cell.textContent)).toEqual(['149', '1', '0'])
+    // 1196 palabras: 1195 nuevas, 1 aprendiendo (谢谢), 0 dominadas
+    expect(within(wordsRow).getAllByRole('cell').map((cell) => cell.textContent)).toEqual(['1195', '1', '0'])
 
     const mostMissed = screen.getByRole('table', { name: 'Most missed' })
     expect(within(mostMissed).getAllByRole('row')).toHaveLength(2)

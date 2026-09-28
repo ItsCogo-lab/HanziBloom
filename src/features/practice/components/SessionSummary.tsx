@@ -5,7 +5,8 @@ import { t } from '../../../i18n/index.ts'
 import { formatPinyin, getMeanings } from '../../dictionary/dictionary.ts'
 import type { StudyItem } from '../../dictionary/studyItem.ts'
 import type { SessionSummary as Summary } from '../session.ts'
-import { HanziText } from '../../../components/ui/HanziText.tsx'
+import { PinyinText } from '../../dictionary/components/PinyinText.tsx'
+import { ToneHanzi } from '../../dictionary/components/ToneHanzi.tsx'
 
 type SessionSummaryProps = {
   summary: Summary
@@ -30,8 +31,8 @@ export function SessionSummary({ summary, missedItems, onRestart }: SessionSumma
           <ul className="divide-y divide-line">
             {missedItems.map((item) => (
               <li key={`${item.kind}:${item.entry.id}`} className="flex items-baseline gap-4 py-2">
-                <HanziText className="text-2xl">{item.entry.hanzi}</HanziText>
-                <span className="text-accent-strong">{formatPinyin(item.entry)}</span>
+                <ToneHanzi entry={item.entry} className="text-2xl" />
+                <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />
                 <span className="text-ink-muted">{getMeanings(item.entry.meanings)[0]}</span>
               </li>
             ))}

@@ -3,23 +3,23 @@ import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { t } from '../../../i18n/index.ts'
 import { getTraditionalForms, type Dictionary } from '../dictionary.ts'
 import { getComponents } from '../ids.ts'
-import type { StudyItem } from '../studyItem.ts'
 import type { Character } from '../types.ts'
+import type { EntryOpener } from './EntryLink.tsx'
 import { HanziLink } from './HanziLink.tsx'
 
 type CharacterFactsProps = {
   character: Character
   dictionary: Dictionary
-  getHref: (item: StudyItem) => string
+  opener: EntryOpener
 }
 
 /**
  * Datos del carácter (tradicional, radical, trazos, componentes, nivel) y su
  * etimología. Cada fila aparece solo si el dataset tiene ese dato.
  */
-export function CharacterFacts({ character, dictionary, getHref }: CharacterFactsProps) {
+export function CharacterFacts({ character, dictionary, opener }: CharacterFactsProps) {
   const link = (hanzi: string) => (
-    <HanziLink hanzi={hanzi} dictionary={dictionary} getHref={getHref} />
+    <HanziLink hanzi={hanzi} dictionary={dictionary} opener={opener} />
   )
   const traditional = getTraditionalForms(character)
   const components = character.decomposition ? getComponents(character.decomposition) : []

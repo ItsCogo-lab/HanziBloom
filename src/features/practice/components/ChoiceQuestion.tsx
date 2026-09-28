@@ -2,11 +2,13 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { t, type MessageKey } from '../../../i18n/index.ts'
-import { formatPinyin } from '../../dictionary/dictionary.ts'
+import { formatPinyin, type Dictionary } from '../../dictionary/dictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { getMeaningLabel, getPinyinLabel, isCorrectOption } from '../choiceExercises.ts'
 import type { ChoiceExercise, ChoiceExerciseType } from '../types.ts'
-import { HanziText } from '../../../components/ui/HanziText.tsx'
+import { LookUpButtons } from './LookUpButtons.tsx'
+import { PinyinText } from '../../dictionary/components/PinyinText.tsx'
+import { ToneHanzi } from '../../dictionary/components/ToneHanzi.tsx'
 
 const QUESTIONS: Record<ChoiceExerciseType, MessageKey> = {
   'meaning-choice': 'practice.choice.meaningQuestion',
@@ -16,7 +18,9 @@ const QUESTIONS: Record<ChoiceExerciseType, MessageKey> = {
 
 type ChoiceQuestionProps = {
   exercise: ChoiceExercise
+  dictionary: Dictionary
   onAnswer: (correct: boolean) => void
+  onLookUp: (item: StudyItem) => void
 }
 
 /**
@@ -24,7 +28,7 @@ type ChoiceQuestionProps = {
  * (la correcta en verde, la elegida en rojo si falla) y se muestra la
  * respuesta completa; «Continue» pasa al siguiente ejercicio.
  */
-export function ChoiceQuestion({ exercise, onAnswer }: ChoiceQuestionProps) {
+export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: ChoiceQuestionProps) {
   const [selected, setSelected] = useState<StudyItem>()
   const continueRef = useRef<HTMLButtonElement>(null)
   const feedbackId = useId()
@@ -48,7 +52,12 @@ export function ChoiceQuestion({ exercise, onAnswer }: ChoiceQuestionProps) {
         {type === 'hanzi-choice' ? (
           <p className="text-2xl font-medium">{getMeaningLabel(item)}</p>
         ) : (
-          <HanziText className="text-7xl leading-tight sm:text-8xl">{item.entry.hanzi}</HanziText>
+          // Si se pregunta la pronunciación, los colores de tono no aparecen hasta responder
+          <ToneHanzi
+            entry={item.entry}
+            showTones={isAnswered || type !== 'pinyin-choice'}
+            className="text-7xl leading-tight sm:text-8xl"
+          />
         )}
         <h2 className="text-lg text-ink-muted">{t(QUESTIONS[type])}</h2>
       </div>
@@ -75,11 +84,12 @@ export function ChoiceQuestion({ exercise, onAnswer }: ChoiceQuestionProps) {
             </p>
             {/* Los {' '} separan las palabras al leerlo en voz alta; el hueco visual lo pone gap */}
             <p className="mt-2 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
-              <HanziText className="text-2xl">{item.entry.hanzi}</HanziText>{' '}
-              <span className="text-accent-strong">{formatPinyin(item.entry)}</span>{' '}
+              <ToneHanzi entry={item.entry} className="text-2xl" />{' '}
+              <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />{' '}
               <span className="text-ink-muted">{getMeaningLabel(item)}</span>
             </p>
           </div>
+          <LookUpButtons item={item} dictionary={dictionary} onLookUp={onLookUp} />
           <Button
             ref={continueRef}
             aria-describedby={feedbackId}
@@ -126,9 +136,11 @@ function ChoiceOption({ type, option, state, disabled, onSelect }: ChoiceOptionP
       className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2 text-center transition-colors ${OPTION_STATE_CLASSES[state]}`}
     >
       {type === 'hanzi-choice' ? (
-        <HanziText className="text-3xl">{option.entry.hanzi}</HanziText>
+        <ToneHanzi entry={option.entry} className="text-3xl" />
       ) : (
-        <span className="text-lg">{type === 'pinyin-choice' ? getPinyinLabel(option) : getMeaningLabel(option)}</span>
+        <span className="text-lg">
+          {type === 'pinyin-choice' ? <PinyinText pinyin={getPinyinLabel(option)} /> : getMeaningLabel(option)}
+        </span>
       )}
       {/* El color no basta para todo el mundo: también un símbolo y un texto para lectores de pantalla */}
       {state === 'correct' && <OptionMark symbol="✓" label={t('practice.choice.correctOption')} />}

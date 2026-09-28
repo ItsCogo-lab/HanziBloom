@@ -1,8 +1,11 @@
-import { render, screen, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import type { StudyItem } from '../../dictionary/studyItem.ts'
+import type { Character } from '../../dictionary/types.ts'
 import type { ChoiceExercise, ChoiceExerciseType } from '../types.ts'
+import { createDictionary } from '../../dictionary/dictionary.ts'
+import { renderWithProviders } from '../../../test/renderWithProviders.tsx'
 import { ChoiceQuestion } from './ChoiceQuestion.tsx'
 
 function character(hanzi: string, pinyin: string, meaning: string): StudyItem {
@@ -21,7 +24,10 @@ function exerciseOf(type: ChoiceExerciseType): ChoiceExercise {
 }
 
 function renderQuestion(type: ChoiceExerciseType, onAnswer = vi.fn()) {
-  render(<ChoiceQuestion exercise={exerciseOf(type)} onAnswer={onAnswer} />)
+  const dictionary = createDictionary([one, two, three, four].map((item) => item.entry as Character), [])
+  renderWithProviders(
+    <ChoiceQuestion exercise={exerciseOf(type)} dictionary={dictionary} onAnswer={onAnswer} onLookUp={() => {}} />,
+  )
   return onAnswer
 }
 

@@ -33,10 +33,10 @@ describe('AppRoutes', () => {
     const user = userEvent.setup()
     renderAt('/')
 
-    await user.click(within(getMainNavigation()).getByRole('link', { name: 'Practice' }))
+    await user.click(within(getMainNavigation()).getByRole('link', { name: 'Study' }))
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument()
-    expect(within(getMainNavigation()).getByRole('link', { name: 'Practice' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { level: 1, name: 'Study' })).toBeInTheDocument()
+    expect(within(getMainNavigation()).getByRole('link', { name: 'Study' })).toHaveAttribute(
       'aria-current',
       'page',
     )

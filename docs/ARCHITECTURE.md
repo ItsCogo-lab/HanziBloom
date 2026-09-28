@@ -52,18 +52,20 @@ el resto se crea en su fase.
 src/
   app/              Arranque de la app: App, rutas, layout y navegación (Fase 3)
   pages/            Una página por sección; componen features, sin lógica propia
-    DashboardPage.tsx, PracticePage.tsx, VocabularyPage.tsx,
-    CharactersPage.tsx, ProgressPage.tsx, SettingsPage.tsx
+    DashboardPage, DictionaryPage, EntryDetailPage, PracticePage,
+    ProfilePage, ProgressPage, SettingsPage; study/ (pestañas y sets)
   features/
-    dictionary/     Tipos de dominio (Character, Word) y consultas sobre los datos
+    dictionary/     Tipos de dominio (Character, Word), búsqueda, tonos y el panel de diccionario
+    studySets/      Modelo StudySet (HSK, temas, propios) y su progreso derivado
+    myStudies/      Sets que sigue el usuario y cuándo los estudió (localStorage)
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
     progress/       Registro de progreso, estadísticas, racha, persistencia
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
-    settings/       Ajustes del usuario (tamaño de sesión), guardados en localStorage
+    settings/       Ajustes del usuario (sesión, colores y números de tono)
     audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
-  data/             Datasets generados (hsk1/characters.ts, hsk1/words.ts)
+  data/             Datasets generados (hsk1/ a hsk4/) y temas curados a mano (topics.ts)
   i18n/             Textos de la interfaz (en activo, es preparado, ca más adelante)
   lib/              Utilidades sin dominio: almacenamiento, fechas, aleatoriedad
   test/             Configuración compartida de los tests
@@ -74,19 +76,62 @@ Regla práctica: `pages` → `features` → `lib`/`data`. Una feature no importa
 
 ## 5. Secciones de la aplicación
 
-Mantengo las seis que propusiste; tienen sentido técnico porque cada una
-corresponde a una ruta y una responsabilidad:
+Cuatro secciones en la navegación principal; Progreso y Ajustes cuelgan del perfil.
 
-| Sección | Ruta | Contenido MVP |
+| Sección | Ruta | Contenido |
 | --- | --- | --- |
-| Inicio (Dashboard) | `/` | Progreso general, caracteres y palabras aprendidos, racha, pendientes de repaso, botón «Empezar sesión». |
-| Práctica | `/practice` | Sesión de estudio con ejercicios mezclados. |
-| Vocabulario | `/vocabulary`, `/vocabulary/:hanzi` | Lista con buscador y ficha de cada palabra. |
-| Caracteres | `/characters`, `/characters/:hanzi` | Lista con buscador y ficha de cada carácter. |
-| Progreso | `/progress` | Estadísticas básicas: respuestas, acierto, rachas, últimos 7 días, estados y los más fallados. |
-| Ajustes | `/settings` | Tamaño de sesión, borrar el progreso, créditos del dataset, (futuro) idioma. |
+| Home | `/` | Progreso general, racha, repasos pendientes, sets que se estudian. |
+| Study | `/study`, `/study/hsk`, `/study/topics` | Pestañas My Studies, HSK y Topics con tarjetas de set. |
+| Set | `/study/sets/:setId` | Progreso del set (aprendidos, aprendiendo, sin empezar), vocabulario y botón de estudiar. |
+| Sesión | `/study/practice?set=:setId` | Sesión con elementos del set (sin `set`, de todo el vocabulario). Botón Dictionary. |
+| Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Búsqueda global y fichas. `q` y `kind` van en la URL. |
+| Profile | `/profile` | Resumen local: aprendidos, repasos, racha, sets y recientes. |
+| Progreso / Ajustes | `/progress`, `/settings` | Estadísticas detalladas; sesión, tonos, borrar progreso, créditos. |
 
+Las rutas antiguas (`/practice`, `/vocabulary`, `/characters`) redirigen a las nuevas.
 Navegación: barra lateral en escritorio, barra inferior en móvil.
+
+### Study sets
+
+`StudySet` (`features/studySets/types.ts`) es un id, un tipo (`hsk`, `topic`,
+`custom`), nombre, descripción, nivel e icono opcionales y una lista de
+`StudyItemId`. Un set no guarda progreso: su progreso se calcula al vuelo con
+`summarizeItemIds` sobre el progreso por elemento, así que un elemento que está
+en varios sets cuenta en todos sin duplicar datos. Dominado = nivel SRS ≥ 4.
+
+- Sets HSK: salen de `hskN/words.ts` y `hskN/characters.ts` (palabras del nivel
+  y caracteres que se estrenan en él). No hay listas escritas a mano.
+- Sets por temas: `src/data/topics.ts`, curado a mano (criterios en
+  DATA_SOURCES.md, «Sets por temas»). Añadir un tema es añadir un objeto.
+- `validateStudySets` comprueba ids repetidos, sets vacíos y elementos que no
+  existen; un test lo pasa sobre los sets de la app.
+- Sets propios (`custom`): el modelo y la validación ya los admiten; falta la
+  interfaz para crearlos.
+
+My Studies (`features/myStudies`) guarda solo qué sets sigue el usuario y la
+última vez que estudió cada uno (`hanzivocab.studies`). Quitar un set no borra
+el progreso de sus elementos.
+
+### Diccionario dentro de la sesión
+
+`DictionaryPanel` se abre encima de la sesión (panel lateral en escritorio,
+hoja inferior en móvil) sin cambiar de ruta: el ejercicio sigue montado debajo
+con su estado, y al cerrar (botón, Escape) el foco vuelve al botón Dictionary.
+Las fichas reciben un `EntryOpener`: en la página enlazan a otra ruta; en el
+panel abren la ficha dentro del panel, con historial para volver. Consultar el
+elemento de la pregunta solo se ofrece después de responder, para no dar la
+respuesta.
+
+### Colores de tono
+
+`getCharacterTones` (`features/dictionary/tones.ts`) saca el tono de cada
+carácter del pinyin con marcas de la entrada. En palabras, sílaba a sílaba (así
+un polifónico toma la lectura de la palabra); en caracteres sueltos, solo si
+todas sus lecturas tienen el mismo tono. Si algo no cuadra, el carácter queda
+sin color: no se adivina. Colores en `index.css` (`--color-tone-1..5`), todos
+con contraste ≥ 4.5:1. El color nunca es la única pista: el pinyin con marcas
+va al lado, y se oculta en los ejercicios que preguntan la pronunciación hasta
+responder. Ajustes: activar colores y añadir números de tono.
 
 ## 6. Entidades principales
 

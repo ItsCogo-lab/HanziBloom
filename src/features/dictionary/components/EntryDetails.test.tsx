@@ -10,7 +10,7 @@ const dictionary = createDictionary([...testCharacters, ningCharacter], [...test
 
 function renderCharacter(entry = ningCharacter) {
   return renderWithProviders(
-    <EntryDetails item={{ kind: 'character', entry }} dictionary={dictionary} getHref={getEntryPath} />,
+    <EntryDetails item={{ kind: 'character', entry }} dictionary={dictionary} opener={{ getHref: getEntryPath }} />,
   )
 }
 
@@ -119,7 +119,7 @@ describe('EntryDetails de un carácter', () => {
 describe('EntryDetails de una palabra', () => {
   it('muestra la forma tradicional', () => {
     renderWithProviders(
-      <EntryDetails item={{ kind: 'word', entry: ningmengWord }} dictionary={dictionary} getHref={getEntryPath} />,
+      <EntryDetails item={{ kind: 'word', entry: ningmengWord }} dictionary={dictionary} opener={{ getHref: getEntryPath }} />,
     )
     expect(screen.getByText('Traditional').parentElement).toHaveTextContent('Traditional 檸檬')
   })

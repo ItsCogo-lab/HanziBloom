@@ -24,6 +24,14 @@ export function t(key: MessageKey, params: Record<string, string | number> = {})
   )
 }
 
+/**
+ * Texto con un número que cambia en singular y plural:
+ * tCount(1, 'sets.wordCountOne', 'sets.wordCount') → "1 word"; con 3 → "3 words".
+ */
+export function tCount(count: number, one: MessageKey, other: MessageKey): string {
+  return t(count === 1 ? one : other, { count })
+}
+
 /** Porcentaje en el formato del idioma activo: 0.75 → "75%". */
 export function formatPercent(ratio: number): string {
   return new Intl.NumberFormat(ACTIVE_UI_LOCALE, { style: 'percent' }).format(ratio)

@@ -1,6 +1,7 @@
-import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { formatPinyin, getMeanings } from '../dictionary.ts'
 import type { Character, Word } from '../types.ts'
+import { PinyinText } from './PinyinText.tsx'
+import { ToneHanzi } from './ToneHanzi.tsx'
 
 type EntryLabelProps = {
   entry: Character | Word
@@ -13,8 +14,8 @@ export function EntryLabel({ entry, withMeaning = false }: EntryLabelProps) {
   // Los {' '} separan las palabras al leerlo en voz alta; el hueco visual lo pone gap
   return (
     <span className="inline-flex flex-wrap items-baseline gap-x-2">
-      <HanziText className="text-xl">{entry.hanzi}</HanziText>{' '}
-      <span className="text-accent-strong">{formatPinyin(entry)}</span>
+      <ToneHanzi entry={entry} className="text-xl" />{' '}
+      <PinyinText pinyin={formatPinyin(entry)} className="text-accent-strong" />
       {withMeaning && (
         <>
           {' '}

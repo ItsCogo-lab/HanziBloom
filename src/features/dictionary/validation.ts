@@ -1,3 +1,4 @@
+import { getWordId } from './dictionary.ts'
 import { isValidIds } from './ids.ts'
 import type { Character, Etymology, ExampleSet, Translations, Word } from './types.ts'
 
@@ -64,7 +65,9 @@ export function validateDictionaryData(characters: readonly Character[], words: 
     if (wordIds.has(word.id)) problems.push(`${label}: id duplicado`)
     wordIds.add(word.id)
 
-    if (word.id !== word.hanzi) problems.push(`${label}: el id debe ser igual al hanzi`)
+    if (word.id !== word.hanzi && word.id !== getWordId(word.hanzi, word.pinyin, true)) {
+      problems.push(`${label}: el id debe ser el hanzi, o el hanzi con su pinyin si es un homógrafo`)
+    }
     if (isBlank(word.pinyin)) problems.push(`${label}: falta el pinyin`)
     if (!HSK_LEVELS.includes(word.hskLevel)) problems.push(`${label}: nivel HSK no válido`)
     if (
@@ -93,7 +96,8 @@ export function validateDictionaryData(characters: readonly Character[], words: 
  */
 export function validateExampleSet(set: ExampleSet, words: readonly Word[]): string[] {
   const problems: string[] = []
-  const wordIds = new Set(words.map((word) => word.id))
+  // Las frases se asocian al hanzi de la palabra (un homógrafo comparte frases)
+  const wordHanzi = new Set(words.map((word) => word.hanzi))
   const seen = new Set<number>()
 
   if (set.source !== 'Tatoeba' || set.license !== 'CC BY 2.0 FR') problems.push('Ejemplos: fuente o licencia no válida')
@@ -110,7 +114,7 @@ export function validateExampleSet(set: ExampleSet, words: readonly Word[]): str
     if (isBlank(sentence.author)) problems.push(`${label}: falta el autor`)
     if (sentence.words.length === 0) problems.push(`${label}: no está asociada a ninguna palabra`)
     for (const word of sentence.words) {
-      if (!wordIds.has(word)) problems.push(`${label}: la palabra "${word}" no está en el dataset`)
+      if (!wordHanzi.has(word)) problems.push(`${label}: la palabra "${word}" no está en el dataset`)
       else if (!sentence.zh.includes(word)) problems.push(`${label}: no contiene la palabra "${word}"`)
     }
     problems.push(...findEmptyValues(label, sentence))

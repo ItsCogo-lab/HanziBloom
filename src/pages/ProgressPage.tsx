@@ -33,7 +33,7 @@ export function ProgressPage() {
       {totals.answers === 0 ? (
         <Card className="flex flex-col items-start gap-4">
           <p className="text-ink-muted">{t('stats.empty')}</p>
-          <ButtonLink to="/practice">{t('dashboard.startSession')}</ButtonLink>
+          <ButtonLink to="/study/practice">{t('dashboard.startSession')}</ButtonLink>
         </Card>
       ) : (
         <Statistics progress={progress} totals={totals} now={new Date()} />

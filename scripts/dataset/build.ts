@@ -14,7 +14,7 @@ import { createReadStream, existsSync, mkdirSync, readFileSync, rmSync, writeFil
 import { createInterface } from 'node:readline'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { ExampleSet } from '../../src/features/dictionary/types.ts'
+import type { Character, ExampleSet, HskLevel, Word } from '../../src/features/dictionary/types.ts'
 import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import { buildBaseEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
@@ -28,7 +28,7 @@ import { loadUnihan, type UnihanCharacter } from './sources/unihan.ts'
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const cacheDir = join(scriptDir, '.cache')
 const rootDir = join(scriptDir, '../..')
-const outputDir = join(rootDir, 'src/data/hsk1')
+const dataDir = join(rootDir, 'src/data')
 const strokesDir = join(rootDir, 'public/strokes')
 const examplesDir = join(rootDir, 'public/examples')
 const conflictsReport = join(rootDir, 'docs/DATA_CONFLICTS.md')
@@ -70,10 +70,13 @@ async function* readLines(file: string): AsyncGenerator<string> {
 
 // --- Fuentes base: lista HSK + CC-CEDICT ----------------------------------
 
-const hskList = parseHskList(readSource('hsk-level-1.json'))
+/** Niveles HSK 2.0 que se generan, cada uno en su carpeta src/data/hsk<n>/. */
+const LEVELS: readonly HskLevel[] = [1, 2, 3, 4]
+
+const hskLists = LEVELS.map((level) => ({ level, words: parseHskList(readSource(`hsk-level-${level}.json`)) }))
 const cedict = createCedictIndex(readSource('cedict.json'))
-const base = buildBaseEntries(hskList, cedict, 1)
-const { words, problems } = base
+const base = buildBaseEntries(hskLists, cedict)
+const { words, problems, duplicates, leftOut } = base
 const hanziSet = new Set(base.characters.map((character) => character.hanzi))
 
 // --- Make Me a Hanzi: descomposición y etimología ------------------------
@@ -120,7 +123,12 @@ const characters = base.characters.map((character) => {
 
 // --- Tatoeba: frases de ejemplo --------------------------------------------
 
-let examples: ExampleSet | undefined
+/*
+ * Un archivo de frases por nivel. Las frases de un nivel solo usan caracteres
+ * de ese nivel o de los anteriores, para que quien estudia HSK 1 pueda
+ * leerlas enteras.
+ */
+const examplesByLevel = new Map<HskLevel, ExampleSet>()
 if (!skippedSources.has('tatoeba')) {
   const chinese = new Map<number, TatoebaSentence>()
   for await (const line of readLines('tatoeba/cmn_sentences_detailed.tsv')) {
@@ -140,24 +148,29 @@ if (!skippedSources.has('tatoeba')) {
     const sentence = parseSentenceLine(line)
     if (sentence && wantedEnglish.has(sentence.id)) english.set(sentence.id, sentence)
   }
-  examples = {
-    source: 'Tatoeba',
-    license: 'CC BY 2.0 FR',
-    exportDate: readSource('tatoeba/export-date.txt').trim(),
-    sentences: selectExamples({
-      words: words.map((word) => word.hanzi),
-      knownCharacters: hanziSet,
-      chinese,
-      english,
-      translations,
-    }),
+  const exportDate = readSource('tatoeba/export-date.txt').trim()
+  for (const level of LEVELS) {
+    examplesByLevel.set(level, {
+      source: 'Tatoeba',
+      license: 'CC BY 2.0 FR',
+      exportDate,
+      sentences: selectExamples({
+        words: [...new Set(words.filter((word) => word.hskLevel === level).map((word) => word.hanzi))],
+        knownCharacters: new Set(
+          base.characters.filter((character) => character.hskLevel <= level).map((character) => character.hanzi),
+        ),
+        chinese,
+        english,
+        translations,
+      }),
+    })
   }
 }
 
 // --- Validación y escritura ----------------------------------------------
 
 problems.push(...validateDictionaryData(characters, words))
-if (examples) problems.push(...validateExampleSet(examples, words))
+for (const examples of examplesByLevel.values()) problems.push(...validateExampleSet(examples, words))
 if (problems.length > 0) {
   console.error(`No se ha generado el dataset. Problemas:\n- ${problems.join('\n- ')}`)
   process.exit(1)
@@ -171,19 +184,28 @@ const header = `// Generado por scripts/dataset/build.ts. No editar a mano: camb
 // Lista de palabras HSK 2.0: clem109/hsk-vocabulary (MIT). Detalles en docs/DATA_SOURCES.md.
 `
 
-function writeDataFile(fileName: string, typeName: 'Character' | 'Word', exportName: string, entries: object[]) {
-  const lines = entries.map((entry) => `  ${JSON.stringify(entry)},`).join('\n')
+function writeDataFile(level: HskLevel, typeName: 'Character' | 'Word', entries: readonly (Character | Word)[]) {
+  const fileName = typeName === 'Character' ? 'characters.ts' : 'words.ts'
+  const exportName = `hsk${level}${typeName === 'Character' ? 'Characters' : 'Words'}`
+  const lines = entries
+    .filter((entry) => entry.hskLevel === level)
+    .map((entry) => `  ${JSON.stringify(entry)},`)
+    .join('\n')
   const content = `${header}import type { ${typeName} } from '../../features/dictionary/types.ts'
 
 export const ${exportName}: ${typeName}[] = [
 ${lines}
 ]
 `
-  writeFileSync(join(outputDir, fileName), content)
+  const levelDir = join(dataDir, `hsk${level}`)
+  mkdirSync(levelDir, { recursive: true })
+  writeFileSync(join(levelDir, fileName), content)
 }
 
-writeDataFile('characters.ts', 'Character', 'hsk1Characters', characters)
-writeDataFile('words.ts', 'Word', 'hsk1Words', words)
+for (const level of LEVELS) {
+  writeDataFile(level, 'Character', characters)
+  writeDataFile(level, 'Word', words)
+}
 
 // Trazos: se copian tal cual, uno por carácter, para cargarlos al abrir la ficha.
 // Se borra la carpeta antes para que no queden archivos de caracteres que ya no están.
@@ -192,9 +214,9 @@ mkdirSync(strokesDir, { recursive: true })
 for (const [hanzi, data] of strokeData) writeFileSync(join(strokesDir, strokeFileName(hanzi)), data.json)
 
 // Ejemplos: un JSON por nivel, que la ficha pide al abrirse.
-if (examples) {
-  mkdirSync(examplesDir, { recursive: true })
-  writeFileSync(join(examplesDir, 'hsk1.json'), `${JSON.stringify(examples, null, 1)}\n`)
+if (examplesByLevel.size > 0) mkdirSync(examplesDir, { recursive: true })
+for (const [level, examples] of examplesByLevel) {
+  writeFileSync(join(examplesDir, `hsk${level}.json`), `${JSON.stringify(examples, null, 1)}\n`)
 }
 
 writeFileSync(
@@ -208,12 +230,36 @@ fuente dueña del campo (ver docs/DATA_SOURCES.md) y aquí se deja constancia
 para revisarlo.
 
 ${conflicts.length === 0 ? 'Ninguno.' : conflicts.map((conflict) => `- ${conflict}`).join('\n')}
+
+## Palabras de la lista HSK que no están en el dataset
+
+No hay una entrada de CC-CEDICT con ese hanzi y ese pinyin, así que no hay de
+dónde sacar su significado. Se dejan fuera en lugar de inventarlo.
+
+${leftOut.length === 0 ? 'Ninguna.' : leftOut.map((word) => `- ${word}`).join('\n')}
+
+## Entradas repetidas en la lista HSK
+
+La lista repite estas palabras con el mismo pinyin (con otro sentido). Se
+guardan una sola vez.
+
+${duplicates.length === 0 ? 'Ninguna.' : duplicates.map((word) => `- ${word}`).join('\n')}
 `,
 )
 
-console.log(`Dataset HSK 1 generado: ${words.length} palabras y ${characters.length} caracteres.`)
+for (const level of LEVELS) {
+  const count = (entries: readonly { hskLevel: HskLevel }[]) => entries.filter((entry) => entry.hskLevel === level).length
+  console.log(`HSK ${level}: ${count(words)} palabras y ${count(characters)} caracteres nuevos.`)
+}
+console.log(`Dataset generado: ${words.length} palabras y ${characters.length} caracteres.`)
+if (leftOut.length > 0) console.warn(`Palabras sin entrada en CC-CEDICT, fuera del dataset: ${leftOut.join(', ')}.`)
+if (duplicates.length > 0) {
+  console.log(`Entradas repetidas en la lista HSK, guardadas una vez: ${duplicates.join(', ')}.`)
+}
 console.log(`Trazos copiados a public/strokes: ${strokeData.size}.`)
-if (examples) console.log(`Frases de ejemplo de Tatoeba (${examples.exportDate}): ${examples.sentences.length}.`)
+for (const [level, examples] of examplesByLevel) {
+  console.log(`Frases de ejemplo de Tatoeba para HSK ${level} (${examples.exportDate}): ${examples.sentences.length}.`)
+}
 if (conflicts.length > 0) {
   console.warn(`${conflicts.length} desacuerdos entre fuentes (ver docs/DATA_CONFLICTS.md):\n- ${conflicts.join('\n- ')}`)
 }

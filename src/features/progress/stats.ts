@@ -1,5 +1,5 @@
 import { addDays, toDateKey, type DateKey } from '../../lib/dates.ts'
-import { getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
+import { getStudyItemId, type StudyItem, type StudyItemId } from '../dictionary/studyItem.ts'
 import { getItemStatus, isDue } from './progress.ts'
 import type { DailyActivity, ItemProgress, ProgressData } from './types.ts'
 
@@ -17,9 +17,14 @@ export interface ItemsSummary {
 
 /** Cuántos elementos hay en cada estado. */
 export function summarizeItems(items: readonly StudyItem[], progress: ProgressData, now: Date): ItemsSummary {
-  const summary: ItemsSummary = { total: items.length, new: 0, learning: 0, mastered: 0, studied: 0, due: 0 }
-  for (const item of items) {
-    const itemProgress = progress.items[getStudyItemId(item)]
+  return summarizeItemIds(items.map(getStudyItemId), progress, now)
+}
+
+/** Igual que summarizeItems, a partir de los ids (así los guardan los sets de estudio). */
+export function summarizeItemIds(itemIds: readonly StudyItemId[], progress: ProgressData, now: Date): ItemsSummary {
+  const summary: ItemsSummary = { total: itemIds.length, new: 0, learning: 0, mastered: 0, studied: 0, due: 0 }
+  for (const itemId of itemIds) {
+    const itemProgress = progress.items[itemId]
     summary[getItemStatus(itemProgress)] += 1
     if (isDue(itemProgress, now)) summary.due += 1
   }

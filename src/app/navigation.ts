@@ -9,13 +9,12 @@ export type NavigationItem = {
 
 /**
  * Secciones de la navegación principal. Añadir una sección nueva = añadir
- * una entrada aquí y su <Route> en AppRoutes.
+ * una entrada aquí y su <Route> en AppRoutes. Estadísticas y Ajustes se
+ * abren desde el perfil.
  */
 export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { path: '/', labelKey: 'nav.dashboard', symbol: '首' },
-  { path: '/practice', labelKey: 'nav.practice', symbol: '练' },
-  { path: '/vocabulary', labelKey: 'nav.vocabulary', symbol: '词' },
-  { path: '/characters', labelKey: 'nav.characters', symbol: '字' },
-  { path: '/progress', labelKey: 'nav.progress', symbol: '进' },
-  { path: '/settings', labelKey: 'nav.settings', symbol: '设' },
+  { path: '/study', labelKey: 'nav.study', symbol: '学' },
+  { path: '/dictionary', labelKey: 'nav.dictionary', symbol: '典' },
+  { path: '/profile', labelKey: 'nav.profile', symbol: '我' },
 ]

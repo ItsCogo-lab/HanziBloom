@@ -1,16 +1,26 @@
+import { Link } from 'react-router'
 import { ButtonLink } from '../components/ui/ButtonLink.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { ProgressBar } from '../components/ui/ProgressBar.tsx'
 import { StatCard } from '../components/ui/StatCard.tsx'
 import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { summarizeItems, type ItemsSummary } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
+import { appStudySets } from '../features/studySets/appStudySets.ts'
+import { getSetPath, getSetPracticePath } from '../features/studySets/setPaths.ts'
+import { SetProgressBar } from '../features/studySets/components/SetProgressBar.tsx'
+import { getSetProgress } from '../features/studySets/setProgress.ts'
+import { getStudySet } from '../features/studySets/studySets.ts'
 import { t, type MessageKey } from '../i18n/index.ts'
 
 const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
 const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
+
+/** Sets de My Studies que se muestran en Inicio; el resto, en Study. */
+const MAX_SETS_ON_HOME = 3
 
 /** Qué decir en «Today» según cómo va el usuario. */
 function getTodayMessage(summary: ItemsSummary): MessageKey {
@@ -22,15 +32,20 @@ function getTodayMessage(summary: ItemsSummary): MessageKey {
 
 export function DashboardPage() {
   const { progress } = useProgress()
+  const { myStudies } = useMyStudies()
   const now = new Date()
   const summary = summarizeItems(hskStudyItems, progress, now)
+  const studyingSets = myStudies.sets
+    .map(({ setId }) => getStudySet(appStudySets, setId))
+    .filter((set) => set !== undefined)
+    .slice(0, MAX_SETS_ON_HOME)
 
   return (
     <>
       <PageHeader
         title={t('nav.dashboard')}
         description={t('dashboard.description')}
-        actions={<ButtonLink to="/practice">{t('dashboard.startSession')}</ButtonLink>}
+        actions={<ButtonLink to="/study/practice">{t('dashboard.startSession')}</ButtonLink>}
       />
 
       <div className="flex flex-col gap-6">
@@ -54,6 +69,43 @@ export function DashboardPage() {
             <StatCard label={t('stats.mastered')} value={summary.mastered} />
           </dl>
         </section>
+
+        <Card>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-semibold">{t('study.myStudies')}</h2>
+            <Link to="/study" className="text-accent-strong underline underline-offset-2">
+              {t('dashboard.allSets')}
+            </Link>
+          </div>
+          {studyingSets.length === 0 ? (
+            <div className="flex flex-col items-start gap-3">
+              <p className="text-ink-muted">{t('myStudies.empty')}</p>
+              <ButtonLink to="/study/hsk" variant="secondary">
+                {t('myStudies.browseHsk')}
+              </ButtonLink>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-5">
+              {studyingSets.map((set) => (
+                <li key={set.id} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                    <Link to={getSetPath(set)} className="font-medium hover:text-accent-strong hover:underline">
+                      {set.name}
+                    </Link>
+                    <SetProgressBar name={set.name} progress={getSetProgress(set, progress, now)} />
+                  </div>
+                  <ButtonLink
+                    to={getSetPracticePath(set)}
+                    variant="secondary"
+                    aria-label={t('sets.studyNamed', { name: set.name })}
+                  >
+                    {t('sets.continue')}
+                  </ButtonLink>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
 
         <Card>
           <h2 className="mb-4 text-lg font-semibold">{t('dashboard.hskProgress')}</h2>
