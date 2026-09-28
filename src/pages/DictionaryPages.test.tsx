@@ -1,41 +1,71 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppRoutes } from '../app/AppRoutes.tsx'
+import { allCharacters, allWords } from '../data/index.ts'
 import { createEmptyProgress, recordAnswer } from '../features/progress/progress.ts'
 import { saveProgress } from '../features/progress/storage.ts'
 import { memoryStorage } from '../test/memoryStorage.ts'
 import { renderWithProviders } from '../test/renderWithProviders.tsx'
 
-describe('VocabularyPage y CharactersPage', () => {
-  it('listan todas las entradas y filtran al buscar', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<AppRoutes />, { path: '/vocabulary' })
+describe('DictionaryPage', () => {
+  it('sin búsqueda lista todo el diccionario por páginas', () => {
+    renderWithProviders(<AppRoutes />, { path: '/dictionary' })
 
-    expect(screen.getByText('Showing 1196 of 1196')).toBeInTheDocument()
-
-    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'xiexie')
-
-    expect(screen.getByText('Showing 1 of 1196')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /谢谢/ })).toHaveAttribute('href', '/vocabulary/%E8%B0%A2%E8%B0%A2')
+    expect(screen.getByText(`Showing 50 of ${allCharacters.length + allWords.length}`)).toBeInTheDocument()
   })
 
-  it('avisan si no hay resultados', async () => {
+  it('busca por hanzi, pinyin o inglés y ordena primero lo exacto', async () => {
     const user = userEvent.setup()
-    renderWithProviders(<AppRoutes />, { path: '/characters' })
+    renderWithProviders(<AppRoutes />, { path: '/dictionary' })
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), '果')
+    const results = within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link')
+    // Primero el carácter 果, luego las palabras que empiezan por él, luego las que lo contienen
+    expect(results[0]).toHaveAttribute('href', '/characters/%E6%9E%9C')
+    expect(results.map((link) => link.getAttribute('href'))).toContain('/vocabulary/%E8%8B%B9%E6%9E%9C') // 苹果
+
+    await user.clear(screen.getByRole('searchbox', { name: 'Search' }))
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'xiexie')
+    expect(screen.getByRole('link', { name: /谢谢/ })).toHaveAttribute('href', '/vocabulary/%E8%B0%A2%E8%B0%A2')
+
+    await user.clear(screen.getByRole('searchbox', { name: 'Search' }))
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'apple')
+    expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link')[0]).toHaveTextContent('苹果')
+  })
+
+  it('guarda la búsqueda en la dirección y filtra por tipo', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AppRoutes />, { path: '/dictionary?q=hao&kind=character' })
+
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('hao')
+    expect(screen.getByRole('radio', { name: 'Characters' })).toBeChecked()
+    expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link').every((link) => link.textContent?.includes('Character'))).toBe(true)
+
+    await user.click(screen.getByRole('radio', { name: 'Words' }))
+    expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link').every((link) => link.textContent?.includes('Word'))).toBe(true)
+  })
+
+  it('avisa si no hay resultados', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AppRoutes />, { path: '/dictionary' })
 
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'zzzz')
 
     expect(screen.getByText(/No matches/)).toBeInTheDocument()
   })
 
-  it('muestran el estado de estudio de cada entrada', () => {
-    const storage = memoryStorage()
-    saveProgress(recordAnswer(createEmptyProgress(), 'char:你', true, new Date()), storage)
-    renderWithProviders(<AppRoutes />, { path: '/characters', storage })
+  it('muestra la leyenda de colores de los tonos', () => {
+    renderWithProviders(<AppRoutes />, { path: '/dictionary' })
 
-    expect(screen.getByRole('link', { name: /你.*Learning/ })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /好.*New/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tone colors' })).toBeInTheDocument()
+  })
+
+  it('las direcciones antiguas /vocabulary y /characters llevan al diccionario', () => {
+    renderWithProviders(<AppRoutes />, { path: '/characters' })
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Dictionary' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Characters' })).toBeChecked()
   })
 })
 
@@ -52,6 +82,14 @@ describe('EntryDetailPage', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: '谢' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Appears in' })).toBeInTheDocument()
+  })
+
+  it('muestra en qué sets está el elemento (puede estar en varios)', () => {
+    renderWithProviders(<AppRoutes />, { path: '/vocabulary/苹果' })
+
+    const sets = screen.getByRole('heading', { name: 'In study sets' }).nextElementSibling as HTMLElement
+    expect(within(sets).getByRole('link', { name: 'HSK 1' })).toHaveAttribute('href', '/study/sets/hsk-1')
+    expect(within(sets).getByRole('link', { name: 'Food & drink' })).toHaveAttribute('href', '/study/sets/topic-food')
   })
 
   it('muestra el progreso del elemento', () => {
