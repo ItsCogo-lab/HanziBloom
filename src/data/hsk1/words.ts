@@ -1,4 +1,4 @@
-// Generado por scripts/dataset/build-hsk1.ts. No editar a mano: cambia el script y vuelve a generarlo.
+// Generado por scripts/dataset/build.ts. No editar a mano: cambia el script y vuelve a generarlo.
 // Significados y lecturas: CC-CEDICT (https://cc-cedict.org), licencia CC BY-SA 4.0.
 // Lista de palabras HSK 2.0: clem109/hsk-vocabulary (MIT). Detalles en docs/DATA_SOURCES.md.
 import type { Word } from '../../features/dictionary/types.ts'

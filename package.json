@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "check": "npm run typecheck && npm run lint && npm run test",
     "data:fetch": "bash scripts/dataset/fetch-sources.sh",
-    "data:build": "node scripts/dataset/build-hsk1.ts"
+    "data:build": "node scripts/dataset/build.ts"
   },
   "dependencies": {
     "react": "^19.3.0",
