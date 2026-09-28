@@ -5,10 +5,11 @@ export type HskLevel = 1 | 2 | 3 | 4
 export type ContentLocale = 'es' | 'en' | 'ca'
 
 /**
- * Significados de una entrada por idioma. El español es obligatorio;
- * inglés y catalán se podrán añadir más adelante sin cambiar el modelo.
+ * Significados de una entrada por idioma. El inglés es obligatorio porque
+ * es el idioma de la fuente (CC-CEDICT); español y catalán se podrán añadir
+ * más adelante sin cambiar el modelo.
  */
-export type Translations = { es: string[] } & Partial<Record<Exclude<ContentLocale, 'es'>, string[]>>
+export type Translations = { en: string[] } & Partial<Record<Exclude<ContentLocale, 'en'>, string[]>>
 
 /** Un carácter chino (hanzi) individual. */
 export interface Character {

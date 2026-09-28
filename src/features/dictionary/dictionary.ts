@@ -59,7 +59,7 @@ export function getWordsWithCharacter(dictionary: Dictionary, characterId: strin
   return listWords(dictionary).filter((word) => word.hanzi.includes(characterId))
 }
 
-/** Significados en un idioma; si no existen en ese idioma, devuelve los de español. */
-export function getMeanings(translations: Translations, locale: ContentLocale = 'es'): string[] {
-  return translations[locale] ?? translations.es
+/** Significados en un idioma; si no existen en ese idioma, devuelve los de inglés. */
+export function getMeanings(translations: Translations, locale: ContentLocale = 'en'): string[] {
+  return translations[locale] ?? translations.en
 }

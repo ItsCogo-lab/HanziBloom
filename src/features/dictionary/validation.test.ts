@@ -7,7 +7,7 @@ const validCharacter: Character = {
   id: '你',
   hanzi: '你',
   pinyin: ['nǐ'],
-  meanings: { es: ['tú'] },
+  meanings: { en: ['you'] },
   hskLevel: 1,
 }
 
@@ -35,9 +35,9 @@ describe('validateDictionaryData', () => {
   })
 
   it('detecta pinyin y significados vacíos', () => {
-    const problems = validateDictionaryData([{ ...validCharacter, pinyin: [], meanings: { es: [' '] } }], [])
+    const problems = validateDictionaryData([{ ...validCharacter, pinyin: [], meanings: { en: [' '] } }], [])
 
-    expect(problems).toEqual(['Carácter "你": falta el pinyin', 'Carácter "你": falta el significado en español'])
+    expect(problems).toEqual(['Carácter "你": falta el pinyin', 'Carácter "你": falta el significado en inglés'])
   })
 
   it('detecta un número de trazos no válido', () => {
@@ -47,7 +47,7 @@ describe('validateDictionaryData', () => {
   })
 
   it('detecta palabras con caracteres que no están en el dataset', () => {
-    const word: Word = { id: '你们', hanzi: '你们', pinyin: 'nǐmen', meanings: { es: ['vosotros'] }, hskLevel: 1 }
+    const word: Word = { id: '你们', hanzi: '你们', pinyin: 'nǐmen', meanings: { en: ['you (plural)'] }, hskLevel: 1 }
 
     expect(validateDictionaryData([validCharacter], [word])).toEqual([
       'Palabra "你们": el carácter "们" no está en el dataset',
