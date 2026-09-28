@@ -85,8 +85,16 @@ La estructura completa prevista está descrita en
 
 ## Datos
 
-Los significados y lecturas vienen de [CC-CEDICT](https://cc-cedict.org/wiki/)
-(CC BY-SA 4.0) y la lista de palabras HSK de
-[clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
-Los archivos de `src/data/` se distribuyen bajo CC BY-SA 4.0. Más detalles en
+Todos los datos lingüísticos vienen de fuentes abiertas y se generan con un
+script; la app no llama a ninguna API externa:
+
+- Significados, lecturas y tradicional de las palabras: [CC-CEDICT](https://cc-cedict.org/wiki/) (CC BY-SA 4.0).
+- Lista de palabras HSK 2.0: [clem109/hsk-vocabulary](https://github.com/clem109/hsk-vocabulary) (MIT).
+- Trazos, radicales y tradicional de los caracteres: [Unihan](https://www.unicode.org/reports/tr38/) (Unicode License v3).
+- Componentes y etimología: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) (LGPL 3.0+).
+- Orden de trazos: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) (Arphic Public License).
+- Frases de ejemplo: [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR).
+
+Cada archivo generado mantiene la licencia de su fuente. Qué fuente manda en
+cada campo y cómo se regenera el dataset, en
 [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).
