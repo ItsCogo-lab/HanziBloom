@@ -1,0 +1,47 @@
+name: Deploy
+
+# Publica la app en GitHub Pages (https://itscogo-lab.github.io/HanziVocab/)
+# cada vez que cambia main. Requiere Settings → Pages → Source: GitHub Actions.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Si llegan dos pushes seguidos, el despliegue más nuevo sustituye al anterior.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build -- --base=/${{ github.event.repository.name }}/
+      # GitHub Pages no sabe de rutas de React: al recargar /study responde con
+      # 404.html, así que ese archivo es una copia de la app y el router hace el resto.
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
