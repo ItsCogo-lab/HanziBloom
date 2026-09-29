@@ -66,7 +66,9 @@ export function CharacterFacts({ character, dictionary, opener }: CharacterFacts
               </span>
             </Fact>
           )}
-          <Fact label={t('dictionary.hskLevel')}>{t('dictionary.hskLevelValue', { level: character.hskLevel })}</Fact>
+          {character.hskLevel !== undefined && (
+            <Fact label={t('dictionary.hskLevel')}>{t('dictionary.hskLevelValue', { level: character.hskLevel })}</Fact>
+          )}
         </dl>
       </section>
 

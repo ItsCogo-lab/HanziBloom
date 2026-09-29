@@ -50,29 +50,41 @@ function getSearchFields(entry: Character | Word): SearchFields {
  * 7. significado que lo contiene ("apples", "pineapple")
  */
 export function getSearchRank(entry: Character | Word, query: string): number | undefined {
+  return createMatcher(query)(entry)
+}
+
+/**
+ * Prepara la búsqueda una vez (texto normalizado, expresión regular) y
+ * devuelve la función que puntúa cada entrada. Con el diccionario completo
+ * son más de 100.000 entradas por búsqueda.
+ */
+function createMatcher(query: string): (entry: Character | Word) => number | undefined {
   const text = query.trim().toLowerCase()
-  if (text === '') return undefined
+  if (text === '') return () => undefined
 
   if (HAN.test(text)) {
-    if (entry.hanzi === text) return 0
-    if (entry.hanzi.startsWith(text)) return 1
-    if (entry.hanzi.includes(text)) return 2
+    return (entry) => {
+      if (entry.hanzi === text) return 0
+      if (entry.hanzi.startsWith(text)) return 1
+      if (entry.hanzi.includes(text)) return 2
+      return undefined
+    }
+  }
+
+  const pinyin = normalizePinyin(text)
+  const wholeWord = new RegExp(`(^|[^a-z])${escapeRegExp(text)}($|[^a-z])`)
+  return (entry) => {
+    const { readings, meanings } = getSearchFields(entry)
+    if (pinyin !== '') {
+      if (readings.includes(pinyin)) return 3
+      if (readings.some((reading) => reading.startsWith(pinyin))) return 4
+      // Contener solo cuenta con 2 letras o más: si no, "a" coincidiría con casi todo
+      if (pinyin.length > 1 && readings.some((reading) => reading.includes(pinyin))) return 5
+    }
+    if (meanings.some((meaning) => meaning === text || wholeWord.test(meaning))) return 6
+    if (meanings.some((meaning) => meaning.includes(text))) return 7
     return undefined
   }
-
-  const { readings, meanings } = getSearchFields(entry)
-  const pinyin = normalizePinyin(text)
-  if (pinyin !== '') {
-    if (readings.includes(pinyin)) return 3
-    if (readings.some((reading) => reading.startsWith(pinyin))) return 4
-    // Contener solo cuenta con 2 letras o más: si no, "a" coincidiría con casi todo
-    if (pinyin.length > 1 && readings.some((reading) => reading.includes(pinyin))) return 5
-  }
-
-  const wholeWord = new RegExp(`(^|[^a-z])${escapeRegExp(text)}($|[^a-z])`)
-  if (meanings.some((meaning) => meaning === text || wholeWord.test(meaning))) return 6
-  if (meanings.some((meaning) => meaning.includes(text))) return 7
-  return undefined
 }
 
 function escapeRegExp(text: string): string {
@@ -80,24 +92,52 @@ function escapeRegExp(text: string): string {
 }
 
 /**
- * Busca en el diccionario y ordena por lo bien que coincide (getSearchRank).
- * A igual coincidencia, primero los caracteres y luego las palabras, y cada
- * grupo por nivel HSK, en el orden del dataset. Todo es local: con unos
- * miles de entradas tarda milisegundos.
+ * Busca en el diccionario y ordena: primero las coincidencias exactas y
+ * luego las parciales (tier); dentro de cada grupo, lo que está en HSK 1-4
+ * antes que el resto, y después por lo bien que coincide (getSearchRank), los
+ * caracteres antes que las palabras, el nivel HSK (fuera de HSK, las más
+ * cortas primero) y el orden del dataset.
  */
 export function searchItems(items: readonly StudyItem[], query: string, limit = Infinity): StudyItem[] {
+  const rankOf = createMatcher(query)
   return items
-    .map((item, index) => ({ item, index, rank: getSearchRank(item.entry, query) }))
+    .map((item, index) => ({ item, index, rank: rankOf(item.entry) }))
     .filter((result) => result.rank !== undefined)
     .sort(
       (a, b) =>
+        tier(a.rank!) - tier(b.rank!) ||
+        outsideHsk(a.item) - outsideHsk(b.item) ||
         a.rank! - b.rank! ||
         kindOrder(a.item) - kindOrder(b.item) ||
-        a.item.entry.hskLevel - b.item.entry.hskLevel ||
+        levelOrder(a.item) - levelOrder(b.item) ||
+        lengthOutsideHsk(a.item) - lengthOutsideHsk(b.item) ||
         a.index - b.index,
     )
     .slice(0, limit)
     .map((result) => result.item)
+}
+
+/**
+ * Coincidencias exactas (hanzi, pinyin o significado entero: 0, 3 y 6)
+ * antes que las parciales. Así «bank» da primero 银行 y no palabras cuyo
+ * pinyin empieza por «bank» (版刻 bǎn kè).
+ */
+function tier(rank: number): number {
+  return rank === 0 || rank === 3 || rank === 6 ? 0 : 1
+}
+
+/** Lo que está en HSK 1-4 va antes que el resto del diccionario. */
+function outsideHsk(item: StudyItem): number {
+  return item.entry.hskLevel === undefined ? 1 : 0
+}
+
+function levelOrder(item: StudyItem): number {
+  return item.entry.hskLevel ?? 0
+}
+
+/** Fuera de HSK, las palabras cortas primero: suelen ser las más comunes. */
+function lengthOutsideHsk(item: StudyItem): number {
+  return item.entry.hskLevel === undefined ? item.entry.hanzi.length : 0
 }
 
 function kindOrder(item: StudyItem): number {

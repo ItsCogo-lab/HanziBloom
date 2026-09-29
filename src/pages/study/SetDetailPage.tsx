@@ -1,28 +1,31 @@
 import { useId, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Button } from '../../components/ui/Button.tsx'
-import { ButtonLink } from '../../components/ui/ButtonLink.tsx'
 import { Card } from '../../components/ui/Card.tsx'
 import { PageHeader } from '../../components/ui/PageHeader.tsx'
 import { StatCard } from '../../components/ui/StatCard.tsx'
 import { EntryLabel } from '../../features/dictionary/components/EntryLabel.tsx'
-import { hskDictionary } from '../../features/dictionary/hskDictionary.ts'
+import { LoadEntries } from '../../features/dictionary/components/LoadEntries.tsx'
+import { useDictionary } from '../../features/dictionary/dictionaryContext.ts'
 import { getStudyItemId, type StudyItem } from '../../features/dictionary/studyItem.ts'
 import { isStudying } from '../../features/myStudies/myStudies.ts'
 import { useMyStudies } from '../../features/myStudies/myStudiesContext.ts'
+import { AddVocabulary } from '../../features/customSets/components/AddVocabulary.tsx'
+import { CustomItemList } from '../../features/customSets/components/CustomItemList.tsx'
+import { CustomSetSettings } from '../../features/customSets/components/CustomSetSettings.tsx'
 import { StatusBadge } from '../../features/progress/components/StatusBadge.tsx'
 import { getItemStatus } from '../../features/progress/progress.ts'
 import { useProgress } from '../../features/progress/progressContext.ts'
 import type { ProgressData } from '../../features/progress/types.ts'
-import { appStudySets } from '../../features/studySets/appStudySets.ts'
-import { getSetPracticePath } from '../../features/studySets/setPaths.ts'
+import { useStudySets } from '../../features/studySets/useStudySets.ts'
+import { SetSessionActions } from '../../features/studySets/components/SetSessionActions.tsx'
 import { SetItemCount, StudyingBadge } from '../../features/studySets/components/SetSummary.tsx'
 import { SetProgressBar } from '../../features/studySets/components/SetProgressBar.tsx'
 import { StudyToggleButton } from '../../features/studySets/components/StudyToggleButton.tsx'
 import { getSetProgress } from '../../features/studySets/setProgress.ts'
 import { getSetItems, getStudySet } from '../../features/studySets/studySets.ts'
 import { t } from '../../i18n/index.ts'
-import { getEntryPath } from '../entryPaths.ts'
+import { getEntryPath } from '../../features/dictionary/entryPaths.ts'
 import { NotFoundPage } from '../NotFoundPage.tsx'
 
 /** Elementos que se muestran de golpe en la lista; el resto, con «Show more». */
@@ -31,13 +34,15 @@ const PAGE_SIZE = 100
 /** Página de un set: progreso, acciones y su vocabulario. */
 export function SetDetailPage() {
   const { setId = '' } = useParams()
+  const dictionary = useDictionary()
   const { progress } = useProgress()
   const { myStudies } = useMyStudies()
-  const set = getStudySet(appStudySets, setId)
+  const studySets = useStudySets()
+  const set = getStudySet(studySets, setId)
   if (!set) return <NotFoundPage />
 
   const setProgress = getSetProgress(set, progress, new Date())
-  const items = getSetItems(set, hskDictionary)
+  const items = getSetItems(set, dictionary)
   const words = items.filter((item) => item.kind === 'word')
   const characters = items.filter((item) => item.kind === 'character')
 
@@ -45,17 +50,15 @@ export function SetDetailPage() {
     <>
       <PageHeader
         title={set.name}
-        description={set.description}
+        description={set.description || (set.type === 'custom' ? t('custom.label') : undefined)}
         actions={
           <div className="flex flex-wrap gap-2">
-            <ButtonLink to={getSetPracticePath(set)}>
-              {t(setProgress.studied > 0 ? 'sets.continue' : 'sets.start')}
-            </ButtonLink>
             <StudyToggleButton set={set} />
           </div>
         }
       />
       <div className="flex flex-col gap-6">
+        <SetSessionActions set={set} />
         <Card className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 className="text-lg font-semibold">{t('sets.progressTitle')}</h2>
@@ -66,15 +69,33 @@ export function SetDetailPage() {
           </div>
           <SetProgressBar name={set.name} progress={setProgress} />
           <dl className="grid grid-cols-3 gap-3">
-            <StatCard label={t('sets.learned')} value={setProgress.mastered} />
+            <StatCard label={t('sets.mastered')} value={setProgress.mastered} />
             <StatCard label={t('sets.learning')} value={setProgress.learning} />
             <StatCard label={t('sets.notStarted')} value={setProgress.new} />
           </dl>
         </Card>
 
-        {words.length > 0 && <ItemList title={t('sets.vocabulary')} items={words} progress={progress} />}
-        {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
-        <Link to="/study" className="self-start text-accent-strong underline underline-offset-2">
+        {set.type === 'custom' ? (
+          <>
+            {/* Puede tener palabras de fuera de HSK, que se cargan la primera vez */}
+            <LoadEntries itemIds={set.itemIds}>
+              <CustomItemList set={set} items={items} />
+            </LoadEntries>
+            <Card>
+              <AddVocabulary set={set} />
+            </Card>
+            <CustomSetSettings set={set} />
+          </>
+        ) : (
+          <>
+            {words.length > 0 && <ItemList title={t('sets.vocabulary')} items={words} progress={progress} />}
+            {characters.length > 0 && <ItemList title={t('sets.characters')} items={characters} progress={progress} />}
+          </>
+        )}
+        <Link
+          to={set.type === 'custom' ? '/study/custom' : '/study'}
+          className="self-start text-accent-strong underline underline-offset-2"
+        >
           {t('sets.backToStudy')}
         </Link>
       </div>

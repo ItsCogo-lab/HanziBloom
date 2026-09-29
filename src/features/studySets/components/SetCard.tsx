@@ -44,7 +44,7 @@ export function SetCard({ set }: { set: StudySet }) {
           </p>
         </div>
       </div>
-      <p>{set.description}</p>
+      {set.description && <p>{set.description}</p>}
       <SetProgressBar name={set.name} progress={setProgress} />
       <div className="mt-auto flex flex-wrap gap-2">
         <Link

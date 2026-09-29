@@ -5,7 +5,7 @@ import type { HskLevel } from '../dictionary/types.ts'
  * De dónde sale un set:
  * - `hsk`: un nivel HSK, calculado a partir del dataset.
  * - `topic`: un tema (comida, familia...), de una lista curada a mano (src/data/topics.ts).
- * - `custom`: creado por el usuario (preparado en el modelo; aún no hay pantalla para crearlos).
+ * - `custom`: creado por el usuario (features/customSets).
  */
 export type StudySetType = 'hsk' | 'topic' | 'custom'
 

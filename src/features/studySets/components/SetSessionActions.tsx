@@ -1,0 +1,93 @@
+import { ButtonLink } from '../../../components/ui/ButtonLink.tsx'
+import { t, tCount } from '../../../i18n/index.ts'
+import { useProgress } from '../../progress/progressContext.ts'
+import { getSetSessionCounts } from '../sessionItems.ts'
+import { getSetSessionPath } from '../setPaths.ts'
+import type { StudySet } from '../types.ts'
+import { SessionTypeLabel } from './SessionTypeLabel.tsx'
+
+/**
+ * Las dos acciones de un set, Learn y Study, con cuántos elementos tiene cada
+ * una ahora mismo (calculado con el progreso actual, nunca fijo).
+ */
+export function SetSessionActions({ set }: { set: StudySet }) {
+  const { progress } = useProgress()
+  const counts = getSetSessionCounts(set, progress, new Date())
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+        <SessionTypeLabel type="learn" as="h2" />
+        <p>
+          {counts.learnable > 0
+            ? tCount(counts.learnable, 'session.learnAvailableOne', 'session.learnAvailable')
+            : t('session.learnEmpty')}
+        </p>
+        {counts.learnable > 0 && (
+          <ButtonLink
+            to={getSetSessionPath(set, 'learn')}
+            aria-label={t('session.learnNamed', { name: set.name })}
+            className="mt-auto self-start"
+          >
+            {t('session.learn')}
+          </ButtonLink>
+        )}
+      </section>
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+        <SessionTypeLabel type="study" as="h2" />
+        <p>
+          {counts.learned === 0
+            ? t('session.studyEmpty')
+            : counts.due > 0
+              ? tCount(counts.due, 'session.studyDueOne', 'session.studyDue')
+              : t('session.studyUpToDate')}
+        </p>
+        <div className="mt-auto self-start">
+          {counts.learned === 0 ? (
+            <ButtonLink to={getSetSessionPath(set, 'learn')} variant="secondary">
+              {t('session.startLearning')}
+            </ButtonLink>
+          ) : counts.due > 0 ? (
+            <ButtonLink to={getSetSessionPath(set, 'study')} aria-label={t('session.studyNamed', { name: set.name })}>
+              {t('session.study')}
+            </ButtonLink>
+          ) : (
+            <ButtonLink to={getSetSessionPath(set, 'study', { reviewAll: true })} variant="secondary">
+              {t('session.reviewAnyway')}
+            </ButtonLink>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+/** Versión compacta para listas (My Studies, Home): un botón por acción disponible. */
+export function SetSessionButtons({ set }: { set: StudySet }) {
+  const { progress } = useProgress()
+  const counts = getSetSessionCounts(set, progress, new Date())
+  return (
+    <>
+      {counts.learnable > 0 && (
+        <ButtonLink to={getSetSessionPath(set, 'learn')} aria-label={t('session.learnNamed', { name: set.name })}>
+          <span aria-hidden="true" className="font-hanzi">
+            新
+          </span>
+          {t('session.learn')}
+        </ButtonLink>
+      )}
+      {counts.learned > 0 && (
+        <ButtonLink
+          to={getSetSessionPath(set, 'study', { reviewAll: counts.due === 0 })}
+          variant="secondary"
+          aria-label={t('session.studyNamed', { name: set.name })}
+        >
+          <span aria-hidden="true" className="font-hanzi">
+            复
+          </span>
+          {t('session.study')}
+        </ButtonLink>
+      )}
+    </>
+  )
+}

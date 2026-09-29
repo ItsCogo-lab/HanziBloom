@@ -2,7 +2,6 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createDictionary } from '../../dictionary/dictionary.ts'
-import { listStudyItems } from '../../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../../dictionary/testData.ts'
 import type { Exercise } from '../types.ts'
 import { hanzi } from '../../../test/hanzi.ts'
@@ -21,7 +20,6 @@ function renderSession({ onRestart = () => {}, onResult = () => {}, sessionExerc
     <PracticeSession
       exercises={sessionExercises}
       dictionary={dictionary}
-      dictionaryItems={listStudyItems(dictionary)}
       onResult={onResult}
       onRestart={onRestart}
     />,
@@ -156,7 +154,8 @@ describe('PracticeSession: diccionario sin salir de la sesión', () => {
     await user.click(within(getPanel()).getByRole('button', { name: /谢谢/ }))
     expect(within(getPanel()).getByText('thanks')).toBeInTheDocument()
     await user.click(within(getPanel()).getByRole('button', { name: 'Back' }))
-    expect(within(getPanel()).getByText('to thank')).toBeInTheDocument()
+    // El panel usa el diccionario de la app: 谢 «to thank» y, entre sus palabras, 谢谢
+    expect(within(getPanel()).getAllByText('to thank')[0]).toBeInTheDocument()
 
     await user.keyboard('{Escape}')
 

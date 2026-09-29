@@ -1,15 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
-import type { Dictionary } from '../dictionary.ts'
+import { useDictionary } from '../dictionaryContext.ts'
 import type { StudyItem } from '../studyItem.ts'
 import { DictionarySearch } from './DictionarySearch.tsx'
 import { EntryDetails } from './EntryDetails.tsx'
 import { ToneLegend } from './ToneLegend.tsx'
 
 type DictionaryPanelProps = {
-  dictionary: Dictionary
-  items: readonly StudyItem[]
   /** Ficha que se abre directamente (consulta desde un ejercicio); sin ella, el buscador. */
   initialItem?: StudyItem
   onClose: () => void
@@ -23,8 +21,9 @@ type DictionaryPanelProps = {
  * Accesibilidad: es un diálogo no modal. Al abrirse, el foco va al buscador
  * (o a la ficha); Escape lo cierra y quien lo abrió recupera el foco.
  */
-export function DictionaryPanel({ dictionary, items, initialItem, onClose }: DictionaryPanelProps) {
+export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) {
   const titleId = useId()
+  const dictionary = useDictionary()
   const [query, setQuery] = useState('')
   // Fichas abiertas, como un historial: «Back» vuelve a la anterior o al buscador
   const [history, setHistory] = useState<StudyItem[]>(initialItem ? [initialItem] : [])
@@ -82,7 +81,6 @@ export function DictionaryPanel({ dictionary, items, initialItem, onClose }: Dic
           ) : (
             <>
               <DictionarySearch
-                items={items}
                 query={query}
                 onQueryChange={setQuery}
                 opener={{ onOpen: open }}

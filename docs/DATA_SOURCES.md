@@ -18,7 +18,7 @@ fuentes → adaptadores → fusión → validación → archivos generados → a
 | Adaptadores | `scripts/dataset/sources/*.ts` | Uno por fuente. Leen el formato original y devuelven solo los campos de los que esa fuente es dueña. No saben nada de las demás fuentes. |
 | Fusión | `scripts/dataset/fusion.ts` | Combina los adaptadores campo a campo según `FIELD_SOURCES` y compara fuentes que dicen lo mismo. |
 | Validación | `src/features/dictionary/validation.ts` | Comprueba el resultado. Si algo falla, no se escribe nada. |
-| Salida | `src/data/`, `public/strokes/`, `public/examples/` | Ver «Archivos generados». |
+| Salida | `src/data/`, `public/strokes/`, `public/examples/`, `public/dictionary/` | Ver «Archivos generados». |
 
 ```bash
 npm run data:fetch      # descarga las fuentes
@@ -72,6 +72,10 @@ rellena.
 | Palabra | `hskLevel`, `pinyin` | Lista HSK |
 | Palabra | `meanings.en`, `traditional` | CC-CEDICT |
 | Frases | `public/examples/` | Tatoeba |
+
+El diccionario completo (fuera de HSK 1-4) sigue las mismas reglas, salvo
+que no tiene nivel HSK y que el pinyin de sus palabras es el de CC-CEDICT. Ver
+«Diccionario completo».
 
 No se guardan porque se calculan: las palabras relacionadas de un carácter
 (`getWordsWithCharacter`), los caracteres de una palabra y los componentes de
@@ -198,6 +202,40 @@ Por eso los niveles no tienen exactamente el número oficial de palabras
 (150/150/300/600): HSK 1 tiene 150, HSK 2 149, HSK 3 299 (la lista de
 clem109 trae 299) y HSK 4 598 (la lista trae 601, con 3 repeticiones).
 
+## Diccionario completo
+
+Además de HSK 1-4, el build genera todo CC-CEDICT en `public/dictionary/`
+(`buildFullEntries` en `fusion.ts`). Sirve para buscar cualquier palabra y
+para añadirla a un set propio. Reglas:
+
+1. **Qué entra:** las entradas escritas enteras con caracteres chinos y con
+   lectura conocida. Se quedan fuera las que llevan letras, cifras o
+   símbolos («T恤», «110», «%») y las que CC-CEDICT anota con pinyin
+   desconocido (`xx5`, como 々).
+2. **Sin repetir HSK:** las entradas que ya usa una palabra de HSK 1-4 no
+   vuelven a aparecer, ni los caracteres de HSK 1-4.
+3. **Caracteres:** una entrada de un solo carácter. Lleva todas sus
+   lecturas; las de nombre propio («surname Xxx») solo cuentan si no tiene
+   otras. Los demás campos (radical, trazos, descomposición, etimología,
+   tradicional) salen de su fuente dueña, igual que en HSK.
+4. **Palabras:** una por cada hanzi y pinyin distintos, con el pinyin de
+   CC-CEDICT (las mayúsculas marcan nombres propios: 苹果 *Píng guǒ* es
+   «Apple», aparte de 苹果 *píng guǒ* de HSK 1). Si hay otra palabra con el
+   mismo hanzi, el id lleva el pinyin: `苹果[Píng guǒ]`.
+5. **Palabras que no se pueden enseñar:** si un carácter de la palabra no
+   tiene entrada propia (碁 en 宏碁), la palabra se deja fuera. Todo lo que
+   se deja fuera aparece en `DATA_CONFLICTS.md`.
+6. **Sin nivel HSK, sin frases y sin animación de trazos.** Las frases de
+   Tatoeba se eligen por nivel HSK. De hanzi-writer-data solo se usa el
+   número de trazos: copiar los ~9.500 archivos de trazos ocuparía unos
+   40 MB en el repositorio.
+
+Se reparte en 32 archivos (`CHUNK_COUNT` en
+`src/features/dictionary/fullDictionary.ts`): cada entrada va en el del punto
+de código de su primer carácter módulo 32. Así la app sabe qué archivo pedir
+a partir del hanzi, sin índice aparte. Ocupa unos 18 MB (unos 4,7 MB con
+gzip; el archivo más grande, unos 200 KB con gzip).
+
 ## Sets por temas
 
 `src/data/topics.ts` es el único archivo de `src/data` escrito a mano. Define
@@ -221,6 +259,7 @@ Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
 | `src/data/hsk1/` a `hsk4/`: `characters.ts`, `words.ts` | Caracteres y palabras de cada nivel | En el bundle, en un archivo aparte del código de la app |
 | `public/strokes/*.json` | Trazos de cada carácter | Al abrir la ficha de un carácter |
 | `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Al abrir una ficha |
+| `public/dictionary/0.json` a `31.json` | Diccionario completo, fuera de HSK 1-4 | Un archivo al abrir una ficha o un set con esas entradas; todos al buscar |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
 | `src/data/topics.ts` (no generado) | Temas curados a mano | En el bundle, con el dataset |
 
@@ -233,6 +272,7 @@ generados mantienen la de su fuente:
   (Unicode License v3) y Make Me a Hanzi (LGPL 3.0+).
 - `public/strokes/`: Arphic Public License.
 - `public/examples/`: CC BY 2.0 FR.
+- `public/dictionary/`: como `src/data/`.
 
 Aviso de Unicode: Copyright © Unicode, Inc. Los datos de Unihan se
 distribuyen bajo los términos de la Unicode License v3

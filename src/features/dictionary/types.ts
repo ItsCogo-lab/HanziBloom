@@ -32,7 +32,8 @@ export interface Character {
   /** Pinyin con marcas de tono. Algunos caracteres tienen varias lecturas (了: le, liǎo). */
   pinyin: string[]
   meanings: Translations
-  hskLevel: HskLevel
+  /** Nivel HSK. Los caracteres del diccionario completo que no están en HSK 1-4 no tienen. */
+  hskLevel?: HskLevel
   /*
    * Opcionales a propósito: solo se rellenan si tenemos una fuente fiable.
    * Mejor un dato vacío que un dato inventado.
@@ -61,8 +62,8 @@ export interface Character {
 /** Una palabra del vocabulario, formada por uno o más caracteres. */
 export interface Word {
   /**
-   * Identificador único: la propia palabra, p. ej. "你好". Si la lista HSK
-   * tiene la misma palabra con dos pronunciaciones (长 cháng «largo» y
+   * Identificador único: la propia palabra, p. ej. "你好". Si hay varias
+   * palabras con el mismo hanzi y distinta pronunciación (长 cháng «largo» y
    * 长 zhǎng «crecer»), cada una lleva su pinyin: "长[cháng]" (ver getWordId).
    */
   id: string
@@ -70,7 +71,8 @@ export interface Word {
   /** Pinyin de la palabra completa con marcas de tono, p. ej. "nǐ hǎo". */
   pinyin: string
   meanings: Translations
-  hskLevel: HskLevel
+  /** Nivel HSK. Las palabras del diccionario completo que no están en HSK 1-4 no tienen. */
+  hskLevel?: HskLevel
   /** Forma tradicional de la palabra (CC-CEDICT): 柠檬 → "檸檬". */
   traditional?: string
   /** Posición en una lista de frecuencia (1 = la más frecuente). */

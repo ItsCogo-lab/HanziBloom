@@ -5,7 +5,8 @@ import { DataTable } from '../components/ui/DataTable.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { StatCard } from '../components/ui/StatCard.tsx'
 import { EntryLabel } from '../features/dictionary/components/EntryLabel.tsx'
-import { hskDictionary, hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { useDictionary, useLoadItems } from '../features/dictionary/dictionaryContext.ts'
+import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItem } from '../features/dictionary/studyItem.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import {
@@ -51,8 +52,12 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
     { label: t('dashboard.characters'), summary: summarizeItems(characterItems, progress, now) },
     { label: t('dashboard.words'), summary: summarizeItems(wordItems, progress, now) },
   ]
-  const mostMissed = getMostMissed(progress).flatMap((item) => {
-    const studyItem = getStudyItem(hskDictionary, item.itemId)
+  const dictionary = useDictionary()
+  const missed = getMostMissed(progress)
+  // Un elemento de un set propio puede ser de fuera de HSK: se carga su entrada
+  useLoadItems(missed.map((item) => item.itemId))
+  const mostMissed = missed.flatMap((item) => {
+    const studyItem = getStudyItem(dictionary, item.itemId)
     return studyItem ? [{ studyItem, progress: item }] : []
   })
 

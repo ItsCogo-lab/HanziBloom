@@ -1,4 +1,5 @@
 import { getWordId } from './dictionary.ts'
+import { getChunkIndex, type DictionaryChunk } from './fullDictionary.ts'
 import { isValidIds } from './ids.ts'
 import type { Character, Etymology, ExampleSet, Translations, Word } from './types.ts'
 
@@ -29,7 +30,9 @@ export function validateDictionaryData(characters: readonly Character[], words: 
     if (character.id !== character.hanzi) problems.push(`${label}: el id debe ser igual al hanzi`)
     if (Array.from(character.hanzi).length !== 1) problems.push(`${label}: debe ser un solo carácter`)
     else if (!isHan(character.hanzi)) problems.push(`${label}: no es un carácter chino`)
-    if (!HSK_LEVELS.includes(character.hskLevel)) problems.push(`${label}: nivel HSK no válido`)
+    if (character.hskLevel !== undefined && !HSK_LEVELS.includes(character.hskLevel)) {
+      problems.push(`${label}: nivel HSK no válido`)
+    }
     problems.push(...findEmptyValues(label, character))
     if (character.pinyin.length === 0 || character.pinyin.some(isBlank)) {
       problems.push(`${label}: falta el pinyin`)
@@ -69,7 +72,7 @@ export function validateDictionaryData(characters: readonly Character[], words: 
       problems.push(`${label}: el id debe ser el hanzi, o el hanzi con su pinyin si es un homógrafo`)
     }
     if (isBlank(word.pinyin)) problems.push(`${label}: falta el pinyin`)
-    if (!HSK_LEVELS.includes(word.hskLevel)) problems.push(`${label}: nivel HSK no válido`)
+    if (word.hskLevel !== undefined && !HSK_LEVELS.includes(word.hskLevel)) problems.push(`${label}: nivel HSK no válido`)
     if (
       word.traditional !== undefined &&
       (Array.from(word.traditional).length !== Array.from(word.hanzi).length || !Array.from(word.traditional).every(isHan))
@@ -87,6 +90,23 @@ export function validateDictionaryData(characters: readonly Character[], words: 
     }
   }
 
+  return problems
+}
+
+/**
+ * Revisa los trozos del diccionario completo: cada entrada en el trozo de su
+ * primer carácter (si no, la app no la encontraría) y ninguna con nivel HSK
+ * (las de HSK 1-4 van en src/data). La coherencia de las entradas se revisa
+ * con validateDictionaryData, junto con las de HSK.
+ */
+export function validateFullDictionary(chunks: readonly DictionaryChunk[]): string[] {
+  const problems: string[] = []
+  chunks.forEach((chunk, index) => {
+    for (const entry of [...chunk.characters, ...chunk.words]) {
+      if (getChunkIndex(entry.hanzi) !== index) problems.push(`"${entry.id}": está en el trozo ${index}, no en el suyo`)
+      if (entry.hskLevel !== undefined) problems.push(`"${entry.id}": el diccionario completo no lleva nivel HSK`)
+    }
+  })
   return problems
 }
 

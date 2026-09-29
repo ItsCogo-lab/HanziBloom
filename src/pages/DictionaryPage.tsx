@@ -2,10 +2,9 @@ import { useSearchParams } from 'react-router'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { DictionarySearch } from '../features/dictionary/components/DictionarySearch.tsx'
 import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
-import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import type { StudyItem } from '../features/dictionary/studyItem.ts'
 import { t, type MessageKey } from '../i18n/index.ts'
-import { getEntryPath } from './entryPaths.ts'
+import { getEntryPath } from '../features/dictionary/entryPaths.ts'
 
 type KindFilter = 'all' | StudyItem['kind']
 
@@ -20,7 +19,7 @@ function isKindFilter(value: string | null): value is KindFilter {
 }
 
 /**
- * Diccionario: busca en todos los caracteres y palabras del dataset. La
+ * Diccionario: busca en todo CC-CEDICT (HSK 1-4 y el diccionario completo). La
  * búsqueda y el filtro van en la URL (/dictionary?q=果&kind=word), así el
  * botón atrás vuelve a los mismos resultados y se pueden compartir.
  */
@@ -29,7 +28,6 @@ export function DictionaryPage() {
   const query = searchParams.get('q') ?? ''
   const kindParam = searchParams.get('kind')
   const kind: KindFilter = isKindFilter(kindParam) ? kindParam : 'all'
-  const items = kind === 'all' ? hskStudyItems : hskStudyItems.filter((item) => item.kind === kind)
 
   const update = (changes: { q?: string; kind?: KindFilter }) => {
     const next = { q: query, kind, ...changes }
@@ -65,7 +63,7 @@ export function DictionaryPage() {
             ))}
           </fieldset>
           <DictionarySearch
-            items={items}
+            kind={kind === 'all' ? undefined : kind}
             query={query}
             onQueryChange={(q) => update({ q })}
             opener={{ getHref: getEntryPath }}

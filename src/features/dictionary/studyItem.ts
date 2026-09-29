@@ -43,8 +43,9 @@ export function getStudyItem(dictionary: Dictionary, id: StudyItemId): StudyItem
 
 /**
  * Elementos relacionados: los caracteres de una palabra, o las palabras en
- * las que aparece un carácter. La palabra con el mismo hanzi que el carácter
- * (谁 carácter y 谁 palabra) no se incluye: no aporta nada.
+ * las que aparece un carácter (primero las de HSK 1-4). La palabra con el
+ * mismo hanzi que el carácter (谁 carácter y 谁 palabra) no se incluye: no
+ * aporta nada.
  */
 export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyItem[] {
   if (item.kind === 'word') {
@@ -52,5 +53,6 @@ export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyI
   }
   return getWordsWithCharacter(dictionary, item.entry.id)
     .filter((word) => word.hanzi !== item.entry.hanzi)
+    .sort((a, b) => Number(a.hskLevel === undefined) - Number(b.hskLevel === undefined))
     .map((entry): StudyItem => ({ kind: 'word', entry }))
 }

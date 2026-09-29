@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getEntryPath } from '../../../pages/entryPaths.ts'
+import { getEntryPath } from '../entryPaths.ts'
 import { renderWithProviders } from '../../../test/renderWithProviders.tsx'
 import { createDictionary } from '../dictionary.ts'
 import { ningCharacter, ningmengWord, testCharacters, testExampleSet, testWords } from '../testData.ts'

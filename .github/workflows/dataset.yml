@@ -39,7 +39,7 @@ jobs:
       - name: Subir el dataset regenerado
         if: github.ref != 'refs/heads/main'
         run: |
-          git add src/data public/strokes public/examples docs/DATA_CONFLICTS.md
+          git add src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md
           if git diff --cached --quiet; then
             echo "El dataset ya estaba al día."
             exit 0
@@ -51,5 +51,5 @@ jobs:
       - name: Comprobar que el dataset de main está al día
         if: github.ref == 'refs/heads/main'
         run: |
-          git add -N src/data public/strokes public/examples docs/DATA_CONFLICTS.md
-          git diff --exit-code --stat -- src/data public/strokes public/examples docs/DATA_CONFLICTS.md
+          git add -N src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md
+          git diff --exit-code --stat -- src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md

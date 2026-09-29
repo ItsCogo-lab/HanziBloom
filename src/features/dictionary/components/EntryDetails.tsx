@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { t } from '../../../i18n/index.ts'
@@ -10,6 +12,9 @@ import { ToneHanzi } from './ToneHanzi.tsx'
 import { EntryLink, type EntryOpener } from './EntryLink.tsx'
 import { ExampleSentences } from './ExampleSentences.tsx'
 import { StrokeOrder } from './StrokeOrder.tsx'
+
+/** Palabras relacionadas que se muestran de golpe; el resto, con «Show more». */
+const RELATED_PAGE_SIZE = 20
 
 type EntryDetailsProps = {
   item: StudyItem
@@ -24,6 +29,10 @@ type EntryDetailsProps = {
  */
 export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
   const related = getRelatedItems(dictionary, item)
+  // Con el diccionario completo, un carácter como 一 aparece en miles de palabras: se muestran por tandas
+  const itemId = getStudyItemId(item)
+  const [shown, setShown] = useState({ itemId, count: RELATED_PAGE_SIZE })
+  const relatedCount = shown.itemId === itemId ? shown.count : RELATED_PAGE_SIZE
   const traditional = getTraditionalForms(item.entry)
 
   return (
@@ -55,7 +64,8 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
       {item.kind === 'character' && (
         <>
           <CharacterFacts character={item.entry} dictionary={dictionary} opener={opener} />
-          <StrokeOrder hanzi={item.entry.hanzi} />
+          {/* public/strokes/ solo tiene los caracteres de HSK 1-4 (ver docs/DATA_SOURCES.md) */}
+          {item.entry.hskLevel !== undefined && <StrokeOrder hanzi={item.entry.hanzi} />}
         </>
       )}
 
@@ -80,12 +90,21 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
             </ul>
           ) : (
             <ul className="divide-y divide-line rounded-xl border border-line">
-              {related.map((relatedItem) => (
+              {related.slice(0, relatedCount).map((relatedItem) => (
                 <li key={getStudyItemId(relatedItem)}>
                   <RelatedWord item={relatedItem} opener={opener} />
                 </li>
               ))}
             </ul>
+          )}
+          {item.kind === 'character' && relatedCount < related.length && (
+            <Button
+              variant="secondary"
+              className="mt-3"
+              onClick={() => setShown({ itemId, count: relatedCount + RELATED_PAGE_SIZE })}
+            >
+              {t('sets.showMore')}
+            </Button>
           )}
         </section>
       )}
@@ -107,8 +126,11 @@ function RelatedWord({ item, opener }: { item: StudyItem; opener: EntryOpener })
         </HanziText>
       )}
       <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />
-      <span className="min-w-0 flex-1 text-ink-muted">{getMeanings(item.entry.meanings)[0]}</span>
-      <span className="text-sm text-ink-muted">{t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}</span>
+      {/* Con poco sitio, el significado baja a su propia línea en vez de salirse */}
+      <span className="min-w-32 flex-1 break-words text-ink-muted">{getMeanings(item.entry.meanings)[0]}</span>
+      {item.entry.hskLevel !== undefined && (
+        <span className="text-sm text-ink-muted">{t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}</span>
+      )}
     </EntryLink>
   )
 }

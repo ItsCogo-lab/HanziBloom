@@ -3,7 +3,7 @@ import { ningCharacter, ningmengWord } from '../../src/features/dictionary/testD
 import { cedictFixture } from './fixtures/cedict.ts'
 import { makeMeAHanziFixture } from './fixtures/makemeahanzi.ts'
 import { cjkRadicalsFixture, unihanIrgSourcesFixture, unihanVariantsFixture } from './fixtures/unihan.ts'
-import { buildBaseEntries, crossCheckCharacter, enrichCharacter } from './fusion.ts'
+import { buildBaseEntries, buildFullEntries, crossCheckCharacter, enrichCharacter } from './fusion.ts'
 import { createCedictIndex } from './sources/cedict.ts'
 import { parseMakeMeAHanzi } from './sources/makemeahanzi.ts'
 import { loadUnihan } from './sources/unihan.ts'
@@ -151,5 +151,45 @@ describe('crossCheckCharacter', () => {
       'X: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.',
       'X: el radical es 木 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.',
     ])
+  })
+})
+
+describe('buildFullEntries', () => {
+  // Líneas reales de CC-CEDICT (edición 2025-12-13)
+  const fullCedict = createCedictIndex(
+    JSON.stringify([
+      { traditional: 'T恤', simplified: 'T恤', pinyin: 'T xu4', english: ['T-shirt'] },
+      { traditional: '々', simplified: '々', pinyin: 'xx5', english: ['iteration mark (used to represent a duplicated character)'] },
+      { traditional: '宏碁', simplified: '宏碁', pinyin: 'Hong2 ji1', english: ['Acer, Taiwanese computer hardware company'] },
+      { traditional: '果', simplified: '果', pinyin: 'guo3', english: ['fruit', 'result', 'resolute', 'indeed', 'if really'] },
+      { traditional: '苹', simplified: '苹', pinyin: 'ping2', english: ['(artemisia)', 'duckweed'] },
+      { traditional: '蘋', simplified: '苹', pinyin: 'ping2', english: ['used in 蘋果|苹果[ping2 guo3]'] },
+      { traditional: '蘋果', simplified: '苹果', pinyin: 'Ping2 guo3', english: ['Apple (American tech company)'] },
+      { traditional: '蘋果', simplified: '苹果', pinyin: 'ping2 guo3', english: ['apple', 'CL:個|个[ge4],顆|颗[ke1]'] },
+      { traditional: '檸', simplified: '柠', pinyin: 'ning2', english: ['used in 檸檬|柠檬[ning2 meng2]'] },
+    ]),
+  )
+  const hsk = buildBaseEntries([{ level: 1, words: [{ hanzi: '苹果', pinyin: 'píng guǒ' }] }], fullCedict)
+  const full = buildFullEntries(fullCedict, hsk)
+
+  it('no repite lo que ya está en HSK y separa las otras lecturas con su pinyin en el id', () => {
+    expect(full.words).toEqual([
+      {
+        id: '苹果[Píng guǒ]',
+        hanzi: '苹果',
+        pinyin: 'Píng guǒ',
+        meanings: { en: ['Apple (American tech company)'] },
+        traditional: '蘋果',
+      },
+    ])
+  })
+
+  it('añade los caracteres que no están en HSK, sin nivel', () => {
+    expect(full.characters).toEqual([{ id: '柠', hanzi: '柠', pinyin: ['níng'], meanings: { en: ['used in 柠檬'] } }])
+  })
+
+  it('deja fuera lo que no puede enseñar, y dice por qué', () => {
+    expect(full.leftOut).toEqual(['々: CC-CEDICT no conoce su lectura', '宏碁 [Hóng jī]: sin entrada para 宏, 碁'])
+    expect(full.words.map((word) => word.hanzi)).not.toContain('T恤')
   })
 })

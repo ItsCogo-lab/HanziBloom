@@ -143,6 +143,681 @@ dónde sacar su significado. Se dejan fuera en lugar de inventarlo.
 
 - 打篮球 [dá lán qiú] (HSK 2)
 
+## Diccionario completo: desacuerdos entre fuentes
+
+Lo mismo que arriba, para los caracteres del diccionario completo (fuera de HSK 1-4).
+
+- 㐆: el radical es 丿 en Unihan y 尸 en Make Me a Hanzi. Se usa el de Unihan.
+- 㐌: el radical es 乙 en Unihan y 亻 en Make Me a Hanzi. Se usa el de Unihan.
+- 㒸: el radical es 八 en Unihan y 豕 en Make Me a Hanzi. Se usa el de Unihan.
+- 罔: el radical es 网 en Unihan y ⺳ en Make Me a Hanzi. Se usa el de Unihan.
+- 迥: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 筲: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 脉: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 魂: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 乏: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 亟: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 占: el radical es 卜 en Unihan y ⺊ en Make Me a Hanzi. Se usa el de Unihan.
+- 逼: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 兼: el radical es 八 en Unihan y 丷 en Make Me a Hanzi. Se usa el de Unihan.
+- 冑: el radical es 冂 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 幂: el radical es 巾 en Unihan y 冖 en Make Me a Hanzi. Se usa el de Unihan.
+- 処: el radical es 几 en Unihan y 夂 en Make Me a Hanzi. Se usa el de Unihan.
+- 凼: el radical es 凵 en Unihan y 水 en Make Me a Hanzi. Se usa el de Unihan.
+- 初: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 剳: Unihan dice 11 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 劄: el radical es 刀 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 胜: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 劳: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 匿: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 卄: el radical es 一 en Unihan y 十 en Make Me a Hanzi. Se usa el de Unihan.
+- 卟: el radical es 卜 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.
+- 卣: el radical es 卜 en Unihan y ⺊ en Make Me a Hanzi. Se usa el de Unihan.
+- 膝: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 叟: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 衔: el radical es 行 en Unihan y 彳 en Make Me a Hanzi. Se usa el de Unihan.
+- 丧: el radical es 一 en Unihan y 十 en Make Me a Hanzi. Se usa el de Unihan.
+- 乔: el radical es 丿 en Unihan y 大 en Make Me a Hanzi. Se usa el de Unihan.
+- 啬: el radical es 口 en Unihan y 十 en Make Me a Hanzi. Se usa el de Unihan.
+- 嚄: Unihan dice 16 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 冁: el radical es 八 en Unihan y 丷 en Make Me a Hanzi. Se usa el de Unihan.
+- 啰: el radical es 口 en Unihan y 罒 en Make Me a Hanzi. Se usa el de Unihan.
+- 苏: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 尧: el radical es 尢 en Unihan y 儿 en Make Me a Hanzi. Se usa el de Unihan.
+- 茔: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 葬: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 墓: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 墨: el radical es 黑 en Unihan y 土 en Make Me a Hanzi. Se usa el de Unihan.
+- 堕: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 垄: el radical es 土 en Unihan y 龙 en Make Me a Hanzi. Se usa el de Unihan.
+- 夹: el radical es 大 en Unihan y 一 en Make Me a Hanzi. Se usa el de Unihan.
+- 奢: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 娄: el radical es 米 en Unihan y 女 en Make Me a Hanzi. Se usa el de Unihan.
+- 孽: Unihan dice 20 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 寻: el radical es 寸 en Unihan y 彐 en Make Me a Hanzi. Se usa el de Unihan.
+- 尚: el radical es 小 en Unihan y ⺌ en Make Me a Hanzi. Se usa el de Unihan.
+- 尨: el radical es 尢 en Unihan y 犬 en Make Me a Hanzi. Se usa el de Unihan.
+- 尹: el radical es 丿 en Unihan y 尸 en Make Me a Hanzi. Se usa el de Unihan.
+- 屏: el radical es 尸 en Unihan y 户 en Make Me a Hanzi. Se usa el de Unihan.
+- 屠: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 嵬: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 巡: el radical es 辵 en Unihan y 巛 en Make Me a Hanzi. Se usa el de Unihan.
+- 巨: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 巨: el radical es 工 en Unihan y 匚 en Make Me a Hanzi. Se usa el de Unihan.
+- 庭: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 庾: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 廊: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 廌: el radical es 广 en Unihan y 鹿 en Make Me a Hanzi. Se usa el de Unihan.
+- 廓: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 廴: Unihan dice 3 trazos y hanzi-writer-data tiene 2. Se usa el de hanzi-writer-data.
+- 延: Unihan dice 8 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 廷: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 建: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 彟: Unihan dice 19 trazos y hanzi-writer-data tiene 20. Se usa el de hanzi-writer-data.
+- 彪: el radical es 虍 en Unihan y 彡 en Make Me a Hanzi. Se usa el de Unihan.
+- 忝: el radical es 心 en Unihan y ⺗ en Make Me a Hanzi. Se usa el de Unihan.
+- 恭: el radical es 心 en Unihan y ⺗ en Make Me a Hanzi. Se usa el de Unihan.
+- 惹: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 慝: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 惫: el radical es 心 en Unihan y 夂 en Make Me a Hanzi. Se usa el de Unihan.
+- 蒙: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 戢: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 背: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 摸: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 敖: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 敬: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 敌: el radical es 攴 en Unihan y 舌 en Make Me a Hanzi. Se usa el de Unihan.
+- 斩: el radical es 斤 en Unihan y 车 en Make Me a Hanzi. Se usa el de Unihan.
+- 昼: el radical es 日 en Unihan y 尸 en Make Me a Hanzi. Se usa el de Unihan.
+- 晟: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 畅: el radical es 田 en Unihan y 日 en Make Me a Hanzi. Se usa el de Unihan.
+- 暮: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 暹: Unihan dice 16 trazos y hanzi-writer-data tiene 15. Se usa el de hanzi-writer-data.
+- 曙: Unihan dice 18 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 曚: Unihan dice 17 trazos y hanzi-writer-data tiene 18. Se usa el de hanzi-writer-data.
+- 曼: el radical es 曰 en Unihan y 日 en Make Me a Hanzi. Se usa el de Unihan.
+- 朊: el radical es 月 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胧: el radical es 肉 en Unihan y 月 en Make Me a Hanzi. Se usa el de Unihan.
+- 筏: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 梃: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 棻: Unihan dice 11 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 笺: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 楛: Unihan dice 12 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 矩: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荣: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 模: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蕊: Unihan dice 16 trazos y hanzi-writer-data tiene 15. Se usa el de hanzi-writer-data.
+- 櫆: Unihan dice 17 trazos y hanzi-writer-data tiene 18. Se usa el de hanzi-writer-data.
+- 郁: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 郁: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 歔: Unihan dice 15 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 壳: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 肴: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 毗: el radical es 比 en Unihan y 田 en Make Me a Hanzi. Se usa el de Unihan.
+- 氹: el radical es 水 en Unihan y 乙 en Make Me a Hanzi. Se usa el de Unihan.
+- 氽: el radical es 入 en Unihan y 人 en Make Me a Hanzi. Se usa el de Unihan.
+- 泵: el radical es 石 en Unihan y 水 en Make Me a Hanzi. Se usa el de Unihan.
+- 渚: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 渠: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 荥: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 滑: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 颍: el radical es 页 en Unihan y 水 en Make Me a Hanzi. Se usa el de Unihan.
+- 灌: Unihan dice 21 trazos y hanzi-writer-data tiene 20. Se usa el de hanzi-writer-data.
+- 煮: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 荧: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 营: Unihan dice 13 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 爇: Unihan dice 18 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 爌: Unihan dice 18 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 牵: el radical es 牛 en Unihan y 大 en Make Me a Hanzi. Se usa el de Unihan.
+- 犂: Unihan dice 12 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 荦: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荦: el radical es 艸 en Unihan y 牛 en Make Me a Hanzi. Se usa el de Unihan.
+- 獒: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 兽: el radical es 八 en Unihan y 丷 en Make Me a Hanzi. Se usa el de Unihan.
+- 莹: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 瓦: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 瓮: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 甍: Unihan dice 16 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 甙: el radical es 甘 en Unihan y 弋 en Make Me a Hanzi. Se usa el de Unihan.
+- 畑: el radical es 田 en Unihan y 火 en Make Me a Hanzi. Se usa el de Unihan.
+- 肛: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 盛: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 卢: el radical es 卜 en Unihan y ⺊ en Make Me a Hanzi. Se usa el de Unihan.
+- 瞢: Unihan dice 16 trazos y hanzi-writer-data tiene 15. Se usa el de hanzi-writer-data.
+- 砻: el radical es 石 en Unihan y 龙 en Make Me a Hanzi. Se usa el de Unihan.
+- 祈: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 祖: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 祥: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 禄: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 禸: Unihan dice 4 trazos y hanzi-writer-data tiene 5. Se usa el de hanzi-writer-data.
+- 禽: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 稣: el radical es 禾 en Unihan y 鱼 en Make Me a Hanzi. Se usa el de Unihan.
+- 竺: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 竽: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 竿: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笄: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笆: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笈: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笊: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笋: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笏: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笙: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笛: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笞: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笠: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笤: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笥: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笪: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笫: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笮: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笱: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笳: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笸: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筀: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筅: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筇: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筊: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筋: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筌: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筐: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筑: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筒: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筕: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 策: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筘: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筠: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筢: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筦: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笕: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筮: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箸: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筱: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筵: Unihan dice 14 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 筵: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箅: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箍: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筝: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箐: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箔: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箕: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箜: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箝: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箢: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箬: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箭: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箴: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篁: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篆: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箧: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篌: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筼: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篙: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篚: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篝: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篡: el radical es 竹 en Unihan y 厶 en Make Me a Hanzi. Se usa el de Unihan.
+- 笃: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篥: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篦: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筛: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篪: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筚: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篷: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篹: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篼: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篾: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箦: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簇: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簉: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簋: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簌: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篓: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簏: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箪: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簟: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篑: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簦: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簧: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簪: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箫: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簸: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筜: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簿: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 籀: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篮: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 筹: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 籍: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 籑: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箓: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箨: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 籁: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笼: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 笾: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 簖: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 篱: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 箩: el radical es 竹 en Unihan y ⺮ en Make Me a Hanzi. Se usa el de Unihan.
+- 糢: Unihan dice 16 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 致: Unihan dice 9 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 萦: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 罕: el radical es 网 en Unihan y ⺳ en Make Me a Hanzi. Se usa el de Unihan.
+- 署: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 骂: el radical es 马 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.
+- 芈: el radical es 艸 en Unihan y 羋 en Make Me a Hanzi. Se usa el de Unihan.
+- 义: el radical es 丶 en Unihan y 丿 en Make Me a Hanzi. Se usa el de Unihan.
+- 膻: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 翥: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 耶: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 肋: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肌: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胳: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肓: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肖: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肘: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肙: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肜: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肝: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肟: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 股: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肢: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胚: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肩: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肪: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肫: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肭: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肰: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肱: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肺: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肼: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肽: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胂: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胃: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胄: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胍: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胎: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胗: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胙: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胛: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胝: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胞: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胠: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胡: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胤: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胥: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胩: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胭: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胯: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胰: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胱: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胲: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胴: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胸: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胺: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胼: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脂: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脆: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胁: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脊: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脒: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脖: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脘: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胫: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脞: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脢: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脩: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脬: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脯: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脲: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脷: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胀: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腆: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腈: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腊: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腋: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腌: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肾: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腑: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腓: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腔: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腕: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胨: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腙: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腚: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腠: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脶: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腥: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腧: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腩: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肿: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腮: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腰: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腱: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腴: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肠: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腹: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腺: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膀: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 肷: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膂: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腽: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膈: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膊: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膘: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膛: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膜: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胶: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膣: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膦: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膨: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 腻: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膪: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膫: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膲: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膳: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膺: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胆: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脍: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脓: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臀: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臁: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臂: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臃: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臆: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臊: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臌: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 脐: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 膑: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 胪: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 臜: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 卧: el radical es 卜 en Unihan y 臣 en Make Me a Hanzi. Se usa el de Unihan.
+- 臾: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 舁: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 舋: Unihan dice 13 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 艰: el radical es 艮 en Unihan y 又 en Make Me a Hanzi. Se usa el de Unihan.
+- 艹: Unihan dice 4 trazos y hanzi-writer-data tiene 3. Se usa el de hanzi-writer-data.
+- 艻: Unihan dice 5 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 艾: Unihan dice 6 trazos y hanzi-writer-data tiene 5. Se usa el de hanzi-writer-data.
+- 艿: Unihan dice 6 trazos y hanzi-writer-data tiene 5. Se usa el de hanzi-writer-data.
+- 芊: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 芋: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 芒: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 芙: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芥: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芫: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芬: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芭: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芮: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 芳: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 刍: el radical es 刀 en Unihan y 彐 en Make Me a Hanzi. Se usa el de Unihan.
+- 芽: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 苓: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苔: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苗: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苜: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苞: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苟: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 若: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 英: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 苲: Unihan dice 8 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 茀: Unihan dice 8 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 茂: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 茄: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 荔: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 兹: el radical es 八 en Unihan y 艹 en Make Me a Hanzi. Se usa el de Unihan.
+- 茹: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荀: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荅: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荆: el radical es 艸 en Unihan y 刂 en Make Me a Hanzi. Se usa el de Unihan.
+- 荒: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 荼: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 莎: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 莘: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 苋: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 莫: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 莽: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 莿: Unihan dice 11 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 菀: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 菊: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 菩: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 菱: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 菲: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 萃: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 萌: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 萎: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 萑: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 萱: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 葄: Unihan dice 12 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 葛: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 董: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 葺: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 蒂: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 蒐: Unihan dice 12 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蒜: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蒟: Unihan dice 13 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蒦: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蒭: Unihan dice 13 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蒲: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蒸: el radical es 火 en Unihan y 艹 en Make Me a Hanzi. Se usa el de Unihan.
+- 蒻: Unihan dice 13 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蒿: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蓂: Unihan dice 13 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蓍: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蓐: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蓔: Unihan dice 13 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蓬: Unihan dice 15 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 蔑: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蔡: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蕃: Unihan dice 16 trazos y hanzi-writer-data tiene 15. Se usa el de hanzi-writer-data.
+- 蕑: Unihan dice 15 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 蕠: Unihan dice 15 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 萧: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 薄: Unihan dice 17 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 荟: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 薛: Unihan dice 17 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 薯: Unihan dice 18 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 薰: Unihan dice 18 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 薳: Unihan dice 16 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 苧: Unihan dice 8 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 薶: Unihan dice 17 trazos y hanzi-writer-data tiene 18. Se usa el de hanzi-writer-data.
+- 藇: Unihan dice 16 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 藏: Unihan dice 18 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 藒: Unihan dice 17 trazos y hanzi-writer-data tiene 18. Se usa el de hanzi-writer-data.
+- 藘: Unihan dice 18 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 藨: Unihan dice 18 trazos y hanzi-writer-data tiene 19. Se usa el de hanzi-writer-data.
+- 蔺: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 蘖: Unihan dice 21 trazos y hanzi-writer-data tiene 20. Se usa el de hanzi-writer-data.
+- 蘖: el radical es 艸 en Unihan y 木 en Make Me a Hanzi. Se usa el de Unihan.
+- 蘘: Unihan dice 20 trazos y hanzi-writer-data tiene 21. Se usa el de hanzi-writer-data.
+- 兰: el radical es 八 en Unihan y 丷 en Make Me a Hanzi. Se usa el de Unihan.
+- 蘵: Unihan dice 21 trazos y hanzi-writer-data tiene 22. Se usa el de hanzi-writer-data.
+- 虒: el radical es 厂 en Unihan y 虎 en Make Me a Hanzi. Se usa el de Unihan.
+- 蚤: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 蚀: el radical es 虫 en Unihan y 饣 en Make Me a Hanzi. Se usa el de Unihan.
+- 融: el radical es 虫 en Unihan y 鬲 en Make Me a Hanzi. Se usa el de Unihan.
+- 蟆: Unihan dice 17 trazos y hanzi-writer-data tiene 16. Se usa el de hanzi-writer-data.
+- 卫: el radical es 卩 en Unihan y 乛 en Make Me a Hanzi. Se usa el de Unihan.
+- 衤: Unihan dice 6 trazos y hanzi-writer-data tiene 5. Se usa el de hanzi-writer-data.
+- 邪: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 邪: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 裇: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 补: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 袭: el radical es 衣 en Unihan y 龙 en Make Me a Hanzi. Se usa el de Unihan.
+- 觅: el radical es 见 en Unihan y 爫 en Make Me a Hanzi. Se usa el de Unihan.
+- 豱: Unihan dice 16 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 贞: el radical es 贝 en Unihan y ⺊ en Make Me a Hanzi. Se usa el de Unihan.
+- 贰: el radical es 贝 en Unihan y 弋 en Make Me a Hanzi. Se usa el de Unihan.
+- 赓: el radical es 贝 en Unihan y 广 en Make Me a Hanzi. Se usa el de Unihan.
+- 赜: el radical es 贝 en Unihan y 臣 en Make Me a Hanzi. Se usa el de Unihan.
+- 逾: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 军: el radical es 冖 en Unihan y 车 en Make Me a Hanzi. Se usa el de Unihan.
+- 载: el radical es 车 en Unihan y 戈 en Make Me a Hanzi. Se usa el de Unihan.
+- 辉: el radical es 车 en Unihan y ⺌ en Make Me a Hanzi. Se usa el de Unihan.
+- 辈: el radical es 车 en Unihan y 非 en Make Me a Hanzi. Se usa el de Unihan.
+- 舆: el radical es 臼 en Unihan y 车 en Make Me a Hanzi. Se usa el de Unihan.
+- 辔: el radical es 车 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.
+- 辞: el radical es 辛 en Unihan y 舌 en Make Me a Hanzi. Se usa el de Unihan.
+- 辶: Unihan dice 4 trazos y hanzi-writer-data tiene 3. Se usa el de hanzi-writer-data.
+- 迅: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 迪: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 迭: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 述: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 迶: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 迷: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 追: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 退: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 逃: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 逄: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 逅: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 逆: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 逢: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 逮: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 逵: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 逸: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 遁: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 遂: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 遄: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 遣: Unihan dice 14 trazos y hanzi-writer-data tiene 13. Se usa el de hanzi-writer-data.
+- 迁: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 迈: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 邗: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邘: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邙: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邛: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邠: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邡: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邢: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 邢: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邦: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 邦: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邨: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邯: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邰: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邱: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邳: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邴: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邵: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邶: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邸: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邾: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郄: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郅: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郇: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郊: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郎: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 郎: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郗: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郛: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郜: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郝: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郏: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郡: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郢: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郤: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 郤: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郫: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郭: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 郭: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郯: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郴: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邮: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郾: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄂: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄄: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郓: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄋: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邹: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邬: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郧: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄙: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄞: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄢: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄣: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄦: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邓: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 邓: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郑: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 郑: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄯: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄱: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郸: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邺: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郐: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 鄹: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 邝: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 酃: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 酆: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 郦: el radical es 邑 en Unihan y 阝 en Make Me a Hanzi. Se usa el de Unihan.
+- 铓: Unihan dice 11 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 阞: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 防: Unihan dice 7 trazos y hanzi-writer-data tiene 6. Se usa el de hanzi-writer-data.
+- 陋: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.
+- 陟: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 陈: Unihan dice 8 trazos y hanzi-writer-data tiene 7. Se usa el de hanzi-writer-data.
+- 陶: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 隆: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 队: Unihan dice 5 trazos y hanzi-writer-data tiene 4. Se usa el de hanzi-writer-data.
+- 隋: Unihan dice 12 trazos y hanzi-writer-data tiene 11. Se usa el de hanzi-writer-data.
+- 雚: Unihan dice 18 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 灵: el radical es 火 en Unihan y 彐 en Make Me a Hanzi. Se usa el de Unihan.
+- 腼: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 靥: el radical es 面 en Unihan y 厂 en Make Me a Hanzi. Se usa el de Unihan.
+- 顸: el radical es 页 en Unihan y 干 en Make Me a Hanzi. Se usa el de Unihan.
+- 顼: el radical es 页 en Unihan y 王 en Make Me a Hanzi. Se usa el de Unihan.
+- 颀: el radical es 页 en Unihan y 斤 en Make Me a Hanzi. Se usa el de Unihan.
+- 类: el radical es 米 en Unihan y 大 en Make Me a Hanzi. Se usa el de Unihan.
+- 颦: el radical es 页 en Unihan y 十 en Make Me a Hanzi. Se usa el de Unihan.
+- 冯: el radical es 冫 en Unihan y 马 en Make Me a Hanzi. Se usa el de Unihan.
+- 腾: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 蓦: el radical es 艸 en Unihan y 马 en Make Me a Hanzi. Se usa el de Unihan.
+- 骨: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 肮: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+- 鬼: Unihan dice 10 trazos y hanzi-writer-data tiene 9. Se usa el de hanzi-writer-data.
+- 魄: Unihan dice 15 trazos y hanzi-writer-data tiene 14. Se usa el de hanzi-writer-data.
+- 魆: Unihan dice 14 trazos y hanzi-writer-data tiene 15. Se usa el de hanzi-writer-data.
+- 魏: Unihan dice 18 trazos y hanzi-writer-data tiene 17. Se usa el de hanzi-writer-data.
+- 魖: Unihan dice 20 trazos y hanzi-writer-data tiene 22. Se usa el de hanzi-writer-data.
+- 鸣: el radical es 鸟 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.
+- 莺: Unihan dice 11 trazos y hanzi-writer-data tiene 10. Se usa el de hanzi-writer-data.
+- 黯: el radical es 黑 en Unihan y 音 en Make Me a Hanzi. Se usa el de Unihan.
+- 鼋: el radical es 黾 en Unihan y 龟 en Make Me a Hanzi. Se usa el de Unihan.
+- 鼎: Unihan dice 13 trazos y hanzi-writer-data tiene 12. Se usa el de hanzi-writer-data.
+- 腭: el radical es 肉 en Unihan y ⺼ en Make Me a Hanzi. Se usa el de Unihan.
+
+## Diccionario completo: entradas de CC-CEDICT que se dejan fuera
+
+- 々: CC-CEDICT no conoce su lectura
+- 〻: CC-CEDICT no conoce su lectura
+- 丆: CC-CEDICT no conoce su lectura
+- 丷: CC-CEDICT no conoce su lectura
+- 乊: CC-CEDICT no conoce su lectura
+- 乤: CC-CEDICT no conoce su lectura
+- 乥: CC-CEDICT no conoce su lectura
+- 乧: CC-CEDICT no conoce su lectura
+- 乫: CC-CEDICT no conoce su lectura
+- 乷: CC-CEDICT no conoce su lectura
+- 乺: CC-CEDICT no conoce su lectura
+- 乼: CC-CEDICT no conoce su lectura
+- 亪: CC-CEDICT no conoce su lectura
+- 亽: CC-CEDICT no conoce su lectura
+- 仒: CC-CEDICT no conoce su lectura
+- 働: CC-CEDICT no conoce su lectura
+- 匁: CC-CEDICT no conoce su lectura
+- 卪: CC-CEDICT no conoce su lectura
+- 厼: CC-CEDICT no conoce su lectura
+- 壭: CC-CEDICT no conoce su lectura
+- 峠: CC-CEDICT no conoce su lectura
+- 朩: CC-CEDICT no conoce su lectura
+- 朰: CC-CEDICT no conoce su lectura
+- 瓧: CC-CEDICT no conoce su lectura
+- 畓: CC-CEDICT no conoce su lectura
+- 罖: CC-CEDICT no conoce su lectura
+- 込: CC-CEDICT no conoce su lectura
+- 鎹: CC-CEDICT no conoce su lectura
+- 龶: CC-CEDICT no conoce su lectura
+- 傢具 [jiā jù]: sin entrada para 傢
+- 宏碁 [Hóng jī]: sin entrada para 碁
+- 宏碁集团 [Hóng jī Jí tuán]: sin entrada para 碁
+- 燉煌 [Dūn huáng]: sin entrada para 燉
+- 韩复榘 [Hán Fù jǔ]: sin entrada para 榘
+
 ## Entradas repetidas en la lista HSK
 
 La lista repite estas palabras con el mismo pinyin (con otro sentido). Se

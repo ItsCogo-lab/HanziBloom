@@ -48,9 +48,8 @@ export function createTopicSet(topic: TopicDefinition): StudySet {
 }
 
 /**
- * Todos los sets de la app: los HSK, los de temas y (cuando existan) los del
- * usuario. Los sets de usuario ya encajan en el modelo: solo hace falta
- * guardarlos y pasarlos aquí.
+ * Los sets de la app: los HSK, los de temas y, si se pasan, otros sets. Los
+ * del usuario se añaden en la interfaz con useStudySets().
  */
 export function createStudySets(
   dictionary: Dictionary,
