@@ -1,4 +1,5 @@
-import { useSearchParams } from 'react-router'
+import { useState } from 'react'
+import { useLocation, useSearchParams } from 'react-router'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { DictionarySearch } from '../features/dictionary/components/DictionarySearch.tsx'
 import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
@@ -18,6 +19,9 @@ function isKindFilter(value: string | null): value is KindFilter {
   return KIND_FILTERS.some((filter) => filter.value === value)
 }
 
+/** Marca las navegaciones que hace el propio buscador al escribir. */
+const FROM_SEARCH_INPUT = 'dictionary-search-input'
+
 /**
  * Diccionario: busca en todo CC-CEDICT (HSK 1-4 y el diccionario completo). La
  * búsqueda y el filtro van en la URL (/dictionary?q=果&kind=word), así el
@@ -25,17 +29,29 @@ function isKindFilter(value: string | null): value is KindFilter {
  */
 export function DictionaryPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const query = searchParams.get('q') ?? ''
+  const location = useLocation()
+  const urlQuery = searchParams.get('q') ?? ''
+  // El texto del buscador vive aquí y la URL lo sigue. La URL cambia con una
+  // navegación, que llega un poco más tarde: si el input leyera de ella, el
+  // teclado chino (IME) perdería lo que está componiendo y duplicaría el texto.
+  const [query, setQuery] = useState(urlQuery)
+  // Si la URL cambia por otra razón (un enlace, atrás), manda la URL
+  const [locationKey, setLocationKey] = useState(location.key)
+  if (location.key !== locationKey) {
+    setLocationKey(location.key)
+    if (location.state !== FROM_SEARCH_INPUT && urlQuery !== query) setQuery(urlQuery)
+  }
   const kindParam = searchParams.get('kind')
   const kind: KindFilter = isKindFilter(kindParam) ? kindParam : 'all'
 
   const update = (changes: { q?: string; kind?: KindFilter }) => {
     const next = { q: query, kind, ...changes }
+    setQuery(next.q)
     const params = new URLSearchParams()
     if (next.q !== '') params.set('q', next.q)
     if (next.kind !== 'all') params.set('kind', next.kind)
     // replace: escribir no llena el historial con una entrada por letra
-    setSearchParams(params, { replace: true })
+    setSearchParams(params, { replace: true, state: FROM_SEARCH_INPUT })
   }
 
   return (
