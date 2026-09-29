@@ -263,6 +263,8 @@ export const en = {
   'dictionary.typeToSearch': 'Type a character, pinyin (with or without tones) or an English word.',
   'dictionary.loadingFull': 'Loading the full dictionary. Showing HSK 1-4 results for now.',
   'dictionary.fullUnavailable': "Couldn't load the full dictionary. Showing HSK 1-4 results only.",
+  'dictionary.queryTooShort': 'Type at least 2 letters, or one character.',
+  'dictionary.searching': 'Searching…',
   'dictionary.loadingEntries': 'Loading from the dictionary…',
   'dictionary.entriesUnavailable': "Couldn't load these entries from the dictionary. Check your connection and reload the page.",
   'dictionary.results': 'Results',

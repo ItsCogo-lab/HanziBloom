@@ -263,6 +263,8 @@ export const es: Record<MessageKey, string> = {
   'dictionary.typeToSearch': 'Escribe un carácter, pinyin (con o sin tonos) o una palabra en inglés.',
   'dictionary.loadingFull': 'Cargando el diccionario completo. De momento, resultados de HSK 1-4.',
   'dictionary.fullUnavailable': 'No se ha podido cargar el diccionario completo. Solo hay resultados de HSK 1-4.',
+  'dictionary.queryTooShort': 'Escribe al menos 2 letras o un carácter.',
+  'dictionary.searching': 'Buscando…',
   'dictionary.loadingEntries': 'Cargando del diccionario…',
   'dictionary.entriesUnavailable': 'No se han podido cargar estas entradas del diccionario. Comprueba la conexión y recarga la página.',
   'dictionary.results': 'Resultados',

@@ -124,7 +124,7 @@ describe('PracticeSession: diccionario sin salir de la sesión', () => {
     expect(search).toHaveFocus()
 
     await user.type(search, '你')
-    const results = within(getPanel()).getByRole('list', { name: 'Results' })
+    const results = await within(getPanel()).findByRole('list', { name: 'Results' })
     await user.click(within(results).getAllByRole('button')[0]!)
     // La ficha se abre dentro del panel, sin cambiar de página
     expect(within(getPanel()).getByRole('heading', { name: 'Meanings' })).toBeInTheDocument()

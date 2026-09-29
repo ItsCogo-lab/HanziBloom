@@ -148,7 +148,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     await user.click(screen.getByRole('button', { name: 'Dictionary' }))
     const panel = screen.getByRole('dialog', { name: 'Dictionary' })
     await user.type(within(panel).getByRole('searchbox', { name: 'Search' }), 'red')
-    expect(within(panel).getByRole('list', { name: 'Results' })).toBeInTheDocument()
+    expect(await within(panel).findByRole('list', { name: 'Results' })).toBeInTheDocument()
     await user.click(within(panel).getByRole('button', { name: 'Close' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     return { before, after: document.body.textContent }

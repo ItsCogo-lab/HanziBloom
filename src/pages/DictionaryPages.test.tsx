@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppRoutes } from '../app/AppRoutes.tsx'
@@ -20,18 +20,20 @@ describe('DictionaryPage', () => {
     renderWithProviders(<AppRoutes />, { path: '/dictionary' })
 
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), '果')
-    const results = within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link')
+    const results = within(await screen.findByRole('list', { name: 'Results' })).getAllByRole('link')
     // Primero el carácter 果, luego las palabras que empiezan por él, luego las que lo contienen
     expect(results[0]).toHaveAttribute('href', '/characters/%E6%9E%9C')
     expect(results.map((link) => link.getAttribute('href'))).toContain('/vocabulary/%E8%8B%B9%E6%9E%9C') // 苹果
 
     await user.clear(screen.getByRole('searchbox', { name: 'Search' }))
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'xiexie')
-    expect(screen.getByRole('link', { name: /谢谢/ })).toHaveAttribute('href', '/vocabulary/%E8%B0%A2%E8%B0%A2')
+    expect(await screen.findByRole('link', { name: /谢谢/ })).toHaveAttribute('href', '/vocabulary/%E8%B0%A2%E8%B0%A2')
 
     await user.clear(screen.getByRole('searchbox', { name: 'Search' }))
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'apple')
-    expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link')[0]).toHaveTextContent('苹果')
+    await waitFor(() =>
+      expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link')[0]).toHaveTextContent('苹果'),
+    )
   })
 
   it('guarda la búsqueda en la dirección y filtra por tipo', async () => {
@@ -52,7 +54,7 @@ describe('DictionaryPage', () => {
 
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'zzzz')
 
-    expect(screen.getByText(/No matches/)).toBeInTheDocument()
+    expect(await screen.findByText(/No matches/)).toBeInTheDocument()
   })
 
   it('muestra la leyenda de colores de los tonos', () => {
