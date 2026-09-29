@@ -1,6 +1,7 @@
 import { toDateKey } from '../../lib/dates.ts'
+import type { HskLevel } from '../dictionary/types.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
-import { isReviewDue, scheduleFirstReview, scheduleKnownItem, scheduleNextReview, type ReviewSchedule } from '../srs/srs.ts'
+import { isReviewDue, MAX_MASTERY_LEVEL, scheduleFirstReview, scheduleKnownItem, scheduleNextReview, type ReviewSchedule } from '../srs/srs.ts'
 import type { ItemProgress, ProgressData } from './types.ts'
 
 /**
@@ -22,6 +23,7 @@ export function createEmptyProgress(): ProgressData {
  */
 export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correct: boolean, now: Date): ProgressData {
   const previous = progress.items[itemId]
+  // Sin la marca `basic`: un elemento básico que se responde vuelve al SRS normal
   const item: ItemProgress = {
     itemId,
     timesSeen: (previous?.timesSeen ?? 0) + 1,
@@ -62,17 +64,69 @@ export function markItemKnown(progress: ProgressData, itemId: StudyItemId, now: 
   return addItem(progress, itemId, now, scheduleKnownItem(now))
 }
 
+/** Un elemento de HSK con su nivel, para aplicar el nivel del usuario. */
+export interface LeveledItem {
+  itemId: StudyItemId
+  hskLevel: HskLevel
+}
+
+/**
+ * Niveles por debajo del del usuario a partir de los cuales el vocabulario es
+ * básico: con HSK 3, lo de HSK 1 ya no hace falta repasarlo.
+ */
+export const BASIC_LEVEL_GAP = 2
+
+/** Días entre los que se reparten los primeros repasos al marcar un nivel entero. */
+const LEVEL_SPREAD_DAYS = 30
+
+/**
+ * Aplica el nivel HSK que el usuario dice tener (`null` si no indica ninguno):
+ *
+ * - Hasta su nivel, lo que aún no tenía registro entra como dominado (ver
+ *   markItemKnown), con los primeros repasos repartidos en 30 días más.
+ * - Lo que está BASIC_LEVEL_GAP niveles o más por debajo es básico: dominado
+ *   y sin repasos, aunque ya se estuviera estudiando.
+ * - Lo que era básico y deja de serlo (bajó el nivel) vuelve a repasarse de
+ *   vez en cuando como dominado.
+ *
+ * Lo demás no se toca. Como las demás funciones, devuelve un objeto nuevo.
+ */
+export function applyHskLevel(
+  progress: ProgressData,
+  items: readonly LeveledItem[],
+  userLevel: HskLevel | null,
+  now: Date,
+): ProgressData {
+  const updated = { ...progress.items }
+  let scheduled = 0
+  const knownSchedule = () => scheduleKnownItem(now, scheduled++ % LEVEL_SPREAD_DAYS)
+
+  for (const { itemId, hskLevel } of items) {
+    const existing = progress.items[itemId]
+    const isBasic = userLevel !== null && hskLevel <= userLevel - BASIC_LEVEL_GAP
+    const isKnown = userLevel !== null && hskLevel <= userLevel
+
+    if (isBasic) {
+      if (existing?.basic) continue
+      updated[itemId] = { ...(existing ?? newItem(itemId, now)), masteryLevel: MAX_MASTERY_LEVEL, basic: true }
+    } else if (existing?.basic) {
+      const { basic: _basic, ...rest } = existing
+      updated[itemId] = { ...rest, ...knownSchedule() }
+    } else if (isKnown && !existing) {
+      updated[itemId] = { ...newItem(itemId, now), ...knownSchedule() }
+    }
+  }
+  return { ...progress, items: updated }
+}
+
+/** Registro sin respuestas; quien lo usa le pone su propia programación. */
+function newItem(itemId: StudyItemId, now: Date): ItemProgress {
+  return { itemId, timesSeen: 0, timesCorrect: 0, timesWrong: 0, lastReviewedAt: now.toISOString(), ...scheduleKnownItem(now) }
+}
+
 function addItem(progress: ProgressData, itemId: StudyItemId, now: Date, schedule: ReviewSchedule): ProgressData {
   if (progress.items[itemId]) return progress
-  const item: ItemProgress = {
-    itemId,
-    timesSeen: 0,
-    timesCorrect: 0,
-    timesWrong: 0,
-    lastReviewedAt: now.toISOString(),
-    ...schedule,
-  }
-  return { ...progress, items: { ...progress.items, [itemId]: item } }
+  return { ...progress, items: { ...progress.items, [itemId]: { ...newItem(itemId, now), ...schedule } } }
 }
 
 /**
@@ -89,7 +143,7 @@ export function getItemStatus(item: ItemProgress | undefined): ItemStatus {
   return item.masteryLevel >= MASTERED_LEVEL ? 'mastered' : 'learning'
 }
 
-/** ¿Toca repasar este elemento? Los nuevos no cuentan como repaso pendiente. */
+/** ¿Toca repasar este elemento? Los nuevos y los básicos no cuentan como repaso pendiente. */
 export function isDue(item: ItemProgress | undefined, now: Date): boolean {
-  return item !== undefined && isReviewDue(item.nextReviewAt, now)
+  return item !== undefined && !item.basic && isReviewDue(item.nextReviewAt, now)
 }

@@ -4,7 +4,7 @@ import { getStudyItemId, listStudyItems, type StudyItem } from '../dictionary/st
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { seededRandom } from '../../test/random.ts'
 import type { ExerciseDefinition } from './exerciseDefinitions.ts'
-import { createEmptyProgress, recordAnswer } from '../progress/progress.ts'
+import { applyHskLevel, createEmptyProgress, recordAnswer } from '../progress/progress.ts'
 import {
   createSessionExercises,
   createSessionState,
@@ -78,6 +78,16 @@ describe('selectSessionItems', () => {
 
   it('y, si faltan, los que aún no tocaban', () => {
     expect(selectSessionItems(pool, progress, monday, 100, seededRandom(1))).toHaveLength(pool.length)
+  })
+
+  it('los básicos nunca son pendientes y van detrás de todo lo demás', () => {
+    // 你 era un fallo pendiente, pero con HSK 3 pasa a básico
+    const withBasic = applyHskLevel(progress, [{ itemId: 'char:你', hskLevel: 1 }], 3, monday)
+    const items = pool.filter((item) => withBasic.items[getStudyItemId(item)] !== undefined)
+
+    expect(ids(selectSessionItems(items, withBasic, thursday, 3, seededRandom(1)))).toEqual(
+      ['char:好', 'char:谢', 'char:了'].toSorted(),
+    )
   })
 
   it('cuando llega su fecha, los acertados también son repasos pendientes', () => {

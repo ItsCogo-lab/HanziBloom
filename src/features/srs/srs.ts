@@ -43,15 +43,16 @@ export function scheduleFirstReview(now: Date): ReviewSchedule {
 }
 
 /**
- * Programación de un elemento que el usuario ya conocía al verlo en Learn:
- * empieza en el nivel máximo, así que vuelve a los 30 días. Si lo acierta
- * sigue cada 30 días; si lo falla, vuelve al nivel 0 como cualquier otro.
+ * Programación de un elemento que el usuario ya conocía: empieza en el nivel
+ * máximo, así que vuelve a los 30 días. Si lo acierta sigue cada 30 días; si
+ * lo falla, vuelve al nivel 0 como cualquier otro.
+ *
+ * `extraDays` retrasa el primer repaso: al marcar muchos elementos a la vez
+ * sirve para repartirlos y que no toquen todos el mismo día.
  */
-export function scheduleKnownItem(now: Date): ReviewSchedule {
-  return {
-    masteryLevel: MAX_MASTERY_LEVEL,
-    nextReviewAt: addDays(startOfDay(now), REVIEW_INTERVAL_DAYS[MAX_MASTERY_LEVEL] ?? 0).toISOString(),
-  }
+export function scheduleKnownItem(now: Date, extraDays = 0): ReviewSchedule {
+  const interval = (REVIEW_INTERVAL_DAYS[MAX_MASTERY_LEVEL] ?? 0) + extraDays
+  return { masteryLevel: MAX_MASTERY_LEVEL, nextReviewAt: addDays(startOfDay(now), interval).toISOString() }
 }
 
 export function isReviewDue(nextReviewAt: string, now: Date): boolean {
