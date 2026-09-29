@@ -50,7 +50,7 @@ export function DashboardPage() {
         actions={<ButtonLink to="/study/practice">{t('dashboard.startSession')}</ButtonLink>}
       />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         <Card>
           <h2 className="text-lg font-semibold">{t('dashboard.today')}</h2>
           <p className="mt-1 text-ink-muted">{t(getTodayMessage(summary))}</p>
@@ -87,7 +87,7 @@ export function DashboardPage() {
               </ButtonLink>
             </div>
           ) : (
-            <ul className="flex flex-col gap-5">
+            <ul className="flex flex-col gap-3 sm:gap-5">
               {studyingSets.map((set) => (
                 <li key={set.id} className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -107,7 +107,7 @@ export function DashboardPage() {
 
         <Card>
           <h2 className="mb-4 text-lg font-semibold">{t('dashboard.hskProgress')}</h2>
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3 sm:gap-5">
             <KindProgress label={t('dashboard.characters')} summary={summarizeItems(characterItems, progress, now)} />
             <KindProgress label={t('dashboard.words')} summary={summarizeItems(wordItems, progress, now)} />
           </div>

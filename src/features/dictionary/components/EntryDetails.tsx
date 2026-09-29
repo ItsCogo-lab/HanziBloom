@@ -37,7 +37,7 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
   const traditional = getTraditionalForms(item.entry)
 
   return (
-    <Card className="flex flex-col gap-6">
+    <Card className="flex flex-col gap-4 sm:gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
         <ToneHanzi entry={item.entry} className="text-7xl leading-tight sm:text-8xl" />
         <p className="text-2xl font-medium text-accent-strong">

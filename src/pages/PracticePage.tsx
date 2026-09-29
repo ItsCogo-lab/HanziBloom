@@ -55,7 +55,7 @@ export function PracticePage() {
   return (
     <>
       <PageHeader title={set.name} />
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <SessionTypeLabel type={mode} />
       </div>
       {/* Un set propio puede tener palabras de fuera de HSK: la sesión empieza cuando están cargadas */}

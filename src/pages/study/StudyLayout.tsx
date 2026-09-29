@@ -15,7 +15,7 @@ export function StudyLayout() {
   return (
     <>
       <PageHeader title={t('nav.study')} description={t('study.description')} />
-      <nav aria-label={t('study.sections')} className="mb-6 overflow-x-auto">
+      <nav aria-label={t('study.sections')} className="mb-4 overflow-x-auto sm:mb-6">
         <ul className="flex gap-1 border-b border-line">
           {STUDY_TABS.map((tab) => (
             <li key={tab.path} className="flex-1 sm:flex-none">

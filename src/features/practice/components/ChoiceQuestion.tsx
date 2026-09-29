@@ -44,7 +44,7 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
   }, [isAnswered])
 
   return (
-    <Card className="flex flex-col gap-6">
+    <Card className="flex flex-col gap-4 sm:gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="text-sm font-medium tracking-wide text-ink-muted uppercase">
           {t(item.kind === 'character' ? 'practice.kind.character' : 'practice.kind.word')}

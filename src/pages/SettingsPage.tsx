@@ -52,7 +52,7 @@ export function SettingsPage() {
   return (
     <>
       <PageHeader title={t('nav.settings')} description={t('settings.description')} />
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="flex max-w-2xl flex-col gap-4 sm:gap-6">
         <SettingsSection title={t('settings.practice')}>
           <SessionSizeSetting />
         </SettingsSection>

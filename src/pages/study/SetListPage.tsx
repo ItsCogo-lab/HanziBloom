@@ -16,7 +16,7 @@ export function SetListPage({ type }: { type: Exclude<StudySetType, 'custom'> })
         </h2>
         <p className="text-ink-muted">{type === 'hsk' ? t('study.hskIntro') : TOPIC_CURATION_NOTE}</p>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="grid gap-3 sm:gap-4 md:grid-cols-2">
         {sets.map((set) => (
           <li key={set.id} className="flex">
             <div className="flex-1">

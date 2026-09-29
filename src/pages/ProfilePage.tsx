@@ -40,7 +40,7 @@ export function ProfilePage() {
   return (
     <>
       <PageHeader title={t('nav.profile')} description={t('profile.description')} />
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         <section aria-labelledby="profile-overview">
           <h2 id="profile-overview" className="mb-3 text-lg font-semibold">
             {t('profile.overall')}

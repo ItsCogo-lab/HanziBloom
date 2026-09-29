@@ -21,7 +21,7 @@ export function AppLayout() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex-1 px-4 pt-6 pb-[calc(var(--mobile-nav-height)+2.5rem)] outline-none sm:px-6 md:px-10 md:py-10"
+        className="flex-1 px-4 pt-4 pb-[calc(var(--mobile-nav-height)+2.5rem)] outline-none sm:px-6 sm:pt-6 md:px-10 md:py-10"
       >
         <div className="mx-auto max-w-5xl">
           <Outlet />

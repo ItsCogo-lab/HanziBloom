@@ -60,11 +60,21 @@
     text-size-adjust: 100%;
   }
 
-  /* Safari en iPhone hace zoom al escribir en un campo de menos de 16px */
-  input,
-  select,
-  textarea {
-    @apply max-md:text-base;
+  /*
+   * En móvil todo va un poco más apretado: con la raíz a 15px, textos,
+   * márgenes y paddings (todos en rem) se reducen a la vez y en proporción.
+   */
+  @media (width < 48rem) {
+    html {
+      font-size: 15px;
+    }
+
+    /* Safari en iPhone hace zoom al escribir en un campo de menos de 16px (en px, no en rem) */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
   }
 
   /* Foco siempre visible al navegar con teclado */

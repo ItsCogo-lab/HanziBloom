@@ -15,8 +15,8 @@ export function SetSessionActions({ set }: { set: StudySet }) {
   const counts = getSetSessionCounts(set, progress, new Date())
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+    <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <SessionTypeLabel type="learn" as="h2" />
         <p>
           {counts.learnable > 0
@@ -33,7 +33,7 @@ export function SetSessionActions({ set }: { set: StudySet }) {
           </ButtonLink>
         )}
       </section>
-      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+      <section className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <SessionTypeLabel type="study" as="h2" />
         <p>
           {counts.learned === 0

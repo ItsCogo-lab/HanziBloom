@@ -12,14 +12,14 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, titleLang, description, actions }: PageHeaderProps) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-4 flex flex-col gap-3 sm:mb-8 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
       {/* React 19 coloca este <title> en el <head>: cada página tiene su título en la pestaña */}
       <title>{`${title} · ${t('app.name')}`}</title>
       <div>
         <h1 lang={titleLang} className="text-2xl font-semibold tracking-tight sm:text-3xl">
           {title}
         </h1>
-        {description && <p className="mt-1 text-ink-muted">{description}</p>}
+        {description && <p className="mt-1 text-sm text-ink-muted sm:text-base">{description}</p>}
       </div>
       {actions}
     </header>

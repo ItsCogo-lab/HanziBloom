@@ -262,8 +262,10 @@ La app se diseña primero para el móvil (360 px de ancho). La barra de
 navegación inferior mide `--mobile-nav-height` (`index.css`): 3.5rem más la
 franja del sistema de los iPhone (`env(safe-area-inset-bottom)`, gracias a
 `viewport-fit=cover`); el contenido y los botones fijos de Learn la usan para
-no quedar tapados. Los campos de formulario miden 16 px en móvil para que
-Safari no haga zoom al escribir.
+no quedar tapados. En móvil todo va más compacto: la raíz baja a 15 px (todo
+está en rem, así que textos y espacios se reducen a la vez) y márgenes, gaps y
+paddings usan valores pequeños que crecen desde `sm:`. Los campos de formulario
+miden 16 px fijos para que Safari no haga zoom al escribir.
 
 Se puede instalar como app (`public/manifest.webmanifest`). `start_url` y
 `scope` son relativos (`./`), así valen igual en `/` que en `/HanziVocab/`.

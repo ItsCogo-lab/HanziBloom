@@ -21,7 +21,7 @@ export function CustomSetListPage() {
       {sets.length === 0 ? (
         <p className="text-ink-muted">{t('custom.empty')}</p>
       ) : (
-        <ul className="grid gap-4 md:grid-cols-2">
+        <ul className="grid gap-3 sm:gap-4 md:grid-cols-2">
           {sets.map((set) => (
             <li key={set.id} className="flex">
               <div className="flex-1">
