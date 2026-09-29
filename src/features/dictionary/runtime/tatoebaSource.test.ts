@@ -46,7 +46,7 @@ describe('toExampleSentences', () => {
     })
   })
 
-  it('solo deja frases atribuibles, aprobadas, cortas y con traducción', () => {
+  it('solo deja frases atribuibles, aprobadas, cortas y con traducción directa', () => {
     const unapproved = { ...tatoebaSentence(4, '柠檬。', 'a', [lemon]), is_unapproved: true }
     const otherLicense = { ...tatoebaSentence(5, '柠檬。', 'a', [lemon]), license: 'CC0 1.0' }
     const result = convert([
@@ -58,6 +58,7 @@ describe('toExampleSentences', () => {
       tatoebaSentence(6, '这个柠檬比我昨天在商店里买的那个柠檬酸多了。', 'a', [lemon]),
       tatoebaSentence(7, '檸檬。', 'a', [lemon]),
       tatoebaSentence(8, '柠檬。', 'a', [tatoebaTranslation(9, 'Lemon.', null)]),
+      tatoebaSentence(10, '柠檬。', 'a', [tatoebaTranslation(11, 'See you again.', 'b', false)]),
     ])
     expect(result).toEqual([expect.objectContaining({ tatoebaId: 8, translationTatoebaId: 9 })])
     expect(result[0]).not.toHaveProperty('translationAuthor')

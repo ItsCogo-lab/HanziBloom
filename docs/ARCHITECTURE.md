@@ -57,6 +57,7 @@ src/
     ProfilePage, ProgressPage, SettingsPage; study/ (pestañas y sets)
   features/
     dictionary/     Tipos de dominio (Character, Word), búsqueda, tonos y el panel de diccionario
+      runtime/      Servicio, caché (IndexedDB) y adaptadores de las fuentes externas
     studySets/      Modelo StudySet (HSK, temas, propios) y su progreso derivado
     myStudies/      Sets que sigue el usuario y cuándo los estudió (localStorage)
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
@@ -193,8 +194,47 @@ primer carácter (`fullDictionary.ts`), y se pide solo cuando hace falta:
   busca en HSK y se avisa. Sin búsqueda no se descarga nada.
 - **Orden de los resultados**: coincidencias exactas antes que parciales, y
   dentro de cada grupo HSK antes que el resto.
-- Las entradas de fuera de HSK no tienen nivel, frases de ejemplo ni
-  animación de trazos: la ficha oculta esas secciones.
+- **`useDictionarySearch(query)`**: lo que usan los dos buscadores. Busca
+  cuando se deja de escribir (200 ms; cada tecla cancela la espera anterior),
+  pide un hanzi o dos letras (una sola coincide con decenas de miles de
+  entradas) y recuerda las 30 últimas búsquedas por versión del diccionario.
+  Mientras se escribe se siguen viendo los resultados anteriores.
+
+### Fuentes en tiempo de ejecución
+
+El orden de trazos y las frases de ejemplo se piden a la fuente al abrir una
+ficha (jsDelivr y la API de Tatoeba; por qué estas y no otras, en
+`DATA_SOURCES.md`). Las capas, de arriba abajo:
+
+```
+StrokeOrder, ExampleSentences          (componentes: nunca llaman a una API)
+  └ useRuntimeData(key, load)           (hook: cancela al cambiar de ficha)
+     └ dictionaryService.ts             (decide de dónde sale cada dato)
+        ├ resourceService.ts            (caché stale-while-revalidate)
+        │  └ dictionaryCache.ts         (IndexedDB; en memoria si no hay)
+        └ strokeSource.ts, tatoebaSource.ts   (adaptadores)
+           └ http.ts                    (errores clasificados, tiempo máximo, límite por minuto)
+```
+
+- **Adaptadores**: uno por fuente. Construyen la URL (la versión va fijada),
+  validan la respuesta y la pasan al modelo de la app (`StrokeData`,
+  `ExampleSentence`). Nada del formato de la API sale de ahí: si la API cambia,
+  solo cambia su adaptador.
+- **Errores**: `http.ts` convierte cualquier fallo en un `SourceError` con su
+  tipo (`network`, `http`, `rate-limit`, `invalid`, `aborted`). Cada fuente
+  tiene su propio límite de peticiones por minuto en el navegador y, tras un
+  429, espera lo que pida la fuente.
+- **Caché**: IndexedDB (base `hanzivocab-dictionary`), no localStorage, porque
+  puede crecer a varios MB. Cada entrada guarda la clave, los datos, cuándo se
+  descargaron y de qué fuente y versión. Si IndexedDB falla, es como no tener
+  caché.
+- **Orden al pedir un dato**: caché al día → caché caducada (se enseña y se
+  renueva en segundo plano) → la API → la copia local de HSK 1-4 → la ficha
+  dice que no está disponible sin conexión. Nunca se enseña un dato inventado.
+- **Tests**: `renderWithProviders` usa una caché en memoria y un `fetch` sin
+  conexión; `src/test/setup.ts` sustituye el `fetch` global para que ningún
+  test salga a internet. Las respuestas de prueba de Tatoeba son copias de una
+  consulta real (`src/test/tatoebaResponses.ts`).
 
 ### Diccionario dentro de la sesión
 
@@ -391,7 +431,9 @@ en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
 campo `version` para poder migrar datos cuando el formato cambie. Si lo
 guardado está corrupto o localStorage no está disponible (modo privado), la
 app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
-módulo.
+módulo. Lo descargado de fuentes externas no va aquí sino en IndexedDB (ver
+«Fuentes en tiempo de ejecución»); no son datos del usuario y se pueden
+borrar sin perder nada.
 
 ### Audio (futuro, fuera del MVP)
 

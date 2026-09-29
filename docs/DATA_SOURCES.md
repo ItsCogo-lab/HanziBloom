@@ -1,10 +1,15 @@
 # Fuentes de datos
 
-Todos los datos lingüísticos de HanziVocab vienen de fuentes abiertas. Se
-descargan y se combinan con un script, y el resultado se sube al repositorio:
-la app no llama a ninguna API externa cuando se usa. Nada se escribe a mano ni
-se genera con IA: si hay que corregir algo, se cambia el script y se vuelve a
-generar.
+Todos los datos lingüísticos de HanziVocab vienen de fuentes abiertas. Nada
+se escribe a mano ni se genera con IA. Hay dos formas de llegar a la app:
+
+- **Generados con un script** (`npm run data:build`) y subidos al
+  repositorio: HSK 1-4, el diccionario completo y las copias locales de trazos
+  y frases de HSK. Si hay que corregir algo, se cambia el script y se vuelve a
+  generar.
+- **Pedidos en tiempo de ejecución** a la fuente, con caché en el navegador:
+  el orden de trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba). Ver
+  [Fuentes en tiempo de ejecución](#fuentes-en-tiempo-de-ejecución).
 
 ## Cómo se genera
 
@@ -236,6 +241,79 @@ de código de su primer carácter módulo 32. Así la app sabe qué archivo pedi
 a partir del hanzi, sin índice aparte. Ocupa unos 18 MB (unos 4,7 MB con
 gzip; el archivo más grande, unos 200 KB con gzip).
 
+## Fuentes en tiempo de ejecución
+
+Antes de pasar nada a tiempo de ejecución se investigó qué APIs existen de
+verdad para cada fuente (informe del 2026-09-29, comprobado desde GitHub
+Actions porque el entorno de Claude no llega a esos dominios):
+
+| Fuente | ¿API real? | Qué se hace |
+| --- | --- | --- |
+| hanzi-writer-data (trazos) | Sí: jsDelivr, el CDN desde el que Hanzi Writer los carga por defecto | En tiempo de ejecución |
+| Tatoeba (frases) | Sí: API v1, pública y sin clave | En tiempo de ejecución |
+| CC-CEDICT (significados, pinyin) | No: es un archivo. MDBG prohíbe el acceso automatizado; ccdb.hemiola.com solo va por HTTP | Local (ver [Diccionario completo](#diccionario-completo)) |
+| Unihan (radical, trazos) | No: Unicode solo publica archivos | Local |
+| Make Me a Hanzi (descomposición, etimología) | No: un archivo de 2,5 MB en GitHub, que no es un CDN | Local |
+| Lista HSK | No | Local, como pide el diseño |
+
+### Trazos: hanzi-writer-data en jsDelivr
+
+- **Por qué:** es la fuente que ya mandaba en los trazos y jsDelivr es de donde
+  Hanzi Writer los carga por defecto. Con ella, la animación funciona en los
+  ~9.500 caracteres que tiene hanzi-writer-data, no solo en los de HSK 1-4.
+- **Endpoint:** `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/<carácter>.json`,
+  con la versión fijada en la URL.
+- **Licencia y atribución:** Arphic Public License (como la copia local).
+- **Límites:** jsDelivr no publica un límite por usuario. La app hace como
+  mucho 60 peticiones por minuto a esta fuente y, si recibe un 429, espera lo
+  que diga `Retry-After` (o un minuto).
+- **CORS:** `access-control-allow-origin: *` (comprobado).
+- **Autenticación:** ninguna.
+- **Caché:** 365 días. Los archivos de una versión no cambian
+  (`cache-control: immutable`); la clave de caché lleva la versión, así que
+  cambiar de versión es cambiar `STROKE_DATA_VERSION`.
+- **Si falla:** en HSK 1-4, la copia local de `public/strokes/`. Fuera de HSK,
+  la ficha dice «Stroke order unavailable offline.». Un 404 (carácter sin
+  trazos) oculta la sección.
+- **Campos:** `strokes`, `medians`, `radStrokes`. El número de trazos de la
+  ficha sigue saliendo del dataset local.
+- **Adaptador:** `src/features/dictionary/runtime/strokeSource.ts`
+
+### Frases: API v1 de Tatoeba
+
+- **Por qué:** es la API oficial de la fuente que ya se usaba; la antigua
+  `api_v0` está obsoleta. Da frases nuevas y corregidas sin regenerar nada.
+- **Endpoint:** `https://api.tatoeba.org/v1/sentences?lang=cmn&q="<término>"&sort=words&showtrans:lang=eng&trans:lang=eng&limit=50`.
+  `sort=words` da primero las frases más cortas; 50 es el máximo por página.
+- **Licencia y atribución:** CC BY 2.0 FR. Solo se usan frases y traducciones
+  con esa licencia, con autor y no marcadas como dudosas; cada frase se
+  muestra con su número, su autor y un enlace a su página.
+- **Límites:** Tatoeba no publica límites, pero sus condiciones de uso
+  prohíben saturar el servicio. La app hace como mucho 20 peticiones por
+  minuto, una por ficha abierta (nunca al buscar), y respeta los 429.
+- **CORS:** `access-control-allow-origin: *` (comprobado).
+- **Autenticación:** ninguna.
+- **Caché:** 7 días; pasado ese tiempo se enseña lo guardado y se pide de
+  nuevo en segundo plano.
+- **Si falla:** en HSK 1-4, las frases locales de `public/examples/`. Fuera de
+  HSK, «Example sentences unavailable offline.».
+- **Selección:** las mismas reglas que el script (16 caracteres como mucho,
+  sin letras latinas ni cifras, con traducción inglesa directa), más: la frase
+  debe contener el término tal cual (Tatoeba también devuelve frases en
+  tradicional). Se muestran 3, primero las que solo usan caracteres de HSK 1-4
+  o del propio término. Como traducción, la directa de id más bajo: las
+  indirectas (traducción de una traducción) pueden no corresponder a la frase
+  (好大！ salía como «God, this place is huge!»).
+- **Adaptador:** `src/features/dictionary/runtime/tatoebaSource.ts`
+
+### Qué se queda local
+
+HSK 1-4 (niveles, sets de HSK y de temas), el progreso, los ajustes, los sets
+propios con sus significados y frases (nunca se envían a ninguna parte), el
+pinyin de las frases propias (pinyin-pro, en el navegador) y los colores de
+tono. Learn y Study solo dependen de esto: si una fuente externa falla, se
+sigue estudiando igual.
+
 ## Sets por temas
 
 `src/data/topics.ts` es el único archivo de `src/data` escrito a mano. Define
@@ -257,8 +335,8 @@ Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
 | Archivo | Contenido | Cómo se carga |
 | --- | --- | --- |
 | `src/data/hsk1/` a `hsk4/`: `characters.ts`, `words.ts` | Caracteres y palabras de cada nivel | En el bundle, en un archivo aparte del código de la app |
-| `public/strokes/*.json` | Trazos de cada carácter | Al abrir la ficha de un carácter |
-| `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Al abrir una ficha |
+| `public/strokes/*.json` | Trazos de los caracteres de HSK 1-4 | Solo si jsDelivr no responde |
+| `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Solo si Tatoeba no responde o no tiene frases |
 | `public/dictionary/0.json` a `31.json` | Diccionario completo, fuera de HSK 1-4 | Un archivo al abrir una ficha o un set con esas entradas; todos al buscar |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
 | `src/data/topics.ts` (no generado) | Temas curados a mano | En el bundle, con el dataset |

@@ -75,8 +75,10 @@ export function parseSentencesResponse(json: unknown): ApiSentence[] {
  * Pasa las frases de la API al modelo de la app. Solo quedan las que se pueden
  * atribuir y mostrar bien: con autor, aprobadas, con licencia CC BY 2.0 FR,
  * cortas, sin letras latinas ni cifras, que contienen el término tal cual
- * (Tatoeba también devuelve frases en tradicional) y con traducción inglesa.
- * Como traducción, la directa de id más bajo (la misma regla que en HSK).
+ * (Tatoeba también devuelve frases en tradicional) y con traducción inglesa
+ * directa: las indirectas (traducción de una traducción) pueden no
+ * corresponder a la frase china. Como traducción, la de id más bajo (la misma
+ * regla que en HSK, que solo usa enlaces directos).
  */
 export function toExampleSentences(term: string, sentences: readonly ApiSentence[]): ExampleSentence[] {
   const usable = (sentence: Omit<ApiTranslation, 'isDirect'>) =>
@@ -86,8 +88,8 @@ export function toExampleSentences(term: string, sentences: readonly ApiSentence
     if (!usable(sentence) || sentence.owner === null || !text.includes(term)) return []
     if (Array.from(text).length > MAX_SENTENCE_LENGTH || LATIN_OR_DIGIT.test(text)) return []
     const [translation] = sentence.translations
-      .filter(usable)
-      .sort((a, b) => Number(b.isDirect) - Number(a.isDirect) || a.id - b.id)
+      .filter((candidate) => candidate.isDirect && usable(candidate))
+      .sort((a, b) => a.id - b.id)
     if (!translation) return []
     return [
       {
