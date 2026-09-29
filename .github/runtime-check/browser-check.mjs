@@ -53,7 +53,7 @@ results['ning.cachedRequests'] = [...requests]
 
 // 3. Fuentes externas caídas: 柠 sale de la caché; 桔 (sin caché, fuera de HSK) dice que no está disponible;
 //    好 (HSK) usaría la copia local si no estuviera ya en caché, así que se prueba con 你
-await page.route(EXTERNAL, (route) => route.abort('internetdisconnected'))
+await page.route(/api\.tatoeba\.org|hanzi-writer-data/, (route) => route.abort('internetdisconnected'))
 await detail(`/characters/${encodeURIComponent('柠')}`)
 await page.getByRole('heading', { name: 'Stroke order' }).waitFor()
 results['offline.ningFromCache'] = (await sectionText('Example sentences')) !== null
@@ -63,25 +63,54 @@ results['offline.juUnavailable'] = await sectionText('Example sentences')
 await detail(`/characters/${encodeURIComponent('你')}`)
 await page.getByRole('heading', { name: 'Stroke order' }).waitFor({ timeout: 15000 })
 results['offline.niLocalExamples'] = await sectionText('Example sentences')
+await page.unroute(/api\.tatoeba\.org|hanzi-writer-data/)
+
+// 4. Búsqueda: la primera descarga el diccionario completo del repositorio de datos
+await page.unroute(EXTERNAL).catch(() => {})
+const DATA = /HanziVocab-Data/
+async function search(query, expected) {
+  const box = page.getByRole('searchbox', { name: 'Search' })
+  await box.fill(query)
+  await page.getByRole('list', { name: 'Results' }).getByRole('link', { name: expected }).first().waitFor({ timeout: 60000 })
+}
+requests.length = 0
+await page.goto(BASE + '/dictionary')
+await timed('search.firstFullMs', async () => {
+  await search('penguin', /企鹅/)
+  await page.getByText('Loading the full dictionary', { exact: false }).waitFor({ state: 'detached', timeout: 90000 }).catch(() => {})
+})
+results['search.firstRequestsToData'] = requests.filter((url) => DATA.test(url)).length
+results['search.penguinTop'] = await page.getByRole('list', { name: 'Results' }).getByRole('link').first().innerText()
+await timed('search.secondMs', async () => search('grapefruit', /柚子/))
+await timed('search.repeatedMs', async () => search('penguin', /企鹅/))
+
+// 5. Otra visita: el diccionario sale de IndexedDB, sin pedir nada
+requests.length = 0
+await page.goto(BASE + '/dictionary')
+await timed('search.afterReloadMs', async () => search('penguin', /企鹅/))
+results['search.afterReloadRequestsToData'] = requests.filter((url) => DATA.test(url)).length
+
+// 6. Sin conexión con las fuentes externas, con caché: todo sigue
+await page.route(EXTERNAL, (route) => route.abort('internetdisconnected'))
+await page.goto(BASE + '/dictionary')
+await timed('search.offlineCachedMs', async () => search('grapefruit', /柚子/))
 await page.unroute(EXTERNAL)
 
-// 4. Búsqueda: la primera descarga el diccionario completo; la segunda ya lo tiene
-await page.goto(BASE + '/dictionary')
-const box = page.getByRole('searchbox', { name: 'Search' })
-await timed('search.firstMs', async () => {
-  await box.fill('lemon')
-  await page.getByText(/^Showing \d+ of \d+$/).waitFor()
-  await page.getByRole('status').filter({ hasText: 'full dictionary' }).waitFor({ state: 'detached', timeout: 30000 }).catch(() => {})
-})
-results['search.firstTop'] = await page.getByRole('list', { name: 'Results' }).getByRole('link').first().innerText()
-await timed('search.secondMs', async () => {
-  await box.fill('penguin')
-  await page.getByRole('link', { name: /企鹅/ }).first().waitFor()
-})
-await timed('search.repeatedMs', async () => {
-  await box.fill('lemon')
-  await page.getByRole('link', { name: /柠檬/ }).first().waitFor()
-})
+// 7. Navegador nuevo (sin caché) y sin fuentes externas: HSK sigue, el resto avisa
+const fresh = await browser.newContext()
+const freshPage = await fresh.newPage()
+await freshPage.route(EXTERNAL, (route) => route.abort('internetdisconnected'))
+await freshPage.goto(BASE + '/dictionary')
+await freshPage.getByRole('searchbox', { name: 'Search' }).fill('apple')
+await freshPage.getByText("Couldn't load the full dictionary", { exact: false }).waitFor({ timeout: 30000 })
+results['offlineFresh.appleTop'] = await freshPage.getByRole('list', { name: 'Results' }).getByRole('link').first().innerText()
+await freshPage.goto(BASE + `/characters/${encodeURIComponent('柚')}`)
+await freshPage.getByText("Couldn't load these entries", { exact: false }).waitFor({ timeout: 30000 })
+results['offlineFresh.youPage'] = 'entries unavailable message shown'
+await freshPage.goto(BASE + '/study/practice?set=hsk-1&mode=learn')
+await freshPage.waitForTimeout(1500)
+results['offlineFresh.learnPage'] = (await freshPage.locator('main').innerText()).slice(0, 300)
+await freshPage.screenshot({ path: 'runtime-offline-learn.png', fullPage: true })
 
 console.log(JSON.stringify(results, null, 2))
 await browser.close()
