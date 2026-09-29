@@ -124,7 +124,7 @@ describe('EntryDetails de un carácter', () => {
     renderCharacter(ningCharacter, fake.fetch)
 
     expect(await screen.findByRole('heading', { name: 'Example sentences' })).toBeInTheDocument()
-    expect(screen.getByText('柠檬很酸。')).toBeInTheDocument()
+    await expectSentenceWithPinyin('柠檬很酸。', 'níng méng hěn suān。')
     // La traducción directa de id más bajo
     expect(screen.getByText('Lemon is sour.')).toBeInTheDocument()
     // Las frases en tradicional no contienen 柠 tal cual
@@ -143,10 +143,16 @@ describe('EntryDetails de un carácter', () => {
     renderCharacter(ningCharacter, fake.fetch)
 
     expect(await screen.findByRole('heading', { name: 'Example sentences' })).toBeInTheDocument()
-    expect(screen.getByText('柠檬很酸。')).toBeInTheDocument()
+    await expectSentenceWithPinyin('柠檬很酸。', 'níng méng hěn suān。')
     expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toBeInTheDocument()
   })
 })
+
+/** La frase de ejemplo, ya con el pinyin del motor debajo (el chino va en un span por carácter). */
+async function expectSentenceWithPinyin(chinese: string, pinyin: string) {
+  const pinyinLine = await screen.findByText(pinyin)
+  expect(pinyinLine.previousElementSibling).toHaveTextContent(chinese)
+}
 
 describe('EntryDetails de una palabra', () => {
   it('muestra la forma tradicional', () => {

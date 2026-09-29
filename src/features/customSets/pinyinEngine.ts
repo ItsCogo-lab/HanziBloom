@@ -13,6 +13,10 @@ import type { SentenceToken } from './types.ts'
  * lo que se pronuncia. La versión está fijada en package.json para que el
  * pinyin generado no cambie solo.
  *
+ * El motor no conoce los tonos neutros de muchas palabras (朋友 péng yǒu):
+ * donde el dataset HSK lee esa misma sílaba en tono neutro (朋友 péng you),
+ * se usa la del dataset.
+ *
  * Nunca se adivina. Un carácter con varias lecturas solo se da por seguro
  * si el motor lo lee dentro de una de sus palabras (行长), o si su lectura
  * coincide con la del dataset HSK (CC-CEDICT) en ese punto de la frase: la
@@ -45,7 +49,7 @@ export function annotateSentence(chinese: string, datasetReadings: DatasetReadin
       return
     }
 
-    const reading = readings[index] ?? ''
+    const reading = neutralFromDataset(readings[index] ?? '', fromDataset[index])
     const tone = getSyllableTone(reading)
     const candidates = getReadings(character)
     const certain =
@@ -58,6 +62,16 @@ export function annotateSentence(chinese: string, datasetReadings: DatasetReadin
     )
   })
   return tokens
+}
+
+/** La sílaba del dataset si es la misma que la del motor pero en tono neutro; si no, la del motor. */
+function neutralFromDataset(reading: string, datasetReading: string | undefined): string {
+  if (datasetReading === undefined || getSyllableTone(datasetReading) !== 5) return reading
+  return withoutToneMarks(datasetReading) === withoutToneMarks(reading) ? datasetReading : reading
+}
+
+function withoutToneMarks(syllable: string): string {
+  return syllable.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
 /** Todas las lecturas de un carácter según el motor, sin repetidos. */

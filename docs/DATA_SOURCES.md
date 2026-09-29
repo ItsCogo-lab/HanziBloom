@@ -173,8 +173,8 @@ caracteres como mucho, sin letras latinas ni cifras y cuyos caracteres chinos
 sean todos del mismo nivel HSK o de uno anterior (quien estudia HSK 1 puede
 leer entera una frase de HSK 1). Por palabra, las 3 más cortas (a igual longitud, la
 de id más bajo), con la traducción inglesa de id más bajo. Las frases se copian
-tal cual; el pinyin de las frases no se muestra porque todavía no se usa la
-exportación de transcripciones de Tatoeba.
+tal cual. Su pinyin se genera en el navegador (ver «Pinyin de las frases de
+ejemplo»).
 
 ### Lista HSK 2.0
 
@@ -355,6 +355,24 @@ Actions porque el entorno de Claude no llega a esos dominios):
   (好大！ salía como «God, this place is huge!»).
 - **Adaptador:** `src/features/dictionary/runtime/tatoebaSource.ts`
 
+### Pinyin de las frases de ejemplo
+
+La API v1 de Tatoeba no devuelve transcripciones (comprobado desde GitHub
+Actions el 2026-09-29: ni en `/v1/sentences/{id}` ni en la búsqueda). La
+exportación `transcriptions.tar.bz2` sí tiene pinyin en números para unas
+89.000 frases en chino, pero la mayoría están generadas automáticamente (sin
+usuario que las revise), igual que haría un motor.
+
+Por eso el pinyin de las frases de ejemplo, de Tatoeba en tiempo de ejecución
+o de HSK 1-4, sale del mismo motor que las frases propias
+(`customSets/pinyinEngine.ts`: pinyin-pro comprobado con el dataset HSK). Lo
+que el motor no puede asegurar se marca con «?» y sin color. Límites:
+
+- Los tonos neutros solo se corrigen con el dataset HSK 1-4 (朋友 péng you);
+  fuera de HSK el motor puede dar tono pleno.
+- Un carácter con varias lecturas fuera de una palabra conocida sale dudoso
+  (谁 shéi / shuí).
+
 ### Qué se queda local
 
 HSK 1-4 (niveles, sets de HSK y de temas), el progreso, los ajustes, los sets
@@ -408,8 +426,6 @@ distribuyen bajo los términos de la Unicode License v3
 ## Pendiente
 
 - **Frecuencia** (`frequencyRank`): sin fuente elegida todavía.
-- **Pinyin de las frases de ejemplo:** Tatoeba publica transcripciones
-  (`cmn_transcriptions.tsv`); falta decidir si usarlas.
 - **Significados en español:** más adelante, en `meanings.es`.
 - **Calidad de algunos significados:** CC-CEDICT no siempre pone primero el
   sentido de HSK 1 (点 empieza por «to touch briefly» antes que «o'clock»; 咸
