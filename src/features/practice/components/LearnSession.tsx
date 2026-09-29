@@ -82,7 +82,7 @@ export function LearnSession({
           {/* key: cada elemento empieza con su ficha desde arriba */}
           <EntryDetails key={getStudyItemId(item)} item={item} dictionary={dictionary} opener={{ onOpen: lookUp }} />
           {renderExtra?.(item)}
-          <div className="sticky bottom-14 -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 md:bottom-0">
+          <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 md:bottom-0">
             <Button variant="secondary" onClick={() => next(false)}>
               {t('learn.skip')}
             </Button>

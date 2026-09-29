@@ -12,9 +12,9 @@ type StatCardProps = {
  */
 export function StatCard({ label, value, detail }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+    <div className="rounded-2xl border border-line bg-surface p-3 shadow-sm sm:p-4">
       <dt className="text-sm text-ink-muted">{label}</dt>
-      <dd className="mt-1 text-3xl font-semibold tabular-nums">
+      <dd className="mt-1 text-2xl font-semibold sm:text-3xl tabular-nums">
         {value}
         {detail && <span className="text-base font-normal text-ink-muted"> {detail}</span>}
       </dd>
