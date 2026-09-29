@@ -48,6 +48,17 @@ describe('DictionaryPage', () => {
     expect(within(screen.getByRole('list', { name: 'Results' })).getAllByRole('link').every((link) => link.textContent?.includes('Word'))).toBe(true)
   })
 
+  it('el buscador sigue la dirección cuando cambia por un enlace', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AppRoutes />, { path: '/dictionary?q=hao' })
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'ren')
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('haoren')
+    await user.click(screen.getAllByRole('link', { name: /Dictionary/ })[0]!)
+
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('')
+  })
+
   it('avisa si no hay resultados', async () => {
     const user = userEvent.setup()
     renderWithProviders(<AppRoutes />, { path: '/dictionary' })
