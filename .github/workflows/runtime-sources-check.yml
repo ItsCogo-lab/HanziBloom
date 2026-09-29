@@ -11,6 +11,18 @@ on:
       - '.github/runtime-check/**'
 
 jobs:
+  data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Repositorio de datos por commit (antes de fusionar)
+        run: node .github/runtime-check/data-check.mjs db979cc9d9384f7d0ce43024aa0e3b604633b6a4
+      - name: Repositorio de datos en main
+        run: node .github/runtime-check/data-check.mjs main
+
   browser:
     runs-on: ubuntu-latest
     steps:
