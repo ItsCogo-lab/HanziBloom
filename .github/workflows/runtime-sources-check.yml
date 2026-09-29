@@ -1,0 +1,30 @@
+name: Runtime sources check
+
+# Temporal: comprueba desde fuera del entorno de Claude si las fuentes que se
+# quieren usar en tiempo de ejecución responden y mandan cabeceras CORS.
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - '.github/workflows/runtime-sources-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cabeceras y respuesta de cada fuente
+        run: |
+          check() {
+            echo "::group::$1"
+            curl -sS -D - -o body.txt -H 'Origin: https://itscogo-lab.github.io' "$1" | grep -iE '^(HTTP|access-control|cache-control|content-type|content-length|x-ratelimit|retry-after|age|etag|last-modified)' || true
+            head -c 600 body.txt; echo
+            echo "::endgroup::"
+          }
+          check 'https://api.tatoeba.org/v1/sentences?lang=cmn&q=%E5%AD%A6%E4%B9%A0&sort=relevance&showtrans:lang=eng&trans:lang=eng&limit=3'
+          check 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/%E6%9F%A0.json'
+          check 'https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab@main/public/dictionary/0.json'
+          check 'https://raw.githubusercontent.com/ItsCogo-lab/HanziVocab/main/public/dictionary/0.json'
+          echo "::group::Preflight Tatoeba"
+          curl -sS -D - -o /dev/null -X OPTIONS -H 'Origin: https://itscogo-lab.github.io' -H 'Access-Control-Request-Method: GET' 'https://api.tatoeba.org/v1/sentences?lang=cmn&q=a&sort=relevance' | grep -iE '^(HTTP|access-control)' || true
+          echo "::endgroup::"
