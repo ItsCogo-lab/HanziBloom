@@ -1,8 +1,8 @@
-import { useDeferredValue, useId, useMemo, useState, type Ref } from 'react'
+import { useId, useMemo, useState, type Ref } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
-import { useDictionaryStore, useSearchableItems } from '../dictionaryContext.ts'
-import { searchItems } from '../search.ts'
+import { useDictionaryStore } from '../dictionaryContext.ts'
+import { useDictionarySearch } from '../useDictionarySearch.ts'
 import { getStudyItemId, type StudyItem } from '../studyItem.ts'
 import { EntryLabel } from './EntryLabel.tsx'
 import { EntryLink, type EntryOpener } from './EntryLink.tsx'
@@ -23,9 +23,9 @@ type DictionarySearchProps = {
 
 /**
  * Buscador del diccionario: hanzi, pinyin (con o sin tonos) o inglés. Lo usan
- * la página Dictionary y el panel de las sesiones de estudio. Todo es local:
- * al empezar a buscar se descarga el diccionario completo (una vez) y, hasta
- * que llega, se busca en HSK 1-4.
+ * la página Dictionary y el panel de las sesiones de estudio. Al empezar a
+ * buscar se descarga el diccionario completo (una vez) y, hasta que llega, se
+ * busca en HSK 1-4. Se busca cuando se deja de escribir (useDictionarySearch).
  */
 export function DictionarySearch({
   kind,
@@ -38,14 +38,16 @@ export function DictionarySearch({
   const inputId = useId()
   const hasQuery = query.trim() !== ''
   const { baseItems } = useDictionaryStore()
-  const searchable = useSearchableItems(hasQuery)
-  // Con más de 100.000 entradas, buscar lleva un momento: el campo de texto no espera
-  const deferredQuery = useDeferredValue(query)
-  const results = useMemo(() => {
-    const ofKind = (items: readonly StudyItem[]) => (kind ? items.filter((item) => item.kind === kind) : items)
-    if (deferredQuery.trim() !== '') return searchItems(ofKind(searchable.items), deferredQuery)
-    return listAllWhenEmpty ? ofKind(baseItems) : []
-  }, [searchable.items, baseItems, kind, deferredQuery, listAllWhenEmpty])
+  const search = useDictionarySearch(query, { kind })
+  const allItems = useMemo(
+    () => (!listAllWhenEmpty ? [] : kind ? baseItems.filter((item) => item.kind === kind) : baseItems),
+    [baseItems, kind, listAllWhenEmpty],
+  )
+  const results = hasQuery ? search.results : allItems
+  // Mientras se escribe se siguen viendo los resultados anteriores
+  const showCount = hasQuery
+    ? search.status === 'ready' || (search.status === 'pending' && results.length > 0)
+    : listAllWhenEmpty
   // El número de resultados visibles vuelve a PAGE_SIZE con cada búsqueda nueva
   const [shown, setShown] = useState({ query, count: PAGE_SIZE })
   const count = shown.query === query ? shown.count : PAGE_SIZE
@@ -68,7 +70,13 @@ export function DictionarySearch({
         />
       </div>
 
-      {(hasQuery || listAllWhenEmpty) && (
+      {search.status === 'too-short' && <p className="text-sm text-ink-muted">{t('dictionary.queryTooShort')}</p>}
+      {search.status === 'pending' && results.length === 0 && (
+        <p className="text-sm text-ink-muted" role="status">
+          {t('dictionary.searching')}
+        </p>
+      )}
+      {showCount && (
         <p className="text-sm text-ink-muted" aria-live="polite">
           {results.length === 0
             ? t('dictionary.noResults')
@@ -76,9 +84,9 @@ export function DictionarySearch({
         </p>
       )}
       {!hasQuery && !listAllWhenEmpty && <p className="text-sm text-ink-muted">{t('dictionary.typeToSearch')}</p>}
-      {hasQuery && searchable.status !== 'complete' && (
+      {hasQuery && search.dictionary !== 'complete' && (
         <p className="text-sm text-ink-muted" role="status">
-          {t(searchable.status === 'loading' ? 'dictionary.loadingFull' : 'dictionary.fullUnavailable')}
+          {t(search.dictionary === 'loading' ? 'dictionary.loadingFull' : 'dictionary.fullUnavailable')}
         </p>
       )}
 

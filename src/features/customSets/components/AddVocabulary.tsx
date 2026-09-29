@@ -1,11 +1,10 @@
-import { useDeferredValue, useId, useMemo, useState } from 'react'
+import { useId, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
 import { EntryLabel } from '../../dictionary/components/EntryLabel.tsx'
 import { formatPinyin } from '../../dictionary/dictionary.ts'
-import { useSearchableItems } from '../../dictionary/dictionaryContext.ts'
-import { searchItems } from '../../dictionary/search.ts'
 import { getStudyItemId } from '../../dictionary/studyItem.ts'
+import { useDictionarySearch } from '../../dictionary/useDictionarySearch.ts'
 import type { StudySet } from '../../studySets/types.ts'
 import { useCustomSets } from '../customSetsContext.ts'
 
@@ -21,13 +20,7 @@ export function AddVocabulary({ set }: { set: StudySet }) {
   const { addItem } = useCustomSets()
   const [query, setQuery] = useState('')
   const inputId = useId()
-  const hasQuery = query.trim() !== ''
-  const searchable = useSearchableItems(hasQuery)
-  const deferredQuery = useDeferredValue(query)
-  const results = useMemo(
-    () => (deferredQuery.trim() === '' ? [] : searchItems(searchable.items, deferredQuery, RESULT_LIMIT)),
-    [searchable.items, deferredQuery],
-  )
+  const { results, status, dictionary } = useDictionarySearch(query, { limit: RESULT_LIMIT })
 
   return (
     <section aria-labelledby={`${inputId}-title`} className="flex flex-col gap-3">
@@ -47,9 +40,10 @@ export function AddVocabulary({ set }: { set: StudySet }) {
         autoComplete="off"
         className="w-full rounded-xl border border-line bg-surface px-4 py-2.5"
       />
-      {hasQuery && searchable.status !== 'complete' && (
+      {status === 'too-short' && <p className="text-sm text-ink-muted">{t('dictionary.queryTooShort')}</p>}
+      {status !== 'idle' && dictionary !== 'complete' && (
         <p className="text-sm text-ink-muted" role="status">
-          {t(searchable.status === 'loading' ? 'dictionary.loadingFull' : 'dictionary.fullUnavailable')}
+          {t(dictionary === 'loading' ? 'dictionary.loadingFull' : 'dictionary.fullUnavailable')}
         </p>
       )}
       {results.length > 0 && (

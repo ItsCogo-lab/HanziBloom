@@ -3,7 +3,8 @@
  * descargar nada: `npm run data:validate`.
  *
  * - Caracteres y palabras de src/data y del diccionario completo de
- *   public/dictionary, juntos (validateDictionaryData y validateFullDictionary).
+ *   data-release/dictionary (lo que se va a publicar en el repositorio de
+ *   datos), juntos (validateDictionaryData y validateFullDictionary).
  * - Un archivo de trazos en public/strokes por cada carácter.
  * - Las frases de ejemplo de public/examples (validateExampleSet).
  */
@@ -14,11 +15,12 @@ import { allCharacters, allWords } from '../../src/data/index.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import type { ExampleSet } from '../../src/features/dictionary/types.ts'
 import { validateDictionaryData, validateExampleSet, validateFullDictionary } from '../../src/features/dictionary/validation.ts'
+import { DATA_RELEASE_DIR } from './dataRelease.ts'
 import { readFullDictionary } from './fullDictionaryFiles.ts'
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '../../public')
 
-const chunks = readFullDictionary(join(publicDir, 'dictionary'))
+const chunks = readFullDictionary(join(DATA_RELEASE_DIR, 'dictionary'))
 const fullCharacters = chunks.flatMap((chunk) => chunk.characters)
 const fullWords = chunks.flatMap((chunk) => chunk.words)
 const problems = [

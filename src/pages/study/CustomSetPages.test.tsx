@@ -34,7 +34,7 @@ async function addWord(user: User, query: string, hanzi: string) {
   const search = screen.getByRole('searchbox', { name: 'Search' })
   await user.clear(search)
   await user.type(search, query)
-  await user.click(screen.getByRole('button', { name: new RegExp(`^Add ${hanzi} \\(`) }))
+  await user.click(await screen.findByRole('button', { name: new RegExp(`^Add ${hanzi} \\(`) }))
 }
 
 function getVocabulary() {

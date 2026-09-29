@@ -1,0 +1,55 @@
+name: Publish data
+
+# Regenera el diccionario completo desde sus fuentes y lo publica como una
+# versión nueva en ItsCogo-lab/HanziVocab-Data, de donde lo lee la app a través
+# de jsDelivr. La app no cambia ni se vuelve a compilar.
+#
+# Necesita el secreto DATA_REPO_TOKEN: un token de GitHub (fine-grained) con
+# permiso «Contents: Read and write» solo sobre ItsCogo-lab/HanziVocab-Data.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión nueva de los datos, mayor que la publicada (p. ej. 1.1.0)'
+        required: true
+
+concurrency:
+  group: publish-data
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run data:fetch
+      - run: npm run data:build
+      - run: npm run data:validate
+      - uses: actions/checkout@v4
+        with:
+          repository: ItsCogo-lab/HanziVocab-Data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: data-repo
+      - name: Preparar la versión
+        env:
+          VERSION: ${{ inputs.version }}
+        run: npm run data:release -- "$VERSION" data-repo
+      - name: Publicar
+        env:
+          VERSION: ${{ inputs.version }}
+        working-directory: data-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish the full dictionary, version $VERSION"
+          git push
+      - name: Avisar a jsDelivr del manifiesto nuevo
+        # Sin esto, jsDelivr puede servir el manifiesto anterior hasta 12 horas
+        run: curl -sSf "https://purge.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v1/manifest.json"

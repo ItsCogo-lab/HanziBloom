@@ -57,6 +57,7 @@ src/
     ProfilePage, ProgressPage, SettingsPage; study/ (pestañas y sets)
   features/
     dictionary/     Tipos de dominio (Character, Word), búsqueda, tonos y el panel de diccionario
+      runtime/      Servicio, caché (IndexedDB) y adaptadores de las fuentes externas
     studySets/      Modelo StudySet (HSK, temas, propios) y su progreso derivado
     myStudies/      Sets que sigue el usuario y cuándo los estudió (localStorage)
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
@@ -177,24 +178,68 @@ un servidor más adelante basta con cambiarlo.
 
 HSK 1-4 va en el bundle (`src/data`), porque lo usan los sets, los ejercicios
 y las estadísticas. El resto de CC-CEDICT (unas 108.000 palabras y 9.900
-caracteres) está en `public/dictionary/`, repartido en 32 archivos por el
-primer carácter (`fullDictionary.ts`), y se pide solo cuando hace falta:
+caracteres) está en el repositorio de datos `ItsCogo-lab/HanziVocab-Data`
+(servido por jsDelivr, ver «Fuentes en tiempo de ejecución»), repartido en 32
+archivos por el primer carácter (`fullDictionary.ts`), y se pide solo cuando
+hace falta:
 
 - **`dictionaryStore.ts`**: el diccionario de la interfaz. Empieza con HSK y
   añade cada trozo que llega; nunca pide uno dos veces. Sigue el contrato de
   `useSyncExternalStore`, así que la interfaz se vuelve a pintar sola.
-- **`DictionaryProvider`** lo comparte con toda la app. Los tests le pasan un
-  `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
+- **`DictionaryProvider`** lo comparte con toda la app. Por defecto pide los
+  trozos con `loadDictionaryChunk` (servicio del diccionario, con caché). Los
+  tests le pasan un `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
 - **`useLoadItems(itemIds)` / `<LoadEntries>`**: para abrir una ficha, un set
   propio o una sesión de un set propio, carga los trozos de esos elementos y
   de sus caracteres. Con elementos de HSK está listo al momento.
 - **`useSearchableItems(active)`**: al escribir la primera búsqueda se cargan
-  los 32 trozos (unos 4,7 MB con gzip, una vez por visita); mientras llegan se
-  busca en HSK y se avisa. Sin búsqueda no se descarga nada.
+  los 32 trozos (unos 4,7 MB con gzip, una vez por versión de los datos: se
+  guardan en IndexedDB); mientras llegan se busca en HSK y se avisa. Sin
+  búsqueda no se descarga nada.
 - **Orden de los resultados**: coincidencias exactas antes que parciales, y
   dentro de cada grupo HSK antes que el resto.
-- Las entradas de fuera de HSK no tienen nivel, frases de ejemplo ni
-  animación de trazos: la ficha oculta esas secciones.
+- **`useDictionarySearch(query)`**: lo que usan los dos buscadores. Busca
+  cuando se deja de escribir (200 ms; cada tecla cancela la espera anterior),
+  pide un hanzi o dos letras (una sola coincide con decenas de miles de
+  entradas) y recuerda las 30 últimas búsquedas por versión del diccionario.
+  Mientras se escribe se siguen viendo los resultados anteriores.
+
+### Fuentes en tiempo de ejecución
+
+El diccionario completo (repositorio de datos en jsDelivr), el orden de
+trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba) se piden en tiempo
+de ejecución; por qué estas fuentes y no otras, en `DATA_SOURCES.md`. Las
+capas, de arriba abajo:
+
+```
+StrokeOrder, ExampleSentences, buscadores   (componentes: nunca llaman a una API)
+  └ useRuntimeData / dictionaryStore        (cancelan o reutilizan peticiones)
+     └ dictionaryService.ts                 (decide de dónde sale cada dato)
+        ├ resourceService.ts                (caché stale-while-revalidate)
+        │  └ dictionaryCache.ts             (IndexedDB; en memoria si no hay)
+        └ dictionarySource.ts, strokeSource.ts, tatoebaSource.ts   (adaptadores)
+           └ http.ts                        (errores clasificados, tiempo máximo, límite por minuto)
+```
+
+- **Adaptadores**: uno por fuente. Construyen la URL (la versión va fijada),
+  validan la respuesta y la pasan al modelo de la app (`StrokeData`,
+  `ExampleSentence`). Nada del formato de la API sale de ahí: si la API cambia,
+  solo cambia su adaptador.
+- **Errores**: `http.ts` convierte cualquier fallo en un `SourceError` con su
+  tipo (`network`, `http`, `rate-limit`, `invalid`, `aborted`). Cada fuente
+  tiene su propio límite de peticiones por minuto en el navegador y, tras un
+  429, espera lo que pida la fuente.
+- **Caché**: IndexedDB (base `hanzivocab-dictionary`), no localStorage, porque
+  puede crecer a varios MB. Cada entrada guarda la clave, los datos, cuándo se
+  descargaron y de qué fuente y versión. Si IndexedDB falla, es como no tener
+  caché.
+- **Orden al pedir un dato**: caché al día → caché caducada (se enseña y se
+  renueva en segundo plano) → la API → la copia local de HSK 1-4 → la ficha
+  dice que no está disponible sin conexión. Nunca se enseña un dato inventado.
+- **Tests**: `renderWithProviders` usa una caché en memoria y un `fetch` sin
+  conexión; `src/test/setup.ts` sustituye el `fetch` global para que ningún
+  test salga a internet. Las respuestas de prueba de Tatoeba son copias de una
+  consulta real (`src/test/tatoebaResponses.ts`).
 
 ### Diccionario dentro de la sesión
 
@@ -391,7 +436,9 @@ en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
 campo `version` para poder migrar datos cuando el formato cambie. Si lo
 guardado está corrupto o localStorage no está disponible (modo privado), la
 app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
-módulo.
+módulo. Lo descargado de fuentes externas no va aquí sino en IndexedDB (ver
+«Fuentes en tiempo de ejecución»); no son datos del usuario y se pueden
+borrar sin perder nada.
 
 ### Audio (futuro, fuera del MVP)
 
