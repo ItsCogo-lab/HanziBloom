@@ -57,7 +57,7 @@ export function SetDetailPage() {
           </div>
         }
       />
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         <SetSessionActions set={set} />
         <Card className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -117,7 +117,7 @@ function ItemList({ title, items, progress }: ItemListProps) {
       <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
         {items.slice(0, shown).map((item) => (
           <li key={getStudyItemId(item)}>
-            <Link to={getEntryPath(item)} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-paper">
+            <Link to={getEntryPath(item)} className="flex items-center justify-between gap-3 px-3 py-2.5 hover:bg-paper sm:gap-4 sm:px-4 sm:py-3">
               <EntryLabel entry={item.entry} withMeaning />
               <StatusBadge status={getItemStatus(progress.items[getStudyItemId(item)])} />
             </Link>

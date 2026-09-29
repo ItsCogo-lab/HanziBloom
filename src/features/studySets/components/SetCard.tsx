@@ -20,7 +20,7 @@ export function SetCard({ set }: { set: StudySet }) {
   const setProgress = getSetProgress(set, progress, new Date())
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+    <article className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:gap-4 sm:p-5">
       <div className="flex items-start gap-4">
         {set.icon && (
           <span

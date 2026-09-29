@@ -31,7 +31,7 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
   }, [isRevealed])
 
   return (
-    <Card className="flex flex-col items-center gap-6 text-center">
+    <Card className="flex flex-col items-center gap-4 sm:gap-6 text-center">
       <p className="text-sm font-medium tracking-wide text-ink-muted uppercase">
         {t(item.kind === 'character' ? 'practice.kind.character' : 'practice.kind.word')}
       </p>
@@ -44,7 +44,7 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
           role="group"
           tabIndex={-1}
           aria-label={t('practice.answer')}
-          className="flex w-full flex-col items-center gap-6 outline-none"
+          className="flex w-full flex-col items-center gap-4 sm:gap-6 outline-none"
         >
           <FlashcardAnswer item={item} dictionary={dictionary} />
           <LookUpButtons item={item} dictionary={dictionary} onLookUp={onLookUp} />

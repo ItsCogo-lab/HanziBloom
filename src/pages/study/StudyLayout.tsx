@@ -15,15 +15,15 @@ export function StudyLayout() {
   return (
     <>
       <PageHeader title={t('nav.study')} description={t('study.description')} />
-      <nav aria-label={t('study.sections')} className="mb-6 overflow-x-auto">
+      <nav aria-label={t('study.sections')} className="mb-4 overflow-x-auto sm:mb-6">
         <ul className="flex gap-1 border-b border-line">
           {STUDY_TABS.map((tab) => (
-            <li key={tab.path}>
+            <li key={tab.path} className="flex-1 sm:flex-none">
               <NavLink
                 to={tab.path}
                 end
                 className={({ isActive }) =>
-                  `-mb-px inline-block border-b-2 px-4 py-2.5 font-medium whitespace-nowrap ${
+                  `-mb-px block border-b-2 px-2 py-2.5 text-center font-medium whitespace-nowrap sm:px-4 ${
                     isActive ? 'border-accent text-accent-strong' : 'border-transparent text-ink-muted hover:text-ink'
                   }`
                 }

@@ -100,7 +100,7 @@ export function DictionarySearch({
               <EntryLink
                 item={item}
                 opener={opener}
-                className="flex w-full items-center justify-between gap-4 px-4 py-3 hover:bg-paper"
+                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 hover:bg-paper sm:gap-4 sm:px-4 sm:py-3"
               >
                 <EntryLabel entry={item.entry} withMeaning />
                 <span className="shrink-0 text-xs text-ink-muted">

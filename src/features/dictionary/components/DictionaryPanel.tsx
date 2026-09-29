@@ -56,7 +56,7 @@ export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) 
         aria-modal="false"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="pointer-events-auto relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-paper shadow-xl outline-none md:max-h-none md:w-[28rem] md:rounded-none md:border-y-0 md:border-r-0"
+        className="pointer-events-auto relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-paper shadow-xl outline-none md:max-h-none md:w-[28rem] md:rounded-none md:border-y-0 md:border-r-0"
       >
         <header className="flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3">
           <h2 id={titleId} className="text-lg font-semibold">
@@ -66,7 +66,8 @@ export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) 
             {t('dictionary.close')}
           </Button>
         </header>
-        <div className="flex flex-col gap-4 overflow-y-auto p-4">
+        {/* En móvil la hoja llega al borde de la pantalla: el final queda por encima de la barra del sistema */}
+        <div className="flex flex-col gap-4 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {current ? (
             <>
               <Button

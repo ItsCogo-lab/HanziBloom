@@ -60,7 +60,7 @@ function Entry({ itemId }: { itemId: StudyItemId }) {
           )
         }
       />
-      <div className="flex max-w-3xl flex-col gap-6">
+      <div className="flex max-w-3xl flex-col gap-4 sm:gap-6">
         <EntryDetails item={item} dictionary={dictionary} opener={{ getHref: getEntryPath }} />
         {customSet?.itemIds.includes(getStudyItemId(item)) && <CustomNotesView set={customSet} item={item} />}
         <ItemProgressCard item={progress.items[getStudyItemId(item)]} now={new Date()} />

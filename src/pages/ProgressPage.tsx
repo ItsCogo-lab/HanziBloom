@@ -62,7 +62,7 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
   })
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <section aria-labelledby="stats-overview">
         <h2 id="stats-overview" className="sr-only">
           {t('stats.overview')}

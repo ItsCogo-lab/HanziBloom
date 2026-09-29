@@ -17,7 +17,7 @@ type SessionSummaryProps = {
 
 export function SessionSummary({ summary, missedItems, onRestart }: SessionSummaryProps) {
   return (
-    <Card className="mx-auto flex max-w-xl flex-col gap-6">
+    <Card className="mx-auto flex max-w-xl flex-col gap-4 sm:gap-6">
       <div className="text-center">
         <h2 className="text-2xl font-semibold tracking-tight">{t('practice.summary.title')}</h2>
         <p className="mt-2 text-lg text-ink-muted">

@@ -57,7 +57,7 @@ export function DictionaryPage() {
   return (
     <>
       <PageHeader title={t('nav.dictionary')} description={t('dictionary.description')} />
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <fieldset className="flex flex-wrap gap-2">
             <legend className="sr-only">{t('dictionary.kind.label')}</legend>
@@ -86,7 +86,7 @@ export function DictionaryPage() {
             listAllWhenEmpty
           />
         </div>
-        <ToneLegend className="rounded-2xl border border-line bg-surface p-5 lg:sticky lg:top-6 lg:w-72" />
+        <ToneLegend className="rounded-2xl border border-line bg-surface p-4 sm:p-5 lg:sticky lg:top-6 lg:w-72" />
       </div>
     </>
   )

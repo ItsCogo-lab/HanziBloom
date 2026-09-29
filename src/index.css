@@ -39,11 +39,42 @@
   --font-hanzi: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
 }
 
+/*
+ * Alto de la barra de navegación inferior en móvil, más la franja del sistema
+ * en los iPhone sin botón (safe-area). Lo usan el contenido y los botones fijos
+ * para no quedar tapados.
+ */
+:root {
+  --mobile-nav-height: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
 @layer base {
   html {
     @apply bg-paper font-sans text-ink antialiased;
     /* En móvil, al mover el foco el navegador deja sitio para la barra inferior fija */
     @apply scroll-pb-24 md:scroll-pb-0;
+    /* Sin el recuadro gris que pinta el móvil al tocar un enlace o botón */
+    -webkit-tap-highlight-color: transparent;
+    /* Que el navegador no agrande el texto por su cuenta al girar el móvil */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /*
+   * En móvil todo va un poco más apretado: con la raíz a 15px, textos,
+   * márgenes y paddings (todos en rem) se reducen a la vez y en proporción.
+   */
+  @media (width < 48rem) {
+    html {
+      font-size: 15px;
+    }
+
+    /* Safari en iPhone hace zoom al escribir en un campo de menos de 16px (en px, no en rem) */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
   }
 
   /* Foco siempre visible al navegar con teclado */

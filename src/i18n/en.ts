@@ -307,6 +307,17 @@ export const en = {
   'notFound.title': 'Page not found',
   'notFound.description': 'The address you opened does not exist.',
   'notFound.backHome': 'Back to home',
+
+  'install.title': 'Install HanziVocab',
+  'install.description': 'Add it to your home screen to open it like an app, full screen and in one tap.',
+  'install.install': 'Install',
+  'install.notNow': 'Not now',
+  'install.gotIt': 'Got it',
+  'install.iosStepShare': 'Tap the Share button in Safari.',
+  'install.iosStepAdd': 'Choose "Add to Home Screen".',
+  'install.installed': 'HanziVocab is installed on this device.',
+  'install.unavailable': 'This browser cannot install web apps. Try Chrome on Android or Safari on iPhone.',
+  'settings.app': 'App',
 } as const
 
 export type MessageKey = keyof typeof en
