@@ -136,7 +136,10 @@ Definiciones, sobre el progreso que ya existía (sin campos nuevos):
 
 Confirmar en Learn llama a `introduceItem`: crea el registro con nivel 0 y
 primer repaso hoy (el intervalo del nivel 0 del SRS). No es una respuesta, así
-que no suma a la actividad ni a la racha. Los filtros están en
+que no suma a la actividad ni a la racha. «I already know it» llama a
+`markItemKnown`: el registro entra en el nivel máximo (dominado) con el primer
+repaso a los 30 días (`scheduleKnownItem`). Sigue saliendo en Study, pero muy
+de vez en cuando; si se falla, vuelve al nivel 0 como cualquier otro. Los filtros están en
 `studySets/sessionItems.ts` (`getLearnableItems`, `getReviewItems`,
 `getSetSessionCounts`); ninguna página filtra por su cuenta.
 

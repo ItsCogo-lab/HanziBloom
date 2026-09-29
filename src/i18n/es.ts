@@ -191,6 +191,7 @@ export const es: Record<MessageKey, string> = {
   'learn.newWord': 'Palabra nueva',
   'learn.newCharacter': 'Carácter nuevo',
   'learn.skip': 'Saltar por ahora',
+  'learn.alreadyKnown': 'Ya lo domino',
   'learn.gotIt': 'Ya lo he aprendido',
   'learn.summary.title': 'Sesión de aprendizaje completada',
   'learn.summary.count': 'Has aprendido {learned} de {total} elementos nuevos.',

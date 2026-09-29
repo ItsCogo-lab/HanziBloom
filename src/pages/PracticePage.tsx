@@ -155,7 +155,7 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
 /** Learn: presenta elementos del set que aún no se han aprendido. */
 function LearnPractice({ set }: { set: StudySet }) {
   const dictionary = useDictionary()
-  const { progress, introduceItem } = useProgress()
+  const { progress, introduceItem, markItemKnown } = useProgress()
   // En un set propio, las notas del usuario acompañan a la ficha
   const customSet = useCustomSet(set.type === 'custom' ? set.id : undefined)
   const { sessionSize } = useSettings().settings
@@ -182,6 +182,10 @@ function LearnPractice({ set }: { set: StudySet }) {
       dictionary={dictionary}
       onLearned={(item) => {
         introduceItem(getStudyItemId(item))
+        markStudied(session.id)
+      }}
+      onKnown={(item) => {
+        markItemKnown(getStudyItemId(item))
         markStudied(session.id)
       }}
       renderExtra={customSet && ((item) => <CustomNotesView set={customSet} item={item} />)}

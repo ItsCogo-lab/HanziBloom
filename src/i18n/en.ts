@@ -191,6 +191,7 @@ export const en = {
   'learn.newWord': 'New word',
   'learn.newCharacter': 'New character',
   'learn.skip': 'Skip for now',
+  'learn.alreadyKnown': 'I already know it',
   'learn.gotIt': "I've learned it",
   'learn.summary.title': 'Learning session complete',
   'learn.summary.count': 'You learned {learned} of {total} new items.',

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { topicDefinitions } from '../data/topics.ts'
 import { loadMyStudies } from '../features/myStudies/storage.ts'
-import { createEmptyProgress, introduceItem, recordAnswer } from '../features/progress/progress.ts'
+import { createEmptyProgress, getItemStatus, introduceItem, isDue, recordAnswer } from '../features/progress/progress.ts'
 import { loadProgress, saveProgress } from '../features/progress/storage.ts'
 import type { ProgressData } from '../features/progress/types.ts'
 import { DEFAULT_SETTINGS, saveSettings } from '../features/settings/settings.ts'
@@ -91,6 +91,18 @@ describe('PracticePage: Learn y Study de un set', () => {
     // Aprender no es responder: no suma a la actividad ni a la racha
     expect(progress.activity).toEqual({})
     expect(Object.keys(loadMyStudies(storage).lastStudied)).toEqual(['topic-colors'])
+  })
+
+  it('Learn permite marcar un elemento como ya dominado: no toca repasarlo hasta dentro de mucho', async () => {
+    const user = userEvent.setup()
+    const storage = renderSession('mode=learn')
+
+    const known = currentLearnHanzi()!
+    await user.click(screen.getByRole('button', { name: 'I already know it' }))
+
+    const item = loadProgress(storage).items[`word:${known}`]
+    expect(getItemStatus(item)).toBe('mastered')
+    expect(isDue(item, new Date())).toBe(false)
   })
 
   it('Learn sin nada nuevo lo dice y no cambia a Study por su cuenta', () => {

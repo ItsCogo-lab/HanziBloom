@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { t } from '../../../i18n/index.ts'
+import { StatusBadge } from '../../progress/components/StatusBadge.tsx'
 import { EntryDetails } from '../../dictionary/components/EntryDetails.tsx'
 import { EntryLabel } from '../../dictionary/components/EntryLabel.tsx'
 import type { Dictionary } from '../../dictionary/dictionary.ts'
@@ -14,6 +15,8 @@ type LearnSessionProps = {
   dictionary: Dictionary
   /** Se llama al confirmar que un elemento está aprendido, para guardarlo al momento. */
   onLearned: (item: StudyItem) => void
+  /** Se llama cuando el usuario ya dominaba el elemento: vuelve a salir en Study muy de vez en cuando. */
+  onKnown: (item: StudyItem) => void
   /** Acciones del resumen final (p. ej. repasar lo aprendido). */
   summaryActions: ReactNode
   /** Contenido extra bajo la ficha, p. ej. las notas del usuario en un set propio. */
@@ -29,11 +32,13 @@ export function LearnSession({
   items,
   dictionary,
   onLearned,
+  onKnown,
   summaryActions,
   renderExtra,
 }: LearnSessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [learned, setLearned] = useState<readonly StudyItem[]>([])
+  // Lo aprendido en la sesión; `known` indica si el usuario ya lo dominaba
+  const [learned, setLearned] = useState<readonly { item: StudyItem; known: boolean }[]>([])
   const item = items[currentIndex]
 
   if (!item) {
@@ -47,9 +52,10 @@ export function LearnSession({
         </div>
         {learned.length > 0 && (
           <ul className="divide-y divide-line">
-            {learned.map((learnedItem) => (
-              <li key={getStudyItemId(learnedItem)} className="py-2">
+            {learned.map(({ item: learnedItem, known }) => (
+              <li key={getStudyItemId(learnedItem)} className="flex items-center justify-between gap-3 py-2">
                 <EntryLabel entry={learnedItem.entry} withMeaning />
+                {known && <StatusBadge status="mastered" />}
               </li>
             ))}
           </ul>
@@ -59,11 +65,10 @@ export function LearnSession({
     )
   }
 
-  const next = (wasLearned: boolean) => {
-    if (wasLearned) {
-      onLearned(item)
-      setLearned([...learned, item])
-    }
+  const next = (choice: 'skip' | 'learned' | 'known') => {
+    if (choice === 'learned') onLearned(item)
+    if (choice === 'known') onKnown(item)
+    if (choice !== 'skip') setLearned([...learned, { item, known: choice === 'known' }])
     setCurrentIndex(currentIndex + 1)
   }
 
@@ -82,11 +87,15 @@ export function LearnSession({
           {/* key: cada elemento empieza con su ficha desde arriba */}
           <EntryDetails key={getStudyItemId(item)} item={item} dictionary={dictionary} opener={{ onOpen: lookUp }} />
           {renderExtra?.(item)}
-          <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 md:bottom-0">
-            <Button variant="secondary" onClick={() => next(false)}>
+          {/* En móvil "Ya lo sé" ocupa su propia fila encima de las otras dos */}
+          <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 sm:grid-cols-3 md:bottom-0">
+            <Button variant="secondary" onClick={() => next('skip')}>
               {t('learn.skip')}
             </Button>
-            <Button onClick={() => next(true)}>{t('learn.gotIt')}</Button>
+            <Button variant="secondary" className="order-first col-span-2 sm:order-none sm:col-span-1" onClick={() => next('known')}>
+              {t('learn.alreadyKnown')}
+            </Button>
+            <Button onClick={() => next('learned')}>{t('learn.gotIt')}</Button>
           </div>
         </>
       )}
