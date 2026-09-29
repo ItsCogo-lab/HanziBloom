@@ -64,8 +64,8 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
       {item.kind === 'character' && (
         <>
           <CharacterFacts character={item.entry} dictionary={dictionary} opener={opener} />
-          {/* public/strokes/ solo tiene los caracteres de HSK 1-4 (ver docs/DATA_SOURCES.md) */}
-          {item.entry.hskLevel !== undefined && <StrokeOrder hanzi={item.entry.hanzi} />}
+          {/* public/strokes/ solo tiene los de HSK 1-4: los demás dependen de jsDelivr (docs/DATA_SOURCES.md) */}
+          <StrokeOrder hanzi={item.entry.hanzi} hasLocalCopy={item.entry.hskLevel !== undefined} />
         </>
       )}
 
