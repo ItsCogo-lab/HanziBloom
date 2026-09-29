@@ -13,18 +13,25 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Cabeceras y respuesta de cada fuente
+      - name: Parámetros de /v1/sentences según openapi.json
+        run: |
+          curl -sS 'https://api.tatoeba.org/openapi.json' -o openapi.json
+          jq '.paths["/v1/sentences"].get.parameters | map({name, in, required, schema})' openapi.json | head -c 12000
+      - name: Consultas de prueba
         run: |
           check() {
             echo "::group::$1"
-            curl -sS -D - -o body.txt -H 'Origin: https://itscogo-lab.github.io' "$1" | grep -iE '^(HTTP|access-control|cache-control|content-type|content-length|x-ratelimit|retry-after|age|etag|last-modified)' || true
-            head -c 600 body.txt; echo
+            curl -sS -D headers.txt -o body.txt -H 'Origin: https://itscogo-lab.github.io' "$1"
+            grep -iE '^(HTTP|access-control|x-ratelimit|retry-after|cache-control)' headers.txt || true
+            jq -c '{paging, n: (.data | length), sample: [.data[:6][] | {id, text, owner, license, is_unapproved, t: [.translations[]? | {id, text, owner, license, is_direct, is_unapproved}][:2]}]}' body.txt | head -c 5000 || head -c 800 body.txt
+            echo
             echo "::endgroup::"
           }
-          check 'https://api.tatoeba.org/v1/sentences?lang=cmn&q=%E5%AD%A6%E4%B9%A0&sort=relevance&showtrans:lang=eng&trans:lang=eng&limit=3'
-          check 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/%E6%9F%A0.json'
-          check 'https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab@main/public/dictionary/0.json'
-          check 'https://raw.githubusercontent.com/ItsCogo-lab/HanziVocab/main/public/dictionary/0.json'
-          echo "::group::Preflight Tatoeba"
-          curl -sS -D - -o /dev/null -X OPTIONS -H 'Origin: https://itscogo-lab.github.io' -H 'Access-Control-Request-Method: GET' 'https://api.tatoeba.org/v1/sentences?lang=cmn&q=a&sort=relevance' | grep -iE '^(HTTP|access-control)' || true
-          echo "::endgroup::"
+          B='https://api.tatoeba.org/v1/sentences?lang=cmn&showtrans:lang=eng&trans:lang=eng'
+          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=50"
+          check "$B&q=%E6%9F%A0&sort=words&limit=50"
+          check "$B&q=%E4%BC%81%E9%B9%85&sort=words&limit=50"
+          check "$B&q=%E5%A5%BD&sort=words&limit=100"
+          check "$B&q=%22%E5%AD%A6%E4%B9%A0%22&sort=words&limit=10"
+          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=10&is_unapproved=no"
+          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=500"
