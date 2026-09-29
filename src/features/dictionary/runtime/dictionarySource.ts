@@ -100,7 +100,8 @@ export function chunkUrl(version: string, index: number): string {
 }
 
 export async function fetchManifest(options: FetchOptions = {}) {
-  const json = await limiter.schedule(() => fetchJson(manifestUrl(), options))
+  // jsDelivr lo manda con max-age de 7 días: sin esto, el navegador no vería una versión nueva en una semana
+  const json = await limiter.schedule(() => fetchJson(manifestUrl(), { cache: 'no-cache', ...options }))
   const manifest = parseManifest(json)
   return { data: manifest, source: `${DATA_REPOSITORY}@${manifest.version}` }
 }

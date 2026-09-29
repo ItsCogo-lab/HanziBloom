@@ -4,8 +4,9 @@ import type { Character, Word } from './types.ts'
 /*
  * El diccionario completo (todo CC-CEDICT menos lo que ya está en HSK 1-4)
  * no va en el bundle: son más de 100.000 entradas. `npm run data:build` lo
- * reparte en CHUNK_COUNT archivos, public/dictionary/0.json ... 31.json, y la
- * app pide solo los que necesita.
+ * reparte en CHUNK_COUNT archivos (0.json ... 31.json), que se publican en el
+ * repositorio de datos (runtime/dictionarySource.ts), y la app pide solo los
+ * que necesita.
  *
  * Cada entrada va en el trozo de su primer carácter. Así, sabiendo el hanzi,
  * se sabe qué archivo pedir sin ningún índice aparte, y un carácter viaja

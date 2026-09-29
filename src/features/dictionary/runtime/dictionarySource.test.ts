@@ -88,6 +88,16 @@ describe('fetchManifest y fetchChunk', () => {
     expect(await fetchChunk('1.0.0', penguin, { fetchFn: fake.fetch })).toEqual({ characters: [qi], words: [qie] })
   })
 
+  it('el manifiesto se revalida siempre con el servidor (jsDelivr lo manda con max-age de 7 días)', async () => {
+    const calls: RequestInit[] = []
+    const fetchFn = (async (_url: string, init: RequestInit) => {
+      calls.push(init)
+      return jsonResponse(manifest)
+    }) as unknown as typeof fetch
+    await fetchManifest({ fetchFn })
+    expect(calls[0]?.cache).toBe('no-cache')
+  })
+
   it('pasan los errores HTTP clasificados', async () => {
     const fake = createFakeFetch([[/./, new Response('', { status: 503 })]])
     await expect(fetchManifest({ fetchFn: fake.fetch })).rejects.toMatchObject({ kind: 'http', status: 503 })

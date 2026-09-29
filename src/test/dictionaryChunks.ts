@@ -3,7 +3,7 @@ import type { LoadChunk } from '../features/dictionary/dictionaryStore.ts'
 import type { Character, Word } from '../features/dictionary/types.ts'
 
 /*
- * Entradas reales del diccionario completo (public/dictionary/), copiadas tal
+ * Entradas reales del diccionario completo (HanziVocab-Data 1.0.0), copiadas tal
  * cual: 企鹅 no está en HSK 1-4, ni sus caracteres 企 y 鹅.
  */
 export const qiCharacter: Character = {

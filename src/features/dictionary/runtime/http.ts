@@ -38,6 +38,8 @@ export interface FetchOptions {
   fetchFn?: typeof fetch
   /** Tiempo máximo de espera. */
   timeoutMs?: number
+  /** Caché HTTP del navegador; 'no-cache' obliga a preguntar al servidor si hay algo nuevo. */
+  cache?: RequestInit['cache']
 }
 
 const DEFAULT_TIMEOUT_MS = 10_000
@@ -57,7 +59,7 @@ function parseRetryAfter(value: string | null, now = Date.now()): number | undef
 
 /** Pide un JSON. Nunca devuelve un error sin clasificar. */
 export async function fetchJson(url: string, options: FetchOptions = {}): Promise<unknown> {
-  const { signal, fetchFn = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = options
+  const { signal, fetchFn = fetch, timeoutMs = DEFAULT_TIMEOUT_MS, cache } = options
   if (signal?.aborted) throw new SourceError('aborted', 'Request cancelled')
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -69,6 +71,7 @@ export async function fetchJson(url: string, options: FetchOptions = {}): Promis
       response = await fetchFn(url, {
         signal: controller.signal,
         headers: { Accept: 'application/json' },
+        ...(cache && { cache }),
       })
     } catch (error) {
       if (signal?.aborted) throw new SourceError('aborted', 'Request cancelled')

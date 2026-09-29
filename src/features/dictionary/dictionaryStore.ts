@@ -1,15 +1,8 @@
 import type { Dictionary } from './dictionary.ts'
-import { CHUNK_COUNT, chunkFileName, getChunksFor, type DictionaryChunk } from './fullDictionary.ts'
+import { CHUNK_COUNT, getChunksFor, type DictionaryChunk } from './fullDictionary.ts'
 import { getStudyItem, listStudyItems, type StudyItem, type StudyItemId } from './studyItem.ts'
 
 export type LoadChunk = (index: number) => Promise<DictionaryChunk>
-
-/** Pide un trozo del diccionario completo a public/dictionary/. */
-export async function fetchDictionaryChunk(index: number, fetchFn: typeof fetch = fetch): Promise<DictionaryChunk> {
-  const response = await fetchFn(`${import.meta.env.BASE_URL}dictionary/${chunkFileName(index)}`)
-  if (!response.ok) throw new Error(`No dictionary chunk ${index} (HTTP ${response.status})`)
-  return (await response.json()) as DictionaryChunk
-}
 
 /**
  * El diccionario que usa la interfaz: HSK 1-4 (en el bundle) más los trozos
