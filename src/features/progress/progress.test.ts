@@ -5,6 +5,7 @@ import {
   introduceItem,
   isDue,
   isLearned,
+  markItemKnown,
   MASTERED_LEVEL,
   recordAnswer,
 } from './progress.ts'
@@ -95,5 +96,35 @@ describe('introduceItem', () => {
     const progress = recordAnswer(createEmptyProgress(), 'word:你好', true, now)
 
     expect(introduceItem(progress, 'word:你好', now)).toBe(progress)
+  })
+})
+
+describe('markItemKnown', () => {
+  const now = new Date(2026, 8, 28, 12)
+
+  it('lo marca como dominado y no toca repasarlo hasta dentro de 30 días', () => {
+    const progress = markItemKnown(createEmptyProgress(), 'word:你好', now)
+    const item = progress.items['word:你好']
+
+    expect(isLearned(progress, 'word:你好')).toBe(true)
+    expect(getItemStatus(item)).toBe('mastered')
+    expect(item).toMatchObject({ timesSeen: 0 })
+    expect(isDue(item, new Date(2026, 9, 27, 23))).toBe(false)
+    expect(isDue(item, new Date(2026, 9, 28))).toBe(true)
+    expect(progress.activity).toEqual({})
+  })
+
+  it('si luego se falla, vuelve a repasarse como cualquier otro', () => {
+    let progress = markItemKnown(createEmptyProgress(), 'word:你好', now)
+    progress = recordAnswer(progress, 'word:你好', false, new Date(2026, 9, 28, 9))
+
+    expect(progress.items['word:你好']).toMatchObject({ masteryLevel: 0, timesWrong: 1 })
+    expect(getItemStatus(progress.items['word:你好'])).toBe('learning')
+  })
+
+  it('no toca un elemento que ya tenía progreso', () => {
+    const progress = introduceItem(createEmptyProgress(), 'word:你好', now)
+
+    expect(markItemKnown(progress, 'word:你好', now)).toBe(progress)
   })
 })

@@ -7,6 +7,8 @@ export interface ProgressContextValue {
   recordAnswer: (itemId: StudyItemId, correct: boolean) => void
   /** Marca un elemento como aprendido (sesión Learn). */
   introduceItem: (itemId: StudyItemId) => void
+  /** Marca un elemento como ya dominado (sesión Learn): vuelve a salir muy de vez en cuando. */
+  markItemKnown: (itemId: StudyItemId) => void
   resetProgress: () => void
 }
 

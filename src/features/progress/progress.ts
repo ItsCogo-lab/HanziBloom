@@ -1,6 +1,6 @@
 import { toDateKey } from '../../lib/dates.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
-import { isReviewDue, scheduleFirstReview, scheduleNextReview } from '../srs/srs.ts'
+import { isReviewDue, scheduleFirstReview, scheduleKnownItem, scheduleNextReview, type ReviewSchedule } from '../srs/srs.ts'
 import type { ItemProgress, ProgressData } from './types.ts'
 
 /**
@@ -50,6 +50,19 @@ export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correc
  * tenía registro, no se toca.
  */
 export function introduceItem(progress: ProgressData, itemId: StudyItemId, now: Date): ProgressData {
+  return addItem(progress, itemId, now, scheduleFirstReview(now))
+}
+
+/**
+ * Como introduceItem, pero para un elemento que el usuario ya domina: entra
+ * directamente como dominado y su primer repaso llega dentro de mucho (ver
+ * scheduleKnownItem). Sigue saliendo en Study, pero muy de vez en cuando.
+ */
+export function markItemKnown(progress: ProgressData, itemId: StudyItemId, now: Date): ProgressData {
+  return addItem(progress, itemId, now, scheduleKnownItem(now))
+}
+
+function addItem(progress: ProgressData, itemId: StudyItemId, now: Date, schedule: ReviewSchedule): ProgressData {
   if (progress.items[itemId]) return progress
   const item: ItemProgress = {
     itemId,
@@ -57,7 +70,7 @@ export function introduceItem(progress: ProgressData, itemId: StudyItemId, now: 
     timesCorrect: 0,
     timesWrong: 0,
     lastReviewedAt: now.toISOString(),
-    ...scheduleFirstReview(now),
+    ...schedule,
   }
   return { ...progress, items: { ...progress.items, [itemId]: item } }
 }
