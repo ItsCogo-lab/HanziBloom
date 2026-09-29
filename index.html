@@ -13,6 +13,22 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="HanziVocab" />
     <title>HanziVocab</title>
+    <!--
+      Tema claro u oscuro antes de pintar nada, para que no se vea un destello
+      del tema equivocado. Lee el ajuste que guarda la app (features/settings)
+      y, con «system» o sin ajuste, sigue al dispositivo. Luego la app lo mantiene.
+    -->
+    <script>
+      try {
+        var theme = JSON.parse(localStorage.getItem('hanzivocab.settings') || '{}').theme
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = theme
+      } catch {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

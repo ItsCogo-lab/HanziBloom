@@ -1,8 +1,11 @@
 import { createContext, use } from 'react'
 import type { Settings } from './settings.ts'
+import type { Theme } from './theme.ts'
 
 export interface SettingsContextValue {
   settings: Settings
+  /** Tema que se ve ahora mismo, ya resuelto si el usuario eligió «sistema». */
+  theme: Theme
   updateSettings: (changes: Partial<Settings>) => void
 }
 

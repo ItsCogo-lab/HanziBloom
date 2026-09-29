@@ -5,9 +5,9 @@ import { DEFAULT_SETTINGS, isSessionSize, loadSettings, saveSettings } from './s
 describe('saveSettings / loadSettings', () => {
   it('guarda y recupera los ajustes', () => {
     const storage = memoryStorage()
-    saveSettings({ sessionSize: 20, toneColors: false, toneNumbers: true }, storage)
+    saveSettings({ sessionSize: 20, toneColors: false, toneNumbers: true, theme: 'dark' }, storage)
 
-    expect(loadSettings(storage)).toEqual({ sessionSize: 20, toneColors: false, toneNumbers: true })
+    expect(loadSettings(storage)).toEqual({ sessionSize: 20, toneColors: false, toneNumbers: true, theme: 'dark' })
   })
 
   it('sin ajustes guardados usa los de por defecto', () => {
@@ -16,11 +16,11 @@ describe('saveSettings / loadSettings', () => {
 
   it('los ajustes guardados antes de existir los tonos toman los valores por defecto', () => {
     const storage = memoryStorage({ 'hanzivocab.settings': JSON.stringify({ version: 1, sessionSize: 5 }) })
-    expect(loadSettings(storage)).toEqual({ sessionSize: 5, toneColors: true, toneNumbers: false })
+    expect(loadSettings(storage)).toEqual({ sessionSize: 5, toneColors: true, toneNumbers: false, theme: 'system' })
   })
 
   it('ignora valores no válidos', () => {
-    const storage = memoryStorage({ 'hanzivocab.settings': JSON.stringify({ version: 1, sessionSize: 7 }) })
+    const storage = memoryStorage({ 'hanzivocab.settings': JSON.stringify({ version: 1, sessionSize: 7, theme: 'sepia' }) })
     expect(loadSettings(storage)).toEqual(DEFAULT_SETTINGS)
   })
 })

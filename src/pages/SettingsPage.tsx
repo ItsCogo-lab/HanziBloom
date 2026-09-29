@@ -7,6 +7,7 @@ import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { SESSION_SIZE_OPTIONS } from '../features/settings/settings.ts'
 import { useSettings } from '../features/settings/settingsContext.ts'
+import { THEME_OPTIONS } from '../features/settings/theme.ts'
 import { t } from '../i18n/index.ts'
 
 const DATA_SOURCES = [
@@ -56,6 +57,9 @@ export function SettingsPage() {
         <SettingsSection title={t('settings.practice')}>
           <SessionSizeSetting />
         </SettingsSection>
+        <SettingsSection title={t('settings.appearance')}>
+          <ThemeSetting />
+        </SettingsSection>
         <SettingsSection title={t('settings.tones')}>
           <div className="flex flex-col gap-4">
             <ToggleSetting setting="toneColors" label={t('settings.toneColors')} hint={t('settings.toneColorsHint')} />
@@ -97,7 +101,10 @@ function SettingsSection({ title, children }: { title: string; children: ReactNo
   )
 }
 
-/** Botones de opción con aspecto de selector segmentado. */
+/** Botón de opción con aspecto de selector segmentado (el input real queda oculto pero accesible). */
+const SEGMENTED_OPTION_CLASSES =
+  'cursor-pointer rounded-xl border-2 border-line px-5 py-2 font-medium has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent'
+
 function SessionSizeSetting() {
   const { settings, updateSettings } = useSettings()
   return (
@@ -107,7 +114,7 @@ function SessionSizeSetting() {
         {SESSION_SIZE_OPTIONS.map((size) => (
           <label
             key={size}
-            className="cursor-pointer rounded-xl border-2 border-line px-5 py-2 font-medium tabular-nums has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+            className={`${SEGMENTED_OPTION_CLASSES} tabular-nums`}
           >
             <input
               type="radio"
@@ -121,6 +128,37 @@ function SessionSizeSetting() {
           </label>
         ))}
       </div>
+    </fieldset>
+  )
+}
+
+const THEME_LABELS = {
+  system: 'settings.themeSystem',
+  light: 'settings.themeLight',
+  dark: 'settings.themeDark',
+} as const
+
+function ThemeSetting() {
+  const { settings, updateSettings } = useSettings()
+  return (
+    <fieldset>
+      <legend className="mb-2 text-ink-muted">{t('settings.theme')}</legend>
+      <div className="flex flex-wrap gap-2">
+        {THEME_OPTIONS.map((theme) => (
+          <label key={theme} className={SEGMENTED_OPTION_CLASSES}>
+            <input
+              type="radio"
+              name="theme"
+              value={theme}
+              checked={settings.theme === theme}
+              onChange={() => updateSettings({ theme })}
+              className="sr-only"
+            />
+            {t(THEME_LABELS[theme])}
+          </label>
+        ))}
+      </div>
+      <p className="mt-2 text-sm text-ink-muted">{t('settings.themeHint')}</p>
     </fieldset>
   )
 }

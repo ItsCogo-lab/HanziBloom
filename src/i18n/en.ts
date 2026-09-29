@@ -317,6 +317,12 @@ export const en = {
   'install.iosStepAdd': 'Choose "Add to Home Screen".',
   'install.installed': 'HanziVocab is installed on this device.',
   'install.unavailable': 'This browser cannot install web apps. Try Chrome on Android or Safari on iPhone.',
+  'settings.appearance': 'Appearance',
+  'settings.theme': 'Theme',
+  'settings.themeSystem': 'System',
+  'settings.themeLight': 'Light',
+  'settings.themeDark': 'Dark',
+  'settings.themeHint': 'System follows the light or dark mode of your device.',
   'settings.app': 'App',
 } as const
 

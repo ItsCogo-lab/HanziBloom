@@ -21,6 +21,22 @@ describe('SettingsPage', () => {
     expect(loadSettings(storage).sessionSize).toBe(20)
   })
 
+  it('cambia el tema y lo aplica a la página', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderWithProviders(<SettingsPage />, { storage })
+
+    // Sin matchMedia (jsdom), «System» se resuelve como claro
+    expect(screen.getByRole('radio', { name: 'System' })).toBeChecked()
+    expect(document.documentElement.dataset.theme).toBe('light')
+
+    await user.click(screen.getByRole('radio', { name: 'Dark' }))
+
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(loadSettings(storage).theme).toBe('dark')
+    delete document.documentElement.dataset.theme
+  })
+
   it('activa y desactiva los colores y los números de tono', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
