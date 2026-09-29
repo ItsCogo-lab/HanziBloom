@@ -1,5 +1,7 @@
 import { createContext, use } from 'react'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
+import type { HskLevel } from '../dictionary/types.ts'
+import type { LeveledItem } from './progress.ts'
 import type { ProgressData } from './types.ts'
 
 export interface ProgressContextValue {
@@ -9,6 +11,8 @@ export interface ProgressContextValue {
   introduceItem: (itemId: StudyItemId) => void
   /** Marca un elemento como ya dominado (sesión Learn): vuelve a salir muy de vez en cuando. */
   markItemKnown: (itemId: StudyItemId) => void
+  /** Aplica el nivel HSK del usuario a esos elementos (ver applyHskLevel en progress.ts). */
+  applyHskLevel: (items: readonly LeveledItem[], level: HskLevel | null) => void
   resetProgress: () => void
 }
 
