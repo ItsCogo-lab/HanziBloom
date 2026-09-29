@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router'
+import { InstallBanner } from '../../features/install/components/InstallBanner.tsx'
 import { t } from '../../i18n/index.ts'
 import { MainNavigation } from './MainNavigation.tsx'
 
@@ -26,6 +27,8 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+
+      <InstallBanner />
     </div>
   )
 }

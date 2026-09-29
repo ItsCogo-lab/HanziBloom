@@ -307,4 +307,15 @@ export const es: Record<MessageKey, string> = {
   'notFound.title': 'Página no encontrada',
   'notFound.description': 'La dirección que has abierto no existe.',
   'notFound.backHome': 'Volver al inicio',
+
+  'install.title': 'Instala HanziVocab',
+  'install.description': 'Añádela a tu pantalla de inicio para abrirla como una app, a pantalla completa y con un toque.',
+  'install.install': 'Instalar',
+  'install.notNow': 'Ahora no',
+  'install.gotIt': 'Entendido',
+  'install.iosStepShare': 'Toca el botón Compartir de Safari.',
+  'install.iosStepAdd': 'Elige «Añadir a pantalla de inicio».',
+  'install.installed': 'HanziVocab está instalada en este dispositivo.',
+  'install.unavailable': 'Este navegador no puede instalar apps web. Prueba con Chrome en Android o Safari en iPhone.',
+  'settings.app': 'App',
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '../components/ui/Button.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
+import { InstallSetting } from '../features/install/components/InstallSetting.tsx'
 import { ToneLegend } from '../features/dictionary/components/ToneLegend.tsx'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { SESSION_SIZE_OPTIONS } from '../features/settings/settings.ts'
@@ -61,6 +62,9 @@ export function SettingsPage() {
             <ToggleSetting setting="toneNumbers" label={t('settings.toneNumbers')} hint={t('settings.toneNumbersHint')} />
             <ToneLegend className="border-t border-line pt-4" />
           </div>
+        </SettingsSection>
+        <SettingsSection title={t('settings.app')}>
+          <InstallSetting />
         </SettingsSection>
         <SettingsSection title={t('settings.data')}>
           <ResetProgress />

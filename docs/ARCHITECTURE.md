@@ -65,6 +65,7 @@ src/
     progress/       Registro de progreso, estadísticas, racha, persistencia
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
     settings/       Ajustes del usuario (sesión, colores y números de tono)
+    install/        Instalar la app en la pantalla de inicio (aviso y sección de Ajustes)
     audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
@@ -254,6 +255,30 @@ Las fichas reciben un `EntryOpener`: en la página enlazan a otra ruta; en el
 panel abren la ficha dentro del panel, con historial para volver. Consultar el
 elemento de la pregunta solo se ofrece después de responder, para no dar la
 respuesta.
+
+### Móvil e instalación
+
+La app se diseña primero para el móvil (360 px de ancho). La barra de
+navegación inferior mide `--mobile-nav-height` (`index.css`): 3.5rem más la
+franja del sistema de los iPhone (`env(safe-area-inset-bottom)`, gracias a
+`viewport-fit=cover`); el contenido y los botones fijos de Learn la usan para
+no quedar tapados. Los campos de formulario miden 16 px en móvil para que
+Safari no haga zoom al escribir.
+
+Se puede instalar como app (`public/manifest.webmanifest`). `start_url` y
+`scope` son relativos (`./`), así valen igual en `/` que en `/HanziVocab/`.
+Los iconos (`public/icons/`, `public/favicon.svg`) están dibujados con los
+trazos de 汉 de hanzi-writer-data, no con una fuente, para que se vean igual en
+todas partes. No hay service worker: los navegadores ya no lo exigen para
+instalar, y así cada despliegue llega sin cachés que lo retrasen (el
+diccionario ya se guarda en IndexedDB).
+
+`features/install`: Chrome/Edge/Samsung lanzan `beforeinstallprompt`, que se
+escucha desde `main.tsx` antes de montar React y se guarda para el botón
+Install. Safari en iPhone no tiene ese diálogo: se explican los pasos
+«Compartir → Añadir a pantalla de inicio». El aviso (`InstallBanner`) sale una
+vez, no durante las sesiones, y no vuelve al cerrarlo; Ajustes → App sigue
+ofreciendo instalar.
 
 ### Colores de tono
 
