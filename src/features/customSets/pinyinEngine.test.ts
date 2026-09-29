@@ -25,6 +25,12 @@ describe('pinyin automático de las frases', () => {
     expect(describeTokens(annotate('我觉得不对。'))).toContain('不:bú2')
   })
 
+  it('usa el tono neutro del dataset donde el motor pone tono pleno', () => {
+    expect(describeTokens(annotate('他没有朋友。'))).toEqual(['他:tā1', '没:méi2', '有:yǒu3', '朋:péng2', '友:you5', '。'])
+    // Sin la misma sílaba en tono neutro en el dataset, manda el motor
+    expect(describeTokens(annotate('我有朋友。'))).toContain('有:yǒu3')
+  })
+
   it('lee los caracteres polifónicos según la palabra', () => {
     expect(describeTokens(annotate('银行行长走了。'))).toEqual([
       '银:yín2', '行:háng2', '行:háng2', '长:zhǎng3', '走:zǒu3', '了:le5', '。',

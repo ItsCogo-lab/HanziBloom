@@ -38,7 +38,7 @@ Dependencias previstas para fases siguientes (se añadirán cuando se necesiten,
 | 3 | `react-router` | Rutas reales (`/characters/好`), botón atrás del navegador y enlaces compartibles. Escribirlo a mano sería reinventar algo estándar. |
 | Integración de datos | `hanzi-writer` (MIT) | Animación del orden de trazos en la ficha del carácter. Se carga con `import()` solo al abrir una ficha. Más adelante servirá para la práctica de escritura. |
 | Integración de datos | `hanzi-writer-data` (Arphic PL, solo desarrollo) | Datos de trazos que el build copia a `public/strokes/`. |
-| Sets propios | `pinyin-pro` 3.29.4 (MIT), versión fija | Pinyin de las frases del usuario. Determinista, con diccionario de palabras para los polifónicos. Se carga con `import()` solo al guardar una frase. |
+| Sets propios | `pinyin-pro` 3.29.4 (MIT), versión fija | Pinyin de las frases del usuario y de las frases de ejemplo. Determinista, con diccionario de palabras para los polifónicos. Se carga con `import()` solo al guardar una frase o al mostrar frases de ejemplo. |
 
 Descartado a propósito: Redux/Zustand (React Context + hooks basta), i18next
 (un diccionario tipado propio basta para 3 idiomas), librerías de componentes
@@ -169,6 +169,9 @@ un servidor más adelante basta con cambiarlo.
   con la lectura del dataset en ese punto (la palabra más larga del dataset que
   empieza ahí, sin homógrafos). Si no, queda marcado como dudoso, sin color, y
   el usuario elige entre las lecturas posibles; nunca escribe pinyin a mano.
+  Donde el dataset lee la misma sílaba en tono neutro (朋友 péng you), se usa
+  la del dataset. Las frases de ejemplo del diccionario usan el mismo motor
+  (`AnnotatedSentence`), pero sin elegir: lo dudoso se queda marcado.
 - **Colores**: los mismos de toda la app (`TONE_TEXT_CLASSES`). Sin color la
   puntuación y los caracteres dudosos; el pinyin siempre visible.
 - La ficha del diccionario abierta desde un set propio (`?set=custom-...`)
