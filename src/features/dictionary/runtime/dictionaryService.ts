@@ -1,9 +1,12 @@
 import { getExamplesFor, loadExampleSet, MAX_EXAMPLES_SHOWN } from '../examples.ts'
+import type { DictionaryChunk } from '../fullDictionary.ts'
 import { hskDictionary } from '../hskDictionary.ts'
 import type { StrokeData } from '../strokeData.ts'
 import { strokeFileName } from '../strokes.ts'
 import type { StudyItem } from '../studyItem.ts'
 import type { ExampleSentence } from '../types.ts'
+import type { DictionaryCache } from './dictionaryCache.ts'
+import { fetchChunk, fetchManifest } from './dictionarySource.ts'
 import { fetchJson, SourceError } from './http.ts'
 import type { ResourceService } from './resourceService.ts'
 import { fetchStrokeData, parseStrokeData, STROKE_DATA_VERSION } from './strokeSource.ts'
@@ -25,9 +28,12 @@ import { fetchTatoebaExamples, TATOEBA_LICENSE } from './tatoebaSource.ts'
 export const STROKE_TTL_MS = 365 * 24 * 60 * 60 * 1000
 /** Las frases de Tatoeba se corrigen y se añaden: una semana. */
 export const EXAMPLES_TTL_MS = 7 * 24 * 60 * 60 * 1000
+/** Cada cuánto se mira si hay una versión nueva del diccionario completo. */
+export const MANIFEST_TTL_MS = 24 * 60 * 60 * 1000
 
 export interface RuntimeSources {
   resources: ResourceService
+  cache: DictionaryCache
   fetchFn: typeof fetch
 }
 
@@ -190,4 +196,61 @@ export async function loadExamples(
     }
   }
   return remote
+}
+
+/** Un trozo guardado, con la versión de los datos de la que salió. */
+interface CachedChunk {
+  version: string
+  chunk: DictionaryChunk
+}
+
+/**
+ * Un trozo del diccionario completo (repositorio de datos en jsDelivr). La
+ * versión actual sale del manifiesto (con su propia caché de un día); cada
+ * trozo se guarda con su versión y se vuelve a pedir solo cuando cambia. Así
+ * la caché nunca mezcla versiones ni acumula las antiguas.
+ *
+ * Sin conexión: un trozo guardado se usa aunque sea de una versión anterior.
+ * Si no hay nada guardado, falla y la búsqueda se queda en HSK 1-4, diciéndolo.
+ */
+export async function loadDictionaryChunk(
+  sources: RuntimeSources,
+  index: number,
+  signal?: AbortSignal,
+): Promise<DictionaryChunk> {
+  const { resources, cache, fetchFn } = sources
+  let version: string | undefined
+  let manifestError: unknown
+  try {
+    const manifest = await resources.load({
+      key: 'dictionary:manifest',
+      ttlMs: MANIFEST_TTL_MS,
+      fetch: (fetchSignal) => fetchManifest({ signal: fetchSignal, fetchFn }),
+      signal,
+    })
+    version = manifest.data.version
+  } catch (error) {
+    rethrowAbort(error)
+    manifestError = error
+  }
+
+  const key = `dictionary:chunk:${index}`
+  const cached = (await cache.get<CachedChunk>(key))?.data
+  if (cached && (version === undefined || cached.version === version)) return cached.chunk
+  if (version === undefined) throw manifestError
+
+  try {
+    const chunk = await fetchChunk(version, index, { signal, fetchFn })
+    await cache.set<CachedChunk>({
+      key,
+      data: { version, chunk },
+      fetchedAt: Date.now(),
+      source: `HanziVocab-Data@${version}`,
+    })
+    return chunk
+  } catch (error) {
+    rethrowAbort(error)
+    if (cached) return cached.chunk
+    throw error
+  }
 }

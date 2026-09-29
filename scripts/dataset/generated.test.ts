@@ -5,14 +5,13 @@ import { describe, expect, it } from 'vitest'
 import { allCharacters, allWords } from '../../src/data/index.ts'
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import type { ExampleSet } from '../../src/features/dictionary/types.ts'
-import {
-  validateDictionaryData,
-  validateExampleSet,
-  validateFullDictionary,
-} from '../../src/features/dictionary/validation.ts'
-import { readFullDictionary } from './fullDictionaryFiles.ts'
+import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
 
-/* Los archivos generados en public/ que carga la app. Lo mismo que `npm run data:validate`. */
+/*
+ * Los archivos generados en public/ que carga la app. El diccionario completo
+ * ya no está en este repositorio: `npm run data:validate` lo revisa antes de
+ * publicarlo en el repositorio de datos.
+ */
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '../../public')
 const exampleFiles = [1, 2, 3, 4].map((level) => join(publicDir, `examples/hsk${level}.json`))
@@ -30,13 +29,7 @@ describe('archivos generados en public/', () => {
     expect(validateExampleSet(set, allWords)).toEqual([])
   })
 
-  it('tienen el diccionario completo, coherente con HSK 1-4', () => {
-    const chunks = readFullDictionary(join(publicDir, 'dictionary'))
-    const characters = chunks.flatMap((chunk) => chunk.characters)
-    const words = chunks.flatMap((chunk) => chunk.words)
-    expect(validateFullDictionary(chunks)).toEqual([])
-    expect(validateDictionaryData([...allCharacters, ...characters], [...allWords, ...words])).toEqual([])
-    // Mucho más que HSK 1-4: todo CC-CEDICT escrito con caracteres chinos
-    expect(words.length).toBeGreaterThan(100_000)
+  it('HSK 1-4 es coherente', () => {
+    expect(validateDictionaryData(allCharacters, allWords)).toEqual([])
   })
 })

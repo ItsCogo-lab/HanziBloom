@@ -7,6 +7,9 @@ name: Dataset
 # - En una rama que no es main: si el resultado cambia, lo sube a la rama
 #   en un commit aparte.
 # - En main (lanzado a mano): solo comprueba que el dataset está al día.
+#
+# El diccionario completo no va en este repositorio: queda como artefacto
+# («data-release») y se publica en HanziVocab-Data con el workflow «Publish data».
 
 on:
   workflow_dispatch:
@@ -36,10 +39,14 @@ jobs:
       - run: npm run data:fetch
       - run: npm run data:build
       - run: npm run data:validate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: data-release
+          path: data-release
       - name: Subir el dataset regenerado
         if: github.ref != 'refs/heads/main'
         run: |
-          git add src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md
+          git add src/data public/strokes public/examples docs/DATA_CONFLICTS.md
           if git diff --cached --quiet; then
             echo "El dataset ya estaba al día."
             exit 0
@@ -51,5 +58,5 @@ jobs:
       - name: Comprobar que el dataset de main está al día
         if: github.ref == 'refs/heads/main'
         run: |
-          git add -N src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md
-          git diff --exit-code --stat -- src/data public/strokes public/examples public/dictionary docs/DATA_CONFLICTS.md
+          git add -N src/data public/strokes public/examples docs/DATA_CONFLICTS.md
+          git diff --exit-code --stat -- src/data public/strokes public/examples docs/DATA_CONFLICTS.md

@@ -13,7 +13,7 @@ type AppProvidersProps = {
   children: ReactNode
   /** Almacenamiento de los datos del usuario; por defecto localStorage. */
   storage?: KeyValueStorage
-  /** De dónde salen los trozos del diccionario completo; por defecto, public/dictionary/. */
+  /** De dónde salen los trozos del diccionario completo; por defecto, el repositorio de datos. */
   loadChunk?: LoadChunk
   /** Caché de las fuentes externas (trazos, frases); por defecto IndexedDB. */
   cache?: DictionaryCache

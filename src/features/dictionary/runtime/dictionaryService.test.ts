@@ -4,7 +4,18 @@ import { ningResponse } from '../../../test/tatoebaResponses.ts'
 import type { StudyItem } from '../studyItem.ts'
 import { ningCharacter, testExampleSet } from '../testData.ts'
 import { createMemoryCache, type DictionaryCache } from './dictionaryCache.ts'
-import { EXAMPLES_TTL_MS, loadExamples, loadStrokes, pickExamples, type RuntimeSources } from './dictionaryService.ts'
+import { getChunkIndex } from '../fullDictionary.ts'
+import {
+  EXAMPLES_TTL_MS,
+  loadDictionaryChunk,
+  loadExamples,
+  loadStrokes,
+  MANIFEST_TTL_MS,
+  pickExamples,
+  type RuntimeSources,
+} from './dictionaryService.ts'
+import { chunkUrl, manifestUrl } from './dictionarySource.ts'
+import { manifest } from './dictionarySource.test.ts'
 import { createResourceService } from './resourceService.ts'
 
 const strokes = { strokes: ['M 0 0'], medians: [[[0, 0]]] }
@@ -12,7 +23,7 @@ const ning: StudyItem = { kind: 'character', entry: ningCharacter }
 const { hskLevel: _level, ...ningOutsideHsk } = ningCharacter
 
 function sources(fetchFn: typeof fetch, cache: DictionaryCache = createMemoryCache(), now = () => 0): RuntimeSources {
-  return { resources: createResourceService(cache, now), fetchFn }
+  return { resources: createResourceService(cache, now), cache, fetchFn }
 }
 
 describe('loadStrokes', () => {
@@ -95,5 +106,58 @@ describe('pickExamples', () => {
     })
     const picked = pickExamples('柠檬', [sentence(1, '柠檬很龘。'), sentence(2, '我吃了你的柠檬。')])
     expect(picked.map((example) => example.tatoebaId)).toEqual([2, 1])
+  })
+})
+
+describe('loadDictionaryChunk', () => {
+  const penguin = getChunkIndex('企')
+  const chunkV1 = {
+    characters: [],
+    words: [{ id: '企鹅', hanzi: '企鹅', pinyin: 'qǐ é', meanings: { en: ['penguin'] } }],
+  }
+  const chunkV2 = {
+    characters: [],
+    words: [{ id: '企鹅', hanzi: '企鹅', pinyin: 'qǐ é', meanings: { en: ['penguin (bird)'] } }],
+  }
+  const online = (version: string, chunk: unknown) =>
+    createFakeFetch([
+      [manifestUrl(), jsonResponse({ ...manifest, version })],
+      [chunkUrl(version, penguin), jsonResponse(chunk)],
+    ])
+
+  it('descarga el trozo de la versión del manifiesto y lo guarda', async () => {
+    const cache = createMemoryCache()
+    const fake = online('1.0.0', chunkV1)
+    expect(await loadDictionaryChunk(sources(fake.fetch, cache), penguin)).toEqual(chunkV1)
+    // Otra visita, sin conexión: sale de la caché
+    expect(await loadDictionaryChunk(sources(offlineFetch, cache), penguin)).toEqual(chunkV1)
+  })
+
+  it('cuando se publica una versión nueva, la pide al caducar el manifiesto', async () => {
+    const cache = createMemoryCache()
+    let time = 0
+    await loadDictionaryChunk(
+      sources(online('1.0.0', chunkV1).fetch, cache, () => time),
+      penguin,
+    )
+    time = MANIFEST_TTL_MS + 1
+    const v2 = online('1.1.0', chunkV2)
+    const service = sources(v2.fetch, cache, () => time)
+    // Stale-while-revalidate: esta vez aún sirve la 1.0.0 y renueva el manifiesto en segundo plano
+    expect(await loadDictionaryChunk(service, penguin)).toEqual(chunkV1)
+    await expect.poll(() => v2.requested).toContain(manifestUrl())
+    await expect.poll(() => loadDictionaryChunk(service, penguin)).toEqual(chunkV2)
+  })
+
+  it('sin conexión usa un trozo guardado aunque sea de una versión anterior', async () => {
+    const cache = createMemoryCache()
+    await loadDictionaryChunk(sources(online('1.0.0', chunkV1).fetch, cache), penguin)
+    const manifestOnly = createFakeFetch([[manifestUrl(), jsonResponse({ ...manifest, version: '1.1.0' })]])
+    const fresh = sources(manifestOnly.fetch, cache)
+    expect(await loadDictionaryChunk(fresh, penguin)).toEqual(chunkV1)
+  })
+
+  it('sin conexión y sin nada guardado falla (la búsqueda se queda en HSK)', async () => {
+    await expect(loadDictionaryChunk(sources(offlineFetch), penguin)).rejects.toMatchObject({ kind: 'network' })
   })
 })

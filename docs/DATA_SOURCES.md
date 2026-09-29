@@ -3,12 +3,14 @@
 Todos los datos lingüísticos de HanziVocab vienen de fuentes abiertas. Nada
 se escribe a mano ni se genera con IA. Hay dos formas de llegar a la app:
 
-- **Generados con un script** (`npm run data:build`) y subidos al
-  repositorio: HSK 1-4, el diccionario completo y las copias locales de trazos
-  y frases de HSK. Si hay que corregir algo, se cambia el script y se vuelve a
-  generar.
+- **Generados con un script** (`npm run data:build`): HSK 1-4 y las copias
+  locales de trazos y frases de HSK se suben a este repositorio; el
+  diccionario completo se publica en un repositorio de datos aparte
+  (`ItsCogo-lab/HanziVocab-Data`) y la app lo lee en tiempo de ejecución. Si
+  hay que corregir algo, se cambia el script y se vuelve a generar.
 - **Pedidos en tiempo de ejecución** a la fuente, con caché en el navegador:
-  el orden de trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba). Ver
+  el diccionario completo (repositorio de datos en jsDelivr), el orden de
+  trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba). Ver
   [Fuentes en tiempo de ejecución](#fuentes-en-tiempo-de-ejecución).
 
 ## Cómo se genera
@@ -23,7 +25,7 @@ fuentes → adaptadores → fusión → validación → archivos generados → a
 | Adaptadores | `scripts/dataset/sources/*.ts` | Uno por fuente. Leen el formato original y devuelven solo los campos de los que esa fuente es dueña. No saben nada de las demás fuentes. |
 | Fusión | `scripts/dataset/fusion.ts` | Combina los adaptadores campo a campo según `FIELD_SOURCES` y compara fuentes que dicen lo mismo. |
 | Validación | `src/features/dictionary/validation.ts` | Comprueba el resultado. Si algo falla, no se escribe nada. |
-| Salida | `src/data/`, `public/strokes/`, `public/examples/`, `public/dictionary/` | Ver «Archivos generados». |
+| Salida | `src/data/`, `public/strokes/`, `public/examples/`; el diccionario completo en `data-release/` (no se sube) | Ver «Archivos generados» y «Repositorio de datos». |
 
 ```bash
 npm run data:fetch      # descarga las fuentes
@@ -209,8 +211,8 @@ clem109 trae 299) y HSK 4 598 (la lista trae 601, con 3 repeticiones).
 
 ## Diccionario completo
 
-Además de HSK 1-4, el build genera todo CC-CEDICT en `public/dictionary/`
-(`buildFullEntries` en `fusion.ts`). Sirve para buscar cualquier palabra y
+Además de HSK 1-4, el build genera todo CC-CEDICT en `data-release/dictionary/`
+(`buildFullEntries` en `fusion.ts`), que se publica en el repositorio de datos. Sirve para buscar cualquier palabra y
 para añadirla a un set propio. Reglas:
 
 1. **Qué entra:** las entradas escritas enteras con caracteres chinos y con
@@ -230,16 +232,63 @@ para añadirla a un set propio. Reglas:
 5. **Palabras que no se pueden enseñar:** si un carácter de la palabra no
    tiene entrada propia (碁 en 宏碁), la palabra se deja fuera. Todo lo que
    se deja fuera aparece en `DATA_CONFLICTS.md`.
-6. **Sin nivel HSK, sin frases y sin animación de trazos.** Las frases de
-   Tatoeba se eligen por nivel HSK. De hanzi-writer-data solo se usa el
-   número de trazos: copiar los ~9.500 archivos de trazos ocuparía unos
-   40 MB en el repositorio.
+6. **Sin nivel HSK.** Las frases y la animación de trazos no van en estos
+   archivos: la ficha las pide en tiempo de ejecución a Tatoeba y a jsDelivr,
+   como las de HSK. De hanzi-writer-data solo se usa aquí el número de trazos.
 
 Se reparte en 32 archivos (`CHUNK_COUNT` en
 `src/features/dictionary/fullDictionary.ts`): cada entrada va en el del punto
 de código de su primer carácter módulo 32. Así la app sabe qué archivo pedir
 a partir del hanzi, sin índice aparte. Ocupa unos 18 MB (unos 4,7 MB con
 gzip; el archivo más grande, unos 200 KB con gzip).
+
+### Repositorio de datos
+
+No hay ninguna API pública de CC-CEDICT, Unihan ni Make Me a Hanzi que se
+pueda usar desde el navegador (ver la tabla de abajo), así que el diccionario
+completo se publica en un repositorio público aparte,
+[ItsCogo-lab/HanziVocab-Data](https://github.com/ItsCogo-lab/HanziVocab-Data),
+y la app lo lee por jsDelivr. Así se actualiza sin tocar la app, y el
+repositorio de la app no lleva 18 MB de datos.
+
+- **Estructura:** `v1/manifest.json` (formato, versión actual, fecha de
+  generación y versión de cada fuente) y `v1/<versión>/dictionary/0.json` a
+  `31.json`. Una carpeta de versión no se modifica nunca; se conservan las dos
+  anteriores.
+- **Endpoints:** `https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v1/manifest.json`
+  y `…@main/v1/<versión>/dictionary/<n>.json`.
+- **Licencia y atribución:** las de las fuentes (CC BY-SA 4.0 por
+  CC-CEDICT; Unicode License v3; LGPL 3.0+; Arphic), escritas en su README.
+- **Límites:** jsDelivr no publica límites por usuario para archivos
+  pequeños; la app hace como mucho 120 peticiones por minuto a esta fuente
+  (una búsqueda completa son 33: el manifiesto y 32 trozos) y respeta los 429.
+- **CORS:** `access-control-allow-origin: *` (comprobado desde GitHub Actions).
+- **Autenticación:** ninguna; el repositorio es público y no hay claves.
+- **Caché:** el manifiesto, 1 día (y jsDelivr lo guarda hasta 12 horas); cada
+  trozo se guarda en IndexedDB con su versión y solo se vuelve a pedir cuando
+  el manifiesto dice otra versión.
+- **Si falla:** sin manifiesto ni red, se usan los trozos guardados (aunque
+  sean de una versión anterior). Si no hay nada guardado, la búsqueda sigue
+  en HSK 1-4 y lo dice («Couldn't load the full dictionary…»), y un set propio
+  con palabras de fuera de HSK avisa de que no puede cargarlas. HSK, Learn y
+  Study no dependen de esto.
+- **Adaptador:** `src/features/dictionary/runtime/dictionarySource.ts`.
+
+Publicar una versión nueva (sin PR ni build de la app):
+
+1. Lanzar a mano el workflow **Publish data** con la versión nueva (mayor que
+   la actual, p. ej. `1.1.0`). Descarga las fuentes, genera y valida el
+   diccionario, escribe la carpeta de la versión y el manifiesto en
+   HanziVocab-Data, hace commit en su `main` y avisa a jsDelivr. Necesita el
+   secreto `DATA_REPO_TOKEN` (un token fine-grained con «Contents: Read and
+   write» solo sobre HanziVocab-Data).
+2. O a mano: `npm run data:fetch && npm run data:build && npm run data:validate`
+   y `npm run data:release -- 1.1.0 <copia de HanziVocab-Data>`, y después
+   commit y push en ese repositorio.
+
+Si cambia el formato de los datos de forma incompatible, se sube `DATA_FORMAT`
+en `dictionarySource.ts` y los datos van en `v2/`: las versiones de la app que
+ya están publicadas siguen leyendo `v1/`.
 
 ## Fuentes en tiempo de ejecución
 
@@ -251,9 +300,9 @@ Actions porque el entorno de Claude no llega a esos dominios):
 | --- | --- | --- |
 | hanzi-writer-data (trazos) | Sí: jsDelivr, el CDN desde el que Hanzi Writer los carga por defecto | En tiempo de ejecución |
 | Tatoeba (frases) | Sí: API v1, pública y sin clave | En tiempo de ejecución |
-| CC-CEDICT (significados, pinyin) | No: es un archivo. MDBG prohíbe el acceso automatizado; ccdb.hemiola.com solo va por HTTP | Local (ver [Diccionario completo](#diccionario-completo)) |
-| Unihan (radical, trazos) | No: Unicode solo publica archivos | Local |
-| Make Me a Hanzi (descomposición, etimología) | No: un archivo de 2,5 MB en GitHub, que no es un CDN | Local |
+| CC-CEDICT (significados, pinyin) | No: es un archivo. MDBG prohíbe el acceso automatizado; ccdb.hemiola.com solo va por HTTP | Generado por nosotros y leído en tiempo de ejecución del [repositorio de datos](#repositorio-de-datos); HSK 1-4, en la app |
+| Unihan (radical, trazos) | No: Unicode solo publica archivos | Igual que CC-CEDICT |
+| Make Me a Hanzi (descomposición, etimología) | No: un archivo de 2,5 MB en GitHub, que no es un CDN | Igual que CC-CEDICT |
 | Lista HSK | No | Local, como pide el diseño |
 
 ### Trazos: hanzi-writer-data en jsDelivr
@@ -337,7 +386,7 @@ Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
 | `src/data/hsk1/` a `hsk4/`: `characters.ts`, `words.ts` | Caracteres y palabras de cada nivel | En el bundle, en un archivo aparte del código de la app |
 | `public/strokes/*.json` | Trazos de los caracteres de HSK 1-4 | Solo si jsDelivr no responde |
 | `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Solo si Tatoeba no responde o no tiene frases |
-| `public/dictionary/0.json` a `31.json` | Diccionario completo, fuera de HSK 1-4 | Un archivo al abrir una ficha o un set con esas entradas; todos al buscar |
+| `data-release/dictionary/0.json` a `31.json` (no se sube) | Diccionario completo, fuera de HSK 1-4 | Se publica en HanziVocab-Data; la app pide un archivo al abrir una ficha o un set con esas entradas y todos al buscar |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
 | `src/data/topics.ts` (no generado) | Temas curados a mano | En el bundle, con el dataset |
 
@@ -350,7 +399,7 @@ generados mantienen la de su fuente:
   (Unicode License v3) y Make Me a Hanzi (LGPL 3.0+).
 - `public/strokes/`: Arphic Public License.
 - `public/examples/`: CC BY 2.0 FR.
-- `public/dictionary/`: como `src/data/`.
+- HanziVocab-Data (diccionario completo): como `src/data/`.
 
 Aviso de Unicode: Copyright © Unicode, Inc. Los datos de Unihan se
 distribuyen bajo los términos de la Unicode License v3

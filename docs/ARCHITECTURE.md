@@ -178,20 +178,24 @@ un servidor más adelante basta con cambiarlo.
 
 HSK 1-4 va en el bundle (`src/data`), porque lo usan los sets, los ejercicios
 y las estadísticas. El resto de CC-CEDICT (unas 108.000 palabras y 9.900
-caracteres) está en `public/dictionary/`, repartido en 32 archivos por el
-primer carácter (`fullDictionary.ts`), y se pide solo cuando hace falta:
+caracteres) está en el repositorio de datos `ItsCogo-lab/HanziVocab-Data`
+(servido por jsDelivr, ver «Fuentes en tiempo de ejecución»), repartido en 32
+archivos por el primer carácter (`fullDictionary.ts`), y se pide solo cuando
+hace falta:
 
 - **`dictionaryStore.ts`**: el diccionario de la interfaz. Empieza con HSK y
   añade cada trozo que llega; nunca pide uno dos veces. Sigue el contrato de
   `useSyncExternalStore`, así que la interfaz se vuelve a pintar sola.
-- **`DictionaryProvider`** lo comparte con toda la app. Los tests le pasan un
-  `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
+- **`DictionaryProvider`** lo comparte con toda la app. Por defecto pide los
+  trozos con `loadDictionaryChunk` (servicio del diccionario, con caché). Los
+  tests le pasan un `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
 - **`useLoadItems(itemIds)` / `<LoadEntries>`**: para abrir una ficha, un set
   propio o una sesión de un set propio, carga los trozos de esos elementos y
   de sus caracteres. Con elementos de HSK está listo al momento.
 - **`useSearchableItems(active)`**: al escribir la primera búsqueda se cargan
-  los 32 trozos (unos 4,7 MB con gzip, una vez por visita); mientras llegan se
-  busca en HSK y se avisa. Sin búsqueda no se descarga nada.
+  los 32 trozos (unos 4,7 MB con gzip, una vez por versión de los datos: se
+  guardan en IndexedDB); mientras llegan se busca en HSK y se avisa. Sin
+  búsqueda no se descarga nada.
 - **Orden de los resultados**: coincidencias exactas antes que parciales, y
   dentro de cada grupo HSK antes que el resto.
 - **`useDictionarySearch(query)`**: lo que usan los dos buscadores. Busca
@@ -202,18 +206,19 @@ primer carácter (`fullDictionary.ts`), y se pide solo cuando hace falta:
 
 ### Fuentes en tiempo de ejecución
 
-El orden de trazos y las frases de ejemplo se piden a la fuente al abrir una
-ficha (jsDelivr y la API de Tatoeba; por qué estas y no otras, en
-`DATA_SOURCES.md`). Las capas, de arriba abajo:
+El diccionario completo (repositorio de datos en jsDelivr), el orden de
+trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba) se piden en tiempo
+de ejecución; por qué estas fuentes y no otras, en `DATA_SOURCES.md`. Las
+capas, de arriba abajo:
 
 ```
-StrokeOrder, ExampleSentences          (componentes: nunca llaman a una API)
-  └ useRuntimeData(key, load)           (hook: cancela al cambiar de ficha)
-     └ dictionaryService.ts             (decide de dónde sale cada dato)
-        ├ resourceService.ts            (caché stale-while-revalidate)
-        │  └ dictionaryCache.ts         (IndexedDB; en memoria si no hay)
-        └ strokeSource.ts, tatoebaSource.ts   (adaptadores)
-           └ http.ts                    (errores clasificados, tiempo máximo, límite por minuto)
+StrokeOrder, ExampleSentences, buscadores   (componentes: nunca llaman a una API)
+  └ useRuntimeData / dictionaryStore        (cancelan o reutilizan peticiones)
+     └ dictionaryService.ts                 (decide de dónde sale cada dato)
+        ├ resourceService.ts                (caché stale-while-revalidate)
+        │  └ dictionaryCache.ts             (IndexedDB; en memoria si no hay)
+        └ dictionarySource.ts, strokeSource.ts, tatoebaSource.ts   (adaptadores)
+           └ http.ts                        (errores clasificados, tiempo máximo, límite por minuto)
 ```
 
 - **Adaptadores**: uno por fuente. Construyen la URL (la versión va fijada),

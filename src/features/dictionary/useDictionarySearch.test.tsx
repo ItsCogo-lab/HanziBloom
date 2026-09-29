@@ -4,12 +4,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createChunkLoader } from '../../test/dictionaryChunks.ts'
 import { DictionaryProvider } from './DictionaryProvider.tsx'
 import { hskStudyItems } from './hskDictionary.ts'
+import { createMemoryCache } from './runtime/dictionaryCache.ts'
+import { RuntimeSourcesProvider } from './runtime/RuntimeSourcesProvider.tsx'
 import * as search from './search.ts'
 import { getStudyItemId } from './studyItem.ts'
 import { cachedSearch, isLongEnough, SEARCH_DEBOUNCE_MS, useDictionarySearch } from './useDictionarySearch.ts'
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <DictionaryProvider loadChunk={createChunkLoader()}>{children}</DictionaryProvider>
+  return (
+    <RuntimeSourcesProvider cache={createMemoryCache()}>
+      <DictionaryProvider loadChunk={createChunkLoader()}>{children}</DictionaryProvider>
+    </RuntimeSourcesProvider>
+  )
 }
 
 function renderSearch(initial = '') {

@@ -11,12 +11,16 @@ type RuntimeSourcesProviderProps = {
   fetchFn?: typeof fetch
 }
 
-/** Da a la app el servicio que consulta las fuentes externas (trazos, frases). */
+/** Da a la app el servicio que consulta las fuentes externas (diccionario completo, trazos, frases). */
 export function RuntimeSourcesProvider({ children, cache, fetchFn }: RuntimeSourcesProviderProps) {
-  const [sources] = useState(() => ({
-    resources: createResourceService(cache ?? createBrowserCache()),
-    // Sin enlazar, algunos navegadores lanzan "Illegal invocation"
-    fetchFn: fetchFn ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init)),
-  }))
+  const [sources] = useState(() => {
+    const store = cache ?? createBrowserCache()
+    return {
+      resources: createResourceService(store),
+      cache: store,
+      // Sin enlazar, algunos navegadores lanzan "Illegal invocation"
+      fetchFn: fetchFn ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init)),
+    }
+  })
   return <RuntimeSourcesContext value={sources}>{children}</RuntimeSourcesContext>
 }

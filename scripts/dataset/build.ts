@@ -19,6 +19,7 @@ import { validateDictionaryData, validateExampleSet } from '../../src/features/d
 import { strokeFileName } from '../../src/features/dictionary/strokes.ts'
 import { CHUNK_COUNT, chunkFileName, getChunkIndex } from '../../src/features/dictionary/fullDictionary.ts'
 import { buildBaseEntries, buildFullEntries, crossCheckCharacter, enrichCharacter, type CharacterSources } from './fusion.ts'
+import { DATA_RELEASE_DIR } from './dataRelease.ts'
 import { createCedictIndex } from './sources/cedict.ts'
 import { readStrokeData, type StrokeData } from './sources/hanziWriter.ts'
 import { parseHskList } from './sources/hsk.ts'
@@ -32,7 +33,7 @@ const rootDir = join(scriptDir, '../..')
 const dataDir = join(rootDir, 'src/data')
 const strokesDir = join(rootDir, 'public/strokes')
 const examplesDir = join(rootDir, 'public/examples')
-const fullDictionaryDir = join(rootDir, 'public/dictionary')
+const fullDictionaryDir = join(DATA_RELEASE_DIR, 'dictionary')
 const conflictsReport = join(rootDir, 'docs/DATA_CONFLICTS.md')
 const hanziWriterDataDir = join(rootDir, 'node_modules/hanzi-writer-data')
 
@@ -81,7 +82,7 @@ const base = buildBaseEntries(hskLists, cedict)
 const { words, problems, duplicates, leftOut } = base
 const hanziSet = new Set(base.characters.map((character) => character.hanzi))
 
-// El resto de CC-CEDICT, para el diccionario completo (public/dictionary/)
+// El resto de CC-CEDICT, para el diccionario completo (repositorio de datos, ver dataRelease.ts)
 const full = buildFullEntries(cedict, base)
 const allHanzi = new Set([...hanziSet, ...full.characters.map((character) => character.hanzi)])
 
@@ -307,7 +308,7 @@ if (duplicates.length > 0) {
   console.log(`Entradas repetidas en la lista HSK, guardadas una vez: ${duplicates.join(', ')}.`)
 }
 console.log(
-  `Diccionario completo (public/dictionary, ${CHUNK_COUNT} archivos): ${full.words.length} palabras y ${fullCharacters.length} caracteres más.`,
+  `Diccionario completo (data-release/dictionary, ${CHUNK_COUNT} archivos, para publicar con data:release): ${full.words.length} palabras y ${fullCharacters.length} caracteres más.`,
 )
 console.log(`Trazos copiados a public/strokes: ${strokeData.size}.`)
 for (const [level, examples] of examplesByLevel) {
