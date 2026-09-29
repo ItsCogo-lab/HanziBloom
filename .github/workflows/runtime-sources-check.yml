@@ -1,37 +1,36 @@
 name: Runtime sources check
 
-# Temporal: comprueba desde fuera del entorno de Claude si las fuentes que se
-# quieren usar en tiempo de ejecución responden y mandan cabeceras CORS.
+# Temporal: prueba la app compilada en un navegador real contra jsDelivr y
+# Tatoeba, que no se pueden alcanzar desde el entorno de Claude.
 
 on:
   push:
     branches-ignore: [main]
     paths:
       - '.github/workflows/runtime-sources-check.yml'
+      - '.github/runtime-check/**'
 
 jobs:
-  check:
+  browser:
     runs-on: ubuntu-latest
     steps:
-      - name: Parámetros de /v1/sentences según openapi.json
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Tamaño del bundle
+        run: ls -l dist/assets && du -sh dist/dictionary dist/strokes dist/examples
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Navegador contra las fuentes reales
         run: |
-          curl -sS 'https://api.tatoeba.org/openapi.json' -o openapi.json
-          jq '.paths["/v1/sentences"].get.parameters | map({name, in, required, schema})' openapi.json | head -c 12000
-      - name: Consultas de prueba
-        run: |
-          check() {
-            echo "::group::$1"
-            curl -sS -D headers.txt -o body.txt -H 'Origin: https://itscogo-lab.github.io' "$1"
-            grep -iE '^(HTTP|access-control|x-ratelimit|retry-after|cache-control)' headers.txt || true
-            jq -c '{paging, n: (.data | length), sample: [.data[:6][] | {id, text, owner, license, is_unapproved, t: [.translations[]? | {id, text, owner, license, is_direct, is_unapproved}][:2]}]}' body.txt | head -c 5000 || head -c 800 body.txt
-            echo
-            echo "::endgroup::"
-          }
-          B='https://api.tatoeba.org/v1/sentences?lang=cmn&showtrans:lang=eng&trans:lang=eng'
-          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=50"
-          check "$B&q=%E6%9F%A0&sort=words&limit=50"
-          check "$B&q=%E4%BC%81%E9%B9%85&sort=words&limit=50"
-          check "$B&q=%E5%A5%BD&sort=words&limit=100"
-          check "$B&q=%22%E5%AD%A6%E4%B9%A0%22&sort=words&limit=10"
-          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=10&is_unapproved=no"
-          check "$B&q=%E5%AD%A6%E4%B9%A0&sort=words&limit=500"
+          npx vite preview --port 4173 --strictPort &
+          npx wait-on -t 30000 http://localhost:4173 2>/dev/null || sleep 5
+          node .github/runtime-check/browser-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: runtime-*.png
