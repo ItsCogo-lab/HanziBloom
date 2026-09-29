@@ -63,7 +63,7 @@ export function ExampleSentences({ item }: { item: StudyItem }) {
  * CC-CEDICT): lo que no puede asegurar sale marcado con «?» y sin color.
  * Mientras se carga el motor, o si falla, se ve solo el chino.
  */
-function ExampleText({ chinese }: { chinese: string }) {
+export function ExampleText({ chinese }: { chinese: string }) {
   const [annotated, setAnnotated] = useState<{ chinese: string; tokens: SentenceToken[] }>()
   useEffect(() => {
     let active = true

@@ -58,6 +58,7 @@ src/
   features/
     dictionary/     Tipos de dominio (Character, Word), búsqueda, tonos y el panel de diccionario
       runtime/      Servicio, caché (IndexedDB) y adaptadores de las fuentes externas
+    grammar/        Notas de gramática de las partículas (datos en data/grammar.ts)
     studySets/      Modelo StudySet (HSK, temas, propios) y su progreso derivado
     myStudies/      Sets que sigue el usuario y cuándo los estudió (localStorage)
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
@@ -67,7 +68,7 @@ src/
     audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
-  data/             Datasets generados (hsk1/ a hsk4/) y temas curados a mano (topics.ts)
+  data/             Datasets generados (hsk1/ a hsk4/); temas y gramática curados a mano (topics.ts, grammar.ts)
   i18n/             Textos de la interfaz (en activo, es preparado, ca más adelante)
   lib/              Utilidades sin dominio: almacenamiento, fechas, aleatoriedad
   test/             Configuración compartida de los tests

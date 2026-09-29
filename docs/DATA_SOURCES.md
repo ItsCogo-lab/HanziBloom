@@ -383,7 +383,7 @@ sigue estudiando igual.
 
 ## Sets por temas
 
-`src/data/topics.ts` es el único archivo de `src/data` escrito a mano. Define
+`src/data/topics.ts` y `src/data/grammar.ts` son los únicos archivos de `src/data` escritos a mano. Define
 17 temas (Food & drink, Family, Travel, School & university, Time & dates,
 Numbers, Weather, Daily life, Emotions, Body & health, Shopping & money,
 Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
@@ -396,6 +396,25 @@ Transportation, Nature, Technology, Work, Animals, Colors). Criterios:
 - Una palabra puede estar en varios temas; su progreso es uno solo.
 - La app lo indica en la pestaña Topics: son una selección curada, no una
   lista oficial.
+
+## Notas de gramática
+
+`src/data/grammar.ts`, escrito a mano. La ficha de las partículas más comunes
+de HSK 1-4 muestra una sección Grammar con sus usos: 的 (posesión y
+modificadores), 了 (acción terminada y cambio de estado), 吗, 呢 («¿y tú?»),
+吧 (sugerencias y suavizar), 过, 着, 得, 地 y 啊. Criterios:
+
+- **Referencia:** [Chinese Grammar Wiki](https://resources.allsetlearning.com/chinese/grammar/)
+  de AllSet Learning, que decide qué usos entran y sus nombres. Su contenido es
+  **CC BY-NC-SA 3.0** (no comercial y compartir igual), incompatible con una
+  app de pago. Por eso las explicaciones son **originales**, no se copia su
+  texto ni sus frases, y cada punto solo **enlaza** a su página.
+- **Ejemplos:** frases de Tatoeba (CC BY 2.0 FR) que ya están en
+  `public/examples/`, copiadas tal cual con su id y su autor. Un test comprueba
+  que existen allí sin cambios y que contienen la partícula. Un uso sin frases
+  en Tatoeba no entra (el 呢 de acción en curso).
+- **Dónde salen:** en la ficha del carácter siempre; en una palabra, solo si
+  su pinyin sin tono es el de la partícula (得 «de» sí, 得 «děi» no).
 
 ## Archivos generados
 

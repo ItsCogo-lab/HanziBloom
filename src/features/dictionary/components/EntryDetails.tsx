@@ -3,6 +3,7 @@ import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { t } from '../../../i18n/index.ts'
+import { GrammarNotes } from '../../grammar/components/GrammarNotes.tsx'
 import { formatPinyin, getMeanings, getTraditionalForms, type Dictionary } from '../dictionary.ts'
 import { getRelatedItems, getStudyItemId, type StudyItem } from '../studyItem.ts'
 import { CharacterFacts } from './CharacterFacts.tsx'
@@ -60,6 +61,8 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
           ))}
         </ul>
       </section>
+
+      <GrammarNotes item={item} />
 
       {item.kind === 'character' && (
         <>

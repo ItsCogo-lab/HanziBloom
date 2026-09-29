@@ -146,6 +146,24 @@ describe('EntryDetails de un carácter', () => {
     await expectSentenceWithPinyin('柠檬很酸。', 'níng méng hěn suān。')
     expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toBeInTheDocument()
   })
+
+  it('muestra las notas de gramática de una partícula con su ejemplo y el enlace a la Grammar Wiki', () => {
+    renderCharacter(testCharacters.find((character) => character.hanzi === '了')!)
+
+    const grammar = screen.getByRole('heading', { name: 'Grammar' }).parentElement!
+    expect(within(grammar).getByRole('heading', { name: 'Completed actions with 了' })).toBeInTheDocument()
+    expect(within(grammar).getByRole('heading', { name: 'Change of state with 了' })).toBeInTheDocument()
+    expect(within(grammar).getByRole('link', { name: 'Tatoeba #817296 by fucongcong' })).toBeInTheDocument()
+    expect(within(grammar).getByRole('link', { name: 'Expressing completion with "le"' })).toHaveAttribute(
+      'href',
+      'https://resources.allsetlearning.com/chinese/grammar/ASGAGDCQ',
+    )
+  })
+
+  it('no muestra notas de gramática si no es una partícula', () => {
+    renderCharacter()
+    expect(screen.queryByRole('heading', { name: 'Grammar' })).not.toBeInTheDocument()
+  })
 })
 
 /** La frase de ejemplo, ya con el pinyin del motor debajo (el chino va en un span por carácter). */
