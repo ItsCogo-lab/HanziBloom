@@ -49,7 +49,7 @@ export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) 
   return (
     <div className="fixed inset-0 z-30 flex items-end md:pointer-events-none md:items-stretch md:justify-end">
       {/* En móvil, un fondo que cierra la hoja al tocarlo; en escritorio la sesión sigue a la vista */}
-      <div aria-hidden="true" className="absolute inset-0 bg-ink/30 md:hidden" onClick={onClose} />
+      <div aria-hidden="true" className="absolute inset-0 bg-backdrop md:hidden" onClick={onClose} />
       <section
         ref={panelRef}
         role="dialog"

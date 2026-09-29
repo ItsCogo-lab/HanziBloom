@@ -38,7 +38,7 @@ function GrammarCard({ point }: { point: GrammarPoint }) {
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-accent text-white shadow-sm"
+            className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-accent text-on-accent shadow-sm"
           >
             <HanziText className="text-2xl leading-none">{point.particle}</HanziText>
             <span className="text-xs leading-tight">{point.pinyin}</span>
@@ -91,7 +91,7 @@ function Pattern({ point }: { point: GrammarPoint }) {
           <HanziText
             className={
               part.includes(point.particle)
-                ? 'rounded-lg bg-accent px-2.5 py-1 font-semibold text-white'
+                ? 'rounded-lg bg-accent px-2.5 py-1 font-semibold text-on-accent'
                 : 'rounded-lg border border-accent/30 bg-surface px-2.5 py-1 text-ink'
             }
           >

@@ -18,6 +18,10 @@
   --color-accent: #b4412f;
   --color-accent-strong: #8f3222;
   --color-accent-soft: #f6e4df;
+  /* Texto sobre un fondo de color (botones, la ficha de la partícula) */
+  --color-on-accent: #ffffff;
+  /* Velo detrás de un panel que se abre encima del contenido */
+  --color-backdrop: rgb(31 29 26 / 0.3);
 
   /* Estados de respuesta */
   --color-success: #2f7d4f;
@@ -37,6 +41,39 @@
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   /* Fuentes chinas del sistema: sin descargas y funciona sin conexión */
   --font-hanzi: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+}
+
+/*
+ * Tema oscuro: los mismos tokens con otros valores, así que ningún componente
+ * necesita clases «dark:». Fondo de piedra de tinta (墨) en vez de negro puro,
+ * que cansa menos. Todos los textos (tonos incluidos) tienen un contraste de
+ * 4,5:1 o más sobre el fondo, la superficie y el fondo suave del acento. El
+ * acento y los tonos se aclaran; sobre un relleno de acento el texto pasa a
+ * ser oscuro. El tema lo pone index.html (y luego la app) en <html data-theme>.
+ */
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-paper: #161412;
+  --color-surface: #221f1c;
+  --color-ink: #ede7dd;
+  --color-ink-muted: #aaa297;
+  --color-line: #3a352f;
+
+  --color-accent: #e57a63;
+  --color-accent-strong: #f4a08c;
+  --color-accent-soft: #3a241e;
+  --color-on-accent: #1b1210;
+  --color-backdrop: rgb(0 0 0 / 0.6);
+
+  --color-success: #5cc48a;
+  --color-danger: #f47c72;
+
+  --color-tone-1: #f27272;
+  --color-tone-2: #f0a347;
+  --color-tone-3: #6cc97c;
+  --color-tone-4: #6fa9f5;
+  --color-tone-5: #a0a4ab;
 }
 
 /*
