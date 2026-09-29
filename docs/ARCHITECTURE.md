@@ -64,7 +64,7 @@ src/
     practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
     progress/       Registro de progreso, estadísticas, racha, persistencia
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
-    settings/       Ajustes del usuario (sesión, colores y números de tono)
+    settings/       Ajustes del usuario (sesión, tema, colores y números de tono)
     install/        Instalar la app en la pantalla de inicio (aviso y sección de Ajustes)
     audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
@@ -90,7 +90,7 @@ Cuatro secciones en la navegación principal; Progreso y Ajustes cuelgan del per
 | Sesión | `/study/practice?set=:setId&mode=learn` o `&mode=study` | Learn (vocabulario nuevo) o Study (repaso de lo aprendido) de un set; sin `set`, sesión mezclada de todo el vocabulario. Botón Dictionary. |
 | Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Búsqueda global y fichas. `q` y `kind` van en la URL. |
 | Profile | `/profile` | Resumen local: dominados, repasos, racha, sets y recientes. |
-| Progreso / Ajustes | `/progress`, `/settings` | Estadísticas detalladas; sesión, tonos, borrar progreso, créditos. |
+| Progreso / Ajustes | `/progress`, `/settings` | Estadísticas detalladas; sesión, tema, tonos, borrar progreso, créditos. |
 
 Las rutas antiguas (`/practice`, `/vocabulary`, `/characters`) redirigen a las nuevas.
 Navegación: barra lateral en escritorio, barra inferior en móvil.
@@ -292,6 +292,22 @@ sin color: no se adivina. Colores en `index.css` (`--color-tone-1..5`), todos
 con contraste ≥ 4.5:1. El color nunca es la única pista: el pinyin con marcas
 va al lado, y se oculta en los ejercicios que preguntan la pronunciación hasta
 responder. Ajustes: activar colores y añadir números de tono.
+
+### Tema oscuro
+
+Los componentes solo usan tokens de color (`bg-paper`, `text-ink`,
+`text-tone-3`...), nunca colores sueltos. El tema oscuro redefine esos mismos
+tokens en `html[data-theme='dark']` (`index.css`), así que no hay clases
+`dark:`. En oscuro el acento y los tonos se aclaran y siguen con contraste
+≥ 4.5:1; sobre un relleno de acento el texto es `on-accent` (blanco en claro,
+oscuro en oscuro).
+
+Ajustes → Appearance: System (por defecto), Light o Dark, guardado con el resto
+de ajustes. Un script pequeño en `index.html` pone `data-theme` antes de pintar,
+para que no se vea el tema equivocado al cargar; luego `SettingsProvider` lo
+mantiene (`features/settings/theme.ts`), escucha los cambios del sistema y
+pinta `theme-color` (barra del navegador) con el fondo. Hanzi Writer dibuja con
+colores fijos, así que el orden de trazos se vuelve a crear al cambiar de tema.
 
 ## 6. Entidades principales
 

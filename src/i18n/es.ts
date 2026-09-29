@@ -317,5 +317,11 @@ export const es: Record<MessageKey, string> = {
   'install.iosStepAdd': 'Elige «Añadir a pantalla de inicio».',
   'install.installed': 'HanziVocab está instalada en este dispositivo.',
   'install.unavailable': 'Este navegador no puede instalar apps web. Prueba con Chrome en Android o Safari en iPhone.',
+  'settings.appearance': 'Apariencia',
+  'settings.theme': 'Tema',
+  'settings.themeSystem': 'Sistema',
+  'settings.themeLight': 'Claro',
+  'settings.themeDark': 'Oscuro',
+  'settings.themeHint': 'Sistema sigue el modo claro u oscuro de tu dispositivo.',
   'settings.app': 'App',
 }

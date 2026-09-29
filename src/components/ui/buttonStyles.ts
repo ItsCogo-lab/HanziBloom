@@ -4,9 +4,9 @@ const baseClasses =
   'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-base font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-strong',
+  primary: 'bg-accent text-on-accent hover:bg-accent-strong',
   secondary: 'border border-line bg-surface text-ink hover:bg-paper',
-  danger: 'bg-danger text-white hover:bg-danger/85',
+  danger: 'bg-danger text-on-accent hover:bg-danger/85',
 }
 
 /**
