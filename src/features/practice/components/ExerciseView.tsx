@@ -3,11 +3,14 @@ import type { StudyItem } from '../../dictionary/studyItem.ts'
 import type { Exercise } from '../types.ts'
 import { ChoiceQuestion } from './ChoiceQuestion.tsx'
 import { Flashcard } from './Flashcard.tsx'
+import { WritingExercise } from './WritingExercise.tsx'
 
 type ExerciseViewProps = {
   exercise: Exercise
   dictionary: Dictionary
   onAnswer: (correct: boolean) => void
+  /** Leaves an exercise that can't be done without counting it (see WritingExercise). */
+  onSkip: () => void
   /** Opens an item in the dictionary without leaving the session. */
   onLookUp: (item: StudyItem) => void
 }
@@ -17,7 +20,7 @@ type ExerciseViewProps = {
  * added, TypeScript forces adding its case here (the `switch` must cover
  * every value of `exercise.type`).
  */
-export function ExerciseView({ exercise, dictionary, onAnswer, onLookUp }: ExerciseViewProps) {
+export function ExerciseView({ exercise, dictionary, onAnswer, onSkip, onLookUp }: ExerciseViewProps) {
   switch (exercise.type) {
     case 'flashcard':
       return <Flashcard exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} onLookUp={onLookUp} />
@@ -25,6 +28,10 @@ export function ExerciseView({ exercise, dictionary, onAnswer, onLookUp }: Exerc
     case 'pinyin-choice':
     case 'hanzi-choice':
       return <ChoiceQuestion exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} onLookUp={onLookUp} />
+    case 'writing':
+      return (
+        <WritingExercise exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} onSkip={onSkip} onLookUp={onLookUp} />
+      )
     default: {
       // If a case is missing, `exercise` would not be `never` and TypeScript would error here
       const missingCase: never = exercise

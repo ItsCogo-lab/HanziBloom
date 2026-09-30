@@ -10,11 +10,8 @@ import type { MyStudies } from '../myStudies/myStudies.ts'
 import type { DailyActivity, ItemProgress, ProgressData } from '../progress/types.ts'
 
 export function mergeProgress(local: ProgressData, remote: ProgressData): ProgressData {
-  const items: ProgressData['items'] = { ...remote.items }
-  for (const [id, item] of Object.entries(local.items) as [keyof ProgressData['items'], ItemProgress][]) {
-    const other = items[id]
-    items[id] = other && isNewer(other, item) ? other : item
-  }
+  const items = mergeRecords(local.items, remote.items)
+  const writing = mergeRecords(local.writing, remote.writing)
 
   // They can't be added up: if a day was partly synced already, answers would
   // be counted twice. Keep the record with more answers.
@@ -23,7 +20,19 @@ export function mergeProgress(local: ProgressData, remote: ProgressData): Progre
     const other = activity[day]
     if (!other || value.answers >= other.answers) activity[day] = value
   }
-  return { items, activity }
+  return { items, writing, activity }
+}
+
+type ProgressRecords = ProgressData['items']
+
+/** Each item keeps its most recent record, from whichever side has it. */
+function mergeRecords(local: ProgressRecords, remote: ProgressRecords): ProgressRecords {
+  const merged: ProgressRecords = { ...remote }
+  for (const [id, item] of Object.entries(local) as [keyof ProgressRecords, ItemProgress][]) {
+    const other = merged[id]
+    merged[id] = other && isNewer(other, item) ? other : item
+  }
+  return merged
 }
 
 /** `a` is newer than `b`: reviewed later or, on a tie, seen more times. */

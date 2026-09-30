@@ -474,6 +474,21 @@ answered correctly (choice questions move their options one place). Retries are
 saved to progress like any other answer, but the session score only counts
 first attempts (`getFirstAttemptResults`).
 
+**Writing.** `WritingExercise` shows the meaning and pinyin and the user
+writes the hanzi one character at a time in a 田字格 box (`WritingPad`, Hanzi
+Writer's `quiz()` over the same stroke data as the entry page). It is correct
+only without help (`gradeWriting` in `practice/writing.ts`): no "Hint", no
+"Show me", and no stroke missed 3 times (when Hanzi Writer shows it by
+itself). An item can be written once it can be read (recognition level 2 or
+more, hanzi only, at most 4). Writing has its own spaced repetition in
+`ProgressData.writing`, so a miss while writing doesn't reset reading.
+`createSessionExercises` asks an item in writing when it comes up in a
+session and its writing is due (`isWritingDue`); otherwise, a recognition
+exercise. So writing reviews ride on the sessions and never add to the
+"due" counts. It can be turned off in Settings (`writingExercises`). If the
+strokes can't be loaded, the exercise is skipped (`skip` action) without
+counting.
+
 **Keyboard.** `useSessionShortcuts` (`practice/shortcuts.ts`) gives each
 exercise its keys: Space shows a flashcard's answer and 1/2 answer it; 1-4
 pick a choice option and Enter continues; in Learn, 1/2/3 are skip, already

@@ -13,7 +13,7 @@ export const MASTERED_LEVEL = 4
 export type ItemStatus = 'new' | 'learning' | 'mastered'
 
 export function createEmptyProgress(): ProgressData {
-  return { items: {}, activity: {} }
+  return { items: {}, writing: {}, activity: {} }
 }
 
 /**
@@ -22,9 +22,29 @@ export function createEmptyProgress(): ProgressData {
  * modifying the previous one (so React detects the change).
  */
 export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correct: boolean, now: Date): ProgressData {
-  const previous = progress.items[itemId]
-  // Without the `basic` or `fromLevel` flags: answered items are the user's own progress
-  const item: ItemProgress = {
+  return {
+    ...progress,
+    items: { ...progress.items, [itemId]: answeredRecord(progress.items[itemId], itemId, correct, now) },
+    activity: addToActivity(progress.activity, correct, now),
+  }
+}
+
+/**
+ * Like recordAnswer, for a writing exercise: it updates the item's writing
+ * record (see ProgressData.writing) and leaves recognition as it was. It
+ * counts for the day's activity and the streak like any other answer.
+ */
+export function recordWritingAnswer(progress: ProgressData, itemId: StudyItemId, correct: boolean, now: Date): ProgressData {
+  return {
+    ...progress,
+    writing: { ...progress.writing, [itemId]: answeredRecord(progress.writing[itemId], itemId, correct, now) },
+    activity: addToActivity(progress.activity, correct, now),
+  }
+}
+
+/** The record after an answer. Without the `basic` or `fromLevel` flags: answered items are the user's own progress. */
+function answeredRecord(previous: ItemProgress | undefined, itemId: StudyItemId, correct: boolean, now: Date): ItemProgress {
+  return {
     itemId,
     timesSeen: (previous?.timesSeen ?? 0) + 1,
     timesCorrect: (previous?.timesCorrect ?? 0) + (correct ? 1 : 0),
@@ -32,17 +52,12 @@ export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correc
     lastReviewedAt: now.toISOString(),
     ...scheduleNextReview(previous?.masteryLevel ?? 0, correct, now),
   }
+}
 
+function addToActivity(activity: ProgressData['activity'], correct: boolean, now: Date): ProgressData['activity'] {
   const day = toDateKey(now)
-  const today = progress.activity[day] ?? { answers: 0, correct: 0 }
-
-  return {
-    items: { ...progress.items, [itemId]: item },
-    activity: {
-      ...progress.activity,
-      [day]: { answers: today.answers + 1, correct: today.correct + (correct ? 1 : 0) },
-    },
-  }
+  const today = activity[day] ?? { answers: 0, correct: 0 }
+  return { ...activity, [day]: { answers: today.answers + 1, correct: today.correct + (correct ? 1 : 0) } }
 }
 
 /**

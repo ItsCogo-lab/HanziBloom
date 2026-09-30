@@ -17,6 +17,7 @@ import { createSessionExercises } from '../features/practice/session.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { getDifficultItems } from '../features/progress/stats.ts'
 import type { ProgressData } from '../features/progress/types.ts'
+import type { Settings } from '../features/settings/settings.ts'
 import { useSettings } from '../features/settings/settingsContext.ts'
 import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { SessionTypeLabel } from '../features/studySets/components/SessionTypeLabel.tsx'
@@ -29,10 +30,15 @@ import { NotFoundPage } from './NotFoundPage.tsx'
 
 let nextSessionId = 0
 
-function createPracticeSession(pool: readonly StudyItem[], progress: ProgressData, size: number) {
+function createPracticeSession(pool: readonly StudyItem[], progress: ProgressData, settings: Settings) {
   nextSessionId += 1
   // Wrong answers come from the whole dictionary, even if the set is small
-  const exercises = createSessionExercises(pool, { progress, size, distractorPool: hskStudyItems })
+  const exercises = createSessionExercises(pool, {
+    progress,
+    size: settings.sessionSize,
+    distractorPool: hskStudyItems,
+    writing: settings.writingExercises,
+  })
   return { id: nextSessionId, exercises }
 }
 
@@ -76,11 +82,11 @@ export function PracticePage() {
 /** Mixed session over all vocabulary (due reviews and new items). */
 function Practice() {
   const dictionary = useDictionary()
-  const { progress, recordAnswer } = useProgress()
-  const { sessionSize } = useSettings().settings
+  const { progress, recordResult } = useProgress()
+  const { settings } = useSettings()
   // useState with a function: the session is created once on entering, not on every render.
   // It uses the progress at that moment; answers do not change the ongoing session.
-  const [session, setSession] = useState(() => createPracticeSession(hskStudyItems, progress, sessionSize))
+  const [session, setSession] = useState(() => createPracticeSession(hskStudyItems, progress, settings))
 
   return (
     <>
@@ -90,8 +96,8 @@ function Practice() {
         key={session.id}
         exercises={session.exercises}
         dictionary={dictionary}
-        onResult={(result) => recordAnswer(result.itemId, result.correct)}
-        onRestart={() => setSession(createPracticeSession(hskStudyItems, progress, sessionSize))}
+        onResult={recordResult}
+        onRestart={() => setSession(createPracticeSession(hskStudyItems, progress, settings))}
       />
     </>
   )
@@ -118,11 +124,11 @@ function DifficultPractice() {
 
 function DifficultSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
   const dictionary = useDictionary()
-  const { progress, recordAnswer } = useProgress()
-  const { sessionSize } = useSettings().settings
+  const { progress, recordResult } = useProgress()
+  const { settings } = useSettings()
   const createSession = (current: ProgressData) => {
     const pool = itemIds.flatMap((itemId) => getStudyItem(dictionary, itemId) ?? [])
-    return createPracticeSession(pool, current, sessionSize)
+    return createPracticeSession(pool, current, settings)
   }
   const [session, setSession] = useState(() => createSession(progress))
 
@@ -142,7 +148,7 @@ function DifficultSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
       key={session.id}
       exercises={session.exercises}
       dictionary={dictionary}
-      onResult={(result) => recordAnswer(result.itemId, result.correct)}
+      onResult={recordResult}
       onRestart={() => setSession(createSession(progress))}
     />
   )
@@ -166,14 +172,14 @@ function useMarkSetStudied(set: StudySet) {
  */
 function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }) {
   const dictionary = useDictionary()
-  const { progress, recordAnswer } = useProgress()
-  const { sessionSize } = useSettings().settings
+  const { progress, recordResult } = useProgress()
+  const { settings } = useSettings()
   const markStudied = useMarkSetStudied(set)
 
   const createSession = (current: ProgressData) => {
     const { due, upToDate } = getReviewItems(set, dictionary, current, new Date())
     const pool = reviewAll ? [...due, ...upToDate] : due
-    return { ...createPracticeSession(pool, current, sessionSize), learnedCount: due.length + upToDate.length }
+    return { ...createPracticeSession(pool, current, settings), learnedCount: due.length + upToDate.length }
   }
   const [session, setSession] = useState(() => createSession(progress))
 
@@ -197,7 +203,7 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
         exercises={session.exercises}
         dictionary={dictionary}
         onResult={(result) => {
-          recordAnswer(result.itemId, result.correct)
+          recordResult(result)
           markStudied(session.id)
         }}
         onRestart={() => setSession(createSession(progress))}

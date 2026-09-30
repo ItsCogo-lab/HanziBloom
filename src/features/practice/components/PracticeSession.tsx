@@ -60,6 +60,7 @@ export function PracticeSession({ exercises, dictionary, onResult, onRestart }: 
               onResult(createExerciseResult(exercise, correct))
               dispatch({ type: 'answer', correct })
             }}
+            onSkip={() => dispatch({ type: 'skip' })}
             onLookUp={lookUp}
           />
         </>

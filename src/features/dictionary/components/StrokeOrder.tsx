@@ -3,9 +3,8 @@ import type HanziWriter from 'hanzi-writer'
 import { Button } from '../../../components/ui/Button.tsx'
 import { t } from '../../../i18n/index.ts'
 import { useSettings } from '../../settings/settingsContext.ts'
-import { loadStrokes } from '../runtime/dictionaryService.ts'
-import type { StrokeData } from '../strokeData.ts'
-import { useRuntimeData } from '../runtime/runtimeSourcesContext.ts'
+import { useStrokeData } from '../useStrokeData.ts'
+import { getWriterColors } from '../writerColors.ts'
 
 const SIZE = 180
 
@@ -15,9 +14,7 @@ const SIZE = 180
  * doesn't have the character, nothing is shown; if it couldn't be fetched, it says so.
  */
 export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCopy: boolean }) {
-  const strokes = useRuntimeData<StrokeData>(`${hanzi}|${hasLocalCopy}`, (sources, options) =>
-    loadStrokes(sources, hanzi, hasLocalCopy, options),
-  )
+  const strokes = useStrokeData(hanzi, hasLocalCopy)
   const data = strokes.status === 'ready' ? strokes.data : undefined
   const targetRef = useRef<HTMLDivElement>(null)
   const writerRef = useRef<HanziWriter>(null)
@@ -31,17 +28,11 @@ export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCo
     import('hanzi-writer').then(
       ({ default: Writer }) => {
         if (cancelled) return
-        // Hanzi Writer draws with fixed colors: we take the page theme's ones
-        const color = getComputedStyle(target).color
-        const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
         writerRef.current = Writer.create(target, hanzi, {
           width: SIZE,
           height: SIZE,
           padding: 8,
-          strokeColor: color,
-          radicalColor: token('--color-accent') || color,
-          // The default light gray outline would be too bright in the dark theme
-          outlineColor: token('--color-line') || '#dddddd',
+          ...getWriterColors(target),
           charDataLoader: () => data,
         })
       },

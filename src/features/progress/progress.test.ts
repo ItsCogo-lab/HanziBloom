@@ -9,10 +9,22 @@ import {
   markItemKnown,
   MASTERED_LEVEL,
   recordAnswer,
+  recordWritingAnswer,
 } from './progress.ts'
 
 const monday = new Date(2026, 8, 28, 10, 0)
 const tuesday = new Date(2026, 8, 29, 9, 0)
+
+describe('recordWritingAnswer', () => {
+  it('only changes writing progress, and counts for the day like any answer', () => {
+    const read = recordAnswer(createEmptyProgress(), 'word:谢谢', true, monday)
+    const written = recordWritingAnswer(read, 'word:谢谢', false, tuesday)
+
+    expect(written.items).toBe(read.items)
+    expect(written.writing['word:谢谢']).toMatchObject({ timesSeen: 1, timesWrong: 1, masteryLevel: 0 })
+    expect(written.activity['2026-09-29']).toEqual({ answers: 1, correct: 0 })
+  })
+})
 
 describe('recordAnswer', () => {
   it('creates progress for a new item', () => {

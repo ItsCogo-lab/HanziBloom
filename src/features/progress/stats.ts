@@ -32,6 +32,15 @@ export function summarizeItemIds(itemIds: readonly StudyItemId[], progress: Prog
   return summary
 }
 
+/** How many items are learning and mastered in writing (see ProgressData.writing). */
+export function summarizeWriting(progress: ProgressData): { learning: number; mastered: number } {
+  const statuses = Object.values(progress.writing).map(getItemStatus)
+  return {
+    learning: statuses.filter((status) => status === 'learning').length,
+    mastered: statuses.filter((status) => status === 'mastered').length,
+  }
+}
+
 export interface AnswerTotals {
   answers: number
   correct: number

@@ -4,7 +4,7 @@ import { getStudyItemId, listStudyItems, type StudyItem } from '../dictionary/st
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { seededRandom } from '../../test/random.ts'
 import type { ExerciseDefinition } from './exerciseDefinitions.ts'
-import { applyHskLevel, createEmptyProgress, recordAnswer } from '../progress/progress.ts'
+import { applyHskLevel, createEmptyProgress, recordAnswer, recordWritingAnswer } from '../progress/progress.ts'
 import {
   createSessionExercises,
   createSessionState,
@@ -146,6 +146,17 @@ describe('sessionReducer', () => {
     expect(state.results).toHaveLength(4)
   })
 
+  it('a skipped exercise leaves the session without a result', () => {
+    let state = createSessionState(exercises)
+    state = sessionReducer(state, { type: 'skip' })
+    expect(getCurrentExercise(state)).toBe(exercises[1])
+    expect(state.firstAttemptCount).toBe(1)
+
+    state = sessionReducer(state, { type: 'answer', correct: true })
+    expect(isSessionFinished(state)).toBe(true)
+    expect(state.results).toHaveLength(1)
+  })
+
   it('only the first attempts count for the score', () => {
     let state = createSessionState(exercises)
     state = sessionReducer(state, { type: 'answer', correct: false })
@@ -159,6 +170,28 @@ describe('sessionReducer', () => {
     const finished = { ...createSessionState(exercises), currentIndex: 2 }
 
     expect(sessionReducer(finished, { type: 'answer', correct: true })).toBe(finished)
+  })
+})
+
+describe('createSessionExercises with writing', () => {
+  const monday = new Date(2026, 8, 28, 10, 0)
+  const thursday = new Date(2026, 9, 1, 10, 0)
+  const thanks = pool.find((item) => item.kind === 'word' && item.entry.id === '谢谢')!
+  // Read right twice: 谢谢 can now be written, and its recognition is due again on Thursday
+  const progress = [monday, monday].reduce((result, date) => recordAnswer(result, 'word:谢谢', true, date), createEmptyProgress())
+
+  it('writes an item when it is its turn to be written', () => {
+    const [exercise] = createSessionExercises([thanks], { progress, now: thursday, writing: true, distractorPool: pool })
+    expect(exercise?.type).toBe('writing')
+  })
+
+  it('never with writing off, and not when its writing review is still ahead', () => {
+    const [off] = createSessionExercises([thanks], { progress, now: thursday, distractorPool: pool })
+    expect(off?.type).not.toBe('writing')
+
+    const written = recordWritingAnswer(progress, 'word:谢谢', true, thursday)
+    const [notDue] = createSessionExercises([thanks], { progress: written, now: thursday, writing: true, distractorPool: pool })
+    expect(notDue?.type).not.toBe('writing')
   })
 })
 

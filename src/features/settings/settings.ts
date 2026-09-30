@@ -15,6 +15,8 @@ export interface Settings {
   toneColors: boolean
   /** Also show pinyin with tone numbers ("ni3 hao3"). */
   toneNumbers: boolean
+  /** Include writing exercises in Study sessions. */
+  writingExercises: boolean
   /** Color theme: system, light or dark. */
   theme: ThemePreference
   /** HSK level the user says they have (see applyHskLevel), or `null` if they haven't given one. */
@@ -25,6 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sessionSize: DEFAULT_SESSION_SIZE,
   toneColors: true,
   toneNumbers: false,
+  writingExercises: true,
   theme: 'system',
   hskLevel: null,
 }
@@ -49,6 +52,8 @@ export function loadSettings(storage?: KeyValueStorage): Settings {
     sessionSize: isSessionSize(saved.sessionSize) ? saved.sessionSize : DEFAULT_SETTINGS.sessionSize,
     toneColors: typeof saved.toneColors === 'boolean' ? saved.toneColors : DEFAULT_SETTINGS.toneColors,
     toneNumbers: typeof saved.toneNumbers === 'boolean' ? saved.toneNumbers : DEFAULT_SETTINGS.toneNumbers,
+    writingExercises:
+      typeof saved.writingExercises === 'boolean' ? saved.writingExercises : DEFAULT_SETTINGS.writingExercises,
     theme: isThemePreference(saved.theme) ? saved.theme : DEFAULT_SETTINGS.theme,
     hskLevel: HSK_LEVELS.find((level) => level === saved.hskLevel) ?? DEFAULT_SETTINGS.hskLevel,
   }

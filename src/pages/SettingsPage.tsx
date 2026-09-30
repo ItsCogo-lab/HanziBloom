@@ -55,7 +55,10 @@ export function SettingsPage() {
       <PageHeader title={t('nav.settings')} description={t('settings.description')} />
       <div className="flex max-w-2xl flex-col gap-4 sm:gap-6">
         <SettingsSection title={t('settings.practice')}>
-          <SessionSizeSetting />
+          <div className="flex flex-col gap-4">
+            <SessionSizeSetting />
+            <ToggleSetting setting="writingExercises" label={t('settings.writing')} hint={t('settings.writingHint')} />
+          </div>
         </SettingsSection>
         <SettingsSection title={t('settings.appearance')}>
           <ThemeSetting />
@@ -164,7 +167,7 @@ function ThemeSetting() {
 }
 
 type ToggleSettingProps = {
-  setting: 'toneColors' | 'toneNumbers'
+  setting: 'toneColors' | 'toneNumbers' | 'writingExercises'
   label: string
   hint: string
 }

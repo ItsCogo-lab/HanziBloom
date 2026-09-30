@@ -1,12 +1,15 @@
 import { createContext, use } from 'react'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
 import type { HskLevel } from '../dictionary/types.ts'
+import type { ExerciseResult } from '../practice/types.ts'
 import type { LeveledItem } from './progress.ts'
 import type { ProgressData } from './types.ts'
 
 export interface ProgressContextValue {
   progress: ProgressData
   recordAnswer: (itemId: StudyItemId, correct: boolean) => void
+  /** Saves an exercise's answer: writing ones to writing progress, the rest to recognition. */
+  recordResult: (result: ExerciseResult) => void
   /** Marks an item as learned (Learn session). */
   introduceItem: (itemId: StudyItemId) => void
   /** Marks an item as already mastered (Learn session): it comes up again only very occasionally. */

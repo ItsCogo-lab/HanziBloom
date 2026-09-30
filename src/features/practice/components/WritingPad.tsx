@@ -1,0 +1,136 @@
+import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
+import type HanziWriter from 'hanzi-writer'
+import { t } from '../../../i18n/index.ts'
+import { useStrokeData } from '../../dictionary/useStrokeData.ts'
+import { getWriterColors } from '../../dictionary/writerColors.ts'
+import { useSettings } from '../../settings/settingsContext.ts'
+import { AUTO_HINT_AFTER_MISSES } from '../writing.ts'
+
+/** What the exercise can ask of the pad. */
+export interface WritingPadHandle {
+  /** Flashes the next stroke. */
+  hint: () => void
+  /** Draws the whole character with its animation; then the pad is done. */
+  reveal: () => void
+}
+
+type WritingPadProps = {
+  hanzi: string
+  /** HSK 1-4 characters have a local copy of their strokes (offline fallback). */
+  hasLocalCopy: boolean
+  size: number
+  ref?: Ref<WritingPadHandle>
+  /** A stroke was missed; `misses` counts the misses on that stroke. */
+  onMistake: (misses: number) => void
+  /** The character is written (or was drawn with reveal). */
+  onDone: () => void
+  /** Its strokes can't be loaded (offline, outside HSK), so it can't be written. */
+  onUnavailable: () => void
+}
+
+/**
+ * One character to write, in a 田字格 grid. Hanzi Writer's quiz grades each
+ * stroke as it is drawn: a right one stays, a wrong one disappears, and
+ * after 3 misses on the same stroke it is shown as a hint. When done, the
+ * character stays drawn.
+ */
+export function WritingPad({ hanzi, hasLocalCopy, size, ref, onMistake, onDone, onUnavailable }: WritingPadProps) {
+  const strokes = useStrokeData(hanzi, hasLocalCopy)
+  const data = strokes.status === 'ready' ? strokes.data : undefined
+  const targetRef = useRef<HTMLDivElement>(null)
+  const writerRef = useRef<HanziWriter>(null)
+  const nextStrokeRef = useRef(0)
+  // The quiz callbacks are set once: they read the latest props from here
+  const callbacksRef = useRef({ onMistake, onDone, onUnavailable })
+  useEffect(() => {
+    callbacksRef.current = { onMistake, onDone, onUnavailable }
+  })
+  const { theme } = useSettings()
+  const isUnavailable = strokes.status === 'unavailable' || strokes.status === 'missing'
+
+  useEffect(() => {
+    if (isUnavailable) callbacksRef.current.onUnavailable()
+  }, [isUnavailable])
+
+  useImperativeHandle(ref, () => ({
+    hint: () => writerRef.current?.highlightStroke(nextStrokeRef.current),
+    reveal: () => {
+      const writer = writerRef.current
+      if (!writer) return
+      writer.cancelQuiz()
+      void writer.animateCharacter({ onComplete: () => callbacksRef.current.onDone() })
+    },
+  }))
+
+  useEffect(() => {
+    const target = targetRef.current
+    if (!data || !target) return
+    let cancelled = false
+    nextStrokeRef.current = 0
+    import('hanzi-writer').then(
+      ({ default: Writer }) => {
+        if (cancelled) return
+        const writer = Writer.create(target, hanzi, {
+          width: size,
+          height: size,
+          padding: 8,
+          showCharacter: false,
+          showOutline: false,
+          ...getWriterColors(target),
+          charDataLoader: () => data,
+        })
+        writerRef.current = writer
+        void writer.quiz({
+          showHintAfterMisses: AUTO_HINT_AFTER_MISSES,
+          onMistake: (stroke) => callbacksRef.current.onMistake(stroke.mistakesOnStroke),
+          onCorrectStroke: (stroke) => {
+            nextStrokeRef.current = stroke.strokeNum + 1
+          },
+          onComplete: () => callbacksRef.current.onDone(),
+        })
+      },
+      () => {},
+    )
+    return () => {
+      cancelled = true
+      writerRef.current?.cancelQuiz()
+      writerRef.current = null
+      target.replaceChildren()
+    }
+  }, [data, hanzi, size, theme])
+
+  return (
+    <div className="relative rounded-xl border border-line bg-paper text-ink" style={{ width: size, height: size }}>
+      <GridLines />
+      {isUnavailable ? (
+        <p role="alert" className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-ink-muted">
+          {t('writing.strokesUnavailable')}
+        </p>
+      ) : (
+        // touch-action: none, or on a phone drawing downwards would scroll the page
+        <div
+          ref={targetRef}
+          role="img"
+          aria-label={t('writing.pad')}
+          data-status={strokes.status}
+          className="relative touch-none"
+          style={{ width: size, height: size }}
+        />
+      )}
+    </div>
+  )
+}
+
+/** The 田字格 guide: a cross and both diagonals, dashed. */
+function GridLines() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 100 100" className="absolute inset-0 h-full w-full text-line">
+      <g stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" fill="none">
+        <line x1="50" y1="0" x2="50" y2="100" />
+        <line x1="0" y1="50" x2="100" y2="50" />
+        <line x1="0" y1="0" x2="100" y2="100" />
+        <line x1="100" y1="0" x2="0" y2="100" />
+      </g>
+    </svg>
+  )
+}
