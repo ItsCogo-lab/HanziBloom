@@ -48,7 +48,7 @@ describe('InstallBanner', () => {
 
     expect(event.prompt).toHaveBeenCalledOnce()
     // Each event can only be used once: the banner disappears
-    expect(screen.queryByRole('complementary', { name: 'Install HanziBloom' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'Install VividHanzi' })).not.toBeInTheDocument()
   })
 
   it("doesn't show again once dismissed", async () => {
@@ -66,7 +66,7 @@ describe('InstallBanner', () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' })
     renderBanner()
 
-    expect(screen.getByRole('complementary', { name: 'Install HanziBloom' })).toBeInTheDocument()
+    expect(screen.getByRole('complementary', { name: 'Install VividHanzi' })).toBeInTheDocument()
     expect(screen.getByText('Choose "Add to Home Screen".')).toBeInTheDocument()
   })
 

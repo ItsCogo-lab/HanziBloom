@@ -1,6 +1,6 @@
 name: Deploy
 
-# Publishes the app to GitHub Pages (https://itscogo-lab.github.io/HanziBloom/)
+# Publishes the app to GitHub Pages (https://itscogo-lab.github.io/VividHanzi/)
 # every time main changes. Requires Settings → Pages → Source: GitHub Actions.
 on:
   push:

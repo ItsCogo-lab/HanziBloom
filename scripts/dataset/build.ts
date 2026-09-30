@@ -1,5 +1,5 @@
 /**
- * Builds the HanziBloom dataset from open sources.
+ * Builds the VividHanzi dataset from open sources.
  *
  *   sources (.cache) → adapters (sources/) → fusion (fusion.ts) → validation → src/data
  *
