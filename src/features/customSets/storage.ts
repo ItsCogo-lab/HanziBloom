@@ -3,12 +3,12 @@ import type { StudyItemId } from '../dictionary/studyItem.ts'
 import { TONES } from '../../lib/tones.ts'
 import type { CustomSentence, CustomSet, SentenceToken } from './types.ts'
 
-const STORAGE_KEY = 'hanzivocab.customSets'
+export const CUSTOM_SETS_STORAGE_KEY = 'hanzivocab.customSets'
 /** Versión del formato guardado, igual que en progress/storage.ts. */
 const CURRENT_VERSION = 1
 
 export function saveCustomSets(sets: readonly CustomSet[], storage?: KeyValueStorage): boolean {
-  return writeJson(STORAGE_KEY, { version: CURRENT_VERSION, sets }, storage)
+  return writeJson(CUSTOM_SETS_STORAGE_KEY, { version: CURRENT_VERSION, sets }, storage)
 }
 
 /**
@@ -17,7 +17,7 @@ export function saveCustomSets(sets: readonly CustomSet[], storage?: KeyValueSto
  * debe romper la interfaz.
  */
 export function loadCustomSets(storage?: KeyValueStorage): CustomSet[] {
-  const saved = readJson(STORAGE_KEY, storage)
+  const saved = readJson(CUSTOM_SETS_STORAGE_KEY, storage)
   if (!isRecord(saved) || saved.version !== CURRENT_VERSION || !Array.isArray(saved.sets)) return []
 
   const sets: CustomSet[] = []

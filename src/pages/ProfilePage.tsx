@@ -1,4 +1,6 @@
 import { Link } from 'react-router'
+import { AccountCard } from '../features/account/components/AccountCard.tsx'
+import { useAccount } from '../features/account/accountContext.ts'
 import { ButtonLink } from '../components/ui/ButtonLink.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
@@ -21,11 +23,13 @@ const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
 const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
 /**
- * Perfil local: no hay cuentas, así que es un resumen de lo que hay guardado
- * en este navegador. Todo sale del progreso por elemento y de My Studies.
+ * Perfil: un resumen de lo que hay guardado en este navegador y, si hay
+ * cuentas configuradas, iniciar sesión para sincronizarlo. Todo sale del
+ * progreso por elemento y de My Studies.
  */
 export function ProfilePage() {
   const { progress } = useProgress()
+  const account = useAccount()
   const { myStudies } = useMyStudies()
   const studySets = useStudySets()
   const now = new Date()
@@ -68,6 +72,8 @@ export function ProfilePage() {
             })}
           </p>
         </section>
+
+        <AccountCard />
 
         <HskLevelCard />
 
@@ -123,7 +129,7 @@ export function ProfilePage() {
             {t('nav.settings')}
           </ButtonLink>
         </div>
-        <p className="text-sm text-ink-muted">{t('profile.localNote')}</p>
+        {!account.enabled && <p className="text-sm text-ink-muted">{t('profile.localNote')}</p>}
       </div>
     </>
   )

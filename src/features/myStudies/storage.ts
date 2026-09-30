@@ -1,17 +1,17 @@
 import { isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
 import { createEmptyMyStudies, type MyStudies, type StudiedSet } from './myStudies.ts'
 
-const STORAGE_KEY = 'hanzivocab.studies'
+export const MY_STUDIES_STORAGE_KEY = 'hanzivocab.studies'
 /** Versión del formato guardado, igual que en progress/storage.ts. */
 const CURRENT_VERSION = 1
 
 export function saveMyStudies(myStudies: MyStudies, storage?: KeyValueStorage): boolean {
-  return writeJson(STORAGE_KEY, { version: CURRENT_VERSION, ...myStudies }, storage)
+  return writeJson(MY_STUDIES_STORAGE_KEY, { version: CURRENT_VERSION, ...myStudies }, storage)
 }
 
 /** Carga los sets del usuario. Lo que no tenga el formato esperado se descarta. */
 export function loadMyStudies(storage?: KeyValueStorage): MyStudies {
-  const saved = readJson(STORAGE_KEY, storage)
+  const saved = readJson(MY_STUDIES_STORAGE_KEY, storage)
   if (!isRecord(saved) || saved.version !== CURRENT_VERSION) return createEmptyMyStudies()
 
   const sets = Array.isArray(saved.sets) ? saved.sets.filter(isStudiedSet) : []

@@ -43,3 +43,13 @@ export function writeJson(key: string, value: unknown, storage = getBrowserStora
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
+
+/** Almacenamiento en memoria con la misma forma que localStorage (para tests y para combinar datos). */
+export function createMemoryStorage(initial: Record<string, string> = {}): KeyValueStorage {
+  const values = new Map(Object.entries(initial))
+  return {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => void values.set(key, value),
+    removeItem: (key) => void values.delete(key),
+  }
+}
