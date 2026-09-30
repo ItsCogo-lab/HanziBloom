@@ -427,10 +427,18 @@ Transportation, Nature, Technology, Work, Animals, Colors). Criteria:
 
 ## Grammar notes
 
-`src/data/grammar.ts`, written by hand. The card for the most common particles
-of HSK 1-4 shows a Grammar section with their uses: 的 (possession and
-modifiers), 了 (completed action and change of state), 吗, 呢 ("and you?"),
-吧 (suggestions and softening), 过, 着, 得, 地 and 啊. Criteria:
+`src/data/grammar.ts`, written by hand. The card for the most common function
+words of HSK 1-4 shows a Grammar section with their uses (30 points):
+
+- Particles: 的 (possession and modifiers), 了 (completed action and change of
+  state), 吗, 呢 ("and you?"), 吧 (suggestions and softening), 过, 着, 得, 地
+  and 啊.
+- Prepositions and verbs with a pattern of their own: 被, 把, 比, 在 (actions
+  in progress, with 正在, and location), 会 (learned skills).
+- Paired words: 越来越, 虽然...但是, 因为...所以, 如果...就, 一边...一边,
+  除了...以外, 不但...而且, 跟...一样, 还是 vs 或者, 太...了, 连...都.
+
+Criteria:
 
 - **Reference:** [Chinese Grammar Wiki](https://resources.allsetlearning.com/chinese/grammar/)
   by AllSet Learning, which decides which uses are included and their names. Its content is
@@ -439,10 +447,12 @@ modifiers), 了 (completed action and change of state), 吗, 呢 ("and you?"),
   text nor its sentences are copied, and each point only **links** to its page.
 - **Examples:** Tatoeba sentences (CC BY 2.0 FR) that are already in
   `public/examples/`, copied as they are with their id and author. A test checks
-  that they exist there unchanged and that they contain the particle. A use without sentences
-  in Tatoeba is not included (the progressive-action 呢).
+  that they exist there unchanged and that they contain the word. A use without sentences
+  in Tatoeba is not included (the progressive-action 呢, the 是...的 emphasis).
 - **Where they appear:** on the character's card always; on a word, only if
-  its toneless pinyin is that of the particle (得 "de" yes, 得 "děi" no).
+  its toneless pinyin is that of the use (得 "de" yes, 得 "děi" no). A pair
+  also shows on its second word through `alsoShownOn` (但是 shows
+  虽然...但是). A test checks that every point shows on an HSK 1-4 word.
 
 ## Generated files
 

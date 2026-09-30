@@ -7,7 +7,7 @@ import { getGrammarPoints } from '../grammar.ts'
 import type { GrammarPoint } from '../types.ts'
 
 /**
- * Grammar notes for a particle (的, 了, 吗...). If the entry isn't one of
+ * Grammar notes for a function word (的, 了, 被, 虽然...). If the entry isn't one of
  * them, nothing is shown. Each note links to its Chinese Grammar Wiki page
  * and each sentence, to Tatoeba.
  */
@@ -30,7 +30,7 @@ export function GrammarNotes({ item }: { item: StudyItem }) {
   )
 }
 
-/** One use of the particle: header, pattern, explanation, examples and link. */
+/** One use of the word: header, pattern, explanation, examples and link. */
 function GrammarCard({ point }: { point: GrammarPoint }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-accent/30 border-l-4 border-l-accent bg-accent-soft">
@@ -38,9 +38,9 @@ function GrammarCard({ point }: { point: GrammarPoint }) {
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-accent text-on-accent shadow-sm"
+            className="flex h-12 min-w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-accent px-2 text-on-accent shadow-sm"
           >
-            <HanziText className="text-2xl leading-none">{point.particle}</HanziText>
+            <HanziText className={`leading-none ${point.word.length > 1 ? 'text-lg' : 'text-2xl'}`}>{point.word}</HanziText>
             <span className="text-xs leading-tight">{point.pinyin}</span>
           </span>
           <h3 className="text-lg leading-snug font-semibold text-accent-strong">{point.title}</h3>
@@ -76,9 +76,12 @@ function GrammarCard({ point }: { point: GrammarPoint }) {
   )
 }
 
+const HAN = /\p{Script=Han}/u
+
 /**
  * The pattern as a formula: "Verb + 了 + Object" is shown as pieces
- * separated by "+", with the particle highlighted.
+ * separated by "+", with the Chinese pieces (the words the point is about)
+ * highlighted.
  */
 function Pattern({ point }: { point: GrammarPoint }) {
   const parts = point.pattern.split(' + ')
@@ -90,7 +93,7 @@ function Pattern({ point }: { point: GrammarPoint }) {
           {index > 0 && <span className="font-semibold text-accent">+</span>}
           <HanziText
             className={
-              part.includes(point.particle)
+              HAN.test(part)
                 ? 'rounded-lg bg-accent px-2.5 py-1 font-semibold text-on-accent'
                 : 'rounded-lg border border-accent/30 bg-surface px-2.5 py-1 text-ink'
             }

@@ -8,15 +8,21 @@ export interface GrammarExample {
 }
 
 /**
- * A grammatical use of a particle: 了 has two (completed action and
- * change of state), 吗 has one.
+ * A grammatical use of a function word (a particle like 了, a preposition
+ * like 被, a conjunction like 虽然): 了 has two (completed action and change
+ * of state), 被 has one.
  */
 export interface GrammarPoint {
   id: string
-  /** The particle, as written: "的". */
-  particle: string
-  /** Its pinyin as a particle, without tone (they are unstressed): "de". */
+  /** The word, as written: "的", "虽然". */
+  word: string
+  /** Its pinyin in this use, without tones: "de", "sui ran". */
   pinyin: string
+  /**
+   * Other words whose entries also show this point, whatever their reading:
+   * 但是 for 虽然...但是.
+   */
+  alsoShownOn?: readonly string[]
   title: string
   /** Sentence pattern: "Verb + 过 + Object". */
   pattern: string
