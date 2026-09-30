@@ -24,6 +24,13 @@ async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'Continue' }))
 }
 
+/** Answers until the session ends: a missed choice question comes back at the end. */
+async function finishSession(user: ReturnType<typeof userEvent.setup>) {
+  for (let i = 0; i < 50 && !screen.queryByRole('heading', { name: 'Session complete' }); i++) {
+    await answerCurrentExercise(user)
+  }
+}
+
 describe('PracticePage', () => {
   it('uses the session size from the settings', () => {
     const storage = memoryStorage()
@@ -41,7 +48,7 @@ describe('PracticePage', () => {
     await answerCurrentExercise(user)
     await answerCurrentExercise(user)
 
-    expect(screen.getByText('Card 3 of 10')).toBeInTheDocument()
+    expect(screen.getByText(/^Card 3 of \d+$/)).toBeInTheDocument()
     expect(Object.keys(loadProgress(storage).items)).toHaveLength(2)
   })
 })
@@ -120,7 +127,7 @@ describe('PracticePage: Learn and Study of a set', () => {
 
     expect(screen.getByText("Review vocabulary you've already learned")).toBeInTheDocument()
     expect(screen.getByText('Card 1 of 3')).toBeInTheDocument()
-    for (let i = 0; i < 3; i++) await answerCurrentExercise(user)
+    await finishSession(user)
 
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
     expect(Object.keys(loadProgress(storage).items).toSorted()).toEqual(learned.toSorted())
@@ -189,6 +196,6 @@ describe('PracticePage: Learn and Study of a set', () => {
 
     expect(after).toBe(before)
     expect(screen.getByText("Review vocabulary you've already learned")).toBeInTheDocument()
-    expect(screen.getByText('Card 2 of 7')).toBeInTheDocument()
+    expect(screen.getByText(/^Card 2 of \d+$/)).toBeInTheDocument()
   })
 })

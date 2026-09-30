@@ -64,6 +64,7 @@ export const es: Record<MessageKey, string> = {
   'practice.summary.toReview': 'Para repasar',
   'practice.summary.allKnown': '¡Las sabías todas! Buen trabajo.',
   'practice.again': 'Practicar otra vez',
+  'practice.retry': 'Otra vez: esta la fallaste antes.',
   'practice.continue': 'Continuar',
   'practice.choice.meaningQuestion': '¿Qué significa?',
   'practice.choice.pinyinQuestion': '¿Cómo se pronuncia?',

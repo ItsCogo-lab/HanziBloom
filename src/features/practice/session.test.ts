@@ -11,6 +11,9 @@ import {
   getCurrentExercise,
   isSessionFinished,
   selectSessionItems,
+  createRetryExercise,
+  getFirstAttemptResults,
+  isRetry,
   sessionReducer,
   summarizeResults,
 } from './session.ts'
@@ -108,20 +111,60 @@ describe('sessionReducer', () => {
     expect(getCurrentExercise(state)).toBe(exercises[1])
   })
 
-  it('finishes when all exercises have been answered', () => {
+  it('finishes when all exercises have been answered correctly', () => {
     let state = createSessionState(exercises)
     state = sessionReducer(state, { type: 'answer', correct: true })
     expect(isSessionFinished(state)).toBe(false)
 
-    state = sessionReducer(state, { type: 'answer', correct: false })
+    state = sessionReducer(state, { type: 'answer', correct: true })
     expect(isSessionFinished(state)).toBe(true)
     expect(getCurrentExercise(state)).toBeUndefined()
+  })
+
+  it('asks a missed exercise again at the end until it is answered correctly', () => {
+    let state = createSessionState(exercises)
+    state = sessionReducer(state, { type: 'answer', correct: false })
+    state = sessionReducer(state, { type: 'answer', correct: true })
+    expect(isRetry(state)).toBe(true)
+    expect(getCurrentExercise(state)?.item).toBe(exercises[0]!.item)
+
+    state = sessionReducer(state, { type: 'answer', correct: false })
+    expect(getCurrentExercise(state)?.item).toBe(exercises[0]!.item)
+
+    state = sessionReducer(state, { type: 'answer', correct: true })
+    expect(isSessionFinished(state)).toBe(true)
+    expect(state.results).toHaveLength(4)
+  })
+
+  it('only the first attempts count for the score', () => {
+    let state = createSessionState(exercises)
+    state = sessionReducer(state, { type: 'answer', correct: false })
+    state = sessionReducer(state, { type: 'answer', correct: true })
+    state = sessionReducer(state, { type: 'answer', correct: true })
+
+    expect(summarizeResults(getFirstAttemptResults(state))).toEqual({ total: 2, correct: 1, wrong: 1 })
   })
 
   it('ignores answers once the session has finished', () => {
     const finished = { ...createSessionState(exercises), currentIndex: 2 }
 
     expect(sessionReducer(finished, { type: 'answer', correct: true })).toBe(finished)
+  })
+})
+
+describe('createRetryExercise', () => {
+  it('moves the options of a choice question so the answer is somewhere else', () => {
+    const [item, ...others] = pool.slice(0, 4)
+    const exercise: Exercise = { type: 'meaning-choice', item: item!, options: [item!, ...others] }
+    const retry = createRetryExercise(exercise)
+
+    expect(retry.type === 'meaning-choice' && retry.options).toEqual([...others, item])
+    expect(exercise.options[0]).toBe(item)
+  })
+
+  it('repeats a flashcard as it is', () => {
+    const exercise: Exercise = { type: 'flashcard', item: pool[0]! }
+    expect(createRetryExercise(exercise)).toBe(exercise)
   })
 })
 

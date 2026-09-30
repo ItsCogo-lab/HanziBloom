@@ -5,6 +5,8 @@ import {
   createExerciseResult,
   createSessionState,
   getCurrentExercise,
+  getFirstAttemptResults,
+  isRetry,
   sessionReducer,
   summarizeResults,
 } from '../session.ts'
@@ -30,10 +32,11 @@ export function PracticeSession({ exercises, dictionary, onResult, onRestart }: 
   const exercise = getCurrentExercise(state)
 
   if (!exercise) {
-    const missedItems = state.results.flatMap((result, index) =>
+    const firstAttempts = getFirstAttemptResults(state)
+    const missedItems = firstAttempts.flatMap((result, index) =>
       result.correct ? [] : [state.exercises[index]!.item],
     )
-    return <SessionSummary summary={summarizeResults(state.results)} missedItems={missedItems} onRestart={onRestart} />
+    return <SessionSummary summary={summarizeResults(firstAttempts)} missedItems={missedItems} onRestart={onRestart} />
   }
 
   const current = state.currentIndex + 1
@@ -46,17 +49,20 @@ export function PracticeSession({ exercises, dictionary, onResult, onRestart }: 
       max={total}
     >
       {(lookUp) => (
-        // key: each exercise is a new component, so its state (e.g. "revealed") starts from scratch
-        <ExerciseView
-          key={state.currentIndex}
-          exercise={exercise}
-          dictionary={dictionary}
-          onAnswer={(correct) => {
-            onResult(createExerciseResult(exercise, correct))
-            dispatch({ type: 'answer', correct })
-          }}
-          onLookUp={lookUp}
-        />
+        <>
+          {isRetry(state) && <p className="text-center text-sm text-ink-muted">{t('practice.retry')}</p>}
+          {/* key: each exercise is a new component, so its state (e.g. "revealed") starts from scratch */}
+          <ExerciseView
+            key={state.currentIndex}
+            exercise={exercise}
+            dictionary={dictionary}
+            onAnswer={(correct) => {
+              onResult(createExerciseResult(exercise, correct))
+              dispatch({ type: 'answer', correct })
+            }}
+            onLookUp={lookUp}
+          />
+        </>
       )}
     </SessionFrame>
   )

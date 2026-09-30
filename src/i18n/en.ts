@@ -64,6 +64,7 @@ export const en = {
   'practice.summary.toReview': 'To review',
   'practice.summary.allKnown': 'You knew all of them. Great job!',
   'practice.again': 'Practice again',
+  'practice.retry': 'Once more: you missed this one earlier.',
   'practice.continue': 'Continue',
   'practice.choice.meaningQuestion': 'What does it mean?',
   'practice.choice.pinyinQuestion': 'How is it pronounced?',

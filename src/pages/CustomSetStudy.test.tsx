@@ -56,6 +56,13 @@ async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'Continue' }))
 }
 
+/** Answers until the session ends: a missed choice question comes back at the end. */
+async function finishSession(user: ReturnType<typeof userEvent.setup>) {
+  for (let i = 0; i < 50 && !screen.queryByRole('heading', { name: 'Session complete' }); i++) {
+    await answerCurrentExercise(user)
+  }
+}
+
 describe('Learn and Study with a custom set', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
@@ -94,7 +101,7 @@ describe('Learn and Study with a custom set', () => {
     // Study: what was learned is due for review today
     await user.click(screen.getByRole('link', { name: 'Review them now' }))
     expect(screen.getByText('Card 1 of 3')).toBeInTheDocument()
-    for (let i = 0; i < 3; i++) await answerCurrentExercise(user)
+    await finishSession(user)
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
     expect(Object.keys(loadProgress(storage).items)).toHaveLength(3)
   })
@@ -125,7 +132,7 @@ describe('Learn and Study with a custom set', () => {
 
     await user.click(screen.getByRole('link', { name: 'Review them now' }))
     expect(await screen.findByText('Card 1 of 1')).toBeInTheDocument()
-    await answerCurrentExercise(user)
+    await finishSession(user)
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
   })
 
