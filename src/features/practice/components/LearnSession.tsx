@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
+import { Kbd } from '../../../components/ui/Kbd.tsx'
 import { t } from '../../../i18n/index.ts'
 import { StatusBadge } from '../../progress/components/StatusBadge.tsx'
 import { EntryDetails } from '../../dictionary/components/EntryDetails.tsx'
@@ -8,6 +9,7 @@ import { EntryLabel } from '../../dictionary/components/EntryLabel.tsx'
 import type { Dictionary } from '../../dictionary/dictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { SessionFrame } from './SessionFrame.tsx'
+import { useSessionShortcuts } from '../shortcuts.ts'
 
 type LearnSessionProps = {
   /** New items the session introduces, in order. */
@@ -65,7 +67,7 @@ export function LearnSession({
     )
   }
 
-  const next = (choice: 'skip' | 'learned' | 'known') => {
+  const next = (choice: LearnChoice) => {
     if (choice === 'learned') onLearned(item)
     if (choice === 'known') onKnown(item)
     if (choice !== 'skip') setLearned([...learned, { item, known: choice === 'known' }])
@@ -87,18 +89,36 @@ export function LearnSession({
           {/* key: each item starts with its entry scrolled to the top */}
           <EntryDetails key={getStudyItemId(item)} item={item} dictionary={dictionary} opener={{ onOpen: lookUp }} />
           {renderExtra?.(item)}
-          {/* On mobile "I already know it" takes its own row above the other two */}
-          <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 sm:grid-cols-3 md:bottom-0">
-            <Button variant="secondary" onClick={() => next('skip')}>
-              {t('learn.skip')}
-            </Button>
-            <Button variant="secondary" className="order-first col-span-2 sm:order-none sm:col-span-1" onClick={() => next('known')}>
-              {t('learn.alreadyKnown')}
-            </Button>
-            <Button onClick={() => next('learned')}>{t('learn.gotIt')}</Button>
-          </div>
+          <LearnActions onChoice={next} />
         </>
       )}
     </SessionFrame>
+  )
+}
+
+type LearnChoice = 'skip' | 'learned' | 'known'
+
+/** The three Learn buttons, also with the keys 1, 2 and 3. */
+function LearnActions({ onChoice }: { onChoice: (choice: LearnChoice) => void }) {
+  useSessionShortcuts({ '1': () => onChoice('skip'), '2': () => onChoice('known'), '3': () => onChoice('learned') })
+
+  return (
+    // On mobile "I already know it" takes its own row above the other two
+    <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 sm:grid-cols-3 md:bottom-0">
+      <Button variant="secondary" aria-keyshortcuts="1" onClick={() => onChoice('skip')}>
+        {t('learn.skip')} <Kbd>1</Kbd>
+      </Button>
+      <Button
+        variant="secondary"
+        aria-keyshortcuts="2"
+        className="order-first col-span-2 sm:order-none sm:col-span-1"
+        onClick={() => onChoice('known')}
+      >
+        {t('learn.alreadyKnown')} <Kbd>2</Kbd>
+      </Button>
+      <Button aria-keyshortcuts="3" onClick={() => onChoice('learned')}>
+        {t('learn.gotIt')} <Kbd>3</Kbd>
+      </Button>
+    </div>
   )
 }

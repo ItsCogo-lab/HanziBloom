@@ -11,7 +11,7 @@ import { getStudyItem } from '../features/dictionary/studyItem.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import {
   getAnswerTotals,
-  getMostMissed,
+  getDifficultItems,
   getRecentActivity,
   summarizeItems,
   type AnswerTotals,
@@ -20,6 +20,9 @@ import { getCurrentStreak, getLongestStreak } from '../features/progress/streak.
 import type { ProgressData } from '../features/progress/types.ts'
 import { formatPercent, formatShortDay, t } from '../i18n/index.ts'
 import { fromDateKey } from '../lib/dates.ts'
+
+/** Difficult items listed; the practice button covers all of them. */
+const MAX_DIFFICULT_SHOWN = 10
 
 const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
 const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
@@ -53,10 +56,10 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
     { label: t('dashboard.words'), summary: summarizeItems(wordItems, progress, now) },
   ]
   const dictionary = useDictionary()
-  const missed = getMostMissed(progress)
+  const difficult = getDifficultItems(progress)
   // An item from a custom set can be non-HSK: its entry is loaded
-  useLoadItems(missed.map((item) => item.itemId))
-  const mostMissed = missed.flatMap((item) => {
+  useLoadItems(difficult.map((item) => item.itemId))
+  const difficultItems = difficult.slice(0, MAX_DIFFICULT_SHOWN).flatMap((item) => {
     const studyItem = getStudyItem(dictionary, item.itemId)
     return studyItem ? [{ studyItem, progress: item }] : []
   })
@@ -103,19 +106,27 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
         />
       </StatsSection>
 
-      {mostMissed.length > 0 && (
-        <StatsSection id="stats-most-missed" title={t('stats.mostMissed')}>
-          <DataTable
-            labelledBy="stats-most-missed"
-            headers={[t('stats.item'), t('stats.mistakes'), t('stats.correct')]}
-            rows={mostMissed.map(({ studyItem, progress: item }) => [
-              <EntryLabel key="entry" entry={studyItem.entry} withMeaning />,
-              item.timesWrong,
-              item.timesCorrect,
-            ])}
-          />
-        </StatsSection>
-      )}
+      <StatsSection id="stats-difficult" title={t('stats.difficult')}>
+        {difficult.length === 0 ? (
+          <p className="text-ink-muted">{t('stats.difficultEmpty')}</p>
+        ) : (
+          <div className="flex flex-col items-start gap-4">
+            <p className="text-ink-muted">{t('stats.difficultDescription')}</p>
+            <DataTable
+              labelledBy="stats-difficult"
+              headers={[t('stats.item'), t('stats.mistakes'), t('stats.correct')]}
+              rows={difficultItems.map(({ studyItem, progress: item }) => [
+                <EntryLabel key="entry" entry={studyItem.entry} withMeaning />,
+                item.timesWrong,
+                item.timesCorrect,
+              ])}
+            />
+            <ButtonLink to="/study/practice?focus=difficult">
+              {t('stats.practiceDifficult', { count: difficult.length })}
+            </ButtonLink>
+          </div>
+        )}
+      </StatsSection>
     </div>
   )
 }

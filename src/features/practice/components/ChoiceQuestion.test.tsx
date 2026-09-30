@@ -35,20 +35,25 @@ function getOptions() {
   return within(screen.getByRole('list', { name: 'Options' })).getAllByRole('button')
 }
 
+/** An option's text without its keyboard shortcut hint. */
+function optionText(option: HTMLElement) {
+  return option.textContent.replace(option.querySelector('kbd')?.textContent ?? '', '')
+}
+
 describe('ChoiceQuestion', () => {
   it('meaning-choice: shows the hanzi and the meanings as options', () => {
     renderQuestion('meaning-choice')
 
     expect(screen.getByText('二')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'What does it mean?' })).toBeInTheDocument()
-    expect(getOptions().map((option) => option.textContent)).toEqual(['one', 'two', 'three', 'four'])
+    expect(getOptions().map(optionText)).toEqual(['one', 'two', 'three', 'four'])
   })
 
   it('pinyin-choice: the options are pinyin', () => {
     renderQuestion('pinyin-choice')
 
     expect(screen.getByRole('heading', { name: 'How is it pronounced?' })).toBeInTheDocument()
-    expect(getOptions().map((option) => option.textContent)).toEqual(['yī', 'èr', 'sān', 'sì'])
+    expect(getOptions().map(optionText)).toEqual(['yī', 'èr', 'sān', 'sì'])
   })
 
   it('hanzi-choice: shows the meaning and the hanzi as options', () => {
@@ -57,7 +62,7 @@ describe('ChoiceQuestion', () => {
     expect(screen.getByText('two')).toBeInTheDocument()
     // The hanzi only appears in the options, not in the question
     expect(screen.getAllByText('二')).toHaveLength(1)
-    expect(getOptions().map((option) => option.textContent)).toEqual(['一', '二', '三', '四'])
+    expect(getOptions().map(optionText)).toEqual(['一', '二', '三', '四'])
   })
 
   it('on a correct answer says so, marks the option and "Continue" answers true', async () => {
@@ -91,5 +96,27 @@ describe('ChoiceQuestion', () => {
 
     await user.click(screen.getByRole('button', { name: 'Continue' }))
     expect(onAnswer).toHaveBeenCalledWith(false)
+  })
+
+  it('keys 1-4 pick an option and Enter continues', async () => {
+    const user = userEvent.setup()
+    const onAnswer = renderQuestion('meaning-choice')
+
+    await user.keyboard('2')
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+
+    // Focus is on "Continue": the browser presses it, and the shortcut doesn't answer twice
+    await user.keyboard('{Enter}')
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith(true)
+  })
+
+  it('Enter continues even if focus is not on "Continue"', async () => {
+    const user = userEvent.setup()
+    const onAnswer = renderQuestion('meaning-choice')
+
+    await user.keyboard('3')
+    ;(document.activeElement as HTMLElement).blur()
+    await user.keyboard('{Enter}')
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith(false)
   })
 })

@@ -47,4 +47,13 @@ for file in cmn/cmn_sentences_detailed cmn/cmn-eng_links eng/eng_sentences_detai
 done
 date -u +%Y-%m-%d > tatoeba/export-date.txt
 
+# wordfreq: word frequencies from subtitles, Wikipedia, news and more.
+# Code Apache 2.0, data CC BY-SA 4.0. It is a Python package, so it is
+# installed in its own virtual environment and its Chinese list exported as TSV.
+WORDFREQ_VERSION=3.1.1
+python3 -m venv wordfreq-venv
+wordfreq-venv/bin/pip install --quiet --disable-pip-version-check "wordfreq==${WORDFREQ_VERSION}"
+wordfreq-venv/bin/python ../export-wordfreq.py > wordfreq-zh.tsv
+rm -rf wordfreq-venv
+
 echo "Sources downloaded to $CACHE_DIR"

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
+import { Kbd } from '../../../components/ui/Kbd.tsx'
 import { t } from '../../../i18n/index.ts'
 import { formatPinyin, getMeanings, type Dictionary } from '../../dictionary/dictionary.ts'
 import { getRelatedItems, type StudyItem } from '../../dictionary/studyItem.ts'
+import { useSessionShortcuts } from '../shortcuts.ts'
 import type { FlashcardExercise } from '../types.ts'
 import { LookUpButtons } from './LookUpButtons.tsx'
 import { PinyinText } from '../../dictionary/components/PinyinText.tsx'
@@ -23,6 +25,10 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
   const [isRevealed, setIsRevealed] = useState(false)
   const answerRef = useRef<HTMLDivElement>(null)
   const { item } = exercise
+  const reveal = () => setIsRevealed(true)
+  useSessionShortcuts(
+    isRevealed ? { '1': () => onAnswer(false), '2': () => onAnswer(true) } : { ' ': reveal, Enter: reveal },
+  )
 
   // On reveal, the "Show answer" button disappears: we move focus to the
   // answer so the keyboard and screen reader stay in place.
@@ -49,15 +55,17 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
           <FlashcardAnswer item={item} dictionary={dictionary} />
           <LookUpButtons item={item} dictionary={dictionary} onLookUp={onLookUp} />
           <div className="grid w-full gap-3 sm:grid-cols-2">
-            <Button variant="secondary" onClick={() => onAnswer(false)}>
-              {t('practice.didNotKnow')}
+            <Button variant="secondary" aria-keyshortcuts="1" onClick={() => onAnswer(false)}>
+              {t('practice.didNotKnow')} <Kbd>1</Kbd>
             </Button>
-            <Button onClick={() => onAnswer(true)}>{t('practice.knewIt')}</Button>
+            <Button aria-keyshortcuts="2" onClick={() => onAnswer(true)}>
+              {t('practice.knewIt')} <Kbd>2</Kbd>
+            </Button>
           </div>
         </div>
       ) : (
-        <Button className="w-full sm:w-auto" onClick={() => setIsRevealed(true)}>
-          {t('practice.showAnswer')}
+        <Button className="w-full sm:w-auto" aria-keyshortcuts="Space" onClick={reveal}>
+          {t('practice.showAnswer')} <Kbd>Space</Kbd>
         </Button>
       )}
     </Card>

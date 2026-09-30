@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { createDictionary } from '../dictionary/dictionary.ts'
 import { hskDictionary } from '../dictionary/hskDictionary.ts'
 import { getStudyItemId, type StudyItem, type StudyItemId } from '../dictionary/studyItem.ts'
+import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, introduceItem, recordAnswer } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
 import { getLearnableItems, getReviewItems, getSetSessionCounts } from './sessionItems.ts'
@@ -70,5 +72,23 @@ describe('Learn and Study of a set', () => {
 
     expect(getSetSessionCounts(set, progress, now)).toEqual({ learnable: 8, learned: 2, due: 2 })
     expect(ids(getReviewItems(set, hskDictionary, progress, now).due)).not.toContain('word:苹果')
+  })
+})
+
+describe('Learn order', () => {
+  // 谢谢 the most frequent, then 好; 你好 has no rank
+  const ranks: Record<string, number> = { 谢谢: 1, 好: 2 }
+  const words = testWords.map((word) => (word.id in ranks ? { ...word, frequencyRank: ranks[word.id] } : word))
+  const dictionary = createDictionary(testCharacters, words)
+  const itemIds: StudyItemId[] = ['word:你好', 'word:好', 'word:谢谢']
+
+  it('an HSK level goes the most frequent first, and entries without a rank last', () => {
+    const hsk: StudySet = { id: 'hsk-1', type: 'hsk', level: 1, name: 'HSK 1', description: '', itemIds }
+    expect(ids(getLearnableItems(hsk, dictionary, createEmptyProgress()))).toEqual(['word:谢谢', 'word:好', 'word:你好'])
+  })
+
+  it('topic and custom sets keep their own order', () => {
+    const topic: StudySet = { id: 'topic-test', type: 'topic', name: 'Test', description: '', itemIds }
+    expect(ids(getLearnableItems(topic, dictionary, createEmptyProgress()))).toEqual(itemIds)
   })
 })

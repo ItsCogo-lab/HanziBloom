@@ -64,4 +64,19 @@ describe('Flashcard', () => {
 
     expect(onAnswer).toHaveBeenCalledWith(expected)
   })
+
+  it('Space shows the answer, 1 answers "I didn\'t know" and 2 "I knew it"', async () => {
+    const user = userEvent.setup()
+    const onAnswer = vi.fn()
+    renderWithProviders(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={onAnswer} onLookUp={() => {}} />)
+
+    await user.keyboard('1')
+    expect(onAnswer).not.toHaveBeenCalled()
+
+    await user.keyboard(' ')
+    expect(screen.getByText('nǐ hǎo')).toBeInTheDocument()
+
+    await user.keyboard('2')
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith(true)
+  })
 })

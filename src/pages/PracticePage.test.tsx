@@ -24,6 +24,13 @@ async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'Continue' }))
 }
 
+/** Answers until the session ends: a missed choice question comes back at the end. */
+async function finishSession(user: ReturnType<typeof userEvent.setup>) {
+  for (let i = 0; i < 50 && !screen.queryByRole('heading', { name: 'Session complete' }); i++) {
+    await answerCurrentExercise(user)
+  }
+}
+
 describe('PracticePage', () => {
   it('uses the session size from the settings', () => {
     const storage = memoryStorage()
@@ -41,8 +48,37 @@ describe('PracticePage', () => {
     await answerCurrentExercise(user)
     await answerCurrentExercise(user)
 
-    expect(screen.getByText('Card 3 of 10')).toBeInTheDocument()
+    expect(screen.getByText(/^Card 3 of \d+$/)).toBeInTheDocument()
     expect(Object.keys(loadProgress(storage).items)).toHaveLength(2)
+  })
+})
+
+describe('PracticePage: difficult items', () => {
+  it('only asks about the difficult items', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    let progress = createEmptyProgress()
+    for (const itemId of ['char:你', 'word:谢谢'] as const) {
+      for (let i = 0; i < 3; i++) progress = recordAnswer(progress, itemId, false, new Date())
+    }
+    progress = recordAnswer(progress, 'word:你好', false, new Date())
+    saveProgress(progress, storage)
+    renderWithProviders(<PracticePage />, { storage, path: '/study/practice?focus=difficult' })
+
+    expect(screen.getByRole('heading', { name: 'Difficult items' })).toBeInTheDocument()
+    expect(screen.getByText(/^Card 1 of 2$/)).toBeInTheDocument()
+    await finishSession(user)
+
+    // Only the two difficult items got new answers; 你好 kept its single one
+    const saved = loadProgress(storage).items
+    expect(saved['word:你好']?.timesSeen).toBe(1)
+    expect(saved['char:你']!.timesSeen).toBeGreaterThan(3)
+    expect(saved['word:谢谢']!.timesSeen).toBeGreaterThan(3)
+  })
+
+  it('with no difficult items says so', () => {
+    renderWithProviders(<PracticePage />, { path: '/study/practice?focus=difficult' })
+    expect(screen.getByText('You have no difficult items right now.')).toBeInTheDocument()
   })
 })
 
@@ -105,6 +141,23 @@ describe('PracticePage: Learn and Study of a set', () => {
     expect(isDue(item, new Date())).toBe(false)
   })
 
+  it('Learn also works with the keys 1 (skip), 2 (already know it) and 3 (learned)', async () => {
+    const user = userEvent.setup()
+    const storage = renderSession('mode=learn')
+
+    const skipped = currentLearnHanzi()!
+    await user.keyboard('1')
+    const known = currentLearnHanzi()!
+    await user.keyboard('2')
+    const learned = currentLearnHanzi()!
+    await user.keyboard('3')
+
+    const { items } = loadProgress(storage)
+    expect(items[`word:${skipped}`]).toBeUndefined()
+    expect(getItemStatus(items[`word:${known}`])).toBe('mastered')
+    expect(getItemStatus(items[`word:${learned}`])).toBe('learning')
+  })
+
   it('Learn with nothing new says so and does not switch to Study on its own', () => {
     renderSession('mode=learn', colorIds.reduce((result, itemId) => introduceItem(result, itemId, now), createEmptyProgress()))
 
@@ -120,7 +173,7 @@ describe('PracticePage: Learn and Study of a set', () => {
 
     expect(screen.getByText("Review vocabulary you've already learned")).toBeInTheDocument()
     expect(screen.getByText('Card 1 of 3')).toBeInTheDocument()
-    for (let i = 0; i < 3; i++) await answerCurrentExercise(user)
+    await finishSession(user)
 
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
     expect(Object.keys(loadProgress(storage).items).toSorted()).toEqual(learned.toSorted())
@@ -189,6 +242,6 @@ describe('PracticePage: Learn and Study of a set', () => {
 
     expect(after).toBe(before)
     expect(screen.getByText("Review vocabulary you've already learned")).toBeInTheDocument()
-    expect(screen.getByText('Card 2 of 7')).toBeInTheDocument()
+    expect(screen.getByText(/^Card 2 of \d+$/)).toBeInTheDocument()
   })
 })

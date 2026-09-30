@@ -4,6 +4,7 @@ import { ProgressBar } from '../../../components/ui/ProgressBar.tsx'
 import { t } from '../../../i18n/index.ts'
 import { DictionaryPanel } from '../../dictionary/components/DictionaryPanel.tsx'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
+import { ShortcutsEnabledContext } from '../shortcuts.ts'
 
 type SessionFrameProps = {
   /** Progress text, e.g. "Card 3 of 10". */
@@ -52,7 +53,9 @@ export function SessionFrame({ progressText, value, max, children }: SessionFram
           </div>
           <ProgressBar value={value} max={max} label={progressText} />
         </div>
-        {children((item) => setDictionaryOpen({ item }))}
+        <ShortcutsEnabledContext value={dictionaryOpen === undefined}>
+          {children((item) => setDictionaryOpen({ item }))}
+        </ShortcutsEnabledContext>
       </div>
       {dictionaryOpen && (
         <DictionaryPanel

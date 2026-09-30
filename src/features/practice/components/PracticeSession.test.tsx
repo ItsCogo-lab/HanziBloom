@@ -53,6 +53,10 @@ describe('PracticeSession', () => {
 
     await answer(user, 'I knew it')
     await answer(user, "I didn't know")
+    // The missed card comes back at the end; the retry doesn't change the score
+    expect(screen.getByText('Once more: you missed this one earlier.')).toBeInTheDocument()
+    expect(screen.getByText('Card 3 of 3')).toBeInTheDocument()
+    await answer(user, 'I knew it')
 
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
     expect(screen.getByText('You knew 1 of 2.')).toBeInTheDocument()
@@ -71,7 +75,11 @@ describe('PracticeSession', () => {
 
     await answer(user, 'I knew it')
     expect(onResult).toHaveBeenLastCalledWith({ itemId: 'word:谢谢', exerciseType: 'flashcard', correct: true })
-    expect(onResult).toHaveBeenCalledTimes(2)
+
+    // The retry of 你 is an answer too
+    await answer(user, 'I knew it')
+    expect(onResult).toHaveBeenLastCalledWith({ itemId: 'char:你', exerciseType: 'flashcard', correct: true })
+    expect(onResult).toHaveBeenCalledTimes(3)
   })
 
   it('works the same with multiple-choice exercises', async () => {
@@ -80,6 +88,8 @@ describe('PracticeSession', () => {
     renderSession({ sessionExercises: [{ type: 'pinyin-choice', item: characters[0]!, options: characters }] }) // 你
 
     await user.click(screen.getByRole('button', { name: 'hǎo' }))
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    await user.click(screen.getByRole('button', { name: 'nǐ' }))
     await user.click(screen.getByRole('button', { name: 'Continue' }))
 
     expect(screen.getByText('You knew 0 of 1.')).toBeInTheDocument()
@@ -166,6 +176,23 @@ describe('PracticeSession: dictionary without leaving the session', () => {
     expect(onResult).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Continue' }))
     expect(onResult).toHaveBeenCalledWith({ itemId: 'char:谢', exerciseType: 'meaning-choice', correct: false })
+  })
+
+  it('keyboard shortcuts are off while the dictionary is open', async () => {
+    const user = userEvent.setup()
+    const onResult = vi.fn()
+    renderSession({ onResult })
+    await user.keyboard(' ')
+
+    await user.click(screen.getByRole('button', { name: 'Dictionary' }))
+    ;(document.activeElement as HTMLElement).blur()
+    await user.keyboard('2')
+    expect(onResult).not.toHaveBeenCalled()
+
+    await user.click(within(getPanel()).getByRole('button', { name: 'Close' }))
+    ;(document.activeElement as HTMLElement).blur()
+    await user.keyboard('2')
+    expect(onResult).toHaveBeenCalledOnce()
   })
 
   it('does not offer to look up the item before answering, so as not to give away the answer', () => {

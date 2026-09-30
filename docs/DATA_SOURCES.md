@@ -40,7 +40,7 @@ npm run check           # types, lint and tests (including the dataset)
 where Claude works, so a full `data:fetch` only works:
 
 - **Locally**: `npm ci && npm run data:fetch && npm run data:build && npm run data:validate`.
-  Needs `curl`, `unzip` and `bunzip2`.
+  Needs `curl`, `unzip`, `bunzip2` and Python 3 (for wordfreq).
 - **In GitHub Actions**: the `Dataset` workflow (`.github/workflows/dataset.yml`)
   runs when changes to `scripts/dataset/` are pushed to any branch other than
   `main`, and pushes the regenerated dataset to that branch. On `main` it is
@@ -75,12 +75,14 @@ source fills it in.
 | Character | `traditional` | Unihan `kTraditionalVariant` |
 | Character | `decomposition`, `etymology` | Make Me a Hanzi |
 | Character | stroke order (`public/strokes/`) | hanzi-writer-data |
+| Character | `frequencyRank` | wordfreq (sum over the words it is in) |
 | Word | `hskLevel`, `pinyin` | HSK list |
 | Word | `meanings.en`, `traditional` | CC-CEDICT |
+| Word | `frequencyRank` | wordfreq |
 | Sentences | `public/examples/` | Tatoeba |
 
 The full dictionary (outside HSK 1-4) follows the same rules, except that it
-has no HSK level and the pinyin of its words comes from CC-CEDICT. See
+has no HSK level, no `frequencyRank` and the pinyin of its words comes from CC-CEDICT. See
 "Full dictionary".
 
 These are not stored because they are computed: a character's related words
@@ -207,6 +209,33 @@ Rules when merging the levels (`buildBaseEntries` in `fusion.ts`):
 That is why the levels do not have exactly the official number of words
 (150/150/300/600): HSK 1 has 150, HSK 2 149, HSK 3 299 (the clem109
 list has 299) and HSK 4 598 (the list has 601, with 3 repetitions).
+
+### wordfreq
+
+- **URL:** https://github.com/rspeer/wordfreq (Python package on PyPI)
+- **Version:** `wordfreq==3.1.1`
+- **License:** code Apache 2.0; data CC BY-SA 4.0 (it combines subtitles,
+  Wikipedia, news, books and web text; see its README for the full list)
+- **Attribution:** Robyn Speer, wordfreq, cited in the generated files and here.
+- **Fields:** `frequencyRank` of HSK 1-4 words and characters (1 = the most
+  common). Words not in the list have no rank.
+- **Adapter:** `sources/wordfreq.ts`; `export-wordfreq.py` exports the
+  Chinese list as TSV (`fetch-sources.sh` installs the package in a temporary
+  virtual environment).
+
+How the ranks are computed:
+
+1. **Words:** position in wordfreq's Chinese list (simplified), counting only
+   entries made of hanzi (English words and numbers in the list don't take
+   up positions).
+2. **Characters:** by the sum of the frequencies of every word in the list
+   that contains them. Counting the character only as a standalone word would
+   undercount the ones that rarely appear alone: 们 is almost always in 我们,
+   你们 or 他们.
+
+The app uses it to put the most common vocabulary first: new items in a
+mixed session and the Learn order of HSK levels (topic and custom sets keep
+their own order). Character cards show the rank.
 
 ## Full dictionary
 
@@ -432,7 +461,7 @@ The app's code is not affected by these licenses. The generated files
 keep that of their source:
 
 - `src/data/`: derived from CC-CEDICT (CC BY-SA 4.0), with fields from Unihan
-  (Unicode License v3) and Make Me a Hanzi (LGPL 3.0+).
+  (Unicode License v3), Make Me a Hanzi (LGPL 3.0+) and wordfreq (CC BY-SA 4.0).
 - `public/strokes/`: Arphic Public License.
 - `public/examples/`: CC BY 2.0 FR.
 - HanziDict (full dictionary): same as `src/data/`.
@@ -443,7 +472,8 @@ distributed under the terms of the Unicode License v3
 
 ## To do
 
-- **Frequency** (`frequencyRank`): no source chosen yet.
+- **Frequency in the full dictionary:** only HSK 1-4 has `frequencyRank` for
+  now; adding it to HanziDict means publishing a new data release.
 - **Spanish meanings:** later, in `meanings.es`.
 - **Quality of some meanings:** CC-CEDICT does not always put the HSK 1
   sense first (点 starts with "to touch briefly" before "o'clock"; 咸

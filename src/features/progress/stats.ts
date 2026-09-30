@@ -62,12 +62,26 @@ export function getRecentActivity(activity: Record<DateKey, DailyActivity>, toda
   })
 }
 
-/** The items with the most mistakes; on ties, those with the worst accuracy. */
-export function getMostMissed(progress: ProgressData, limit = 5): ItemProgress[] {
+/** Mistakes from which an item can count as difficult (see isDifficult). */
+export const DIFFICULT_MIN_MISTAKES = 3
+
+/** Share of correct answers below which an item with enough mistakes is difficult. */
+export const DIFFICULT_MAX_ACCURACY = 0.6
+
+/**
+ * A difficult item (a "leech" in Anki): missed at least 3 times and right
+ * less than 60% of the time. Spaced repetition alone isn't helping with it,
+ * so it is worth looking at again on purpose.
+ */
+export function isDifficult(item: ItemProgress): boolean {
+  return item.timesWrong >= DIFFICULT_MIN_MISTAKES && item.timesCorrect / item.timesSeen < DIFFICULT_MAX_ACCURACY
+}
+
+/** The difficult items, with the most mistakes first; on ties, those with the worst accuracy. */
+export function getDifficultItems(progress: ProgressData): ItemProgress[] {
   const accuracy = (item: ItemProgress) => item.timesCorrect / item.timesSeen
   return Object.values(progress.items)
     .filter((item) => item !== undefined)
-    .filter((item) => item.timesWrong > 0)
+    .filter(isDifficult)
     .toSorted((a, b) => b.timesWrong - a.timesWrong || accuracy(a) - accuracy(b))
-    .slice(0, limit)
 }

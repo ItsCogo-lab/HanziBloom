@@ -26,7 +26,7 @@ describe('ProgressPage', () => {
     expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
-  it('shows totals, streaks, recent activity, states and the most missed', () => {
+  it('shows totals, streaks, recent activity and states', () => {
     const today = new Date()
     const yesterday = addDays(today, -1)
     let progress = createEmptyProgress()
@@ -53,8 +53,23 @@ describe('ProgressPage', () => {
     // 1196 words: 1195 new, 1 learning (谢谢), 0 mastered
     expect(within(wordsRow).getAllByRole('cell').map((cell) => cell.textContent)).toEqual(['1195', '1', '0'])
 
-    const mostMissed = screen.getByRole('table', { name: 'Most missed' })
-    expect(within(mostMissed).getAllByRole('row')).toHaveLength(2)
-    expect(within(mostMissed).getByText('你')).toBeInTheDocument()
+    // 你 was missed only twice: it isn't difficult yet
+    expect(screen.getByText(/^None right now/)).toBeInTheDocument()
+  })
+
+  it('lists the difficult items and offers a session with them', () => {
+    let progress = createEmptyProgress()
+    for (const correct of [false, false, false, true]) progress = recordAnswer(progress, 'char:你', correct, new Date())
+    progress = recordAnswer(progress, 'word:谢谢', false, new Date())
+
+    renderProgressPage(progress)
+
+    const difficult = screen.getByRole('table', { name: 'Difficult items' })
+    expect(within(difficult).getAllByRole('row')).toHaveLength(2)
+    expect(within(difficult).getByText('你')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Practice difficult items (1)' })).toHaveAttribute(
+      'href',
+      '/study/practice?focus=difficult',
+    )
   })
 })

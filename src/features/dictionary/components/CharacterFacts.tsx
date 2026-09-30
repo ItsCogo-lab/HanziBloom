@@ -14,8 +14,8 @@ type CharacterFactsProps = {
 }
 
 /**
- * Character facts (traditional, radical, strokes, components, level) and its
- * etymology. Each row appears only if the dataset has that data.
+ * Character facts (traditional, radical, strokes, components, level,
+ * frequency) and its etymology. Each row appears only if the dataset has that data.
  */
 export function CharacterFacts({ character, dictionary, opener }: CharacterFactsProps) {
   const link = (hanzi: string) => (
@@ -68,6 +68,11 @@ export function CharacterFacts({ character, dictionary, opener }: CharacterFacts
           )}
           {character.hskLevel !== undefined && (
             <Fact label={t('dictionary.hskLevel')}>{t('dictionary.hskLevelValue', { level: character.hskLevel })}</Fact>
+          )}
+          {character.frequencyRank !== undefined && (
+            <Fact label={t('dictionary.frequency')}>
+              {t('dictionary.frequencyValue', { rank: character.frequencyRank })}
+            </Fact>
           )}
         </dl>
       </section>

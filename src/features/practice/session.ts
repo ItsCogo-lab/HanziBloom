@@ -1,4 +1,4 @@
-import { getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
+import { compareByFrequency, getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
 import { createEmptyProgress, isDue } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
 import { shuffle, type RandomFn } from '../../lib/random.ts'
@@ -51,7 +51,7 @@ export function createSessionExercises(
  * Picks the items of a session, in order of priority:
  *
  * 1. Due reviews, starting with the ones that have been waiting longest.
- * 2. New items, at random.
+ * 2. New items, the most frequent first (at random if they have no rank).
  * 3. If still short, already studied items whose review is closest
  *    (basic ones last).
  *
@@ -71,7 +71,7 @@ export function selectSessionItems(
 
   const shuffled = shuffle(pool, random)
   const due = shuffled.filter((item) => isDue(progressOf(item), now)).sort(byNextReview)
-  const fresh = shuffled.filter((item) => progressOf(item) === undefined)
+  const fresh = shuffled.filter((item) => progressOf(item) === undefined).sort(compareByFrequency)
   // Basic items (see applyHskLevel) are never due: they go at the very end
   const isBasic = (item: StudyItem) => Number(progressOf(item)?.basic === true)
   const upcoming = shuffled
@@ -87,18 +87,28 @@ export interface SessionState {
   exercises: readonly Exercise[]
   currentIndex: number
   results: readonly ExerciseResult[]
+  /**
+   * How many exercises the session started with. Every missed exercise is
+   * added again at the end (see sessionReducer), so the ones from this index
+   * on are retries.
+   */
+  firstAttemptCount: number
 }
 
 export type SessionAction = { type: 'answer'; correct: boolean }
 
 export function createSessionState(exercises: readonly Exercise[]): SessionState {
-  return { exercises, currentIndex: 0, results: [] }
+  return { exercises, currentIndex: 0, results: [], firstAttemptCount: exercises.length }
 }
 
 /**
  * Session reducer: takes the state and an action and returns the new state,
  * without modifying the previous one. It is a pure function, so it can be
  * tested without React; the component uses it with useReducer.
+ *
+ * A missed exercise comes back at the end of the session until it is
+ * answered correctly, like the relearning step in Anki: the session doesn't
+ * end with something you just got wrong.
  */
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   const exercise = getCurrentExercise(state)
@@ -107,9 +117,30 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
   switch (action.type) {
     case 'answer': {
       const result = createExerciseResult(exercise, action.correct)
-      return { ...state, currentIndex: state.currentIndex + 1, results: [...state.results, result] }
+      const exercises = action.correct ? state.exercises : [...state.exercises, createRetryExercise(exercise)]
+      return { ...state, exercises, currentIndex: state.currentIndex + 1, results: [...state.results, result] }
     }
   }
+}
+
+/**
+ * The same exercise, to ask again. In a choice question the options move
+ * one place, so the answer can't be found by remembering where it was.
+ */
+export function createRetryExercise(exercise: Exercise): Exercise {
+  if (exercise.type === 'flashcard') return exercise
+  const [first, ...rest] = exercise.options
+  return { ...exercise, options: first ? [...rest, first] : rest }
+}
+
+/** Is the current exercise a retry of one missed earlier in the session? */
+export function isRetry(state: SessionState): boolean {
+  return state.currentIndex >= state.firstAttemptCount
+}
+
+/** Results of the first attempts only: retries don't change the session score. */
+export function getFirstAttemptResults(state: SessionState): readonly ExerciseResult[] {
+  return state.results.slice(0, state.firstAttemptCount)
 }
 
 export function createExerciseResult(exercise: Exercise, correct: boolean): ExerciseResult {

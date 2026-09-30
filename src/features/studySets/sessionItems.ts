@@ -1,5 +1,5 @@
 import type { Dictionary } from '../dictionary/dictionary.ts'
-import { getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
+import { compareByFrequency, getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
 import { isDue, isLearned } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
 import { getSetItems } from './studySets.ts'
@@ -14,9 +14,14 @@ import type { StudySet } from './types.ts'
  */
 export type SetSessionType = 'learn' | 'study'
 
-/** Set items not learned yet, in the set's order. */
+/**
+ * Set items not learned yet. HSK levels go the most frequent first, so the
+ * most useful words come early; topic and custom sets keep their own order,
+ * which someone chose.
+ */
 export function getLearnableItems(set: StudySet, dictionary: Dictionary, progress: ProgressData): StudyItem[] {
-  return getSetItems(set, dictionary).filter((item) => !isLearned(progress, getStudyItemId(item)))
+  const items = getSetItems(set, dictionary).filter((item) => !isLearned(progress, getStudyItemId(item)))
+  return set.type === 'hsk' ? items.sort(compareByFrequency) : items
 }
 
 export interface ReviewItems {

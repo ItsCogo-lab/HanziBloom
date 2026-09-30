@@ -91,7 +91,7 @@ Four sections in the main navigation; Progress and Settings hang off the profile
 | Home | `/` | Overall progress, streak, pending reviews, sets being studied. |
 | Study | `/study`, `/study/hsk`, `/study/topics`, `/study/custom` | My Studies, HSK, Topics and My sets tabs with set cards. `/study/custom/new` creates a set. |
 | Set | `/study/sets/:setId` | Learn and Study actions with their counts, progress (mastered, learning, not started) and vocabulary. |
-| Session | `/study/practice?set=:setId&mode=learn` or `&mode=study` | Learn (new vocabulary) or Study (review of what has been learned) for a set; without `set`, a mixed session of all vocabulary. Dictionary button. |
+| Session | `/study/practice?set=:setId&mode=learn` or `&mode=study` | Learn (new vocabulary) or Study (review of what has been learned) for a set; without `set`, a mixed session of all vocabulary; `?focus=difficult`, only the difficult items. Dictionary button. |
 | Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Global search and detail pages. `q` and `kind` go in the URL. |
 | Profile | `/profile` | Local summary: mastered, reviews, streak, sets and recent items. |
 | Progress / Settings | `/progress`, `/settings` | Detailed statistics; session, theme, tones, deleting progress, credits. |
@@ -469,6 +469,18 @@ type for each) and manages advancement with a pure reducer
 produces an `ExerciseResult { itemId, exerciseType, correct }`, which is what the
 progress system will consume in Phase 8.
 
+A missed exercise is added again at the end of the session until it is
+answered correctly (choice questions move their options one place). Retries are
+saved to progress like any other answer, but the session score only counts
+first attempts (`getFirstAttemptResults`).
+
+**Keyboard.** `useSessionShortcuts` (`practice/shortcuts.ts`) gives each
+exercise its keys: Space shows a flashcard's answer and 1/2 answer it; 1-4
+pick a choice option and Enter continues; in Learn, 1/2/3 are skip, already
+known and learned. They are off while the dictionary panel is open
+(`ShortcutsEnabledContext`), and the key hints (`Kbd`) only show with a fine
+pointer.
+
 ### Spaced repetition
 
 `src/features/srs/srs.ts` exposes two functions:
@@ -497,8 +509,13 @@ later does not affect anything else.
   leaving in the middle of a session loses nothing.
 
 **What goes into a session** (`selectSessionItems`): first the pending
-reviews (the most overdue first), then new items and, if more are still needed,
-the studied ones whose review is closest. Then they are shuffled.
+reviews (the most overdue first), then new items (the most frequent first, see
+`frequencyRank`) and, if more are still needed, the studied ones whose review
+is closest. Then they are shuffled.
+
+**Difficult items** (`isDifficult` in `stats.ts`, "leeches" in Anki): missed
+at least 3 times and right less than 60% of the time. Progress lists them and
+offers a session with only them.
 
 ### Persistence
 
