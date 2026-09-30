@@ -1,8 +1,8 @@
 /**
  * Copy of the user's synced data: exactly what is stored in localStorage
- * (JSON already parsed), with its version number. That way the cloud stores
- * the same format as the browser and, when downloaded, the Providers load
- * and validate it as usual.
+ * (parsed JSON), including its version number. The cloud keeps the same
+ * format as the browser, and after a download the Providers load and
+ * validate it as usual.
  */
 import { createMemoryStorage, isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
 import { CUSTOM_SETS_STORAGE_KEY, loadCustomSets, saveCustomSets } from '../customSets/storage.ts'
@@ -11,7 +11,7 @@ import { PROGRESS_STORAGE_KEY, loadProgress, saveProgress } from '../progress/st
 import { loadSettings, saveSettings, SETTINGS_STORAGE_KEY } from '../settings/settings.ts'
 import { mergeCustomSets, mergeMyStudies, mergeProgress } from './merge.ts'
 
-/** What gets synced. Anything specific to this device (the install prompt) doesn't. */
+/** What gets synced. Device-only data (the install prompt) does not. */
 export const SYNCED_KEYS = [
   PROGRESS_STORAGE_KEY,
   MY_STUDIES_STORAGE_KEY,
@@ -36,14 +36,14 @@ export function readSnapshot(storage?: KeyValueStorage): Snapshot {
   return snapshot
 }
 
-/** Writes what the copy contains. Anything it lacks is left as it was. */
+/** Writes what the copy contains and leaves everything else as it was. */
 export function writeSnapshot(snapshot: Snapshot, storage?: KeyValueStorage): void {
   for (const key of SYNCED_KEYS) {
     if (key in snapshot) writeJson(key, snapshot[key], storage)
   }
 }
 
-/** Turns what arrives from the cloud into a copy, discarding anything that isn't the app's. */
+/** Turns what comes from the cloud into a copy, dropping anything that isn't app data. */
 export function parseSnapshot(value: unknown): Snapshot {
   if (!isRecord(value)) return {}
   const snapshot: Snapshot = {}
@@ -54,8 +54,8 @@ export function parseSnapshot(value: unknown): Snapshot {
 }
 
 /**
- * Merges two copies (see merge.ts). Settings aren't combined: the current
- * device's win, and if it has none, the cloud's.
+ * Combines two copies (see merge.ts). Settings are not combined: the current
+ * device's settings win, or the cloud's if this device has none.
  */
 export function mergeSnapshots(local: Snapshot, remote: Snapshot): Snapshot {
   const localData = toStorage(local)
@@ -71,9 +71,9 @@ export function mergeSnapshots(local: Snapshot, remote: Snapshot): Snapshot {
 }
 
 /**
- * The copy as the Providers would save it. Needed when pulling: the database
- * (jsonb) reorders the keys and, otherwise, each Provider's first save would
- * look like a change that has to be pushed again.
+ * The copy exactly as the Providers would save it. Needed after a download:
+ * the database (jsonb) reorders keys, so otherwise each Provider's first save
+ * would look like a change to upload again.
  */
 export function normalizeSnapshot(snapshot: Snapshot): Snapshot {
   const data = toStorage(snapshot)

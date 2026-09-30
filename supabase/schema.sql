@@ -2,9 +2,9 @@
 -- Run once in Supabase → SQL Editor.
 --
 -- One row per user with the same JSON the app stores in localStorage
--- (progress, sets, custom sets and settings). The policies ensure each
--- user can only read and write their own row: that is why the public (publishable) key
--- can go in the browser.
+-- (progress, study sets, custom sets and settings). The policies only let
+-- each user read and write their own row, which is why the publishable key
+-- can ship to the browser.
 
 create table if not exists public.user_data (
   user_id uuid primary key references auth.users (id) on delete cascade,

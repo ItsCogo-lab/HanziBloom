@@ -1,9 +1,9 @@
 import type { KeyValueStorage } from '../../lib/storage.ts'
 
 /**
- * Wraps storage to learn about every change the Providers make. It only
- * notifies if the value differs from the previous one: at startup, each
- * Provider saves again what it just loaded, and that isn't a change.
+ * Wraps the storage to hear about every change the Providers make. It only
+ * reports a value that differs from the previous one: on start-up each
+ * Provider saves again what it just loaded, and that is not a change.
  */
 export function observeStorage(storage: KeyValueStorage, onChange: (key: string) => void): KeyValueStorage {
   return {

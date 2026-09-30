@@ -11,11 +11,11 @@ export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 export interface AccountContextValue {
   /** A Supabase project is configured. Otherwise the app works without accounts. */
   enabled: boolean
-  /** Not yet known whether there is a session (loading). */
+  /** Still loading: we don't know yet whether there is a session. */
   loading: boolean
   user: AccountUser | null
   syncStatus: SyncStatus
-  /** Goes to Google's page; on return, the session is already signed in. */
+  /** Goes to Google's page; on return, the user is signed in. */
   signInWithGoogle: () => Promise<void>
   /** Sends an email with a passwordless sign-in link. */
   sendEmailLink: (email: string) => Promise<void>
@@ -34,7 +34,7 @@ const noAccounts: AccountContextValue = {
 
 export const AccountContext = createContext<AccountContextValue>(noAccounts)
 
-/** The user's account, if any. Without <AccountProvider> the app works without accounts. */
+/** The user's account, if any. Without an <AccountProvider> the app works without accounts. */
 export function useAccount(): AccountContextValue {
   return use(AccountContext)
 }

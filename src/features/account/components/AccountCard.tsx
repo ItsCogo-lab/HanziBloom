@@ -13,7 +13,7 @@ const SYNC_STATUS_TEXT: Record<SyncStatus, MessageKey> = {
 
 type EmailState = 'idle' | 'sending' | 'sent' | 'error'
 
-/** Sign in or out. Not shown when no Supabase project is configured. */
+/** Sign in or out. Hidden when no Supabase project is configured. */
 export function AccountCard() {
   const { enabled, loading, user, syncStatus, signInWithGoogle, sendEmailLink, signOut } = useAccount()
   const [email, setEmail] = useState('')

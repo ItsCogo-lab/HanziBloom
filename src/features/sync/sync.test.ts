@@ -33,7 +33,7 @@ function storageWithAnswer(itemId: 'char:你' | 'char:好', date: Date) {
 const noChanges = () => 0
 
 describe('syncUserData', () => {
-  it('the first time, pushes local data to an empty cloud', async () => {
+  it('the first time, uploads local data to an empty cloud', async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
 
@@ -56,12 +56,12 @@ describe('syncUserData', () => {
     expect(cloud.copy?.data).toEqual(readSnapshot(storage))
   })
 
-  it("pulls another device's changes without pushing anything", async () => {
+  it("downloads another device's changes without uploading", async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
     await syncUserData({ cloud, userId: 'user-1', storage, changeCount: noChanges })
 
-    // Another device pushes its progress
+    // Another device uploads its progress
     const other = storageWithAnswer('char:好', tuesday)
     cloud.copy = { data: readSnapshot(other), updatedAt: 'T2' }
 
@@ -73,7 +73,7 @@ describe('syncUserData', () => {
     expect(loadSyncState(storage)?.syncedAt).toBe('T2')
   })
 
-  it('pushes pending local changes', async () => {
+  it('uploads pending local changes', async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
     await syncUserData({ cloud, userId: 'user-1', storage, changeCount: noChanges })
@@ -87,7 +87,7 @@ describe('syncUserData', () => {
     expect(loadSyncState(storage)?.dirty).toBe(false)
   })
 
-  it('changes made during a push stay pending for next time', async () => {
+  it('changes made during an upload stay pending for next time', async () => {
     const storage = storageWithAnswer('char:你', monday)
     let changes = 0
     const cloud = fakeCloud()

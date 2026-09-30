@@ -24,12 +24,12 @@ function renderCard(overrides: Partial<AccountContextValue> = {}) {
 }
 
 describe('AccountCard', () => {
-  it("is not shown when accounts aren't configured", () => {
+  it('is hidden when accounts are not configured', () => {
     renderCard({ enabled: false })
     expect(screen.queryByRole('heading', { name: 'Account' })).not.toBeInTheDocument()
   })
 
-  it('signed out, allows signing in with Google or an email link', async () => {
+  it('signed out, offers Google or an email link', async () => {
     const user = userEvent.setup()
     const account = renderCard()
 
@@ -42,7 +42,7 @@ describe('AccountCard', () => {
     expect(await screen.findByText('Check your email and open the link in this browser.')).toBeInTheDocument()
   })
 
-  it('signed in, shows the account and status and allows signing out', async () => {
+  it('signed in, shows the account and sync state and can sign out', async () => {
     const user = userEvent.setup()
     const account = renderCard({ user: { id: 'u1', email: 'arnau@example.com' }, syncStatus: 'synced' })
 

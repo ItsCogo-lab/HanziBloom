@@ -8,7 +8,7 @@ export interface CloudCopy {
   updatedAt: string
 }
 
-/** Where the copy is stored. In the app it's Supabase; in tests, an in-memory object. */
+/** Where the copy is stored. In the app it is Supabase; in tests, an in-memory object. */
 export interface CloudStore {
   load: (userId: string) => Promise<CloudCopy | null>
   /** Saves the copy and returns its new `updatedAt`. */
@@ -21,13 +21,13 @@ type SyncOptions = {
   storage?: KeyValueStorage
   /**
    * How many local changes there have been since the app started. If it
-   * changes while waiting on the network, the new data isn't pushed yet.
+   * changes while waiting for the network, the new changes aren't uploaded yet.
    */
   changeCount: () => number
 }
 
 /**
- * A full sync (see planSync). Returns `true` if it changed the local data,
+ * One full sync (see planSync). Returns `true` if it changed the local data,
  * so the app reloads it.
  */
 export async function syncUserData({ cloud, userId, storage, changeCount }: SyncOptions): Promise<boolean> {

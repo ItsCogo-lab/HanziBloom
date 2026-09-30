@@ -20,7 +20,7 @@ function customSet(id: string, updatedAt: string, name = id): CustomSet {
 }
 
 describe('mergeProgress', () => {
-  it('keeps items that are only on one side', () => {
+  it('keeps items that exist on only one side', () => {
     const merged = mergeProgress(
       { items: { 'char:你': item('char:你', '2026-09-28T10:00:00.000Z') }, activity: {} },
       { items: { 'char:好': item('char:好', '2026-09-27T10:00:00.000Z') }, activity: {} },
@@ -35,13 +35,13 @@ describe('mergeProgress', () => {
     expect(mergeProgress({ items: { 'char:你': newer }, activity: {} }, { items: { 'char:你': older }, activity: {} }).items['char:你']).toBe(newer)
   })
 
-  it('if reviewed at the same time, the one seen more often wins', () => {
+  it('on the same review time, keeps the one seen more times', () => {
     const date = '2026-09-28T10:00:00.000Z'
     const more = item('char:你', date, 4)
     expect(mergeProgress({ items: { 'char:你': item('char:你', date, 1) }, activity: {} }, { items: { 'char:你': more }, activity: {} }).items['char:你']).toBe(more)
   })
 
-  it('for each day, keeps the record with more answers, without adding them', () => {
+  it('keeps the day record with more answers instead of adding them up', () => {
     const merged = mergeProgress(
       { items: {}, activity: { '2026-09-28': { answers: 10, correct: 8 }, '2026-09-29': { answers: 2, correct: 1 } } },
       { items: {}, activity: { '2026-09-28': { answers: 4, correct: 4 }, '2026-09-27': { answers: 3, correct: 3 } } },
@@ -55,7 +55,7 @@ describe('mergeProgress', () => {
 })
 
 describe('mergeMyStudies', () => {
-  it('merges sets without duplicates and keeps the most recent last session', () => {
+  it('joins sets without duplicates and keeps the latest session date', () => {
     const merged = mergeMyStudies(
       {
         sets: [{ setId: 'hsk-1', addedAt: '2026-09-28T00:00:00.000Z' }],
@@ -80,7 +80,7 @@ describe('mergeMyStudies', () => {
 })
 
 describe('mergeCustomSets', () => {
-  it('merges sets and, if on both sides, keeps the one edited later', () => {
+  it('joins sets and, for one on both sides, keeps the one edited later', () => {
     const merged = mergeCustomSets(
       [customSet('custom-a', '2026-09-28T00:00:00.000Z', 'Old name'), customSet('custom-b', '2026-09-28T00:00:00.000Z')],
       [customSet('custom-a', '2026-09-29T00:00:00.000Z', 'New name'), customSet('custom-c', '2026-09-29T00:00:00.000Z')],

@@ -17,7 +17,7 @@ function reorderKeys(value: unknown): unknown {
 }
 
 describe('normalizeSnapshot', () => {
-  it("data pulled from the cloud doesn't change when saved again", () => {
+  it('downloaded data does not change when saved again', () => {
     const original = memoryStorage()
     saveProgress(recordAnswer(createEmptyProgress(), 'char:你', true, new Date(2026, 8, 28)), original)
     saveSettings({ ...DEFAULT_SETTINGS, sessionSize: 20 }, original)

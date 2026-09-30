@@ -1,6 +1,6 @@
 /**
- * Connection to Supabase (accounts and cloud copy). The library is only
- * loaded when a project is configured, so people who don't sign in don't
+ * Connection to Supabase (accounts and the cloud copy). The library is loaded
+ * only when a project is configured, so people who never sign in don't
  * download it when opening the app.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -12,7 +12,7 @@ export interface SupabaseConfig {
   publishableKey: string
 }
 
-/** Supabase project from `.env.production` / `.env.development`; `null` if there is none (and then there are no accounts). */
+/** Supabase project from `.env.production` / `.env.development`; `null` if there is none (then there are no accounts). */
 export function getSupabaseConfig(env: Record<string, unknown> = import.meta.env): SupabaseConfig | null {
   const url = env.VITE_SUPABASE_URL
   const publishableKey = env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -25,8 +25,8 @@ let clientPromise: Promise<SupabaseClient> | null = null
 export function loadSupabaseClient(config: SupabaseConfig): Promise<SupabaseClient> {
   clientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
     createClient(config.url, config.publishableKey, {
-      // PKCE: on returning from Google or the email link, the URL carries a
-      // single-use ?code= instead of the tokens
+      // PKCE: when returning from Google or the email link, the URL carries a
+      // one-time ?code= instead of the tokens
       auth: { flowType: 'pkce' },
     }),
   )
