@@ -1,4 +1,4 @@
-import { getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
+import { compareByFrequency, getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
 import { createEmptyProgress, isDue } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
 import { shuffle, type RandomFn } from '../../lib/random.ts'
@@ -51,7 +51,7 @@ export function createSessionExercises(
  * Picks the items of a session, in order of priority:
  *
  * 1. Due reviews, starting with the ones that have been waiting longest.
- * 2. New items, at random.
+ * 2. New items, the most frequent first (at random if they have no rank).
  * 3. If still short, already studied items whose review is closest
  *    (basic ones last).
  *
@@ -71,7 +71,7 @@ export function selectSessionItems(
 
   const shuffled = shuffle(pool, random)
   const due = shuffled.filter((item) => isDue(progressOf(item), now)).sort(byNextReview)
-  const fresh = shuffled.filter((item) => progressOf(item) === undefined)
+  const fresh = shuffled.filter((item) => progressOf(item) === undefined).sort(compareByFrequency)
   // Basic items (see applyHskLevel) are never due: they go at the very end
   const isBasic = (item: StudyItem) => Number(progressOf(item)?.basic === true)
   const upcoming = shuffled

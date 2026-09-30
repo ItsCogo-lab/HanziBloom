@@ -92,6 +92,8 @@ export const es: Record<MessageKey, string> = {
   'dictionary.strokeCount': 'Trazos',
   'dictionary.hskLevel': 'Nivel HSK',
   'dictionary.hskLevelValue': 'HSK {level}',
+  'dictionary.frequency': 'Frecuencia',
+  'dictionary.frequencyValue': 'N.º {rank} en uso',
   'dictionary.components': 'Componentes',
   'dictionary.etymology': 'Etimología',
   'dictionary.etymology.pictographic': 'Pictográfico',

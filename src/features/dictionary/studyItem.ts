@@ -56,3 +56,11 @@ export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyI
     .sort((a, b) => Number(a.hskLevel === undefined) - Number(b.hskLevel === undefined))
     .map((entry): StudyItem => ({ kind: 'word', entry }))
 }
+
+/**
+ * Sorts by frequency, the most common first (see frequencyRank). Items
+ * without a rank go last; among them the order is kept (sort is stable).
+ */
+export function compareByFrequency(a: StudyItem, b: StudyItem): number {
+  return (a.entry.frequencyRank ?? Infinity) - (b.entry.frequencyRank ?? Infinity) || 0
+}

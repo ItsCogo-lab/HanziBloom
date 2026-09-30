@@ -79,6 +79,16 @@ describe('selectSessionItems', () => {
     )
   })
 
+  it('takes the most frequent new items first', () => {
+    const ranked = pool.map((item) =>
+      item.kind === 'word' && item.entry.id === '谢谢' ? { ...item, entry: { ...item.entry, frequencyRank: 1 } } : item,
+    )
+    // Room for the 2 due reviews and 1 new item: always 谢谢, never at random
+    for (const seed of [1, 2, 3]) {
+      expect(ids(selectSessionItems(ranked, progress, monday, 3, seededRandom(seed)))).toContain('word:谢谢')
+    }
+  })
+
   it('and, if still short, the ones not yet due', () => {
     expect(selectSessionItems(pool, progress, monday, 100, seededRandom(1))).toHaveLength(pool.length)
   })

@@ -35,6 +35,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # wordfreq (frequency ranks) is a Python package: fetch-sources.sh installs it
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - run: npm ci
       - run: npm run data:fetch
       - run: npm run data:build

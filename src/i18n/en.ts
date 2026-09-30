@@ -92,6 +92,8 @@ export const en = {
   'dictionary.strokeCount': 'Strokes',
   'dictionary.hskLevel': 'HSK level',
   'dictionary.hskLevelValue': 'HSK {level}',
+  'dictionary.frequency': 'Frequency',
+  'dictionary.frequencyValue': '#{rank} most common',
   'dictionary.components': 'Components',
   'dictionary.etymology': 'Etymology',
   'dictionary.etymology.pictographic': 'Pictographic',
