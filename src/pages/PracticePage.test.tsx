@@ -53,6 +53,35 @@ describe('PracticePage', () => {
   })
 })
 
+describe('PracticePage: difficult items', () => {
+  it('only asks about the difficult items', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    let progress = createEmptyProgress()
+    for (const itemId of ['char:你', 'word:谢谢'] as const) {
+      for (let i = 0; i < 3; i++) progress = recordAnswer(progress, itemId, false, new Date())
+    }
+    progress = recordAnswer(progress, 'word:你好', false, new Date())
+    saveProgress(progress, storage)
+    renderWithProviders(<PracticePage />, { storage, path: '/study/practice?focus=difficult' })
+
+    expect(screen.getByRole('heading', { name: 'Difficult items' })).toBeInTheDocument()
+    expect(screen.getByText(/^Card 1 of 2$/)).toBeInTheDocument()
+    await finishSession(user)
+
+    // Only the two difficult items got new answers; 你好 kept its single one
+    const saved = loadProgress(storage).items
+    expect(saved['word:你好']?.timesSeen).toBe(1)
+    expect(saved['char:你']!.timesSeen).toBeGreaterThan(3)
+    expect(saved['word:谢谢']!.timesSeen).toBeGreaterThan(3)
+  })
+
+  it('with no difficult items says so', () => {
+    renderWithProviders(<PracticePage />, { path: '/study/practice?focus=difficult' })
+    expect(screen.getByText('You have no difficult items right now.')).toBeInTheDocument()
+  })
+})
+
 describe('PracticePage: Learn and Study of a set', () => {
   const colorIds = topicDefinitions.find((topic) => topic.id === 'colors')!.words.map((word) => `word:${word}` as const)
   const now = new Date()

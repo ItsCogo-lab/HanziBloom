@@ -3,7 +3,7 @@ import { createDictionary } from '../dictionary/dictionary.ts'
 import { listStudyItems, type StudyItemId } from '../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, MASTERED_LEVEL, recordAnswer } from './progress.ts'
-import { getAnswerTotals, getMostMissed, getRecentActivity, summarizeItems } from './stats.ts'
+import { getAnswerTotals, getDifficultItems, getRecentActivity, summarizeItems } from './stats.ts'
 import type { ProgressData } from './types.ts'
 
 const items = listStudyItems(createDictionary(testCharacters, testWords)) // 4 characters and 3 words
@@ -73,20 +73,27 @@ describe('getRecentActivity', () => {
   })
 })
 
-describe('getMostMissed', () => {
+describe('getDifficultItems', () => {
+  function answer(progress: ProgressData, id: StudyItemId, results: readonly boolean[]) {
+    return results.reduce((current, correct) => recordAnswer(current, id, correct, monday), progress)
+  }
+
+  it('only includes items missed at least 3 times and right less than 60% of the time', () => {
+    let progress = createEmptyProgress()
+    progress = answer(progress, 'char:你', [false, false, false, true]) // 3 mistakes, 25%
+    progress = answer(progress, 'char:好', [false, false, true]) // only 2 mistakes
+    progress = answer(progress, 'char:谢', [false, false, false, true, true, true]) // 50%
+    progress = answer(progress, 'char:了', [false, false, false, true, true, true, true, true]) // 62.5%
+
+    expect(getDifficultItems(progress).map((item) => item.itemId)).toEqual(['char:你', 'char:谢'])
+  })
+
   it('sorts by mistakes and, on ties, by worst accuracy', () => {
     let progress = createEmptyProgress()
-    const answers: [StudyItemId, boolean][] = [
-      ['char:你', false],
-      ['char:你', false],
-      ['char:好', false],
-      ['char:好', true],
-      ['char:谢', false],
-      ['char:了', true],
-    ]
-    for (const [id, correct] of answers) progress = recordAnswer(progress, id, correct, monday)
+    progress = answer(progress, 'char:你', [false, false, false, true])
+    progress = answer(progress, 'char:好', [false, false, false, false])
+    progress = answer(progress, 'char:谢', [false, false, false])
 
-    expect(getMostMissed(progress).map((item) => item.itemId)).toEqual(['char:你', 'char:谢', 'char:好'])
-    expect(getMostMissed(progress, 1)).toHaveLength(1)
+    expect(getDifficultItems(progress).map((item) => item.itemId)).toEqual(['char:好', 'char:谢', 'char:你'])
   })
 })

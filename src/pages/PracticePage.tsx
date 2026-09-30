@@ -9,12 +9,13 @@ import { useCustomSet } from '../features/customSets/customSetsContext.ts'
 import { LoadEntries } from '../features/dictionary/components/LoadEntries.tsx'
 import { useDictionary } from '../features/dictionary/dictionaryContext.ts'
 import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
-import { getStudyItemId, type StudyItem } from '../features/dictionary/studyItem.ts'
+import { getStudyItem, getStudyItemId, type StudyItem, type StudyItemId } from '../features/dictionary/studyItem.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { LearnSession } from '../features/practice/components/LearnSession.tsx'
 import { PracticeSession } from '../features/practice/components/PracticeSession.tsx'
 import { createSessionExercises } from '../features/practice/session.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
+import { getDifficultItems } from '../features/progress/stats.ts'
 import type { ProgressData } from '../features/progress/types.ts'
 import { useSettings } from '../features/settings/settingsContext.ts'
 import { useStudySets } from '../features/studySets/useStudySets.ts'
@@ -39,6 +40,7 @@ function createPracticeSession(pool: readonly StudyItem[], progress: ProgressDat
  * Study sessions. With a set, the URL sets the session context:
  * /study/practice?set=hsk-1&mode=learn (new vocabulary) or &mode=study
  * (review of what was learned; &scope=all includes what is not due yet).
+ * With ?focus=difficult, a session with the difficult items (see isDifficult).
  * Without a set, the mixed session over all vocabulary. The `key` makes
  * changing set or type create a new session.
  */
@@ -46,6 +48,7 @@ export function PracticePage() {
   const [searchParams] = useSearchParams()
   const studySets = useStudySets()
   const setId = searchParams.get('set')
+  if (searchParams.get('focus') === 'difficult') return <DifficultPractice />
   if (setId === null) return <Practice />
 
   const set = getStudySet(studySets, setId)
@@ -91,6 +94,57 @@ function Practice() {
         onRestart={() => setSession(createPracticeSession(hskStudyItems, progress, sessionSize))}
       />
     </>
+  )
+}
+
+/**
+ * Session with the difficult items only. The list is taken on entering: an
+ * item that stops being difficult during the session stays until it ends.
+ */
+function DifficultPractice() {
+  const { progress } = useProgress()
+  const [itemIds] = useState(() => getDifficultItems(progress).map((item) => item.itemId))
+
+  return (
+    <>
+      <PageHeader title={t('practice.difficultTitle')} description={t('practice.difficultDescription')} />
+      {/* A custom set item can be non-HSK: its entry is loaded first */}
+      <LoadEntries itemIds={itemIds}>
+        <DifficultSession itemIds={itemIds} />
+      </LoadEntries>
+    </>
+  )
+}
+
+function DifficultSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
+  const dictionary = useDictionary()
+  const { progress, recordAnswer } = useProgress()
+  const { sessionSize } = useSettings().settings
+  const createSession = (current: ProgressData) => {
+    const pool = itemIds.flatMap((itemId) => getStudyItem(dictionary, itemId) ?? [])
+    return createPracticeSession(pool, current, sessionSize)
+  }
+  const [session, setSession] = useState(() => createSession(progress))
+
+  if (session.exercises.length === 0) {
+    return (
+      <Card className="mx-auto flex max-w-xl flex-col items-start gap-4">
+        <p className="text-lg">{t('practice.difficultEmpty')}</p>
+        <ButtonLink to="/progress" variant="secondary">
+          {t('nav.progress')}
+        </ButtonLink>
+      </Card>
+    )
+  }
+
+  return (
+    <PracticeSession
+      key={session.id}
+      exercises={session.exercises}
+      dictionary={dictionary}
+      onResult={(result) => recordAnswer(result.itemId, result.correct)}
+      onRestart={() => setSession(createSession(progress))}
+    />
   )
 }
 
