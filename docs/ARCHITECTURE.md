@@ -147,8 +147,11 @@ entra como dominado, con los primeros repasos repartidos entre 30 y 59 días
 para que no toquen todos el mismo día; lo que está dos niveles o más por debajo
 (`BASIC_LEVEL_GAP`) se marca `basic`: dominado y nunca pendiente (`isDue`
 devuelve `false`), aunque ya se estuviera estudiando. Un básico solo sale en un
-repaso voluntario, el último; si se falla, pierde la marca. Bajar de nivel quita
-la marca y esos elementos vuelven a repasarse como dominados. Los filtros están en
+repaso voluntario, el último; si se falla, pierde la marca. Lo que crea el
+nivel lleva la marca `fromLevel` hasta que se responde: al bajar de nivel, esos
+registros se borran y el elemento vuelve a ser nuevo. Lo que ya se había
+estudiado se conserva; si era básico, pierde la marca y vuelve a repasarse como
+dominado. Los filtros están en
 `studySets/sessionItems.ts` (`getLearnableItems`, `getReviewItems`,
 `getSetSessionCounts`); ninguna página filtra por su cuenta.
 

@@ -18,6 +18,11 @@ export interface ItemProgress {
    * la marca y vuelve a la repetición espaciada normal.
    */
   basic?: true
+  /**
+   * El registro lo creó applyHskLevel y aún no se ha respondido nunca: si el
+   * usuario baja de nivel, se borra y el elemento vuelve a ser nuevo.
+   */
+  fromLevel?: true
 }
 
 /** Respuestas de un día, para la racha y las estadísticas. */
