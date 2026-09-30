@@ -62,7 +62,7 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
         </ul>
       </section>
 
-      <GrammarNotes item={item} />
+      <GrammarNotes item={item} opener={opener} />
 
       {item.kind === 'character' && (
         <>
@@ -112,7 +112,7 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
         </section>
       )}
 
-      <ExampleSentences item={item} />
+      <ExampleSentences item={item} opener={opener} />
     </Card>
   )
 }

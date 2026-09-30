@@ -4,6 +4,7 @@ import { getEntryPath } from '../entryPaths.ts'
 import { renderWithProviders } from '../../../test/renderWithProviders.tsx'
 import { createDictionary } from '../dictionary.ts'
 import { ningCharacter, ningmengWord, testCharacters, testExampleSet, testWords } from '../testData.ts'
+import { createChunkLoader } from '../../../test/dictionaryChunks.ts'
 import { createFakeFetch, jsonResponse } from '../../../test/fakeFetch.ts'
 import { ningResponse } from '../../../test/tatoebaResponses.ts'
 import { EntryDetails } from './EntryDetails.tsx'
@@ -138,6 +139,32 @@ describe('EntryDetails for a character', () => {
     expect(fake.requested).not.toContain('/examples/hsk1.json')
   })
 
+  it('splits example sentences into dictionary words that open their entry', async () => {
+    const fake = createFakeFetch([['https://api.tatoeba.org/v1/sentences?', jsonResponse(ningResponse)]])
+    renderCharacter(ningCharacter, fake.fetch)
+
+    // The app's dictionary is HSK 1-4 plus the (empty, in tests) full dictionary: 柠檬 isn't in it
+    const word = await screen.findByRole('link', { name: '很' })
+    expect(word).toHaveAttribute('href', '/vocabulary/%E5%BE%88')
+    expect(word).toHaveClass('underline')
+    expect(screen.queryByRole('link', { name: '柠檬' })).not.toBeInTheDocument()
+  })
+
+  it('links words from the full dictionary once their chunk loads', async () => {
+    const fake = createFakeFetch([['https://api.tatoeba.org/v1/sentences?', jsonResponse(ningResponse)]])
+    renderWithProviders(
+      <EntryDetails
+        item={{ kind: 'character', entry: ningCharacter }}
+        dictionary={dictionary}
+        opener={{ getHref: getEntryPath }}
+      />,
+      { fetchFn: fake.fetch, loadChunk: createChunkLoader([], [ningmengWord]) },
+    )
+
+    const [word] = await screen.findAllByRole('link', { name: '柠檬' })
+    expect(word).toHaveAttribute('href', getEntryPath({ kind: 'word', entry: ningmengWord }))
+  })
+
   it('without a connection to Tatoeba uses the local HSK sentences', async () => {
     const fake = createFakeFetch([['/examples/hsk1.json', jsonResponse(testExampleSet)]])
     renderCharacter(ningCharacter, fake.fetch)
@@ -147,7 +174,7 @@ describe('EntryDetails for a character', () => {
     expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toBeInTheDocument()
   })
 
-  it('shows a particle\'s grammar notes with its example and the Grammar Wiki link', () => {
+  it("shows a particle's grammar notes with its example and the Grammar Wiki link", () => {
     renderCharacter(testCharacters.find((character) => character.hanzi === '了')!)
 
     const grammar = screen.getByRole('heading', { name: 'Grammar' }).parentElement!

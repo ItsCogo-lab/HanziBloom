@@ -1,6 +1,9 @@
 import { t, tCount } from '../../../i18n/index.ts'
 import { toToneNumbers } from '../../../lib/tones.ts'
+import { EntryLink, type EntryOpener } from '../../dictionary/components/EntryLink.tsx'
+import type { SentenceWord } from '../../dictionary/segmentation.ts'
 import { TONE_TEXT_CLASSES } from '../../dictionary/toneClasses.ts'
+import type { Tone } from '../../../lib/tones.ts'
 import { useSettings } from '../../settings/settingsContext.ts'
 import { countUncertain } from '../sentences.ts'
 import type { CustomSentence, SentenceToken } from '../types.ts'
@@ -15,23 +18,33 @@ export function SentenceView({ sentence }: { sentence: CustomSentence }) {
   return <AnnotatedSentence tokens={sentence.tokens} />
 }
 
+/**
+ * The sentence split into dictionary words: each word is underlined and
+ * opens its entry, so you can see where words of one or more characters
+ * begin and end.
+ */
+export interface SentenceWords {
+  words: readonly SentenceWord[]
+  opener: EntryOpener
+}
+
 /** A sentence already run through the pinyin engine; also used by the dictionary's example sentences. */
-export function AnnotatedSentence({ tokens }: { tokens: readonly SentenceToken[] }) {
+export function AnnotatedSentence({ tokens, links }: { tokens: readonly SentenceToken[]; links?: SentenceWords }) {
   const { toneColors, toneNumbers } = useSettings().settings
   const uncertain = countUncertain(tokens)
   const pinyin = tokens.flatMap((token) => (token.pinyin ? [token.pinyin] : [])).join(' ')
+  // The tone of each character, if it's colored
+  const tones = tokens.flatMap((token) =>
+    Array.from(token.text, () => (toneColors && !token.uncertain ? token.tone : undefined)),
+  )
 
   return (
     <div className="flex flex-col gap-0.5">
       <p lang="zh-Hans" className="font-hanzi text-xl">
-        {tokens.map((token, index) =>
-          toneColors && token.tone !== undefined && !token.uncertain ? (
-            <span key={index} className={TONE_TEXT_CLASSES[token.tone]} data-tone={token.tone}>
-              {token.text}
-            </span>
-          ) : (
-            <span key={index}>{token.text}</span>
-          ),
+        {links ? (
+          <LinkedWords links={links} tones={tones} />
+        ) : (
+          <ToneCharacters text={tokens.map((token) => token.text).join('')} tones={tones} />
         )}
       </p>
       <p className="text-accent-strong">
@@ -45,6 +58,45 @@ export function AnnotatedSentence({ tokens }: { tokens: readonly SentenceToken[]
       )}
     </div>
   )
+}
+
+/**
+ * Each dictionary word as a link with its own underline, in a neutral color
+ * so the tone colors stay readable; the small margin keeps the underlines of
+ * neighboring words apart.
+ */
+function LinkedWords({ links, tones }: { links: SentenceWords; tones: readonly (Tone | undefined)[] }) {
+  let offset = 0
+  return links.words.map((word, index) => {
+    const start = offset
+    offset += Array.from(word.text).length
+    const characters = <ToneCharacters text={word.text} tones={tones.slice(start)} />
+    if (!word.item) return <span key={index}>{characters}</span>
+    return (
+      <EntryLink
+        key={index}
+        item={word.item}
+        opener={links.opener}
+        className="mx-[0.08em] underline decoration-ink-muted/60 decoration-1 underline-offset-[0.3em] hover:decoration-accent-strong"
+      >
+        {characters}
+      </EntryLink>
+    )
+  })
+}
+
+/** Text with each character colored by its tone (`tones[i]` is the tone of the i-th character). */
+function ToneCharacters({ text, tones }: { text: string; tones: readonly (Tone | undefined)[] }) {
+  return Array.from(text).map((character, index) => {
+    const tone = tones[index]
+    return tone === undefined ? (
+      <span key={index}>{character}</span>
+    ) : (
+      <span key={index} className={TONE_TEXT_CLASSES[tone]} data-tone={tone}>
+        {character}
+      </span>
+    )
+  })
 }
 
 /** The syllable of a character (with "?" if uncertain) or punctuation as is, attached to what comes before. */

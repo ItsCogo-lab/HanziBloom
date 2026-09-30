@@ -1,5 +1,6 @@
 import type { Dictionary } from './dictionary.ts'
-import { CHUNK_COUNT, getChunksFor, type DictionaryChunk } from './fullDictionary.ts'
+import { CHUNK_COUNT, getChunkIndex, getChunksFor, type DictionaryChunk } from './fullDictionary.ts'
+import type { WordIndex } from './segmentation.ts'
 import { getStudyItem, listStudyItems, type StudyItem, type StudyItemId } from './studyItem.ts'
 
 export type LoadChunk = (index: number) => Promise<DictionaryChunk>
@@ -27,6 +28,20 @@ export interface DictionaryStore {
   loadItems: (itemIds: readonly StudyItemId[]) => Promise<void>
   /** Loads the whole dictionary, to search in it. */
   loadAll: () => Promise<void>
+  /** Whether every entry that starts with a character of this text has loaded. */
+  hasText: (text: string) => boolean
+  /** Loads the entries starting with each character of this text, to split it into words. */
+  loadText: (text: string) => Promise<void>
+  /** The loaded entries by hanzi, to split sentences into words (see segmentation.ts). */
+  wordIndex: WordIndex
+}
+
+const HAN = /\p{Script=Han}/u
+
+/** Chunks holding every entry that starts with a character of the text. */
+function getChunksOfText(text: string): number[] {
+  const hanzi = Array.from(text).filter((symbol) => HAN.test(symbol))
+  return [...new Set(hanzi.map(getChunkIndex))]
 }
 
 export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): DictionaryStore {
@@ -40,13 +55,30 @@ export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): D
   const loaded = new Map<number, DictionaryChunk>()
   const listeners = new Set<() => void>()
 
+  // Hanzi → its entries (a word, a character, homographs), kept up to date as chunks arrive
+  const byHanzi = new Map<string, StudyItem[]>()
+  let longestHanzi = 1
+  const addToIndex = (item: StudyItem) => {
+    const entries = byHanzi.get(item.entry.hanzi)
+    if (entries) entries.push(item)
+    else byHanzi.set(item.entry.hanzi, [item])
+    longestHanzi = Math.max(longestHanzi, Array.from(item.entry.hanzi).length)
+  }
+  baseItems.forEach(addToIndex)
+
   function load(index: number): Promise<void> {
     let request = requests.get(index)
     if (!request) {
       request = loadChunk(index).then(
         (chunk) => {
-          for (const character of chunk.characters) characters.set(character.id, character)
-          for (const word of chunk.words) words.set(word.id, word)
+          for (const character of chunk.characters) {
+            characters.set(character.id, character)
+            addToIndex({ kind: 'character', entry: character })
+          }
+          for (const word of chunk.words) {
+            words.set(word.id, word)
+            addToIndex({ kind: 'word', entry: word })
+          }
           loaded.set(index, chunk)
           snapshot = { characters, words }
           for (const listener of listeners) listener()
@@ -94,5 +126,11 @@ export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): D
     loadItems: (itemIds) =>
       loadChunks(itemIds.filter((itemId) => !getStudyItem(base, itemId)).flatMap(getChunksFor)),
     loadAll: () => loadChunks(Array.from({ length: CHUNK_COUNT }, (_, index) => index)),
+    hasText: (text) => getChunksOfText(text).every((index) => loaded.has(index)),
+    loadText: (text) => loadChunks(getChunksOfText(text)),
+    wordIndex: {
+      find: (hanzi) => byHanzi.get(hanzi) ?? [],
+      longest: () => longestHanzi,
+    },
   }
 }
