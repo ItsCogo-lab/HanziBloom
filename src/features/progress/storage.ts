@@ -2,7 +2,7 @@ import { isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/s
 import { createEmptyProgress } from './progress.ts'
 import type { DailyActivity, ItemProgress, ProgressData } from './types.ts'
 
-const STORAGE_KEY = 'hanzivocab.progress'
+export const PROGRESS_STORAGE_KEY = 'hanzivocab.progress'
 
 /**
  * Versión del formato guardado. Si algún día cambia la forma de los datos, se
@@ -14,7 +14,7 @@ type SavedProgress = ProgressData & { version: typeof CURRENT_VERSION }
 
 export function saveProgress(progress: ProgressData, storage?: KeyValueStorage): boolean {
   const saved: SavedProgress = { version: CURRENT_VERSION, ...progress }
-  return writeJson(STORAGE_KEY, saved, storage)
+  return writeJson(PROGRESS_STORAGE_KEY, saved, storage)
 }
 
 /**
@@ -23,7 +23,7 @@ export function saveProgress(progress: ProgressData, storage?: KeyValueStorage):
  * sueltas que estén mal se descartan y el resto se conserva.
  */
 export function loadProgress(storage?: KeyValueStorage): ProgressData {
-  const saved = readJson(STORAGE_KEY, storage)
+  const saved = readJson(PROGRESS_STORAGE_KEY, storage)
   if (!isRecord(saved) || saved.version !== CURRENT_VERSION) return createEmptyProgress()
   if (!isRecord(saved.items) || !isRecord(saved.activity)) return createEmptyProgress()
 

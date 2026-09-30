@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { KeyValueStorage } from '../lib/storage.ts'
+import { AccountProvider } from '../features/account/AccountProvider.tsx'
 import { CustomSetsProvider } from '../features/customSets/CustomSetsProvider.tsx'
 import { DictionaryProvider } from '../features/dictionary/DictionaryProvider.tsx'
 import type { LoadChunk } from '../features/dictionary/dictionaryStore.ts'
@@ -26,13 +27,17 @@ export function AppProviders({ children, storage, loadChunk, cache, fetchFn }: A
   return (
     <RuntimeSourcesProvider cache={cache} fetchFn={fetchFn}>
       <DictionaryProvider loadChunk={loadChunk}>
-        <SettingsProvider storage={storage}>
-          <ProgressProvider storage={storage}>
-            <MyStudiesProvider storage={storage}>
-              <CustomSetsProvider storage={storage}>{children}</CustomSetsProvider>
-            </MyStudiesProvider>
-          </ProgressProvider>
-        </SettingsProvider>
+        <AccountProvider storage={storage}>
+          {(userStorage) => (
+            <SettingsProvider storage={userStorage}>
+              <ProgressProvider storage={userStorage}>
+                <MyStudiesProvider storage={userStorage}>
+                  <CustomSetsProvider storage={userStorage}>{children}</CustomSetsProvider>
+                </MyStudiesProvider>
+              </ProgressProvider>
+            </SettingsProvider>
+          )}
+        </AccountProvider>
       </DictionaryProvider>
     </RuntimeSourcesProvider>
   )

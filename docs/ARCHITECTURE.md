@@ -39,10 +39,12 @@ Dependencias previstas para fases siguientes (se añadirán cuando se necesiten,
 | Integración de datos | `hanzi-writer` (MIT) | Animación del orden de trazos en la ficha del carácter. Se carga con `import()` solo al abrir una ficha. Más adelante servirá para la práctica de escritura. |
 | Integración de datos | `hanzi-writer-data` (Arphic PL, solo desarrollo) | Datos de trazos que el build copia a `public/strokes/`. |
 | Sets propios | `pinyin-pro` 3.29.4 (MIT), versión fija | Pinyin de las frases del usuario y de las frases de ejemplo. Determinista, con diccionario de palabras para los polifónicos. Se carga con `import()` solo al guardar una frase o al mostrar frases de ejemplo. |
+| Cuentas | `@supabase/supabase-js` (MIT) | Login opcional (Google y enlace por email) y copia en la nube de los datos del usuario, sin servidor propio. Se carga con `import()` solo si hay proyecto configurado. |
 
 Descartado a propósito: Redux/Zustand (React Context + hooks basta), i18next
 (un diccionario tipado propio basta para 3 idiomas), librerías de componentes
-(queremos identidad propia), backend, Docker.
+(queremos identidad propia), un backend propio (Supabase hace de backend
+para las cuentas), Docker.
 
 ## 4. Estructura de carpetas
 
@@ -66,6 +68,8 @@ src/
     srs/            Repetición espaciada (algoritmo sencillo, sustituible)
     settings/       Ajustes del usuario (sesión, tema, colores y números de tono)
     install/        Instalar la app en la pantalla de inicio (aviso y sección de Ajustes)
+    account/        Cuenta opcional con Supabase (login y tarjeta de Perfil)
+    sync/           Sincronización de los datos del usuario con la nube (juntar, planificar)
     audio/          (Futuro) servicio de pronunciación + botón reutilizable
     writing/        (Futuro) canvas, trazos, evaluación
   components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
@@ -502,10 +506,42 @@ los estudiados cuyo repaso está más cerca. Después se barajan.
 en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
 campo `version` para poder migrar datos cuando el formato cambie. Si lo
 guardado está corrupto o localStorage no está disponible (modo privado), la
-app funciona igual, sin guardar. Si algún día hay backend, se sustituye este
-módulo. Lo descargado de fuentes externas no va aquí sino en IndexedDB (ver
+app funciona igual, sin guardar. Con cuenta, lo guardado se copia además en
+Supabase (ver «Cuentas y sincronización»). Lo descargado de fuentes externas no va aquí sino en IndexedDB (ver
 «Fuentes en tiempo de ejecución»); no son datos del usuario y se pueden
 borrar sin perder nada.
+
+### Cuentas y sincronización
+
+La cuenta es opcional: sin iniciar sesión todo sigue en localStorage como
+siempre. Con sesión (Google o enlace por email, en Perfil), los datos del
+usuario se sincronizan entre dispositivos.
+
+- **Dónde**: Supabase, en la tabla `user_data` (`supabase/schema.sql`): una
+  fila por usuario con el mismo JSON que hay en localStorage (progreso, My
+  Studies, sets propios y ajustes) y un `updated_at`. Las políticas de la
+  tabla solo dejan a cada usuario leer y escribir su fila, así que la URL y la
+  clave pública del proyecto pueden ir en el navegador (`.env.production` y
+  `.env.development`). Sin clave, no hay cuentas y la tarjeta de Perfil no se
+  muestra. En los tests nunca hay proyecto.
+- **Cómo** (`features/account/AccountProvider.tsx` y `features/sync/`): los
+  Providers de datos guardan a través de un almacenamiento observado
+  (`observeStorage`), así que cada cambio real se apunta como pendiente y se
+  sube unos segundos después, agrupado. Al entrar, al volver a la app y al
+  recuperar la conexión se sincroniza (`syncUserData`), y `planSync` decide
+  qué hacer comparando el `updated_at` de la nube con el último visto aquí:
+  subir, bajar, juntar o nada. Si cambia lo guardado, los Providers se
+  vuelven a montar para cargarlo.
+- **Juntar** (`merge.ts`): de cada carácter o palabra se queda el repasado
+  más tarde; de cada día, el registro con más respuestas; los sets se unen.
+  Solo pasa cuando los dos lados han cambiado o la primera vez que un
+  dispositivo usa la cuenta. Limitación conocida: un set quitado en un
+  dispositivo vuelve si otro dispositivo lo tenía y los dos habían cambiado
+  a la vez.
+- **Cerrar sesión** sube lo pendiente y deja los datos en el navegador. La
+  siguiente cuenta que entre en ese navegador juntará sus datos con ellos.
+- Las claves de localStorage (`hanzivocab.*`, y `hanzivocab.sync` para el
+  estado de la sincronización) conservan el nombre antiguo de la app.
 
 ### Audio (futuro, fuera del MVP)
 

@@ -1,0 +1,92 @@
+/**
+ * Copia de los datos del usuario que se sincronizan: exactamente lo que hay
+ * guardado en localStorage (JSON ya parseado), con su número de versión. Así
+ * la nube guarda el mismo formato que el navegador y, al descargarla, los
+ * Providers la cargan y validan como siempre.
+ */
+import { createMemoryStorage, isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
+import { CUSTOM_SETS_STORAGE_KEY, loadCustomSets, saveCustomSets } from '../customSets/storage.ts'
+import { MY_STUDIES_STORAGE_KEY, loadMyStudies, saveMyStudies } from '../myStudies/storage.ts'
+import { PROGRESS_STORAGE_KEY, loadProgress, saveProgress } from '../progress/storage.ts'
+import { loadSettings, saveSettings, SETTINGS_STORAGE_KEY } from '../settings/settings.ts'
+import { mergeCustomSets, mergeMyStudies, mergeProgress } from './merge.ts'
+
+/** Lo que se sincroniza. Lo que es solo de este dispositivo (el aviso de instalar) no. */
+export const SYNCED_KEYS = [
+  PROGRESS_STORAGE_KEY,
+  MY_STUDIES_STORAGE_KEY,
+  CUSTOM_SETS_STORAGE_KEY,
+  SETTINGS_STORAGE_KEY,
+] as const
+
+export type SyncedKey = (typeof SYNCED_KEYS)[number]
+
+export type Snapshot = Partial<Record<SyncedKey, unknown>>
+
+export function isSyncedKey(key: string): key is SyncedKey {
+  return (SYNCED_KEYS as readonly string[]).includes(key)
+}
+
+export function readSnapshot(storage?: KeyValueStorage): Snapshot {
+  const snapshot: Snapshot = {}
+  for (const key of SYNCED_KEYS) {
+    const value = readJson(key, storage)
+    if (value !== undefined) snapshot[key] = value
+  }
+  return snapshot
+}
+
+/** Escribe lo que trae la copia. Lo que no trae se deja como estaba. */
+export function writeSnapshot(snapshot: Snapshot, storage?: KeyValueStorage): void {
+  for (const key of SYNCED_KEYS) {
+    if (key in snapshot) writeJson(key, snapshot[key], storage)
+  }
+}
+
+/** Convierte lo que llega de la nube en una copia, descartando lo que no sea de la app. */
+export function parseSnapshot(value: unknown): Snapshot {
+  if (!isRecord(value)) return {}
+  const snapshot: Snapshot = {}
+  for (const key of SYNCED_KEYS) {
+    if (key in value) snapshot[key] = value[key]
+  }
+  return snapshot
+}
+
+/**
+ * Junta dos copias (ver merge.ts). Los ajustes no se combinan: gana los del
+ * dispositivo que se está usando, y si no tiene, los de la nube.
+ */
+export function mergeSnapshots(local: Snapshot, remote: Snapshot): Snapshot {
+  const localData = toStorage(local)
+  const remoteData = toStorage(remote)
+  const merged = createMemoryStorage()
+
+  saveProgress(mergeProgress(loadProgress(localData), loadProgress(remoteData)), merged)
+  saveMyStudies(mergeMyStudies(loadMyStudies(localData), loadMyStudies(remoteData)), merged)
+  saveCustomSets(mergeCustomSets(loadCustomSets(localData), loadCustomSets(remoteData)), merged)
+  saveSettings(loadSettings(SETTINGS_STORAGE_KEY in local ? localData : remoteData), merged)
+
+  return readSnapshot(merged)
+}
+
+/**
+ * La copia tal como la guardarían los Providers. Hace falta al bajarla: la
+ * base de datos (jsonb) cambia el orden de las claves y, si no, el primer
+ * guardado de cada Provider parecería un cambio que hay que volver a subir.
+ */
+export function normalizeSnapshot(snapshot: Snapshot): Snapshot {
+  const data = toStorage(snapshot)
+  const normalized = createMemoryStorage()
+  if (PROGRESS_STORAGE_KEY in snapshot) saveProgress(loadProgress(data), normalized)
+  if (MY_STUDIES_STORAGE_KEY in snapshot) saveMyStudies(loadMyStudies(data), normalized)
+  if (CUSTOM_SETS_STORAGE_KEY in snapshot) saveCustomSets(loadCustomSets(data), normalized)
+  if (SETTINGS_STORAGE_KEY in snapshot) saveSettings(loadSettings(data), normalized)
+  return readSnapshot(normalized)
+}
+
+function toStorage(snapshot: Snapshot): KeyValueStorage {
+  const storage = createMemoryStorage()
+  writeSnapshot(snapshot, storage)
+  return storage
+}

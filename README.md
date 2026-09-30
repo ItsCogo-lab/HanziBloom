@@ -20,7 +20,9 @@ significados están en inglés.
   tonos, significado) y una ficha de cada entrada con tu progreso.
 - **Ajustes**: tamaño de sesión, borrar el progreso y créditos del dataset.
 
-El progreso se guarda en el navegador (localStorage); no hay servidor ni cuentas. La arquitectura y el plan están
+El progreso se guarda en el navegador (localStorage). Opcionalmente se puede
+iniciar sesión (Google o enlace por email) para sincronizarlo entre
+dispositivos con Supabase. La arquitectura y el plan están
 en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tecnologías
