@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_MASTERY_LEVEL, isReviewDue, scheduleNextReview } from './srs.ts'
+import { MAX_MASTERY_LEVEL, isReviewDue, scheduleKnownItem, scheduleNextReview } from './srs.ts'
 
 const now = new Date(2026, 8, 28, 18, 30)
 const midnight = (day: number, month = 8) => new Date(2026, month, day).toISOString()
@@ -20,6 +20,12 @@ describe('scheduleNextReview', () => {
 
     expect(schedule.masteryLevel).toBe(MAX_MASTERY_LEVEL)
     expect(schedule.nextReviewAt).toBe(midnight(28, 9)) // 30 días
+  })
+})
+
+describe('scheduleKnownItem', () => {
+  it('empieza en el nivel máximo y vuelve a los 30 días', () => {
+    expect(scheduleKnownItem(now)).toEqual({ masteryLevel: MAX_MASTERY_LEVEL, nextReviewAt: midnight(28, 9) })
   })
 })
 

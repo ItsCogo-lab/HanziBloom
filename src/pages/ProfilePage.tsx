@@ -6,6 +6,7 @@ import { StatCard } from '../components/ui/StatCard.tsx'
 import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
 import { getRecentlyStudied } from '../features/myStudies/myStudies.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
+import { HskLevelCard } from '../features/progress/components/HskLevelCard.tsx'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { getAnswerTotals, summarizeItems } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
@@ -67,6 +68,8 @@ export function ProfilePage() {
             })}
           </p>
         </section>
+
+        <HskLevelCard />
 
         <Card>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">

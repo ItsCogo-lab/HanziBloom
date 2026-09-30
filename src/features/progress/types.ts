@@ -12,6 +12,12 @@ export interface ItemProgress {
   /** Fechas en formato ISO 8601. */
   lastReviewedAt: string
   nextReviewAt: string
+  /**
+   * Vocabulario básico para el nivel HSK del usuario (ver applyHskLevel): no
+   * toca repasarlo nunca. Si se responde mal en un repaso voluntario, pierde
+   * la marca y vuelve a la repetición espaciada normal.
+   */
+  basic?: true
 }
 
 /** Respuestas de un día, para la racha y las estadísticas. */

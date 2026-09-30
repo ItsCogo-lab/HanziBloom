@@ -1,5 +1,7 @@
 import { isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
+import type { HskLevel } from '../dictionary/types.ts'
 import { DEFAULT_SESSION_SIZE } from '../practice/session.ts'
+import { HSK_LEVELS } from '../studySets/studySets.ts'
 import { isThemePreference, type ThemePreference } from './theme.ts'
 
 /** Tamaños de sesión que se pueden elegir en Ajustes. */
@@ -15,6 +17,8 @@ export interface Settings {
   toneNumbers: boolean
   /** Tema de colores: el del sistema, claro u oscuro. */
   theme: ThemePreference
+  /** Nivel HSK que el usuario dice tener (ver applyHskLevel), o `null` si no ha indicado ninguno. */
+  hskLevel: HskLevel | null
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,6 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
   toneColors: true,
   toneNumbers: false,
   theme: 'system',
+  hskLevel: null,
 }
 
 /** El script de index.html lee el tema de esta misma clave antes de cargar la app. */
@@ -45,6 +50,7 @@ export function loadSettings(storage?: KeyValueStorage): Settings {
     toneColors: typeof saved.toneColors === 'boolean' ? saved.toneColors : DEFAULT_SETTINGS.toneColors,
     toneNumbers: typeof saved.toneNumbers === 'boolean' ? saved.toneNumbers : DEFAULT_SETTINGS.toneNumbers,
     theme: isThemePreference(saved.theme) ? saved.theme : DEFAULT_SETTINGS.theme,
+    hskLevel: HSK_LEVELS.find((level) => level === saved.hskLevel) ?? DEFAULT_SETTINGS.hskLevel,
   }
 }
 

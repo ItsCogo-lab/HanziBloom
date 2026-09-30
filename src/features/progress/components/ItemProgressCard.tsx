@@ -25,7 +25,13 @@ export function ItemProgressCard({ item, now }: ItemProgressCardProps) {
           <Fact label={t('stats.mistakes')} value={item.timesWrong} />
           <Fact
             label={t('dictionary.nextReview')}
-            value={isDue(item, now) ? t('dictionary.dueNow') : formatDate(new Date(item.nextReviewAt))}
+            value={
+              item.basic
+                ? t('dictionary.basicNoReview')
+                : isDue(item, now)
+                  ? t('dictionary.dueNow')
+                  : formatDate(new Date(item.nextReviewAt))
+            }
           />
         </dl>
       ) : (

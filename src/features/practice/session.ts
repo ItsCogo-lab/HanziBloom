@@ -52,7 +52,8 @@ export function createSessionExercises(
  *
  * 1. Repasos pendientes, empezando por los que llevan más tiempo esperando.
  * 2. Elementos nuevos, al azar.
- * 3. Si aún faltan, elementos ya estudiados cuyo repaso está más cerca.
+ * 3. Si aún faltan, elementos ya estudiados cuyo repaso está más cerca
+ *    (los básicos, los últimos).
  *
  * Al final se barajan para que no salgan agrupados por tipo.
  */
@@ -71,9 +72,11 @@ export function selectSessionItems(
   const shuffled = shuffle(pool, random)
   const due = shuffled.filter((item) => isDue(progressOf(item), now)).sort(byNextReview)
   const fresh = shuffled.filter((item) => progressOf(item) === undefined)
+  // Los básicos (ver applyHskLevel) nunca tocan: van al final de todo
+  const isBasic = (item: StudyItem) => Number(progressOf(item)?.basic === true)
   const upcoming = shuffled
     .filter((item) => progressOf(item) !== undefined && !isDue(progressOf(item), now))
-    .sort(byNextReview)
+    .sort((a, b) => isBasic(a) - isBasic(b) || byNextReview(a, b))
 
   return shuffle([...due, ...fresh, ...upcoming].slice(0, size), random)
 }

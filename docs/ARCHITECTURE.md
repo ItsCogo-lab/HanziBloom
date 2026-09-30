@@ -136,7 +136,19 @@ Definiciones, sobre el progreso que ya existía (sin campos nuevos):
 
 Confirmar en Learn llama a `introduceItem`: crea el registro con nivel 0 y
 primer repaso hoy (el intervalo del nivel 0 del SRS). No es una respuesta, así
-que no suma a la actividad ni a la racha. Los filtros están en
+que no suma a la actividad ni a la racha. «I already know it» llama a
+`markItemKnown`: el registro entra en el nivel máximo (dominado) con el primer
+repaso a los 30 días (`scheduleKnownItem`). Sigue saliendo en Study, pero muy
+de vez en cuando; si se falla, vuelve al nivel 0 como cualquier otro.
+
+En Profile el usuario puede indicar su nivel HSK (`settings.hskLevel`).
+Guardarlo llama a `applyHskLevel`: lo que no tenía registro hasta ese nivel
+entra como dominado, con los primeros repasos repartidos entre 30 y 59 días
+para que no toquen todos el mismo día; lo que está dos niveles o más por debajo
+(`BASIC_LEVEL_GAP`) se marca `basic`: dominado y nunca pendiente (`isDue`
+devuelve `false`), aunque ya se estuviera estudiando. Un básico solo sale en un
+repaso voluntario, el último; si se falla, pierde la marca. Bajar de nivel quita
+la marca y esos elementos vuelven a repasarse como dominados. Los filtros están en
 `studySets/sessionItems.ts` (`getLearnableItems`, `getReviewItems`,
 `getSetSessionCounts`); ninguna página filtra por su cuenta.
 
