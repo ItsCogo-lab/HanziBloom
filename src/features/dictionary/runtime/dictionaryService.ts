@@ -245,7 +245,7 @@ export async function loadDictionaryChunk(
       key,
       data: { version, chunk },
       fetchedAt: Date.now(),
-      source: `HanziVocab-Data@${version}`,
+      source: `HanziDict@${version}`,
     })
     return chunk
   } catch (error) {

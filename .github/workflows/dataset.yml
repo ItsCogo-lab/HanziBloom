@@ -9,7 +9,7 @@ name: Dataset
 # - En main (lanzado a mano): solo comprueba que el dataset está al día.
 #
 # El diccionario completo no va en este repositorio: queda como artefacto
-# («data-release») y se publica en HanziVocab-Data con el workflow «Publish data».
+# («data-release») y se publica en HanziDict con el workflow «Publish data».
 
 on:
   workflow_dispatch:

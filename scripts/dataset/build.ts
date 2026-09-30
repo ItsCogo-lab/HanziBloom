@@ -1,5 +1,5 @@
 /**
- * Genera el dataset de HanziVocab a partir de fuentes abiertas.
+ * Genera el dataset de HanziBloom a partir de fuentes abiertas.
  *
  *   fuentes (.cache) → adaptadores (sources/) → fusión (fusion.ts) → validación → src/data
  *

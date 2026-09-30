@@ -1,12 +1,12 @@
 # Fuentes de datos
 
-Todos los datos lingüísticos de HanziVocab vienen de fuentes abiertas. Nada
+Todos los datos lingüísticos de HanziBloom vienen de fuentes abiertas. Nada
 se escribe a mano ni se genera con IA. Hay dos formas de llegar a la app:
 
 - **Generados con un script** (`npm run data:build`): HSK 1-4 y las copias
   locales de trazos y frases de HSK se suben a este repositorio; el
   diccionario completo se publica en un repositorio de datos aparte
-  (`ItsCogo-lab/HanziVocab-Data`) y la app lo lee en tiempo de ejecución. Si
+  (`ItsCogo-lab/HanziDict`) y la app lo lee en tiempo de ejecución. Si
   hay que corregir algo, se cambia el script y se vuelve a generar.
 - **Pedidos en tiempo de ejecución** a la fuente, con caché en el navegador:
   el diccionario completo (repositorio de datos en jsDelivr), el orden de
@@ -247,7 +247,7 @@ gzip; el archivo más grande, unos 200 KB con gzip).
 No hay ninguna API pública de CC-CEDICT, Unihan ni Make Me a Hanzi que se
 pueda usar desde el navegador (ver la tabla de abajo), así que el diccionario
 completo se publica en un repositorio público aparte,
-[ItsCogo-lab/HanziVocab-Data](https://github.com/ItsCogo-lab/HanziVocab-Data),
+[ItsCogo-lab/HanziDict](https://github.com/ItsCogo-lab/HanziDict),
 y la app lo lee por jsDelivr. Así se actualiza sin tocar la app, y el
 repositorio de la app no lleva 18 MB de datos.
 
@@ -255,7 +255,7 @@ repositorio de la app no lleva 18 MB de datos.
   generación y versión de cada fuente) y `v1/<versión>/dictionary/0.json` a
   `31.json`. Una carpeta de versión no se modifica nunca; se conservan las dos
   anteriores.
-- **Endpoints:** `https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v1/manifest.json`
+- **Endpoints:** `https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v1/manifest.json`
   y `…@main/v1/<versión>/dictionary/<n>.json`.
 - **Licencia y atribución:** las de las fuentes (CC BY-SA 4.0 por
   CC-CEDICT; Unicode License v3; LGPL 3.0+; Arphic), escritas en su README.
@@ -279,11 +279,11 @@ Publicar una versión nueva (sin PR ni build de la app):
 1. Lanzar a mano el workflow **Publish data** con la versión nueva (mayor que
    la actual, p. ej. `1.1.0`). Descarga las fuentes, genera y valida el
    diccionario, escribe la carpeta de la versión y el manifiesto en
-   HanziVocab-Data, hace commit en su `main` y avisa a jsDelivr. Necesita el
+   HanziDict, hace commit en su `main` y avisa a jsDelivr. Necesita el
    secreto `DATA_REPO_TOKEN` (un token fine-grained con «Contents: Read and
-   write» solo sobre HanziVocab-Data).
+   write» solo sobre HanziDict).
 2. O a mano: `npm run data:fetch && npm run data:build && npm run data:validate`
-   y `npm run data:release -- 1.1.0 <copia de HanziVocab-Data>`, y después
+   y `npm run data:release -- 1.1.0 <copia de HanziDict>`, y después
    commit y push en ese repositorio.
 
 Si cambia el formato de los datos de forma incompatible, se sube `DATA_FORMAT`
@@ -423,7 +423,7 @@ modificadores), 了 (acción terminada y cambio de estado), 吗, 呢 («¿y tú?
 | `src/data/hsk1/` a `hsk4/`: `characters.ts`, `words.ts` | Caracteres y palabras de cada nivel | En el bundle, en un archivo aparte del código de la app |
 | `public/strokes/*.json` | Trazos de los caracteres de HSK 1-4 | Solo si jsDelivr no responde |
 | `public/examples/hsk1.json` a `hsk4.json` | Frases de ejemplo de las palabras de cada nivel | Solo si Tatoeba no responde o no tiene frases |
-| `data-release/dictionary/0.json` a `31.json` (no se sube) | Diccionario completo, fuera de HSK 1-4 | Se publica en HanziVocab-Data; la app pide un archivo al abrir una ficha o un set con esas entradas y todos al buscar |
+| `data-release/dictionary/0.json` a `31.json` (no se sube) | Diccionario completo, fuera de HSK 1-4 | Se publica en HanziDict; la app pide un archivo al abrir una ficha o un set con esas entradas y todos al buscar |
 | `docs/DATA_CONFLICTS.md` | Desacuerdos entre fuentes | Para revisarlo |
 | `src/data/topics.ts` (no generado) | Temas curados a mano | En el bundle, con el dataset |
 
@@ -436,7 +436,7 @@ generados mantienen la de su fuente:
   (Unicode License v3) y Make Me a Hanzi (LGPL 3.0+).
 - `public/strokes/`: Arphic Public License.
 - `public/examples/`: CC BY 2.0 FR.
-- HanziVocab-Data (diccionario completo): como `src/data/`.
+- HanziDict (diccionario completo): como `src/data/`.
 
 Aviso de Unicode: Copyright © Unicode, Inc. Los datos de Unihan se
 distribuyen bajo los términos de la Unicode License v3

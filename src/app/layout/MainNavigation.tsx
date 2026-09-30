@@ -17,9 +17,7 @@ export function MainNavigation() {
         to="/"
         className="mb-8 hidden items-center gap-3 rounded-xl px-3 text-lg font-semibold tracking-tight md:flex"
       >
-        <span aria-hidden="true" className="font-hanzi text-3xl text-accent">
-          汉
-        </span>
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="size-9" />
         {t('app.name')}
       </Link>
 

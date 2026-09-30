@@ -2,7 +2,7 @@
  * `npm run data:release -- <versión> <copia del repositorio de datos> [carpeta de trozos]`
  *
  * Prepara una versión nueva del diccionario completo en una copia local de
- * ItsCogo-lab/HanziVocab-data. Después hay que hacer commit, crear la etiqueta
+ * ItsCogo-lab/HanziDict. Después hay que hacer commit, crear la etiqueta
  * con la misma versión y subir las dos cosas (lo hace el workflow «Publish data»).
  */
 import { DATA_RELEASE_DIR, writeDataRelease } from './dataRelease.ts'

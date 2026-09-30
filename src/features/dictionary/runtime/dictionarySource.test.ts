@@ -57,7 +57,7 @@ describe('parseChunk', () => {
 
 describe('URLs del repositorio de datos', () => {
   it('pide el manifiesto del formato 1 y los trozos de la carpeta de su versión', () => {
-    const base = 'https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v1'
+    const base = 'https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v1'
     expect(manifestUrl()).toBe(`${base}/manifest.json`)
     expect(chunkUrl('1.2.3', 7)).toBe(`${base}/1.2.3/dictionary/7.json`)
   })
@@ -83,7 +83,7 @@ describe('fetchManifest y fetchChunk', () => {
     ])
     expect(await fetchManifest({ fetchFn: fake.fetch })).toEqual({
       data: manifest,
-      source: 'ItsCogo-lab/HanziVocab-Data@1.0.0',
+      source: 'ItsCogo-lab/HanziDict@1.0.0',
     })
     expect(await fetchChunk('1.0.0', penguin, { fetchFn: fake.fetch })).toEqual({ characters: [qi], words: [qie] })
   })

@@ -1,6 +1,6 @@
 name: Deploy
 
-# Publica la app en GitHub Pages (https://itscogo-lab.github.io/HanziVocab/)
+# Publica la app en GitHub Pages (https://itscogo-lab.github.io/HanziBloom/)
 # cada vez que cambia main. Requiere Settings → Pages → Source: GitHub Actions.
 on:
   push:

@@ -1,4 +1,4 @@
-# Arquitectura de HanziVocab
+# Arquitectura de HanziBloom
 
 Este documento recoge el análisis inicial (Fase 1), la arquitectura propuesta y el
 plan técnico del MVP. Es un documento vivo: cuando una decisión cambie, se
@@ -198,7 +198,7 @@ un servidor más adelante basta con cambiarlo.
 
 HSK 1-4 va en el bundle (`src/data`), porque lo usan los sets, los ejercicios
 y las estadísticas. El resto de CC-CEDICT (unas 108.000 palabras y 9.900
-caracteres) está en el repositorio de datos `ItsCogo-lab/HanziVocab-Data`
+caracteres) está en el repositorio de datos `ItsCogo-lab/HanziDict`
 (servido por jsDelivr, ver «Fuentes en tiempo de ejecución»), repartido en 32
 archivos por el primer carácter (`fullDictionary.ts`), y se pide solo cuando
 hace falta:
@@ -283,10 +283,15 @@ paddings usan valores pequeños que crecen desde `sm:`. Los campos de formulario
 miden 16 px fijos para que Safari no haga zoom al escribir.
 
 Se puede instalar como app (`public/manifest.webmanifest`). `start_url` y
-`scope` son relativos (`./`), así valen igual en `/` que en `/HanziVocab/`.
-Los iconos (`public/icons/`, `public/favicon.svg`) están dibujados con los
-trazos de 汉 de hanzi-writer-data, no con una fuente, para que se vean igual en
-todas partes. No hay service worker: los navegadores ya no lo exigen para
+`scope` son relativos (`./`), así valen igual en `/` que en `/HanziBloom/`.
+El logotipo (`public/logo.svg`, y con fondo en `public/favicon.svg` y
+`public/icons/`) es una flor de cinco pétalos: cada pétalo es el trazo punto
+(丶) de 汉 de hanzi-writer-data, pintado con el color de uno de los cinco tonos.
+Es un dibujo, no una fuente, para que se vea igual en todas partes.
+
+Las claves de localStorage (`hanzivocab.*`) y la base de IndexedDB
+(`hanzivocab-dictionary`) conservan el nombre antiguo de la app a propósito:
+cambiarlas haría perder el progreso ya guardado. No hay service worker: los navegadores ya no lo exigen para
 instalar, y así cada despliegue llega sin cachés que lo retrasen (el
 diccionario ya se guarda en IndexedDB).
 
