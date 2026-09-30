@@ -9,19 +9,19 @@ afterEach(() => {
 })
 
 describe('resolveTheme', () => {
-  it('con «sistema» sigue al dispositivo', () => {
+  it('with "system" follows the device', () => {
     expect(resolveTheme('system', true)).toBe('dark')
     expect(resolveTheme('system', false)).toBe('light')
   })
 
-  it('una elección explícita manda sobre el dispositivo', () => {
+  it('an explicit choice overrides the device', () => {
     expect(resolveTheme('light', true)).toBe('light')
     expect(resolveTheme('dark', false)).toBe('dark')
   })
 })
 
 describe('isThemePreference', () => {
-  it('solo acepta las opciones disponibles', () => {
+  it('only accepts the available options', () => {
     expect(isThemePreference('dark')).toBe(true)
     expect(isThemePreference('sepia')).toBe(false)
     expect(isThemePreference(undefined)).toBe(false)
@@ -29,19 +29,19 @@ describe('isThemePreference', () => {
 })
 
 describe('systemPrefersDark', () => {
-  it('lee la preferencia del dispositivo', () => {
+  it('reads the device preference', () => {
     vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === '(prefers-color-scheme: dark)' }))
     expect(systemPrefersDark()).toBe(true)
   })
 
-  it('sin matchMedia asume tema claro', () => {
+  it('assumes light theme without matchMedia', () => {
     vi.stubGlobal('matchMedia', undefined)
     expect(systemPrefersDark()).toBe(false)
   })
 })
 
 describe('applyTheme', () => {
-  it('marca el tema en <html> y pinta la barra del navegador con el fondo', () => {
+  it('sets the theme on <html> and paints the browser bar with the background', () => {
     const meta = document.createElement('meta')
     meta.name = 'theme-color'
     meta.content = '#fbf8f3'
@@ -57,7 +57,7 @@ describe('applyTheme', () => {
 })
 
 describe('index.html', () => {
-  it('lee el tema de la misma clave donde la app guarda los ajustes', () => {
+  it('reads the theme from the same key where the app saves settings', () => {
     expect(indexHtml).toContain(`localStorage.getItem('${SETTINGS_STORAGE_KEY}')`)
   })
 })

@@ -36,7 +36,7 @@ function getOptions() {
 }
 
 describe('ChoiceQuestion', () => {
-  it('meaning-choice: muestra el hanzi y los significados como opciones', () => {
+  it('meaning-choice: shows the hanzi and the meanings as options', () => {
     renderQuestion('meaning-choice')
 
     expect(screen.getByText('二')).toBeInTheDocument()
@@ -44,29 +44,29 @@ describe('ChoiceQuestion', () => {
     expect(getOptions().map((option) => option.textContent)).toEqual(['one', 'two', 'three', 'four'])
   })
 
-  it('pinyin-choice: las opciones son pinyin', () => {
+  it('pinyin-choice: the options are pinyin', () => {
     renderQuestion('pinyin-choice')
 
     expect(screen.getByRole('heading', { name: 'How is it pronounced?' })).toBeInTheDocument()
     expect(getOptions().map((option) => option.textContent)).toEqual(['yī', 'èr', 'sān', 'sì'])
   })
 
-  it('hanzi-choice: muestra el significado y los hanzi como opciones', () => {
+  it('hanzi-choice: shows the meaning and the hanzi as options', () => {
     renderQuestion('hanzi-choice')
 
     expect(screen.getByText('two')).toBeInTheDocument()
-    // El hanzi solo aparece en las opciones, no en la pregunta
+    // The hanzi only appears in the options, not in the question
     expect(screen.getAllByText('二')).toHaveLength(1)
     expect(getOptions().map((option) => option.textContent)).toEqual(['一', '二', '三', '四'])
   })
 
-  it('al acertar lo dice, marca la opción y «Continue» responde true', async () => {
+  it('on a correct answer says so, marks the option and "Continue" answers true', async () => {
     const user = userEvent.setup()
     const onAnswer = renderQuestion('meaning-choice')
 
     await user.click(screen.getByRole('button', { name: 'two' }))
 
-    // El foco pasa a «Continue», que lleva la corrección como descripción
+    // Focus moves to "Continue", which carries the feedback as its description
     const continueButton = screen.getByRole('button', { name: 'Continue' })
     expect(continueButton).toHaveFocus()
     expect(continueButton).toHaveAccessibleDescription('Correct! 二 èr two')
@@ -77,7 +77,7 @@ describe('ChoiceQuestion', () => {
     expect(onAnswer).toHaveBeenCalledWith(true)
   })
 
-  it('al fallar marca la elegida y la correcta, y «Continue» responde false', async () => {
+  it('on a wrong answer marks the picked and the correct one, and "Continue" answers false', async () => {
     const user = userEvent.setup()
     const onAnswer = renderQuestion('meaning-choice')
 
@@ -86,7 +86,7 @@ describe('ChoiceQuestion', () => {
     expect(screen.getByText('Not quite')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'four (your answer)' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'two (correct answer)' })).toBeInTheDocument()
-    // No se puede cambiar la respuesta
+    // The answer cannot be changed
     expect(getOptions().every((option) => option.hasAttribute('disabled'))).toBe(true)
 
     await user.click(screen.getByRole('button', { name: 'Continue' }))

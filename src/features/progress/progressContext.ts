@@ -7,20 +7,20 @@ import type { ProgressData } from './types.ts'
 export interface ProgressContextValue {
   progress: ProgressData
   recordAnswer: (itemId: StudyItemId, correct: boolean) => void
-  /** Marca un elemento como aprendido (sesión Learn). */
+  /** Marks an item as learned (Learn session). */
   introduceItem: (itemId: StudyItemId) => void
-  /** Marca un elemento como ya dominado (sesión Learn): vuelve a salir muy de vez en cuando. */
+  /** Marks an item as already mastered (Learn session): it comes up again only very occasionally. */
   markItemKnown: (itemId: StudyItemId) => void
-  /** Aplica el nivel HSK del usuario a esos elementos (ver applyHskLevel en progress.ts). */
+  /** Applies the user's HSK level to those items (see applyHskLevel in progress.ts). */
   applyHskLevel: (items: readonly LeveledItem[], level: HskLevel | null) => void
   resetProgress: () => void
 }
 
 export const ProgressContext = createContext<ProgressContextValue | null>(null)
 
-/** Progreso del usuario y acciones para cambiarlo. Requiere un <ProgressProvider> por encima. */
+/** The user's progress and actions to change it. Requires a <ProgressProvider> above. */
 export function useProgress(): ProgressContextValue {
   const value = use(ProgressContext)
-  if (!value) throw new Error('useProgress debe usarse dentro de <ProgressProvider>')
+  if (!value) throw new Error('useProgress must be used within <ProgressProvider>')
   return value
 }

@@ -10,7 +10,7 @@ import { ToneHanzi } from '../../dictionary/components/ToneHanzi.tsx'
 
 type SessionSummaryProps = {
   summary: Summary
-  /** Elementos que el usuario no sabía, para repasarlos de un vistazo. */
+  /** Items the user did not know, to review them at a glance. */
   missedItems: readonly StudyItem[]
   onRestart: () => void
 }

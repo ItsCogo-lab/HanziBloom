@@ -3,10 +3,10 @@ import { Link } from 'react-router'
 import type { StudyItem } from '../studyItem.ts'
 
 /**
- * Qué hacer al pulsar un carácter o una palabra dentro de una ficha:
- * - `getHref`: ir a su página (la ficha normal, /characters/好).
- * - `onOpen`: abrirla en el mismo sitio, sin cambiar de página (el
- *   diccionario de la sesión de estudio, que no debe salir de la sesión).
+ * What to do when a character or word is pressed inside an entry page:
+ * - `getHref`: go to its page (the normal entry page, /characters/好).
+ * - `onOpen`: open it in place, without changing page (the study
+ *   session's dictionary, which must not leave the session).
  */
 export type EntryOpener = { getHref: (item: StudyItem) => string } | { onOpen: (item: StudyItem) => void }
 
@@ -17,7 +17,7 @@ type EntryLinkProps = {
   children: ReactNode
 }
 
-/** Un enlace a una ficha, o un botón si la ficha se abre sin navegar. */
+/** A link to an entry page, or a button if the entry opens without navigating. */
 export function EntryLink({ item, opener, className, children }: EntryLinkProps) {
   if ('onOpen' in opener) {
     return (

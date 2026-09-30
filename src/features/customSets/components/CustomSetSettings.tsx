@@ -8,7 +8,7 @@ import type { StudySet } from '../../studySets/types.ts'
 import { useCustomSets } from '../customSetsContext.ts'
 import { CustomSetDetailsForm } from './CustomSetDetailsForm.tsx'
 
-/** Editar el nombre y la descripción de un set propio, o borrarlo. */
+/** Edit the name and description of a custom set, or delete it. */
 export function CustomSetSettings({ set }: { set: StudySet }) {
   const { updateDetails, deleteSet } = useCustomSets()
   const { removeSet } = useMyStudies()
@@ -37,14 +37,14 @@ export function CustomSetSettings({ set }: { set: StudySet }) {
         <div className="flex flex-col gap-3 rounded-xl border border-danger/40 bg-danger/5 p-4">
           <p>{t('custom.deleteConfirm', { name: set.name })}</p>
           <div className="flex flex-wrap gap-3">
-            {/* El foco va a «Cancel»: pulsar Enter sin mirar no debe borrar nada */}
+            {/* Focus goes to "Cancel": pressing Enter without looking must not delete anything */}
             <Button ref={cancelRef} variant="secondary" onClick={() => setMode('idle')}>
               {t('common.cancel')}
             </Button>
             <Button
               variant="danger"
               onClick={() => {
-                // El progreso de sus elementos no se toca: es el mismo que en los demás sets
+                // Its items' progress is left untouched: it is the same as in the other sets
                 removeSet(set.id)
                 deleteSet(set.id)
                 navigate('/study/custom')

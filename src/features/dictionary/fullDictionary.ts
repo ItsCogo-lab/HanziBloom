@@ -2,27 +2,27 @@ import type { StudyItemId } from './studyItem.ts'
 import type { Character, Word } from './types.ts'
 
 /*
- * El diccionario completo (todo CC-CEDICT menos lo que ya está en HSK 1-4)
- * no va en el bundle: son más de 100.000 entradas. `npm run data:build` lo
- * reparte en CHUNK_COUNT archivos (0.json ... 31.json), que se publican en el
- * repositorio de datos (runtime/dictionarySource.ts), y la app pide solo los
- * que necesita.
+ * The full dictionary (all of CC-CEDICT minus what's already in HSK 1-4)
+ * isn't in the bundle: it's over 100,000 entries. `npm run data:build`
+ * splits it into CHUNK_COUNT files (0.json ... 31.json), which are published
+ * to the data repository (runtime/dictionarySource.ts), and the app requests
+ * only the ones it needs.
  *
- * Cada entrada va en el trozo de su primer carácter. Así, sabiendo el hanzi,
- * se sabe qué archivo pedir sin ningún índice aparte, y un carácter viaja
- * junto a las palabras que empiezan por él.
+ * Each entry goes in the chunk of its first character. That way, knowing the
+ * hanzi tells you which file to request without a separate index, and a
+ * character travels together with the words that start with it.
  */
 
-/** Número de trozos del diccionario completo. Si cambia, hay que regenerar el dataset. */
+/** Number of chunks in the full dictionary. If it changes, the dataset must be regenerated. */
 export const CHUNK_COUNT = 32
 
-/** Un trozo del diccionario completo. Sus entradas no tienen nivel HSK. */
+/** A chunk of the full dictionary. Its entries have no HSK level. */
 export interface DictionaryChunk {
   characters: Character[]
   words: Word[]
 }
 
-/** Trozo en el que va una entrada: el punto de código de su primer carácter, módulo CHUNK_COUNT. */
+/** Chunk an entry goes in: the code point of its first character, modulo CHUNK_COUNT. */
 export function getChunkIndex(hanzi: string): number {
   return hanzi.codePointAt(0)! % CHUNK_COUNT
 }
@@ -31,7 +31,7 @@ export function chunkFileName(index: number): string {
   return `${index}.json`
 }
 
-/** El hanzi de un elemento de estudio: "word:长[cháng]" → "长". */
+/** The hanzi of a study item: "word:长[cháng]" → "长". */
 export function getItemHanzi(itemId: StudyItemId): string {
   const id = itemId.slice(itemId.indexOf(':') + 1)
   const bracket = id.indexOf('[')
@@ -39,8 +39,8 @@ export function getItemHanzi(itemId: StudyItemId): string {
 }
 
 /**
- * Trozos que hacen falta para mostrar un elemento: el suyo y los de sus
- * caracteres (la ficha de una palabra enseña cada carácter).
+ * Chunks needed to show an item: its own and those of its characters
+ * (a word's entry page shows each character).
  */
 export function getChunksFor(itemId: StudyItemId): number[] {
   return [...new Set(Array.from(getItemHanzi(itemId)).map(getChunkIndex))]

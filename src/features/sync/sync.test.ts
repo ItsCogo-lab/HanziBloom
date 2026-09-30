@@ -6,7 +6,7 @@ import { readSnapshot, type Snapshot } from './snapshot.ts'
 import { syncUserData, type CloudCopy, type CloudStore } from './sync.ts'
 import { loadSyncState, markSyncDirty } from './syncState.ts'
 
-/** Nube en memoria: cada guardado tiene un `updatedAt` nuevo. */
+/** In-memory cloud: every save gets a new `updatedAt`. */
 function fakeCloud(initial: CloudCopy | null = null): CloudStore & { copy: CloudCopy | null; saves: number } {
   const cloud = {
     copy: initial,
@@ -33,7 +33,7 @@ function storageWithAnswer(itemId: 'char:你' | 'char:好', date: Date) {
 const noChanges = () => 0
 
 describe('syncUserData', () => {
-  it('la primera vez sube lo local a una nube vacía', async () => {
+  it('the first time, pushes local data to an empty cloud', async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
 
@@ -44,7 +44,7 @@ describe('syncUserData', () => {
     expect(loadSyncState(storage)).toEqual({ userId: 'user-1', syncedAt: 'T101', dirty: false })
   })
 
-  it('en un dispositivo nuevo junta lo local con la nube', async () => {
+  it('on a new device, merges local data with the cloud', async () => {
     const other = storageWithAnswer('char:好', monday)
     const cloud = fakeCloud({ data: readSnapshot(other), updatedAt: 'T1' })
     const storage = storageWithAnswer('char:你', tuesday)
@@ -56,12 +56,12 @@ describe('syncUserData', () => {
     expect(cloud.copy?.data).toEqual(readSnapshot(storage))
   })
 
-  it('baja los cambios de otro dispositivo sin subir nada', async () => {
+  it("pulls another device's changes without pushing anything", async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
     await syncUserData({ cloud, userId: 'user-1', storage, changeCount: noChanges })
 
-    // Otro dispositivo sube su progreso
+    // Another device pushes its progress
     const other = storageWithAnswer('char:好', tuesday)
     cloud.copy = { data: readSnapshot(other), updatedAt: 'T2' }
 
@@ -73,7 +73,7 @@ describe('syncUserData', () => {
     expect(loadSyncState(storage)?.syncedAt).toBe('T2')
   })
 
-  it('sube los cambios locales pendientes', async () => {
+  it('pushes pending local changes', async () => {
     const storage = storageWithAnswer('char:你', monday)
     const cloud = fakeCloud()
     await syncUserData({ cloud, userId: 'user-1', storage, changeCount: noChanges })
@@ -87,7 +87,7 @@ describe('syncUserData', () => {
     expect(loadSyncState(storage)?.dirty).toBe(false)
   })
 
-  it('si hay cambios mientras se sube, quedan pendientes para la próxima vez', async () => {
+  it('changes made during a push stay pending for next time', async () => {
     const storage = storageWithAnswer('char:你', monday)
     let changes = 0
     const cloud = fakeCloud()

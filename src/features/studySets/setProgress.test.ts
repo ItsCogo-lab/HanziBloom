@@ -11,7 +11,7 @@ function setOf(id: string, itemIds: StudyItemId[]): StudySet {
   return { id, type: 'topic', name: id, description: id, itemIds }
 }
 
-/** Responde bien `times` veces: con 4 aciertos seguidos el elemento queda dominado. */
+/** Answers correctly `times` times: with 4 correct in a row the item is mastered. */
 function answerCorrectly(progress: ProgressData, itemId: StudyItemId, times: number): ProgressData {
   let result = progress
   for (let i = 0; i < times; i++) result = recordAnswer(result, itemId, true, now)
@@ -19,10 +19,10 @@ function answerCorrectly(progress: ProgressData, itemId: StudyItemId, times: num
 }
 
 describe('getSetProgress', () => {
-  it('se calcula con el progreso de cada elemento: dominados, aprendiendo y sin empezar', () => {
+  it('is computed from each item\'s progress: mastered, learning and not started', () => {
     let progress = createEmptyProgress()
-    progress = answerCorrectly(progress, 'word:苹果', 4) // dominado (nivel 4)
-    progress = answerCorrectly(progress, 'word:米饭', 1) // aprendiendo
+    progress = answerCorrectly(progress, 'word:苹果', 4) // mastered (level 4)
+    progress = answerCorrectly(progress, 'word:米饭', 1) // learning
     const set = setOf('food', ['word:苹果', 'word:米饭', 'word:茶', 'word:水'])
 
     expect(getSetProgress(set, progress, now)).toMatchObject({
@@ -35,7 +35,7 @@ describe('getSetProgress', () => {
     })
   })
 
-  it('un elemento en dos sets cuenta en los dos a la vez (no hay progreso por set)', () => {
+  it('an item in two sets counts in both at once (there is no per-set progress)', () => {
     const progress = answerCorrectly(createEmptyProgress(), 'word:苹果', 4)
     const hsk = setOf('hsk', ['word:苹果', 'word:你好'])
     const food = setOf('food', ['word:苹果'])
@@ -44,7 +44,7 @@ describe('getSetProgress', () => {
     expect(getSetProgress(food, progress, now).ratio).toBe(1)
   })
 
-  it('un set vacío tiene progreso 0', () => {
+  it('an empty set has progress 0', () => {
     expect(getSetProgress(setOf('empty', []), createEmptyProgress(), now).ratio).toBe(0)
   })
 })

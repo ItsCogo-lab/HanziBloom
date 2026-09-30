@@ -13,13 +13,13 @@ import { getSetProgress } from '../../features/studySets/setProgress.ts'
 import { getStudySet } from '../../features/studySets/studySets.ts'
 import { t } from '../../i18n/index.ts'
 
-/** Los sets que el usuario está estudiando, con su progreso y acciones. */
+/** The sets the user is studying, with their progress and actions. */
 export function MyStudiesPage() {
   const { myStudies } = useMyStudies()
   const studySets = useStudySets()
   const { progress } = useProgress()
   const now = new Date()
-  // Un set guardado que ya no existe (p. ej. un tema retirado) simplemente no se muestra
+  // A saved set that no longer exists (e.g. a retired topic) is simply not shown
   const sets = myStudies.sets.map(({ setId }) => getStudySet(studySets, setId)).filter((set) => set !== undefined)
 
   if (sets.length === 0) {

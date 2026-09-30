@@ -1,14 +1,14 @@
 /**
- * Genera el dataset de HanziBloom a partir de fuentes abiertas.
+ * Builds the HanziBloom dataset from open sources.
  *
- *   fuentes (.cache) → adaptadores (sources/) → fusión (fusion.ts) → validación → src/data
+ *   sources (.cache) → adapters (sources/) → fusion (fusion.ts) → validation → src/data
  *
- * Uso:
- *   npm run data:fetch   # descarga las fuentes (versiones fijadas)
- *   npm run data:build   # genera los archivos de datos
+ * Usage:
+ *   npm run data:fetch   # downloads the sources (pinned versions)
+ *   npm run data:build   # generates the data files
  *
- * El script no inventa nada: si algo no cuadra, se detiene y dice qué.
- * Fuentes y licencias en docs/DATA_SOURCES.md.
+ * The script makes nothing up: if something doesn't add up, it stops and says what.
+ * Sources and licenses in docs/DATA_SOURCES.md.
  */
 import { createReadStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createInterface } from 'node:readline'
@@ -38,9 +38,9 @@ const conflictsReport = join(rootDir, 'docs/DATA_CONFLICTS.md')
 const hanziWriterDataDir = join(rootDir, 'node_modules/hanzi-writer-data')
 
 /*
- * `--without=unihan,tatoeba` genera el dataset sin esas fuentes. Solo sirve
- * para probar el script donde no se pueden descargar (el entorno en la nube
- * de Claude): el resultado no se debe subir al repositorio.
+ * `--without=unihan,tatoeba` builds the dataset without those sources. It is only
+ * for testing the script where they cannot be downloaded (Claude's cloud
+ * environment): the result must not be committed to the repository.
  */
 const skippedSources = new Set(
   process.argv
@@ -49,10 +49,10 @@ const skippedSources = new Set(
     .split(',') ?? [],
 )
 for (const source of skippedSources) {
-  console.warn(`AVISO: se genera el dataset SIN ${source}. No subas este resultado al repositorio.`)
+  console.warn(`WARNING: building the dataset WITHOUT ${source}. Do not commit this result to the repository.`)
 }
 
-/** Lee un archivo descargado por data:fetch, o se detiene explicando qué falta. */
+/** Reads a file downloaded by data:fetch, or stops explaining what is missing. */
 function readSource(file: string): string {
   return readFileSync(sourcePath(file), 'utf8')
 }
@@ -60,20 +60,20 @@ function readSource(file: string): string {
 function sourcePath(file: string): string {
   const path = join(cacheDir, file)
   if (!existsSync(path)) {
-    console.error(`Falta ${path}. Ejecuta "npm run data:fetch" (ver docs/DATA_SOURCES.md).`)
+    console.error(`Missing ${path}. Run "npm run data:fetch" (see docs/DATA_SOURCES.md).`)
     process.exit(1)
   }
   return path
 }
 
-/** Lee un archivo grande línea a línea (las frases en inglés de Tatoeba ocupan cientos de MB). */
+/** Reads a large file line by line (Tatoeba's English sentences take up hundreds of MB). */
 async function* readLines(file: string): AsyncGenerator<string> {
   yield* createInterface({ input: createReadStream(sourcePath(file), 'utf8'), crlfDelay: Infinity })
 }
 
-// --- Fuentes base: lista HSK + CC-CEDICT ----------------------------------
+// --- Base sources: HSK list + CC-CEDICT ------------------------------------
 
-/** Niveles HSK 2.0 que se generan, cada uno en su carpeta src/data/hsk<n>/. */
+/** HSK 2.0 levels that are generated, each in its own src/data/hsk<n>/ folder. */
 const LEVELS: readonly HskLevel[] = [1, 2, 3, 4]
 
 const hskLists = LEVELS.map((level) => ({ level, words: parseHskList(readSource(`hsk-level-${level}.json`)) }))
@@ -82,17 +82,17 @@ const base = buildBaseEntries(hskLists, cedict)
 const { words, problems, duplicates, leftOut } = base
 const hanziSet = new Set(base.characters.map((character) => character.hanzi))
 
-// El resto de CC-CEDICT, para el diccionario completo (repositorio de datos, ver dataRelease.ts)
+// The rest of CC-CEDICT, for the full dictionary (data repository, see dataRelease.ts)
 const full = buildFullEntries(cedict, base)
 const allHanzi = new Set([...hanziSet, ...full.characters.map((character) => character.hanzi)])
 
-// --- Make Me a Hanzi: descomposición y etimología ------------------------
+// --- Make Me a Hanzi: decomposition and etymology ------------------------
 
 const makeMeAHanzi = parseMakeMeAHanzi(readSource('makemeahanzi-dictionary.txt'), allHanzi)
 
-// --- Unihan: radical, tradicional ----------------------------------------
-// También se lee para los radicales de Make Me a Hanzi, para poder
-// comparar radicales escritos en otra forma (亻 y 人 son el radical 9).
+// --- Unihan: radical, traditional ----------------------------------------
+// Also read for Make Me a Hanzi's radicals, so radicals written in
+// another form can be compared (亻 and 人 are radical 9).
 const makeMeAHanziRadicals = new Set([...makeMeAHanzi.values()].map((entry) => entry.radical))
 const unihan = skippedSources.has('unihan')
   ? new Map<string, UnihanCharacter>()
@@ -102,17 +102,17 @@ const unihan = skippedSources.has('unihan')
       new Set([...allHanzi, ...makeMeAHanziRadicals]),
     )
 
-// --- hanzi-writer-data: trazos (paquete npm fijado en package.json) --------
+// --- hanzi-writer-data: strokes (npm package pinned in package.json) -------
 
 /*
- * Los trazos de HSK 1-4 se copian a public/strokes/. Del resto solo se usa el
- * número de trazos: copiar los ~9.500 archivos del paquete ocuparía unos 40 MB.
+ * HSK 1-4 strokes are copied to public/strokes/. For the rest only the stroke
+ * count is used: copying the package's ~9,500 files would take about 40 MB.
  */
 const strokeData = new Map<string, StrokeData>()
 for (const hanzi of hanziSet) {
   const data = readStrokeData(hanziWriterDataDir, hanzi)
   if (data) strokeData.set(hanzi, data)
-  else problems.push(`Carácter ${hanzi}: sin datos de trazos en hanzi-writer-data`)
+  else problems.push(`Character ${hanzi}: no stroke data in hanzi-writer-data`)
 }
 const fullStrokeCounts = new Map<string, number>()
 for (const { hanzi } of full.characters) {
@@ -120,9 +120,9 @@ for (const { hanzi } of full.characters) {
   if (data) fullStrokeCounts.set(hanzi, data.strokeCount)
 }
 
-// --- Fusión y comprobaciones cruzadas --------------------------------------
+// --- Fusion and cross-checks ----------------------------------------------
 
-/** Añade a un carácter los campos de las demás fuentes y apunta los desacuerdos en `conflicts`. */
+/** Adds the other sources' fields to a character and records disagreements in `conflicts`. */
 function enrich(character: Character, strokeCount: number | undefined, conflicts: string[]): Character {
   const sources: CharacterSources = {
     unihan: unihan.get(character.hanzi),
@@ -146,12 +146,12 @@ const fullCharacters = full.characters.map((character) =>
   enrich(character, fullStrokeCounts.get(character.hanzi), fullConflicts),
 )
 
-// --- Tatoeba: frases de ejemplo --------------------------------------------
+// --- Tatoeba: example sentences -------------------------------------------
 
 /*
- * Un archivo de frases por nivel. Las frases de un nivel solo usan caracteres
- * de ese nivel o de los anteriores, para que quien estudia HSK 1 pueda
- * leerlas enteras.
+ * One sentence file per level. A level's sentences only use characters from
+ * that level or earlier ones, so someone studying HSK 1 can read them
+ * in full.
  */
 const examplesByLevel = new Map<HskLevel, ExampleSet>()
 if (!skippedSources.has('tatoeba')) {
@@ -166,7 +166,7 @@ if (!skippedSources.has('tatoeba')) {
     if (!link || !chinese.has(link[0])) continue
     translations.set(link[0], [...(translations.get(link[0]) ?? []), link[1]])
   }
-  // Del inglés solo se guardan las frases enlazadas con alguna china
+  // Of the English sentences, only those linked to a Chinese one are kept
   const wantedEnglish = new Set([...translations.values()].flat())
   const english = new Map<number, TatoebaSentence>()
   for await (const line of readLines('tatoeba/eng_sentences_detailed.tsv')) {
@@ -192,22 +192,22 @@ if (!skippedSources.has('tatoeba')) {
   }
 }
 
-// --- Validación y escritura ----------------------------------------------
+// --- Validation and writing ----------------------------------------------
 
-// HSK y el diccionario completo juntos: ids únicos entre los dos y caracteres de cada palabra presentes
+// HSK and the full dictionary together: ids unique across both and every word's characters present
 problems.push(...validateDictionaryData([...characters, ...fullCharacters], [...words, ...full.words]))
 for (const examples of examplesByLevel.values()) problems.push(...validateExampleSet(examples, words))
 if (problems.length > 0) {
-  console.error(`No se ha generado el dataset. Problemas:\n- ${problems.join('\n- ')}`)
+  console.error(`The dataset was not generated. Problems:\n- ${problems.join('\n- ')}`)
   process.exit(1)
 }
 
-const header = `// Generado por scripts/dataset/build.ts. No editar a mano: cambia el script y vuelve a generarlo.
-// Significados y lecturas: CC-CEDICT (https://cc-cedict.org), licencia CC BY-SA 4.0.
-// Radicales y formas tradicionales de los caracteres: Unihan de Unicode 18.0 (Unicode License v3).
-// Descomposición y etimología: Make Me a Hanzi (LGPL 3.0 o posterior).
-// Número de trazos: hanzi-writer-data (Arphic Public License).
-// Lista de palabras HSK 2.0: clem109/hsk-vocabulary (MIT). Detalles en docs/DATA_SOURCES.md.
+const header = `// Generated by scripts/dataset/build.ts. Do not edit by hand: change the script and regenerate.
+// Meanings and readings: CC-CEDICT (https://cc-cedict.org), license CC BY-SA 4.0.
+// Character radicals and traditional forms: Unicode 18.0 Unihan (Unicode License v3).
+// Decomposition and etymology: Make Me a Hanzi (LGPL 3.0 or later).
+// Stroke counts: hanzi-writer-data (Arphic Public License).
+// HSK 2.0 word list: clem109/hsk-vocabulary (MIT). Details in docs/DATA_SOURCES.md.
 `
 
 function writeDataFile(level: HskLevel, typeName: 'Character' | 'Word', entries: readonly (Character | Word)[]) {
@@ -233,14 +233,14 @@ for (const level of LEVELS) {
   writeDataFile(level, 'Word', words)
 }
 
-// Trazos: se copian tal cual, uno por carácter, para cargarlos al abrir la ficha.
-// Se borra la carpeta antes para que no queden archivos de caracteres que ya no están.
+// Strokes: copied as is, one per character, to load them when the entry card opens.
+// The folder is deleted first so no files remain for characters that are gone.
 rmSync(strokesDir, { recursive: true, force: true })
 mkdirSync(strokesDir, { recursive: true })
 for (const [hanzi, data] of strokeData) writeFileSync(join(strokesDir, strokeFileName(hanzi)), data.json)
 
-// Diccionario completo: CHUNK_COUNT archivos, cada entrada en el de su primer carácter
-// (getChunkIndex). Una entrada por línea para que los cambios se lean bien en git.
+// Full dictionary: CHUNK_COUNT files, each entry in the one for its first character
+// (getChunkIndex). One entry per line so changes read well in git.
 const chunks = Array.from({ length: CHUNK_COUNT }, () => ({ characters: [] as Character[], words: [] as Word[] }))
 for (const character of fullCharacters) chunks[getChunkIndex(character.hanzi)]!.characters.push(character)
 for (const word of full.words) chunks[getChunkIndex(word.hanzi)]!.words.push(word)
@@ -254,7 +254,7 @@ chunks.forEach((chunk, index) => {
   )
 })
 
-// Ejemplos: un JSON por nivel, que la ficha pide al abrirse.
+// Examples: one JSON per level, which the entry card requests when it opens.
 if (examplesByLevel.size > 0) mkdirSync(examplesDir, { recursive: true })
 for (const [level, examples] of examplesByLevel) {
   writeFileSync(join(examplesDir, `hsk${level}.json`), `${JSON.stringify(examples, null, 1)}\n`)
@@ -262,58 +262,58 @@ for (const [level, examples] of examplesByLevel) {
 
 writeFileSync(
   conflictsReport,
-  `# Desacuerdos entre fuentes
+  `# Disagreements between sources
 
-Generado por \`npm run data:build\`. No editar a mano.
+Generated by \`npm run data:build\`. Do not edit by hand.
 
-Cada línea es un dato en el que dos fuentes no coinciden. El dataset usa la
-fuente dueña del campo (ver docs/DATA_SOURCES.md) y aquí se deja constancia
-para revisarlo.
+Each line is a data point on which two sources disagree. The dataset uses the
+field's owning source (see docs/DATA_SOURCES.md), and it is recorded here
+for review.
 
-${conflicts.length === 0 ? 'Ninguno.' : conflicts.map((conflict) => `- ${conflict}`).join('\n')}
+${conflicts.length === 0 ? 'None.' : conflicts.map((conflict) => `- ${conflict}`).join('\n')}
 
-## Palabras de la lista HSK que no están en el dataset
+## HSK list words not in the dataset
 
-No hay una entrada de CC-CEDICT con ese hanzi y ese pinyin, así que no hay de
-dónde sacar su significado. Se dejan fuera en lugar de inventarlo.
+There is no CC-CEDICT entry with that hanzi and that pinyin, so there is
+nowhere to take its meaning from. They are left out rather than made up.
 
-${leftOut.length === 0 ? 'Ninguna.' : leftOut.map((word) => `- ${word}`).join('\n')}
+${leftOut.length === 0 ? 'None.' : leftOut.map((word) => `- ${word}`).join('\n')}
 
-## Diccionario completo: desacuerdos entre fuentes
+## Full dictionary: disagreements between sources
 
-Lo mismo que arriba, para los caracteres del diccionario completo (fuera de HSK 1-4).
+Same as above, for the characters of the full dictionary (outside HSK 1-4).
 
-${fullConflicts.length === 0 ? 'Ninguno.' : fullConflicts.map((conflict) => `- ${conflict}`).join('\n')}
+${fullConflicts.length === 0 ? 'None.' : fullConflicts.map((conflict) => `- ${conflict}`).join('\n')}
 
-## Diccionario completo: entradas de CC-CEDICT que se dejan fuera
+## Full dictionary: CC-CEDICT entries left out
 
-${full.leftOut.length === 0 ? 'Ninguna.' : full.leftOut.map((entry) => `- ${entry}`).join('\n')}
+${full.leftOut.length === 0 ? 'None.' : full.leftOut.map((entry) => `- ${entry}`).join('\n')}
 
-## Entradas repetidas en la lista HSK
+## Repeated entries in the HSK list
 
-La lista repite estas palabras con el mismo pinyin (con otro sentido). Se
-guardan una sola vez.
+The list repeats these words with the same pinyin (with another sense). They
+are stored only once.
 
-${duplicates.length === 0 ? 'Ninguna.' : duplicates.map((word) => `- ${word}`).join('\n')}
+${duplicates.length === 0 ? 'None.' : duplicates.map((word) => `- ${word}`).join('\n')}
 `,
 )
 
 for (const level of LEVELS) {
   const count = (entries: readonly { hskLevel?: HskLevel }[]) => entries.filter((entry) => entry.hskLevel === level).length
-  console.log(`HSK ${level}: ${count(words)} palabras y ${count(characters)} caracteres nuevos.`)
+  console.log(`HSK ${level}: ${count(words)} words and ${count(characters)} new characters.`)
 }
-console.log(`Dataset generado: ${words.length} palabras y ${characters.length} caracteres.`)
-if (leftOut.length > 0) console.warn(`Palabras sin entrada en CC-CEDICT, fuera del dataset: ${leftOut.join(', ')}.`)
+console.log(`Dataset generated: ${words.length} words and ${characters.length} characters.`)
+if (leftOut.length > 0) console.warn(`Words with no CC-CEDICT entry, left out of the dataset: ${leftOut.join(', ')}.`)
 if (duplicates.length > 0) {
-  console.log(`Entradas repetidas en la lista HSK, guardadas una vez: ${duplicates.join(', ')}.`)
+  console.log(`Repeated entries in the HSK list, stored once: ${duplicates.join(', ')}.`)
 }
 console.log(
-  `Diccionario completo (data-release/dictionary, ${CHUNK_COUNT} archivos, para publicar con data:release): ${full.words.length} palabras y ${fullCharacters.length} caracteres más.`,
+  `Full dictionary (data-release/dictionary, ${CHUNK_COUNT} files, to publish with data:release): ${full.words.length} more words and ${fullCharacters.length} more characters.`,
 )
-console.log(`Trazos copiados a public/strokes: ${strokeData.size}.`)
+console.log(`Strokes copied to public/strokes: ${strokeData.size}.`)
 for (const [level, examples] of examplesByLevel) {
-  console.log(`Frases de ejemplo de Tatoeba para HSK ${level} (${examples.exportDate}): ${examples.sentences.length}.`)
+  console.log(`Tatoeba example sentences for HSK ${level} (${examples.exportDate}): ${examples.sentences.length}.`)
 }
 if (conflicts.length > 0) {
-  console.warn(`${conflicts.length} desacuerdos entre fuentes (ver docs/DATA_CONFLICTS.md):\n- ${conflicts.join('\n- ')}`)
+  console.warn(`${conflicts.length} disagreements between sources (see docs/DATA_CONFLICTS.md):\n- ${conflicts.join('\n- ')}`)
 }

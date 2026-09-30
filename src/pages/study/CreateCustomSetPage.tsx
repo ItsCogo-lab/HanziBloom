@@ -5,7 +5,7 @@ import { CustomSetDetailsForm } from '../../features/customSets/components/Custo
 import { useCustomSets } from '../../features/customSets/customSetsContext.ts'
 import { t } from '../../i18n/index.ts'
 
-/** Crear un set: nombre y descripción; después se va a su página para añadir vocabulario. */
+/** Create a set: name and description; then it goes to its page to add vocabulary. */
 export function CreateCustomSetPage() {
   const { createSet } = useCustomSets()
   const navigate = useNavigate()

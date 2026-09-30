@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { makeMeAHanziFixture } from '../fixtures/makemeahanzi.ts'
 import { parseMakeMeAHanzi } from './makemeahanzi.ts'
 
-describe('adaptador de Make Me a Hanzi', () => {
+describe('Make Me a Hanzi adapter', () => {
   const data = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠', '木']))
 
-  it('da la descomposición, la etimología pictofonética y el radical de 柠', () => {
+  it('gives the decomposition, pictophonetic etymology and radical of 柠', () => {
     expect(data.get('柠')).toEqual({
       radical: '木',
       decomposition: '⿰木宁',
@@ -13,20 +13,20 @@ describe('adaptador de Make Me a Hanzi', () => {
     })
   })
 
-  it('no crea campos vacíos cuando la fuente no los tiene', () => {
+  it('does not create empty fields when the source does not have them', () => {
     expect(data.get('木')?.etymology).toEqual({ type: 'pictographic', hint: 'A tree' })
   })
 
-  it('solo lee los caracteres pedidos', () => {
+  it('only reads the requested characters', () => {
     expect(data.has('好')).toBe(false)
   })
 
-  it('descarta las descomposiciones desconocidas', () => {
+  it('discards unknown decompositions', () => {
     const line = JSON.stringify({ character: '𠀀', radical: '一', decomposition: '？', etymology: null })
     expect(parseMakeMeAHanzi(line, new Set(['𠀀'])).get('𠀀')).toEqual({ radical: '一' })
   })
 
-  it('quita los saltos de línea que trae alguna entrada en los componentes', () => {
+  it('removes the line breaks some entries have in their components', () => {
     const line = JSON.stringify({
       character: '瓣',
       radical: '瓜',
@@ -41,7 +41,7 @@ describe('adaptador de Make Me a Hanzi', () => {
     })
   })
 
-  it('falla con un tipo de etimología desconocido', () => {
+  it('fails with an unknown etymology type', () => {
     const line = JSON.stringify({ character: '𠀀', radical: '一', decomposition: '？', etymology: { type: 'other' } })
     expect(() => parseMakeMeAHanzi(line, new Set(['𠀀']))).toThrow(/other/)
   })

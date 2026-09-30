@@ -19,55 +19,55 @@ function storageWith(changes: Partial<typeof DEFAULT_SETTINGS>) {
   return storage
 }
 
-/** Clases de color de cada carácter de un hanzi pintado. */
+/** Color classes of each character in a rendered hanzi. */
 function toneClassesOf(text: string): (string | null)[] {
   const element = screen.getByText(hanzi(text))
   return [...element.childNodes].map((node) => (node instanceof HTMLElement ? node.className : null))
 }
 
 describe('ToneHanzi', () => {
-  it('colorea cada carácter con el color de su tono', () => {
+  it('colors each character with its tone\'s color', () => {
     renderWithProviders(<ToneHanzi entry={nihao} />)
     expect(toneClassesOf('你好')).toEqual(['text-tone-3', 'text-tone-3'])
   })
 
-  it('usa el gris del tono neutro', () => {
+  it('uses the neutral tone gray', () => {
     renderWithProviders(<ToneHanzi entry={xiexie} />)
     expect(toneClassesOf('谢谢')).toEqual(['text-tone-4', 'text-tone-5'])
   })
 
-  it('sin tono seguro deja el color normal (了: le, liǎo)', () => {
+  it('without a certain tone keeps the normal color (了: le, liǎo)', () => {
     renderWithProviders(<ToneHanzi entry={le} />)
     expect(toneClassesOf('了')).toEqual([null])
   })
 
-  it('no colorea si el ajuste está desactivado', () => {
+  it('does not color if the setting is off', () => {
     renderWithProviders(<ToneHanzi entry={nihao} />, { storage: storageWith({ toneColors: false }) })
     expect(screen.getByText('你好')).toHaveAttribute('lang', 'zh-Hans')
     expect(toneClassesOf('你好')).toEqual([null])
   })
 
-  it('no colorea si el ejercicio lo pide (showTones={false})', () => {
+  it('does not color if the exercise asks so (showTones={false})', () => {
     renderWithProviders(<ToneHanzi entry={nihao} showTones={false} />)
     expect(toneClassesOf('你好')).toEqual([null])
   })
 })
 
 describe('PinyinText', () => {
-  it('muestra siempre las marcas de tono', () => {
+  it('always shows the tone marks', () => {
     renderWithProviders(<PinyinText pinyin="nǐ hǎo" />)
     expect(screen.getByText('nǐ hǎo')).toBeInTheDocument()
     expect(screen.queryByText(/ni3/)).not.toBeInTheDocument()
   })
 
-  it('añade los números de tono si el usuario lo pide', () => {
+  it('adds tone numbers if the user asks for them', () => {
     renderWithProviders(<PinyinText pinyin="xiè xie" />, { storage: storageWith({ toneNumbers: true }) })
     expect(screen.getByText('(xie4 xie5)')).toBeInTheDocument()
   })
 })
 
 describe('ToneLegend', () => {
-  it('nombra cada tono con texto y un ejemplo con su marca, no solo con color', () => {
+  it('names each tone with text and an example with its mark, not just color', () => {
     renderWithProviders(<ToneLegend />)
     expect(screen.getByRole('heading', { name: 'Tone colors' })).toBeInTheDocument()
     for (const [label, example] of [

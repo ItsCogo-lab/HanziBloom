@@ -4,12 +4,12 @@ import { hanziChoiceDefinition, meaningChoiceDefinition, pinyinChoiceDefinition 
 import type { Exercise, FlashcardExercise } from './types.ts'
 
 /**
- * Cómo se construye un tipo de ejercicio. Cada tipo sabe si puede crearse
- * para un elemento (p. ej. un ejercicio de opciones necesita suficientes
- * elementos para inventar respuestas incorrectas) y cómo crearlo.
+ * How an exercise type is built. Each type knows whether it can be created
+ * for an item (e.g. a choice exercise needs enough items to make up wrong
+ * answers) and how to create it.
  *
- * `pool` son todos los elementos disponibles y `random` se inyecta para que
- * los tests sean deterministas.
+ * `pool` is all the available items and `random` is injected so that the
+ * tests are deterministic.
  */
 export interface ExerciseDefinition<E extends Exercise = Exercise> {
   type: E['type']
@@ -23,7 +23,7 @@ export const flashcardDefinition: ExerciseDefinition<FlashcardExercise> = {
   build: (item) => ({ type: 'flashcard', item }),
 }
 
-/** Tipos de ejercicio disponibles. Añadir uno nuevo = añadir su definición aquí. */
+/** Available exercise types. Adding a new one = adding its definition here. */
 export const EXERCISE_DEFINITIONS: readonly ExerciseDefinition[] = [
   flashcardDefinition,
   meaningChoiceDefinition,

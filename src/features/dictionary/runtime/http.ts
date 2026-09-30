@@ -1,27 +1,27 @@
 /**
- * Peticiones HTTP de los adaptadores. Solo los adaptadores usan este archivo:
- * los componentes nunca llaman a una API.
+ * HTTP requests for the adapters. Only the adapters use this file:
+ * components never call an API.
  *
- * Todos los fallos se convierten en un SourceError con un `kind` que el
- * servicio sabe tratar (usar la caché, reintentar más tarde, no mostrar nada).
+ * Every failure becomes a SourceError with a `kind` the service knows
+ * how to handle (use the cache, retry later, show nothing).
  */
 
 export type SourceErrorKind =
-  /** Sin conexión, CORS o tiempo agotado. */
+  /** Offline, CORS or timed out. */
   | 'network'
-  /** La fuente ha respondido con un error (404, 500...). */
+  /** The source responded with an error (404, 500...). */
   | 'http'
-  /** Demasiadas peticiones (429), o nuestro propio límite. */
+  /** Too many requests (429), or our own limit. */
   | 'rate-limit'
-  /** La respuesta no tiene el formato esperado. */
+  /** The response doesn't have the expected format. */
   | 'invalid'
-  /** Se canceló porque ya no hacía falta (otra búsqueda, se cerró la ficha). */
+  /** Cancelled because it was no longer needed (another search, the entry page closed). */
   | 'aborted'
 
 export class SourceError extends Error {
   readonly kind: SourceErrorKind
   readonly status?: number
-  /** Milisegundos que la fuente pide esperar (cabecera Retry-After). */
+  /** Milliseconds the source asks to wait (Retry-After header). */
   readonly retryAfterMs?: number
 
   constructor(kind: SourceErrorKind, message: string, options: { status?: number; retryAfterMs?: number } = {}) {
@@ -36,9 +36,9 @@ export class SourceError extends Error {
 export interface FetchOptions {
   signal?: AbortSignal
   fetchFn?: typeof fetch
-  /** Tiempo máximo de espera. */
+  /** Maximum wait time. */
   timeoutMs?: number
-  /** Caché HTTP del navegador; 'no-cache' obliga a preguntar al servidor si hay algo nuevo. */
+  /** Browser HTTP cache; 'no-cache' forces asking the server whether there's something new. */
   cache?: RequestInit['cache']
 }
 
@@ -48,7 +48,7 @@ function isAbort(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError'
 }
 
-/** Retry-After en segundos o como fecha HTTP. */
+/** Retry-After in seconds or as an HTTP date. */
 function parseRetryAfter(value: string | null, now = Date.now()): number | undefined {
   if (!value) return undefined
   const seconds = Number(value)
@@ -57,7 +57,7 @@ function parseRetryAfter(value: string | null, now = Date.now()): number | undef
   return Number.isNaN(date) ? undefined : Math.max(0, date - now)
 }
 
-/** Pide un JSON. Nunca devuelve un error sin clasificar. */
+/** Requests a JSON. Never returns an unclassified error. */
 export async function fetchJson(url: string, options: FetchOptions = {}): Promise<unknown> {
   const { signal, fetchFn = fetch, timeoutMs = DEFAULT_TIMEOUT_MS, cache } = options
   if (signal?.aborted) throw new SourceError('aborted', 'Request cancelled')
@@ -101,15 +101,15 @@ export async function fetchJson(url: string, options: FetchOptions = {}): Promis
 }
 
 export interface RateLimiter {
-  /** Espera turno y ejecuta `task`. Falla con 'rate-limit' si la fuente pidió esperar. */
+  /** Waits its turn and runs `task`. Fails with 'rate-limit' if the source asked to wait. */
   schedule: <T>(task: () => Promise<T>) => Promise<T>
 }
 
 /**
- * Límite propio por fuente: como mucho `maxPerMinute` peticiones por minuto
- * desde este navegador, y después de un 429 no se vuelve a llamar hasta que
- * pase el tiempo pedido. Así un usuario que hace muchas búsquedas no acaba
- * bloqueado por la fuente (ni hace que la fuente bloquee a los demás).
+ * Our own per-source limit: at most `maxPerMinute` requests per minute
+ * from this browser, and after a 429 no further calls until the requested
+ * time has passed. That way a user who searches a lot doesn't end up
+ * blocked by the source (or get the source to block everyone else).
  */
 export function createRateLimiter(maxPerMinute: number, now: () => number = Date.now): RateLimiter {
   const recent: number[] = []

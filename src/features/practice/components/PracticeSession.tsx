@@ -16,14 +16,14 @@ import { SessionSummary } from './SessionSummary.tsx'
 type PracticeSessionProps = {
   exercises: readonly Exercise[]
   dictionary: Dictionary
-  /** Se llama con cada respuesta, para guardarla en el progreso al momento. */
+  /** Called with each answer, to save it to progress right away. */
   onResult: (result: ExerciseResult) => void
   onRestart: () => void
 }
 
 /**
- * Una sesión de práctica: muestra los ejercicios uno a uno y, al terminar,
- * el resumen. Toda la lógica está en session.ts; aquí solo se pinta.
+ * A practice session: shows the exercises one by one and, at the end, the
+ * summary. All the logic lives in session.ts; this only renders.
  */
 export function PracticeSession({ exercises, dictionary, onResult, onRestart }: PracticeSessionProps) {
   const [state, dispatch] = useReducer(sessionReducer, exercises, createSessionState)
@@ -46,7 +46,7 @@ export function PracticeSession({ exercises, dictionary, onResult, onRestart }: 
       max={total}
     >
       {(lookUp) => (
-        // key: cada ejercicio es un componente nuevo, así su estado (p. ej. «revelado») empieza de cero
+        // key: each exercise is a new component, so its state (e.g. "revealed") starts from scratch
         <ExerciseView
           key={state.currentIndex}
           exercise={exercise}

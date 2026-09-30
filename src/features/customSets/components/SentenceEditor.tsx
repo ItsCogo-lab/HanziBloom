@@ -11,7 +11,7 @@ type SentenceEditorProps = {
   onCancel: () => void
 }
 
-/** Formulario de una frase: el usuario solo escribe el chino; el resto se genera al guardar. */
+/** Sentence form: the user only writes the Chinese; the rest is generated on save. */
 export function SentenceEditor({ initial = '', onSave, onCancel }: SentenceEditorProps) {
   const [chinese, setChinese] = useState(initial)
   const [problem, setProblem] = useState<SentenceProblem | 'failed'>()

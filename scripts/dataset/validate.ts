@@ -1,12 +1,12 @@
 /**
- * Valida el dataset ya generado (lo que está en el repositorio), sin
- * descargar nada: `npm run data:validate`.
+ * Validates the already generated dataset (what is in the repository), without
+ * downloading anything: `npm run data:validate`.
  *
- * - Caracteres y palabras de src/data y del diccionario completo de
- *   data-release/dictionary (lo que se va a publicar en el repositorio de
- *   datos), juntos (validateDictionaryData y validateFullDictionary).
- * - Un archivo de trazos en public/strokes por cada carácter.
- * - Las frases de ejemplo de public/examples (validateExampleSet).
+ * - Characters and words from src/data and from the full dictionary in
+ *   data-release/dictionary (what will be published to the data
+ *   repository), together (validateDictionaryData and validateFullDictionary).
+ * - A stroke file in public/strokes for each character.
+ * - The example sentences in public/examples (validateExampleSet).
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -30,7 +30,7 @@ const problems = [
 
 for (const character of allCharacters) {
   if (!existsSync(join(publicDir, 'strokes', strokeFileName(character.hanzi)))) {
-    problems.push(`Carácter ${character.hanzi}: falta public/strokes/${strokeFileName(character.hanzi)}`)
+    problems.push(`Character ${character.hanzi}: missing public/strokes/${strokeFileName(character.hanzi)}`)
   }
 }
 
@@ -40,13 +40,13 @@ for (const file of exampleFiles) {
   const set: ExampleSet = JSON.parse(readFileSync(join(examplesDir, file), 'utf8'))
   problems.push(...validateExampleSet(set, allWords).map((problem) => `${file}: ${problem}`))
 }
-if (exampleFiles.length === 0) console.warn('AVISO: no hay frases de ejemplo en public/examples.')
+if (exampleFiles.length === 0) console.warn('WARNING: no example sentences in public/examples.')
 
 if (problems.length > 0) {
-  console.error(`El dataset tiene problemas:\n- ${problems.join('\n- ')}`)
+  console.error(`The dataset has problems:\n- ${problems.join('\n- ')}`)
   process.exit(1)
 }
 console.log(
-  `Dataset correcto: ${allCharacters.length} caracteres, ${allWords.length} palabras, ${exampleFiles.length} archivos de ejemplos. ` +
-    `Diccionario completo: ${fullCharacters.length} caracteres y ${fullWords.length} palabras más.`,
+  `Dataset OK: ${allCharacters.length} characters, ${allWords.length} words, ${exampleFiles.length} example files. ` +
+    `Full dictionary: ${fullCharacters.length} more characters and ${fullWords.length} more words.`,
 )

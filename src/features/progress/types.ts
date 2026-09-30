@@ -1,39 +1,39 @@
 import type { DateKey } from '../../lib/dates.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
 
-/** Lo que se sabe de un carácter o palabra que el usuario ya ha estudiado. */
+/** What is known about a character or word the user has already studied. */
 export interface ItemProgress {
   itemId: StudyItemId
   timesSeen: number
   timesCorrect: number
   timesWrong: number
-  /** Nivel de dominio de la repetición espaciada (0-5). */
+  /** Spaced repetition mastery level (0-5). */
   masteryLevel: number
-  /** Fechas en formato ISO 8601. */
+  /** Dates in ISO 8601 format. */
   lastReviewedAt: string
   nextReviewAt: string
   /**
-   * Vocabulario básico para el nivel HSK del usuario (ver applyHskLevel): no
-   * toca repasarlo nunca. Si se responde mal en un repaso voluntario, pierde
-   * la marca y vuelve a la repetición espaciada normal.
+   * Basic vocabulary for the user's HSK level (see applyHskLevel): it is
+   * never due for review. If it is answered wrong in a voluntary review, it
+   * loses the flag and returns to normal spaced repetition.
    */
   basic?: true
   /**
-   * El registro lo creó applyHskLevel y aún no se ha respondido nunca: si el
-   * usuario baja de nivel, se borra y el elemento vuelve a ser nuevo.
+   * The record was created by applyHskLevel and has never been answered: if
+   * the user lowers their level, it is deleted and the item becomes new again.
    */
   fromLevel?: true
 }
 
-/** Respuestas de un día, para la racha y las estadísticas. */
+/** A day's answers, for the streak and statistics. */
 export interface DailyActivity {
   answers: number
   correct: number
 }
 
 /**
- * Todo el progreso del usuario. Los elementos que no aparecen en `items`
- * son nuevos (nunca estudiados).
+ * All of the user's progress. Items that don't appear in `items` are new
+ * (never studied).
  */
 export interface ProgressData {
   items: Partial<Record<StudyItemId, ItemProgress>>

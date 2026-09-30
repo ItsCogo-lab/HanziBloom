@@ -5,16 +5,16 @@ import type { Character, Etymology, ExampleSet, Translations, Word } from './typ
 
 const HSK_LEVELS: readonly number[] = [1, 2, 3, 4]
 const ETYMOLOGY_TYPES: readonly Etymology['type'][] = ['pictographic', 'ideographic', 'pictophonetic']
-/** Los radicales Kangxi van del 1 al 214. */
+/** Kangxi radicals go from 1 to 214. */
 const MAX_RADICAL_NUMBER = 214
 const HAN = /^\p{Script=Han}$/u
 
 /**
- * Revisa que los datos de caracteres y palabras sean coherentes y devuelve
- * una lista de problemas legibles (vacía si todo está bien).
+ * Checks that the character and word data are consistent and returns
+ * a list of readable problems (empty if everything is fine).
  *
- * Se usa en los tests del dataset: si alguien añade una entrada incorrecta,
- * el test falla diciendo exactamente cuál y por qué.
+ * Used in the dataset tests: if someone adds an incorrect entry, the test
+ * fails saying exactly which one and why.
  */
 export function validateDictionaryData(characters: readonly Character[], words: readonly Word[]): string[] {
   const problems: string[] = []
@@ -22,71 +22,71 @@ export function validateDictionaryData(characters: readonly Character[], words: 
   const wordIds = new Set<string>()
 
   for (const character of characters) {
-    const label = `Carácter "${character.id}"`
+    const label = `Character "${character.id}"`
 
-    if (characterIds.has(character.id)) problems.push(`${label}: id duplicado`)
+    if (characterIds.has(character.id)) problems.push(`${label}: duplicate id`)
     characterIds.add(character.id)
 
-    if (character.id !== character.hanzi) problems.push(`${label}: el id debe ser igual al hanzi`)
-    if (Array.from(character.hanzi).length !== 1) problems.push(`${label}: debe ser un solo carácter`)
-    else if (!isHan(character.hanzi)) problems.push(`${label}: no es un carácter chino`)
+    if (character.id !== character.hanzi) problems.push(`${label}: the id must equal the hanzi`)
+    if (Array.from(character.hanzi).length !== 1) problems.push(`${label}: must be a single character`)
+    else if (!isHan(character.hanzi)) problems.push(`${label}: not a Chinese character`)
     if (character.hskLevel !== undefined && !HSK_LEVELS.includes(character.hskLevel)) {
-      problems.push(`${label}: nivel HSK no válido`)
+      problems.push(`${label}: invalid HSK level`)
     }
     problems.push(...findEmptyValues(label, character))
     if (character.pinyin.length === 0 || character.pinyin.some(isBlank)) {
-      problems.push(`${label}: falta el pinyin`)
+      problems.push(`${label}: missing pinyin`)
     }
     if (character.strokeCount !== undefined && !isPositiveInteger(character.strokeCount)) {
-      problems.push(`${label}: número de trazos no válido`)
+      problems.push(`${label}: invalid stroke count`)
     }
     if (character.frequencyRank !== undefined && !isPositiveInteger(character.frequencyRank)) {
-      problems.push(`${label}: posición de frecuencia no válida`)
+      problems.push(`${label}: invalid frequency rank`)
     }
     if (character.radical !== undefined && !isSingleSymbol(character.radical)) {
-      problems.push(`${label}: radical no válido`)
+      problems.push(`${label}: invalid radical`)
     }
     if (
       character.radicalNumber !== undefined &&
       !(isPositiveInteger(character.radicalNumber) && character.radicalNumber <= MAX_RADICAL_NUMBER)
     ) {
-      problems.push(`${label}: número de radical no válido`)
+      problems.push(`${label}: invalid radical number`)
     }
     if (character.traditional !== undefined && (character.traditional.length === 0 || !character.traditional.every(isHan))) {
-      problems.push(`${label}: forma tradicional no válida`)
+      problems.push(`${label}: invalid traditional form`)
     }
     if (typeof character.decomposition === 'string' && !isValidIds(character.decomposition)) {
-      problems.push(`${label}: descomposición no válida`)
+      problems.push(`${label}: invalid decomposition`)
     }
     if (character.etymology !== undefined) problems.push(...validateEtymology(label, character.etymology))
     problems.push(...validateMeanings(label, character.meanings))
   }
 
   for (const word of words) {
-    const label = `Palabra "${word.id}"`
+    const label = `Word "${word.id}"`
 
-    if (wordIds.has(word.id)) problems.push(`${label}: id duplicado`)
+    if (wordIds.has(word.id)) problems.push(`${label}: duplicate id`)
     wordIds.add(word.id)
 
     if (word.id !== word.hanzi && word.id !== getWordId(word.hanzi, word.pinyin, true)) {
-      problems.push(`${label}: el id debe ser el hanzi, o el hanzi con su pinyin si es un homógrafo`)
+      problems.push(`${label}: the id must be the hanzi, or the hanzi with its pinyin if it's a homograph`)
     }
-    if (isBlank(word.pinyin)) problems.push(`${label}: falta el pinyin`)
-    if (word.hskLevel !== undefined && !HSK_LEVELS.includes(word.hskLevel)) problems.push(`${label}: nivel HSK no válido`)
+    if (isBlank(word.pinyin)) problems.push(`${label}: missing pinyin`)
+    if (word.hskLevel !== undefined && !HSK_LEVELS.includes(word.hskLevel)) problems.push(`${label}: invalid HSK level`)
     if (
       word.traditional !== undefined &&
       (Array.from(word.traditional).length !== Array.from(word.hanzi).length || !Array.from(word.traditional).every(isHan))
     ) {
-      problems.push(`${label}: forma tradicional no válida`)
+      problems.push(`${label}: invalid traditional form`)
     }
     if (word.frequencyRank !== undefined && !isPositiveInteger(word.frequencyRank)) {
-      problems.push(`${label}: posición de frecuencia no válida`)
+      problems.push(`${label}: invalid frequency rank`)
     }
     problems.push(...findEmptyValues(label, word))
     problems.push(...validateMeanings(label, word.meanings))
 
     for (const hanzi of Array.from(word.hanzi)) {
-      if (!characterIds.has(hanzi)) problems.push(`${label}: el carácter "${hanzi}" no está en el dataset`)
+      if (!characterIds.has(hanzi)) problems.push(`${label}: the character "${hanzi}" is not in the dataset`)
     }
   }
 
@@ -94,48 +94,48 @@ export function validateDictionaryData(characters: readonly Character[], words: 
 }
 
 /**
- * Revisa los trozos del diccionario completo: cada entrada en el trozo de su
- * primer carácter (si no, la app no la encontraría) y ninguna con nivel HSK
- * (las de HSK 1-4 van en src/data). La coherencia de las entradas se revisa
- * con validateDictionaryData, junto con las de HSK.
+ * Checks the full dictionary chunks: each entry in the chunk of its
+ * first character (otherwise the app wouldn't find it) and none with an HSK
+ * level (HSK 1-4 ones go in src/data). Entry consistency is checked
+ * with validateDictionaryData, together with the HSK ones.
  */
 export function validateFullDictionary(chunks: readonly DictionaryChunk[]): string[] {
   const problems: string[] = []
   chunks.forEach((chunk, index) => {
     for (const entry of [...chunk.characters, ...chunk.words]) {
-      if (getChunkIndex(entry.hanzi) !== index) problems.push(`"${entry.id}": está en el trozo ${index}, no en el suyo`)
-      if (entry.hskLevel !== undefined) problems.push(`"${entry.id}": el diccionario completo no lleva nivel HSK`)
+      if (getChunkIndex(entry.hanzi) !== index) problems.push(`"${entry.id}": is in chunk ${index}, not its own`)
+      if (entry.hskLevel !== undefined) problems.push(`"${entry.id}": the full dictionary has no HSK level`)
     }
   })
   return problems
 }
 
 /**
- * Revisa un archivo de frases de ejemplo: ids de Tatoeba válidos y sin
- * repetir, textos presentes y palabras que existen y aparecen en la frase.
+ * Checks an example sentences file: valid, non-repeated Tatoeba ids,
+ * texts present, and words that exist and appear in the sentence.
  */
 export function validateExampleSet(set: ExampleSet, words: readonly Word[]): string[] {
   const problems: string[] = []
-  // Las frases se asocian al hanzi de la palabra (un homógrafo comparte frases)
+  // Sentences are tied to the word's hanzi (a homograph shares sentences)
   const wordHanzi = new Set(words.map((word) => word.hanzi))
   const seen = new Set<number>()
 
-  if (set.source !== 'Tatoeba' || set.license !== 'CC BY 2.0 FR') problems.push('Ejemplos: fuente o licencia no válida')
-  if (isBlank(set.exportDate)) problems.push('Ejemplos: falta la fecha de la exportación de Tatoeba')
+  if (set.source !== 'Tatoeba' || set.license !== 'CC BY 2.0 FR') problems.push('Examples: invalid source or license')
+  if (isBlank(set.exportDate)) problems.push('Examples: missing Tatoeba export date')
 
   for (const sentence of set.sentences) {
-    const label = `Frase ${sentence.tatoebaId}`
+    const label = `Sentence ${sentence.tatoebaId}`
     if (!isPositiveInteger(sentence.tatoebaId) || !isPositiveInteger(sentence.translationTatoebaId)) {
-      problems.push(`${label}: id de Tatoeba no válido`)
+      problems.push(`${label}: invalid Tatoeba id`)
     }
-    if (seen.has(sentence.tatoebaId)) problems.push(`${label}: repetida`)
+    if (seen.has(sentence.tatoebaId)) problems.push(`${label}: repeated`)
     seen.add(sentence.tatoebaId)
-    if (isBlank(sentence.zh) || isBlank(sentence.en)) problems.push(`${label}: falta el texto`)
-    if (isBlank(sentence.author)) problems.push(`${label}: falta el autor`)
-    if (sentence.words.length === 0) problems.push(`${label}: no está asociada a ninguna palabra`)
+    if (isBlank(sentence.zh) || isBlank(sentence.en)) problems.push(`${label}: missing text`)
+    if (isBlank(sentence.author)) problems.push(`${label}: missing author`)
+    if (sentence.words.length === 0) problems.push(`${label}: not linked to any word`)
     for (const word of sentence.words) {
-      if (!wordHanzi.has(word)) problems.push(`${label}: la palabra "${word}" no está en el dataset`)
-      else if (!sentence.zh.includes(word)) problems.push(`${label}: no contiene la palabra "${word}"`)
+      if (!wordHanzi.has(word)) problems.push(`${label}: the word "${word}" is not in the dataset`)
+      else if (!sentence.zh.includes(word)) problems.push(`${label}: does not contain the word "${word}"`)
     }
     problems.push(...findEmptyValues(label, sentence))
   }
@@ -144,38 +144,38 @@ export function validateExampleSet(set: ExampleSet, words: readonly Word[]): str
 
 function validateEtymology(label: string, etymology: Etymology): string[] {
   const problems: string[] = []
-  if (!ETYMOLOGY_TYPES.includes(etymology.type)) problems.push(`${label}: tipo de etimología no válido`)
+  if (!ETYMOLOGY_TYPES.includes(etymology.type)) problems.push(`${label}: invalid etymology type`)
   for (const component of [etymology.semantic, etymology.phonetic]) {
     if (component !== undefined && !isSingleSymbol(component)) {
-      problems.push(`${label}: componente de la etimología no válido`)
+      problems.push(`${label}: invalid etymology component`)
     }
   }
   return problems
 }
 
 /**
- * Campos con null, undefined o texto vacío. En el dataset, un dato que no
- * existe se omite: si aparece vacío, algo ha fallado al generarlo.
+ * Fields with null, undefined or empty text. In the dataset, missing data
+ * is omitted: if it shows up empty, something went wrong generating it.
  */
 function findEmptyValues(label: string, entry: object): string[] {
   const empty = Object.entries(entry)
     .filter(([, value]) => value === null || value === undefined || (typeof value === 'string' && isBlank(value)))
     .map(([key]) => key)
-  return empty.length > 0 ? [`${label}: campos vacíos (${empty.join(', ')})`] : []
+  return empty.length > 0 ? [`${label}: empty fields (${empty.join(', ')})`] : []
 }
 
 function isHan(text: string): boolean {
   return HAN.test(text)
 }
 
-/** Un solo símbolo: un carácter o un componente como 亻 o ⺮. */
+/** A single symbol: a character or a component like 亻 or ⺮. */
 function isSingleSymbol(text: string): boolean {
   return Array.from(text).length === 1
 }
 
 function validateMeanings(label: string, meanings: Translations): string[] {
   if (meanings.en.length === 0 || meanings.en.some(isBlank)) {
-    return [`${label}: falta el significado en inglés`]
+    return [`${label}: missing English meaning`]
   }
   return []
 }

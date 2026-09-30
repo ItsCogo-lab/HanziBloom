@@ -23,9 +23,9 @@ const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
 const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
 /**
- * Perfil: un resumen de lo que hay guardado en este navegador y, si hay
- * cuentas configuradas, iniciar sesión para sincronizarlo. Todo sale del
- * progreso por elemento y de My Studies.
+ * Profile: a summary of what is saved in this browser and, if accounts are
+ * configured, signing in to sync it. Everything comes from per-item progress
+ * and My Studies.
  */
 export function ProfilePage() {
   const { progress } = useProgress()

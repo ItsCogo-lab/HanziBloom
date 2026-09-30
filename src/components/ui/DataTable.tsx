@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 
 type DataTableProps = {
-  /** id del título que describe la tabla (para lectores de pantalla). */
+  /** id of the heading that describes the table (for screen readers). */
   labelledBy: string
   headers: readonly string[]
-  /** Filas; la primera celda de cada fila hace de encabezado de fila. */
+  /** Rows; the first cell of each row acts as the row header. */
   rows: readonly (readonly ReactNode[])[]
 }
 
-/** Tabla sencilla y accesible, con las cifras alineadas a la derecha. */
+/** Simple, accessible table with figures right-aligned. */
 export function DataTable({ labelledBy, headers, rows }: DataTableProps) {
   return (
     <div className="overflow-x-auto">

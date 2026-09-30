@@ -2,21 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- viewport-fit=cover: la app usa toda la pantalla y respeta las franjas del sistema con env(safe-area-inset-*) -->
+    <!-- viewport-fit=cover: the app uses the whole screen and respects the system bars with env(safe-area-inset-*) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Learn and practice Chinese characters and vocabulary." />
     <meta name="theme-color" content="#fbf8f3" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- Instalar en la pantalla de inicio: manifest (Android, escritorio) y etiquetas de Safari (iPhone) -->
+    <!-- Install to the home screen: manifest (Android, desktop) and Safari tags (iPhone) -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="HanziBloom" />
     <title>HanziBloom</title>
     <!--
-      Tema claro u oscuro antes de pintar nada, para que no se vea un destello
-      del tema equivocado. Lee el ajuste que guarda la app (features/settings)
-      y, con «system» o sin ajuste, sigue al dispositivo. Luego la app lo mantiene.
+      Light or dark theme before painting anything, so there is no flash of
+      the wrong theme. Reads the setting the app stores (features/settings)
+      and, with "system" or no setting, follows the device. The app keeps it up afterwards.
     -->
     <script>
       try {

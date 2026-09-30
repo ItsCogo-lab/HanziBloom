@@ -8,24 +8,24 @@ import { EntryDetails } from './EntryDetails.tsx'
 import { ToneLegend } from './ToneLegend.tsx'
 
 type DictionaryPanelProps = {
-  /** Ficha que se abre directamente (consulta desde un ejercicio); sin ella, el buscador. */
+  /** Entry page opened directly (lookup from an exercise); without it, the search box. */
   initialItem?: StudyItem
   onClose: () => void
 }
 
 /**
- * Diccionario dentro de una sesión de estudio: panel lateral en escritorio y
- * hoja inferior en móvil. Todo pasa aquí dentro, sin cambiar de página, así
- * que la sesión (pregunta actual, respuestas, progreso) sigue intacta debajo.
+ * Dictionary inside a study session: side panel on desktop and bottom
+ * sheet on mobile. Everything happens in here, without changing page, so
+ * the session (current question, answers, progress) stays intact underneath.
  *
- * Accesibilidad: es un diálogo no modal. Al abrirse, el foco va al buscador
- * (o a la ficha); Escape lo cierra y quien lo abrió recupera el foco.
+ * Accessibility: it's a non-modal dialog. When it opens, focus goes to the search box
+ * (or the entry page); Escape closes it and whatever opened it gets focus back.
  */
 export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) {
   const titleId = useId()
   const dictionary = useDictionary()
   const [query, setQuery] = useState('')
-  // Fichas abiertas, como un historial: «Back» vuelve a la anterior o al buscador
+  // Opened entry pages, like a history: "Back" returns to the previous one or to the search box
   const [history, setHistory] = useState<StudyItem[]>(initialItem ? [initialItem] : [])
   const current = history.at(-1)
   const searchRef = useRef<HTMLInputElement>(null)
@@ -48,7 +48,7 @@ export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) 
 
   return (
     <div className="fixed inset-0 z-30 flex items-end md:pointer-events-none md:items-stretch md:justify-end">
-      {/* En móvil, un fondo que cierra la hoja al tocarlo; en escritorio la sesión sigue a la vista */}
+      {/* On mobile, a backdrop that closes the sheet when tapped; on desktop the session stays in view */}
       <div aria-hidden="true" className="absolute inset-0 bg-backdrop md:hidden" onClick={onClose} />
       <section
         ref={panelRef}
@@ -66,7 +66,7 @@ export function DictionaryPanel({ initialItem, onClose }: DictionaryPanelProps) 
             {t('dictionary.close')}
           </Button>
         </header>
-        {/* En móvil la hoja llega al borde de la pantalla: el final queda por encima de la barra del sistema */}
+        {/* On mobile the sheet reaches the screen edge: the bottom stays above the system bar */}
         <div className="flex flex-col gap-4 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {current ? (
             <>

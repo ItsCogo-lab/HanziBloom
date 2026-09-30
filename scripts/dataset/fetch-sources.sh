@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# Descarga las fuentes del dataset en scripts/dataset/.cache (no se versiona).
-# Las versiones están fijadas para que el resultado sea reproducible.
+# Downloads the dataset sources into scripts/dataset/.cache (not versioned).
+# Versions are pinned so the result is reproducible.
 set -euo pipefail
 
 CACHE_DIR="$(dirname "$0")/.cache"
 mkdir -p "$CACHE_DIR"
 cd "$CACHE_DIR"
 
-# Listas de HSK 2.0, niveles 1 a 4, con el pinyin del examen. Licencia MIT.
-# Fijadas a un commit para que el resultado sea reproducible.
+# HSK 2.0 lists, levels 1 to 4, with the exam's pinyin. MIT license.
+# Pinned to a commit so the result is reproducible.
 HSK_COMMIT=f3dc9d12ae00d04fa3676b0bd4c43cd58de2c264
 for level in 1 2 3 4; do
   curl -sSfL -o "hsk-level-${level}.json" \
     "https://raw.githubusercontent.com/clem109/hsk-vocabulary/${HSK_COMMIT}/hsk-vocab-json/hsk-level-${level}.json"
 done
 
-# CC-CEDICT en formato JSON (edición 2025-12-13). Licencia CC BY-SA 4.0.
+# CC-CEDICT in JSON format (2025-12-13 edition). CC BY-SA 4.0 license.
 npm pack cedict-json@1.3.20251213 --silent > /dev/null
 tar -xzf cedict-json-1.3.20251213.tgz package/cedict.json
 mv package/cedict.json cedict.json
 rm -rf package cedict-json-1.3.20251213.tgz
 
-# Make Me a Hanzi, dictionary.txt fijado a un commit. Licencia LGPL 3.0 o posterior.
+# Make Me a Hanzi, dictionary.txt pinned to a commit. LGPL 3.0 or later license.
 MAKEMEAHANZI_COMMIT=bddc96d41bef78427ed0e034e9f7e31d71fd1b92
 curl -sSfL -o makemeahanzi-dictionary.txt \
   "https://raw.githubusercontent.com/skishore/makemeahanzi/${MAKEMEAHANZI_COMMIT}/dictionary.txt"
 
-# Unihan y la lista de radicales de Unicode 18.0. Unicode License v3.
-# unicode.org no es accesible desde el entorno en la nube de Claude: este paso
-# se ejecuta en local o en GitHub Actions (.github/workflows/dataset.yml).
+# Unihan and the Unicode 18.0 radicals list. Unicode License v3.
+# unicode.org is not reachable from Claude's cloud environment: this step
+# runs locally or in GitHub Actions (.github/workflows/dataset.yml).
 UNICODE_VERSION=18.0.0
 mkdir -p unihan
 curl -sSfL -o Unihan.zip "https://www.unicode.org/Public/${UNICODE_VERSION}/ucd/Unihan.zip"
@@ -36,10 +36,10 @@ unzip -o -q Unihan.zip Unihan_IRGSources.txt Unihan_Variants.txt -d unihan
 rm Unihan.zip
 curl -sSfL -o unihan/CJKRadicals.txt "https://www.unicode.org/Public/${UNICODE_VERSION}/ucd/CJKRadicals.txt"
 
-# Tatoeba: frases en chino y en inglés y sus enlaces. Licencia CC BY 2.0 FR.
-# Tatoeba publica una exportación nueva cada semana y no guarda las antiguas,
-# así que se anota la fecha de descarga junto a los archivos.
-# tatoeba.org tampoco es accesible desde el entorno en la nube de Claude.
+# Tatoeba: Chinese and English sentences and their links. CC BY 2.0 FR license.
+# Tatoeba publishes a new export every week and does not keep the old ones,
+# so the download date is recorded next to the files.
+# tatoeba.org is not reachable from Claude's cloud environment either.
 TATOEBA_EXPORTS=https://downloads.tatoeba.org/exports/per_language
 mkdir -p tatoeba
 for file in cmn/cmn_sentences_detailed cmn/cmn-eng_links eng/eng_sentences_detailed; do
@@ -47,4 +47,4 @@ for file in cmn/cmn_sentences_detailed cmn/cmn-eng_links eng/eng_sentences_detai
 done
 date -u +%Y-%m-%d > tatoeba/export-date.txt
 
-echo "Fuentes descargadas en $CACHE_DIR"
+echo "Sources downloaded to $CACHE_DIR"

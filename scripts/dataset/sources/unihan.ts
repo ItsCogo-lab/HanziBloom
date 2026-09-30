@@ -1,12 +1,12 @@
 /**
- * Adaptador de Unihan (Unicode 18.0, Unicode License v3).
+ * Unihan adapter (Unicode 18.0, Unicode License v3).
  *
- * Responsabilidad: número de trazos, radical Kangxi (carácter y número) y
- * formas tradicionales de cada carácter. Lee los archivos de Unihan.zip
- * (`Unihan_IRGSources.txt`, `Unihan_Variants.txt`) y `CJKRadicals.txt`.
+ * Responsibility: stroke count, Kangxi radical (character and number) and
+ * traditional forms of each character. Reads the Unihan.zip files
+ * (`Unihan_IRGSources.txt`, `Unihan_Variants.txt`) and `CJKRadicals.txt`.
  */
 
-/** Lo que aporta Unihan a un carácter. Los campos que Unihan no tiene no aparecen. */
+/** What Unihan contributes to a character. Fields Unihan does not have are absent. */
 export interface UnihanCharacter {
   strokeCount?: number
   radical?: string
@@ -14,7 +14,7 @@ export interface UnihanCharacter {
   traditional?: string[]
 }
 
-/** Propiedades de Unihan que usamos. */
+/** Unihan properties we use. */
 const USED_PROPERTIES = new Set(['kRSUnicode', 'kTotalStrokes', 'kTraditionalVariant'])
 
 function fromCodePoint(hex: string): string {
@@ -22,9 +22,9 @@ function fromCodePoint(hex: string): string {
 }
 
 /**
- * Lee líneas de Unihan ("U+67E0<TAB>kRSUnicode<TAB>75.5") y devuelve, por
- * carácter, las propiedades que usamos. `wanted` limita la lectura a los
- * caracteres del dataset.
+ * Reads Unihan lines ("U+67E0<TAB>kRSUnicode<TAB>75.5") and returns, per
+ * character, the properties we use. `wanted` limits reading to the
+ * dataset's characters.
  */
 export function parseUnihan(
   texts: readonly string[],
@@ -47,9 +47,9 @@ export function parseUnihan(
 }
 
 /**
- * Lee `CJKRadicals.txt` ("75; 2F4A; 6728", "149'; 2EC8; 8BA0") y devuelve
- * el número de radical (con apóstrofo si es la forma simplificada) → el
- * carácter normal del radical (木, 讠).
+ * Reads `CJKRadicals.txt` ("75; 2F4A; 6728", "149'; 2EC8; 8BA0") and returns
+ * the radical number (with an apostrophe for the simplified form) → the
+ * radical's normal character (木, 讠).
  */
 export function parseCjkRadicals(text: string): Map<string, string> {
   const radicals = new Map<string, string>()
@@ -62,12 +62,12 @@ export function parseCjkRadicals(text: string): Map<string, string> {
 }
 
 /**
- * Convierte las propiedades de un carácter en datos del dataset.
+ * Converts a character's properties into dataset data.
  *
- * - kRSUnicode puede tener varios valores ("9.5 212.2"): el primero es el
- *   normativo. "149'.6" es el radical 149 en forma simplificada (讠).
- * - kTotalStrokes puede tener dos valores: el primero es el de China
- *   continental (chino simplificado), que es el que usamos.
+ * - kRSUnicode can have several values ("9.5 212.2"): the first is the
+ *   normative one. "149'.6" is radical 149 in simplified form (讠).
+ * - kTotalStrokes can have two values: the first is mainland China's
+ *   (simplified Chinese), which is the one we use.
  */
 export function toUnihanCharacter(
   properties: ReadonlyMap<string, string>,
@@ -94,7 +94,7 @@ export function toUnihanCharacter(
   return result
 }
 
-/** Todo junto: los datos de Unihan de cada carácter pedido que exista en Unihan. */
+/** All together: the Unihan data for each requested character that exists in Unihan. */
 export function loadUnihan(
   unihanTexts: readonly string[],
   radicalsText: string,

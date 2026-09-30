@@ -8,13 +8,13 @@ import { useDictionarySearch } from '../../dictionary/useDictionarySearch.ts'
 import type { StudySet } from '../../studySets/types.ts'
 import { useCustomSets } from '../customSetsContext.ts'
 
-/** Resultados que se muestran como mucho; para ver otros, se afina la búsqueda. */
+/** Maximum number of results shown; to see others, the search is refined. */
 const RESULT_LIMIT = 20
 
 /**
- * Buscador para añadir elementos a un set propio. Usa la misma búsqueda que
- * el diccionario, en todo el diccionario (HSK 1-4 y el resto de CC-CEDICT),
- * y añade el id del elemento: nunca una copia.
+ * Search box to add items to a custom set. It uses the same search as the
+ * dictionary, over the whole dictionary (HSK 1-4 and the rest of CC-CEDICT),
+ * and adds the item's id: never a copy.
  */
 export function AddVocabulary({ set }: { set: StudySet }) {
   const { addItem } = useCustomSets()

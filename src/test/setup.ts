@@ -1,18 +1,18 @@
-// Añade matchers como toBeInTheDocument() a expect()
+// Adds matchers like toBeInTheDocument() to expect()
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { offlineFetch } from './fakeFetch.ts'
 
 beforeEach(() => {
-  // Los tests nunca salen a internet: sin un fetch falso, todo está «sin conexión»
+  // Tests never go to the internet: without a fake fetch, everything is "offline"
   vi.stubGlobal('fetch', offlineFetch)
 })
 
 afterEach(() => {
-  // Desmonta los componentes renderizados entre tests
+  // Unmounts rendered components between tests
   cleanup()
-  // Cada test empieza sin progreso guardado
+  // Each test starts with no saved progress
   localStorage.clear()
   vi.unstubAllGlobals()
 })

@@ -1,12 +1,12 @@
 /**
- * Adaptador de CC-CEDICT (CC BY-SA 4.0), leído desde el paquete npm `cedict-json`.
+ * CC-CEDICT adapter (CC BY-SA 4.0), read from the `cedict-json` npm package.
  *
- * Responsabilidad: significados en inglés, lecturas de cada carácter y la
- * forma tradicional de cada palabra. No sabe nada de HSK ni de otras fuentes.
+ * Responsibility: English meanings, each character's readings and each
+ * word's traditional form. It knows nothing about HSK or other sources.
  */
 import { numberedPinyinToToneMarks, removeToneMarks } from '../../../src/lib/pinyin.ts'
 
-/** Una entrada tal como viene en `cedict.json`, con el pinyin ya en marcas de tono. */
+/** An entry as it comes in `cedict.json`, with the pinyin already in tone marks. */
 export interface CedictEntry {
   traditional: string
   simplified: string
@@ -14,26 +14,26 @@ export interface CedictEntry {
   english: string[]
 }
 
-/** Entradas de CC-CEDICT agrupadas por su forma simplificada. */
+/** CC-CEDICT entries grouped by their simplified form. */
 export type CedictIndex = ReadonlyMap<string, readonly CedictEntry[]>
 
-/** Máximo de significados por entrada: los primeros de CC-CEDICT suelen ser los principales. */
+/** Maximum meanings per entry: CC-CEDICT's first ones are usually the main ones. */
 const MAX_MEANINGS = 6
 
 /**
- * Cuando CC-CEDICT tiene varias entradas con la misma lectura, se usan todas
- * en su orden. Aquí se elige una forma tradicional concreta cuando el orden
- * de CC-CEDICT pondría primero un sentido que no es el de HSK 1.
+ * When CC-CEDICT has several entries with the same reading, all are used
+ * in their order. Here a specific traditional form is chosen when CC-CEDICT's
+ * order would put first a sense that is not the HSK 1 one.
  */
 const PREFERRED_TRADITIONAL: Record<string, string> = {
-  // 里 "dentro" (裡) y no la unidad de longitud "li" (里)
+  // 里 "inside" (裡) and not the unit of length "li" (里)
   里: '裡',
-  // Evitan las entradas de las variantes 妳 (nota sobre Taiwán) y 秊 (sentidos antiguos)
+  // Avoid the entries for the variants 妳 (note about Taiwan) and 秊 (archaic senses)
   你: '你',
   年: '年',
 }
 
-/** Significados que son notas de diccionario y no traducciones útiles para estudiar. */
+/** Meanings that are dictionary notes rather than translations useful for studying. */
 const NON_TRANSLATION_MEANINGS = [
   /^(old |unofficial |archaic |erroneous )?variant of /i,
   /^see /i,
@@ -47,7 +47,7 @@ const NON_TRANSLATION_MEANINGS = [
   /^Kangxi radical/i,
 ]
 
-/** Lee `cedict.json` y agrupa las entradas por simplificado, con el pinyin en marcas de tono. */
+/** Reads `cedict.json` and groups the entries by simplified form, with the pinyin in tone marks. */
 export function createCedictIndex(json: string): CedictIndex {
   const entries: CedictEntry[] = JSON.parse(json)
   const index = new Map<string, CedictEntry[]>()
@@ -61,18 +61,18 @@ export function createCedictIndex(json: string): CedictIndex {
 }
 
 /**
- * Pinyin comparable: sin espacios, pero con tonos y mayúsculas. Las
- * mayúsculas importan: en CC-CEDICT marcan nombres propios (苹果 píng guǒ
- * "manzana" frente a Píng guǒ "Apple, la empresa").
+ * Comparable pinyin: without spaces, but with tones and capitals. Capitals
+ * matter: in CC-CEDICT they mark proper nouns (苹果 píng guǒ
+ * "apple" versus Píng guǒ "Apple, the company").
  */
 function comparablePinyin(pinyin: string): string {
   return pinyin.replace(/\s+/g, '')
 }
 
 /**
- * Limpia la notación interna de CC-CEDICT para que el texto se lea bien:
+ * Cleans up CC-CEDICT's internal notation so the text reads well:
  * "(abbr. to 京[Jing1])" → "(abbr. to 京)", "兩|两[liang3]" → "两",
- * y quita las notas de clasificadores "(CL:...)" y de pronunciación en Taiwán.
+ * and removes the classifier notes "(CL:...)" and Taiwan pronunciation notes.
  */
 export function cleanMeaning(meaning: string): string {
   return meaning
@@ -92,8 +92,8 @@ function isTranslation(meaning: string): boolean {
 }
 
 /**
- * Significados útiles para estudiar. Si una lectura solo tiene notas (漂 piào:
- * "used in 漂亮"), se conservan las notas: dicen algo cierto y útil.
+ * Meanings useful for studying. If a reading only has notes (漂 piào:
+ * "used in 漂亮"), the notes are kept: they say something true and useful.
  */
 export function usableMeanings(entries: readonly CedictEntry[]): string[] {
   const all = entries.flatMap((entry) => entry.english)
@@ -103,13 +103,13 @@ export function usableMeanings(entries: readonly CedictEntry[]): string[] {
 }
 
 /**
- * Entradas de CC-CEDICT de un hanzi con una lectura concreta. Si no hay
- * ninguna con ese pinyin exacto, se prueba, en este orden:
+ * CC-CEDICT entries for a hanzi with a specific reading. If there is
+ * none with that exact pinyin, it tries, in this order:
  *
- * 1. La misma palabra con tono neutro donde la lista HSK pone el tono
- *    (关系: HSK guān xì, CC-CEDICT guān xi). Es la misma palabra: CC-CEDICT
- *    anota la pronunciación coloquial.
- * 2. Entradas que dicen explícitamente que también se pronuncia así
+ * 1. The same word with a neutral tone where the HSK list has the tone
+ *    (关系: HSK guān xì, CC-CEDICT guān xi). It is the same word: CC-CEDICT
+ *    records the colloquial pronunciation.
+ * 2. Entries that explicitly say it is also pronounced that way
  *    (钥 yuè: "also pr. [yao4]").
  */
 export function findEntries(index: CedictIndex, hanzi: string, pinyin: string): CedictEntry[] {
@@ -131,8 +131,8 @@ function firstNonEmpty<T>(...lists: T[][]): T[] {
 }
 
 /**
- * Si el pinyin de CC-CEDICT es el mismo que el de HSK salvo por sílabas que
- * CC-CEDICT pone en tono neutro: "guān xi" frente a "guān xì".
+ * Whether CC-CEDICT's pinyin is the same as HSK's except for syllables that
+ * CC-CEDICT gives a neutral tone: "guān xi" versus "guān xì".
  */
 function differsOnlyInNeutralTones(cedictPinyin: string, hskPinyin: string): boolean {
   const cedictSyllables = cedictPinyin.split(/\s+/)
@@ -144,7 +144,7 @@ function differsOnlyInNeutralTones(cedictPinyin: string, hskPinyin: string): boo
   })
 }
 
-/** Si la entrada dice "also pr. [yao4]" con esta misma lectura. */
+/** Whether the entry says "also pr. [yao4]" with this same reading. */
 function isAlsoPronounced(entry: CedictEntry, pinyin: string): boolean {
   return entry.english.some((meaning) =>
     [...meaning.matchAll(/also pr\. \[([^\]]+)\]/gi)].some(
@@ -154,9 +154,9 @@ function isAlsoPronounced(entry: CedictEntry, pinyin: string): boolean {
 }
 
 /**
- * Forma tradicional de un grupo de entradas. Se ignoran las entradas que solo
- * son notas ("variant of 吃"), igual que al elegir los significados. Si aun
- * así CC-CEDICT da dos formas distintas, no se elige una a escondidas.
+ * Traditional form of a group of entries. Entries that are only notes
+ * ("variant of 吃") are ignored, same as when choosing the meanings. If even
+ * so CC-CEDICT gives two different forms, none is silently picked.
  */
 export function traditionalOf(entries: readonly CedictEntry[]): string | undefined {
   const withTranslations = entries.filter((entry) => entry.english.some(isTranslation))
@@ -165,11 +165,11 @@ export function traditionalOf(entries: readonly CedictEntry[]): string | undefin
 }
 
 /**
- * Lectura de un carácter tal como se usa en una palabra.
+ * A character's reading as it is used in a word.
  *
- * Si en la palabra lleva tono neutro, se usa la entrada de CC-CEDICT con ese
- * tono neutro si existe (吗 ma, 们 men, 子 zi); si no, la lectura con tono
- * (东西 dōng xi → 西 xī), que es la del carácter aislado.
+ * If it has a neutral tone in the word, the CC-CEDICT entry with that
+ * neutral tone is used if it exists (吗 ma, 们 men, 子 zi); otherwise, the
+ * toned reading (东西 dōng xi → 西 xī), which is that of the character alone.
  */
 export function readingOf(index: CedictIndex, hanzi: string, syllable: string): string | undefined {
   const candidates = (index.get(hanzi) ?? [])
@@ -178,7 +178,7 @@ export function readingOf(index: CedictIndex, hanzi: string, syllable: string): 
   if (hasToneMark(syllable)) {
     const exact = candidates.find((pinyin) => pinyin === syllable)
     if (exact) return exact
-    // 钥 solo tiene la entrada yuè, que dice "also pr. [yao4]": en 钥匙 se lee yào
+    // 钥 only has the entry yuè, which says "also pr. [yao4]": in 钥匙 it is read yào
     const alsoPronounced = (index.get(hanzi) ?? []).some((entry) => isAlsoPronounced(entry, syllable))
     return alsoPronounced ? syllable : undefined
   }

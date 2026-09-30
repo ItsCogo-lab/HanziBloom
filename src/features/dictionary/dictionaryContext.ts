@@ -7,11 +7,11 @@ export const DictionaryStoreContext = createContext<DictionaryStore | null>(null
 
 export function useDictionaryStore(): DictionaryStore {
   const store = use(DictionaryStoreContext)
-  if (!store) throw new Error('useDictionaryStore debe usarse dentro de <DictionaryProvider>')
+  if (!store) throw new Error('useDictionaryStore must be used within <DictionaryProvider>')
   return store
 }
 
-/** El diccionario con todo lo cargado hasta ahora. Se vuelve a pintar cuando llega un trozo. */
+/** The dictionary with everything loaded so far. Re-renders when a chunk arrives. */
 export function useDictionary(): Dictionary {
   const store = useDictionaryStore()
   return useSyncExternalStore(store.subscribe, store.getSnapshot)
@@ -20,8 +20,8 @@ export function useDictionary(): Dictionary {
 export type LoadStatus = 'loading' | 'ready' | 'error'
 
 /**
- * Carga lo necesario para mostrar estos elementos (un set propio con palabras
- * de fuera de HSK, una ficha). Con elementos de HSK está listo al momento.
+ * Loads what's needed to show these items (a custom set with words from
+ * outside HSK, an entry page). With HSK items it's ready right away.
  */
 export function useLoadItems(itemIds: readonly StudyItemId[]): LoadStatus {
   const store = useDictionaryStore()
@@ -46,14 +46,14 @@ export function useLoadItems(itemIds: readonly StudyItemId[]): LoadStatus {
 
 export interface SearchableItems {
   items: readonly StudyItem[]
-  /** 'partial': de momento solo HSK 1-4 (cargando el resto, o sin poder cargarlo). */
+  /** 'partial': only HSK 1-4 for now (loading the rest, or unable to load it). */
   status: 'complete' | 'loading' | 'error'
 }
 
 /**
- * Elementos en los que buscar. Mientras `active` sea falso (no se ha escrito
- * nada) no se descarga nada y se usan los de HSK 1-4. Al empezar a buscar se
- * carga todo el diccionario; hasta que llega, se busca en HSK.
+ * Items to search in. While `active` is false (nothing has been typed)
+ * nothing is downloaded and the HSK 1-4 items are used. Once searching starts
+ * the whole dictionary is loaded; until it arrives, HSK is searched.
  */
 export function useSearchableItems(active: boolean): SearchableItems {
   const store = useDictionaryStore()

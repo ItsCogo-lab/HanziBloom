@@ -11,8 +11,8 @@ import { SetProgressBar } from './SetProgressBar.tsx'
 import { StudyToggleButton } from './StudyToggleButton.tsx'
 
 /**
- * Tarjeta de un set: nombre, tamaño, descripción, progreso y acciones. Es la
- * misma para HSK, temas y (en el futuro) sets propios.
+ * Card for a set: name, size, description, progress and actions. It is the
+ * same for HSK, topics and (in the future) custom sets.
  */
 export function SetCard({ set }: { set: StudySet }) {
   const { progress } = useProgress()

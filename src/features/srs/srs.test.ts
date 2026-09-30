@@ -5,32 +5,32 @@ const now = new Date(2026, 8, 28, 18, 30)
 const midnight = (day: number, month = 8) => new Date(2026, month, day).toISOString()
 
 describe('scheduleNextReview', () => {
-  it('al acertar sube un nivel y espera los días de ese nivel', () => {
+  it("on a correct answer goes up a level and waits that level's days", () => {
     expect(scheduleNextReview(0, true, now)).toEqual({ masteryLevel: 1, nextReviewAt: midnight(29) })
     expect(scheduleNextReview(1, true, now)).toEqual({ masteryLevel: 2, nextReviewAt: midnight(1, 9) })
     expect(scheduleNextReview(3, true, now)).toEqual({ masteryLevel: 4, nextReviewAt: midnight(12, 9) })
   })
 
-  it('al fallar vuelve al nivel 0, pendiente para hoy', () => {
+  it('on a miss goes back to level 0, due today', () => {
     expect(scheduleNextReview(4, false, now)).toEqual({ masteryLevel: 0, nextReviewAt: midnight(28) })
   })
 
-  it('no pasa del nivel máximo', () => {
+  it("doesn't go past the maximum level", () => {
     const schedule = scheduleNextReview(MAX_MASTERY_LEVEL, true, now)
 
     expect(schedule.masteryLevel).toBe(MAX_MASTERY_LEVEL)
-    expect(schedule.nextReviewAt).toBe(midnight(28, 9)) // 30 días
+    expect(schedule.nextReviewAt).toBe(midnight(28, 9)) // 30 days
   })
 })
 
 describe('scheduleKnownItem', () => {
-  it('empieza en el nivel máximo y vuelve a los 30 días', () => {
+  it('starts at the maximum level and comes back after 30 days', () => {
     expect(scheduleKnownItem(now)).toEqual({ masteryLevel: MAX_MASTERY_LEVEL, nextReviewAt: midnight(28, 9) })
   })
 })
 
 describe('isReviewDue', () => {
-  it('toca repasar desde la fecha indicada', () => {
+  it('is due from the given date', () => {
     const tomorrow = midnight(29)
 
     expect(isReviewDue(tomorrow, now)).toBe(false)

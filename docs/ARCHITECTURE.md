@@ -1,363 +1,363 @@
-# Arquitectura de HanziBloom
+# HanziBloom Architecture
 
-Este documento recoge el análisis inicial (Fase 1), la arquitectura propuesta y el
-plan técnico del MVP. Es un documento vivo: cuando una decisión cambie, se
-actualiza aquí.
+This document covers the initial analysis (Phase 1), the proposed architecture and
+the MVP technical plan. It is a living document: when a decision changes, it is
+updated here.
 
-## 1. Estado inicial del repositorio
+## 1. Initial state of the repository
 
-- Un único commit (`Initial commit`) con el `.gitignore` de Node que genera GitHub.
-- Sin código, sin `package.json`, sin configuración, sin issues ni PRs.
-- Conclusión: el proyecto parte de cero, no hay convenciones previas que respetar.
+- A single commit (`Initial commit`) with the Node `.gitignore` that GitHub generates.
+- No code, no `package.json`, no configuration, no issues or PRs.
+- Conclusion: the project starts from scratch, with no prior conventions to respect.
 
-## 2. Principios
+## 2. Principles
 
-1. **Sencillo primero.** Solo añadimos una abstracción cuando resuelve un problema real.
-2. **Lógica separada de la UI.** Las reglas (ejercicios, progreso, repetición
-   espaciada) son funciones TypeScript puras, testeables sin React.
-3. **Datos fuera de los componentes.** Los datasets viven en `src/data/` y se
-   consultan mediante funciones.
-4. **Funciona sin conexión.** Nada básico depende de una API externa.
-5. **Preparado para crecer, sin construir aún lo que no hace falta.**
+1. **Simple first.** We only add an abstraction when it solves a real problem.
+2. **Logic separate from the UI.** The rules (exercises, progress, spaced
+   repetition) are pure TypeScript functions, testable without React.
+3. **Data outside the components.** Datasets live in `src/data/` and are
+   queried through functions.
+4. **Works offline.** Nothing basic depends on an external API.
+5. **Ready to grow, without building yet what is not needed.**
 
-## 3. Stack y dependencias
+## 3. Stack and dependencies
 
-| Pieza | Elección | Por qué |
+| Piece | Choice | Why |
 | --- | --- | --- |
-| UI | React 19 | Pedido explícitamente. |
-| Lenguaje | TypeScript en modo estricto | Pedido. Además `noUncheckedIndexedAccess`: buscar un carácter por id puede fallar y el compilador nos obliga a tenerlo en cuenta. |
-| Bundler / dev server | Vite | Pedido. Arranque instantáneo, configuración mínima. |
-| Estilos | Tailwind CSS v4 (`@tailwindcss/vite`) | Pedido. La v4 se configura desde CSS (`@theme`), sin `tailwind.config.js` ni PostCSS. |
-| Lint | oxlint | Es el linter que trae hoy la plantilla oficial de Vite. Una sola dependencia, muy rápido. |
-| Tests | Vitest + Testing Library + jsdom | Vitest reutiliza la configuración de Vite; Testing Library prueba componentes como los usa una persona. |
+| UI | React 19 | Explicitly requested. |
+| Language | TypeScript in strict mode | Requested. Also `noUncheckedIndexedAccess`: looking up a character by id can fail and the compiler forces us to account for it. |
+| Bundler / dev server | Vite | Requested. Instant startup, minimal configuration. |
+| Styles | Tailwind CSS v4 (`@tailwindcss/vite`) | Requested. v4 is configured from CSS (`@theme`), with no `tailwind.config.js` or PostCSS. |
+| Lint | oxlint | It is the linter the official Vite template ships with today. A single dependency, very fast. |
+| Tests | Vitest + Testing Library + jsdom | Vitest reuses the Vite configuration; Testing Library tests components the way a person uses them. |
 
-Dependencias previstas para fases siguientes (se añadirán cuando se necesiten, no antes):
+Dependencies planned for later phases (they will be added when needed, not before):
 
-| Fase | Dependencia | Motivo |
+| Phase | Dependency | Reason |
 | --- | --- | --- |
-| 3 | `react-router` | Rutas reales (`/characters/好`), botón atrás del navegador y enlaces compartibles. Escribirlo a mano sería reinventar algo estándar. |
-| Integración de datos | `hanzi-writer` (MIT) | Animación del orden de trazos en la ficha del carácter. Se carga con `import()` solo al abrir una ficha. Más adelante servirá para la práctica de escritura. |
-| Integración de datos | `hanzi-writer-data` (Arphic PL, solo desarrollo) | Datos de trazos que el build copia a `public/strokes/`. |
-| Sets propios | `pinyin-pro` 3.29.4 (MIT), versión fija | Pinyin de las frases del usuario y de las frases de ejemplo. Determinista, con diccionario de palabras para los polifónicos. Se carga con `import()` solo al guardar una frase o al mostrar frases de ejemplo. |
-| Cuentas | `@supabase/supabase-js` (MIT) | Login opcional (Google y enlace por email) y copia en la nube de los datos del usuario, sin servidor propio. Se carga con `import()` solo si hay proyecto configurado. |
+| 3 | `react-router` | Real routes (`/characters/好`), the browser back button and shareable links. Writing it by hand would be reinventing something standard. |
+| Data integration | `hanzi-writer` (MIT) | Stroke order animation on the character detail page. Loaded with `import()` only when a detail page is opened. Later it will serve for writing practice. |
+| Data integration | `hanzi-writer-data` (Arphic PL, development only) | Stroke data that the build copies to `public/strokes/`. |
+| Custom sets | `pinyin-pro` 3.29.4 (MIT), pinned version | Pinyin for the user's sentences and for example sentences. Deterministic, with a word dictionary for polyphonic characters. Loaded with `import()` only when saving a sentence or showing example sentences. |
+| Accounts | `@supabase/supabase-js` (MIT) | Optional login (Google and email link) and a cloud copy of the user's data, without our own server. Loaded with `import()` only if a project is configured. |
 
-Descartado a propósito: Redux/Zustand (React Context + hooks basta), i18next
-(un diccionario tipado propio basta para 3 idiomas), librerías de componentes
-(queremos identidad propia), un backend propio (Supabase hace de backend
-para las cuentas), Docker.
+Deliberately ruled out: Redux/Zustand (React Context + hooks is enough), i18next
+(a typed dictionary of our own is enough for 3 languages), component libraries
+(we want our own identity), a backend of our own (Supabase acts as the backend
+for accounts), Docker.
 
-## 4. Estructura de carpetas
+## 4. Folder structure
 
-Organizada por funcionalidad. Solo existen las carpetas que ya tienen contenido;
-el resto se crea en su fase.
+Organized by feature. Only folders that already have content exist;
+the rest are created in their phase.
 
 ```
 src/
-  app/              Arranque de la app: App, rutas, layout y navegación (Fase 3)
-  pages/            Una página por sección; componen features, sin lógica propia
+  app/              App bootstrap: App, routes, layout and navigation (Phase 3)
+  pages/            One page per section; they compose features, with no logic of their own
     DashboardPage, DictionaryPage, EntryDetailPage, PracticePage,
-    ProfilePage, ProgressPage, SettingsPage; study/ (pestañas y sets)
+    ProfilePage, ProgressPage, SettingsPage; study/ (tabs and sets)
   features/
-    dictionary/     Tipos de dominio (Character, Word), búsqueda, tonos y el panel de diccionario
-      runtime/      Servicio, caché (IndexedDB) y adaptadores de las fuentes externas
-    grammar/        Notas de gramática de las partículas (datos en data/grammar.ts)
-    studySets/      Modelo StudySet (HSK, temas, propios) y su progreso derivado
-    myStudies/      Sets que sigue el usuario y cuándo los estudió (localStorage)
-    practice/       Tipos de ejercicio, generación de sesiones, componentes de ejercicio
-    progress/       Registro de progreso, estadísticas, racha, persistencia
-    srs/            Repetición espaciada (algoritmo sencillo, sustituible)
-    settings/       Ajustes del usuario (sesión, tema, colores y números de tono)
-    install/        Instalar la app en la pantalla de inicio (aviso y sección de Ajustes)
-    account/        Cuenta opcional con Supabase (login y tarjeta de Perfil)
-    sync/           Sincronización de los datos del usuario con la nube (juntar, planificar)
-    audio/          (Futuro) servicio de pronunciación + botón reutilizable
-    writing/        (Futuro) canvas, trazos, evaluación
-  components/ui/    Componentes visuales genéricos: Button, Card, ProgressBar...
-  data/             Datasets generados (hsk1/ a hsk4/); temas y gramática curados a mano (topics.ts, grammar.ts)
-  i18n/             Textos de la interfaz (en activo, es preparado, ca más adelante)
-  lib/              Utilidades sin dominio: almacenamiento, fechas, aleatoriedad
-  test/             Configuración compartida de los tests
+    dictionary/     Domain types (Character, Word), search, tones and the dictionary panel
+      runtime/      Service, cache (IndexedDB) and adapters for the external sources
+    grammar/        Grammar notes for particles (data in data/grammar.ts)
+    studySets/      StudySet model (HSK, topics, custom) and its derived progress
+    myStudies/      Sets the user follows and when they last studied them (localStorage)
+    practice/       Exercise types, session generation, exercise components
+    progress/       Progress tracking, statistics, streak, persistence
+    srs/            Spaced repetition (simple, replaceable algorithm)
+    settings/       User settings (session, theme, tone colors and numbers)
+    install/        Installing the app on the home screen (banner and Settings section)
+    account/        Optional account with Supabase (login and Profile card)
+    sync/           Syncing the user's data with the cloud (merge, plan)
+    audio/          (Future) pronunciation service + reusable button
+    writing/        (Future) canvas, strokes, evaluation
+  components/ui/    Generic visual components: Button, Card, ProgressBar...
+  data/             Generated datasets (hsk1/ to hsk4/); topics and grammar curated by hand (topics.ts, grammar.ts)
+  i18n/             Interface texts (en active, es ready, ca later)
+  lib/              Domain-free utilities: storage, dates, randomness
+  test/             Shared test configuration
 ```
 
-Regla práctica: `pages` → `features` → `lib`/`data`. Una feature no importa de
-`pages`, y `lib` no importa de nadie del proyecto.
+Rule of thumb: `pages` → `features` → `lib`/`data`. A feature does not import from
+`pages`, and `lib` does not import from anything else in the project.
 
-## 5. Secciones de la aplicación
+## 5. App sections
 
-Cuatro secciones en la navegación principal; Progreso y Ajustes cuelgan del perfil.
+Four sections in the main navigation; Progress and Settings hang off the profile.
 
-| Sección | Ruta | Contenido |
+| Section | Route | Content |
 | --- | --- | --- |
-| Home | `/` | Progreso general, racha, repasos pendientes, sets que se estudian. |
-| Study | `/study`, `/study/hsk`, `/study/topics`, `/study/custom` | Pestañas My Studies, HSK, Topics y My sets con tarjetas de set. `/study/custom/new` crea un set. |
-| Set | `/study/sets/:setId` | Acciones Learn y Study con sus cuentas, progreso (dominados, aprendiendo, sin empezar) y vocabulario. |
-| Sesión | `/study/practice?set=:setId&mode=learn` o `&mode=study` | Learn (vocabulario nuevo) o Study (repaso de lo aprendido) de un set; sin `set`, sesión mezclada de todo el vocabulario. Botón Dictionary. |
-| Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Búsqueda global y fichas. `q` y `kind` van en la URL. |
-| Profile | `/profile` | Resumen local: dominados, repasos, racha, sets y recientes. |
-| Progreso / Ajustes | `/progress`, `/settings` | Estadísticas detalladas; sesión, tema, tonos, borrar progreso, créditos. |
+| Home | `/` | Overall progress, streak, pending reviews, sets being studied. |
+| Study | `/study`, `/study/hsk`, `/study/topics`, `/study/custom` | My Studies, HSK, Topics and My sets tabs with set cards. `/study/custom/new` creates a set. |
+| Set | `/study/sets/:setId` | Learn and Study actions with their counts, progress (mastered, learning, not started) and vocabulary. |
+| Session | `/study/practice?set=:setId&mode=learn` or `&mode=study` | Learn (new vocabulary) or Study (review of what has been learned) for a set; without `set`, a mixed session of all vocabulary. Dictionary button. |
+| Dictionary | `/dictionary`, `/vocabulary/:id`, `/characters/:hanzi` | Global search and detail pages. `q` and `kind` go in the URL. |
+| Profile | `/profile` | Local summary: mastered, reviews, streak, sets and recent items. |
+| Progress / Settings | `/progress`, `/settings` | Detailed statistics; session, theme, tones, deleting progress, credits. |
 
-Las rutas antiguas (`/practice`, `/vocabulary`, `/characters`) redirigen a las nuevas.
-Navegación: barra lateral en escritorio, barra inferior en móvil.
+The old routes (`/practice`, `/vocabulary`, `/characters`) redirect to the new ones.
+Navigation: sidebar on desktop, bottom bar on mobile.
 
 ### Study sets
 
-`StudySet` (`features/studySets/types.ts`) es un id, un tipo (`hsk`, `topic`,
-`custom`), nombre, descripción, nivel e icono opcionales y una lista de
-`StudyItemId`. Un set no guarda progreso: su progreso se calcula al vuelo con
-`summarizeItemIds` sobre el progreso por elemento, así que un elemento que está
-en varios sets cuenta en todos sin duplicar datos. Dominado = nivel SRS ≥ 4.
+A `StudySet` (`features/studySets/types.ts`) is an id, a type (`hsk`, `topic`,
+`custom`), a name, an optional description, level and icon, and a list of
+`StudyItemId`. A set does not store progress: its progress is computed on the fly with
+`summarizeItemIds` from the per-item progress, so an item that is in
+several sets counts in all of them without duplicating data. Mastered = SRS level ≥ 4.
 
-- Sets HSK: salen de `hskN/words.ts` y `hskN/characters.ts` (palabras del nivel
-  y caracteres que se estrenan en él). No hay listas escritas a mano.
-- Sets por temas: `src/data/topics.ts`, curado a mano (criterios en
-  DATA_SOURCES.md, «Sets por temas»). Añadir un tema es añadir un objeto.
-- `validateStudySets` comprueba ids repetidos, sets vacíos y elementos que no
-  existen; un test lo pasa sobre los sets de la app.
-- Sets propios (`custom`): los crea el usuario (ver «Sets propios» más abajo).
+- HSK sets: they come from `hskN/words.ts` and `hskN/characters.ts` (the level's
+  words and the characters that debut in it). There are no hand-written lists.
+- Topic sets: `src/data/topics.ts`, curated by hand (criteria in
+  DATA_SOURCES.md, "Topic sets"). Adding a topic is adding an object.
+- `validateStudySets` checks for duplicate ids, empty sets and items that do not
+  exist; a test runs it over the app's sets.
+- Custom sets (`custom`): created by the user (see "Custom sets" below).
 
-My Studies (`features/myStudies`) guarda solo qué sets sigue el usuario y la
-última vez que estudió cada uno (`hanzivocab.studies`). Quitar un set no borra
-el progreso de sus elementos.
+My Studies (`features/myStudies`) stores only which sets the user follows and the
+last time they studied each one (`hanzivocab.studies`). Removing a set does not delete
+the progress of its items.
 
-### Learn y Study
+### Learn and Study
 
-Cada set tiene dos tipos de sesión, y ninguno se convierte solo en el otro:
+Each set has two kinds of session, and neither turns into the other on its own:
 
-- **Learn** presenta elementos nuevos del set con su ficha completa (la misma
-  del diccionario) y el usuario confirma cuáles ha aprendido.
-- **Study** es repaso: solo entran elementos ya aprendidos, primero los que
-  toca repasar. Si no toca ninguno, la interfaz lo dice y ofrece «Review
-  learned vocabulary anyway» (`scope=all`), que sigue usando solo lo aprendido.
+- **Learn** presents new items from the set with their full detail page (the same
+  one as in the dictionary) and the user confirms which ones they have learned.
+- **Study** is review: only already-learned items come in, those due for
+  review first. If none are due, the interface says so and offers "Review
+  learned vocabulary anyway" (`scope=all`), which still uses only what has been learned.
 
-Definiciones, sobre el progreso que ya existía (sin campos nuevos):
+Definitions, on top of the progress that already existed (no new fields):
 
-| Estado | Condición | Dónde |
+| State | Condition | Where |
 | --- | --- | --- |
-| Nuevo (sin aprender) | El elemento no tiene registro en el SRS | `getItemStatus` → `new` |
-| Aprendido | Tiene registro: se confirmó en Learn o ya se respondió alguna vez | `isLearned` |
-| Pendiente de repaso | Aprendido y su `nextReviewAt` ya llegó | `isDue` |
-| Dominado | Nivel SRS ≥ 4 | `MASTERED_LEVEL` |
+| New (not learned) | The item has no record in the SRS | `getItemStatus` → `new` |
+| Learned | It has a record: it was confirmed in Learn or has been answered at least once | `isLearned` |
+| Due for review | Learned and its `nextReviewAt` has arrived | `isDue` |
+| Mastered | SRS level ≥ 4 | `MASTERED_LEVEL` |
 
-Confirmar en Learn llama a `introduceItem`: crea el registro con nivel 0 y
-primer repaso hoy (el intervalo del nivel 0 del SRS). No es una respuesta, así
-que no suma a la actividad ni a la racha. «I already know it» llama a
-`markItemKnown`: el registro entra en el nivel máximo (dominado) con el primer
-repaso a los 30 días (`scheduleKnownItem`). Sigue saliendo en Study, pero muy
-de vez en cuando; si se falla, vuelve al nivel 0 como cualquier otro.
+Confirming in Learn calls `introduceItem`: it creates the record at level 0 with
+the first review today (the SRS level 0 interval). It is not an answer, so
+it does not count toward activity or the streak. "I already know it" calls
+`markItemKnown`: the record enters at the maximum level (mastered) with the first
+review after 30 days (`scheduleKnownItem`). It still shows up in Study, but very
+rarely; if it is answered wrong, it goes back to level 0 like any other.
 
-En Profile el usuario puede indicar su nivel HSK (`settings.hskLevel`).
-Guardarlo llama a `applyHskLevel`: lo que no tenía registro hasta ese nivel
-entra como dominado, con los primeros repasos repartidos entre 30 y 59 días
-para que no toquen todos el mismo día; lo que está dos niveles o más por debajo
-(`BASIC_LEVEL_GAP`) se marca `basic`: dominado y nunca pendiente (`isDue`
-devuelve `false`), aunque ya se estuviera estudiando. Un básico solo sale en un
-repaso voluntario, el último; si se falla, pierde la marca. Lo que crea el
-nivel lleva la marca `fromLevel` hasta que se responde: al bajar de nivel, esos
-registros se borran y el elemento vuelve a ser nuevo. Lo que ya se había
-estudiado se conserva; si era básico, pierde la marca y vuelve a repasarse como
-dominado. Los filtros están en
+In Profile the user can set their HSK level (`settings.hskLevel`).
+Saving it calls `applyHskLevel`: anything with no record up to that level
+enters as mastered, with the first reviews spread between 30 and 59 days
+so they do not all fall on the same day; anything two or more levels below
+(`BASIC_LEVEL_GAP`) is marked `basic`: mastered and never due (`isDue`
+returns `false`), even if it was already being studied. A basic item only shows up in a
+voluntary review, last; if it is answered wrong, it loses the mark. What the
+level creates carries the `fromLevel` mark until it is answered: when lowering the level, those
+records are deleted and the item becomes new again. What had already been
+studied is kept; if it was basic, it loses the mark and goes back to being reviewed as
+mastered. The filters live in
 `studySets/sessionItems.ts` (`getLearnableItems`, `getReviewItems`,
-`getSetSessionCounts`); ninguna página filtra por su cuenta.
+`getSetSessionCounts`); no page filters on its own.
 
-La URL fija el contexto de la sesión: `/study/practice?set=hsk-1&mode=learn`
-o `&mode=study`. El elemento actual y las respuestas viven en el estado del
-componente de la sesión, que sigue montado mientras el diccionario está abierto.
+The URL fixes the session context: `/study/practice?set=hsk-1&mode=learn`
+or `&mode=study`. The current item and the answers live in the state of the
+session component, which stays mounted while the dictionary is open.
 
-### Sets propios
+### Custom sets
 
-`features/customSets` guarda los sets del usuario en localStorage
-(`hanzivocab.customSets`, con versión). Un `CustomSet` es JSON puro: nombre,
-descripción, ids de elementos del diccionario y las notas del usuario. `useStudySets()`
-los convierte en `StudySet` de tipo `custom` y los junta con los de la app,
-así que tarjetas, progreso, Learn, Study y My Studies funcionan igual.
-`CustomSetsProvider` es el único sitio que sabe dónde se guardan: para usar
-un servidor más adelante basta con cambiarlo.
+`features/customSets` stores the user's sets in localStorage
+(`hanzivocab.customSets`, versioned). A `CustomSet` is plain JSON: name,
+description, dictionary item ids and the user's notes. `useStudySets()`
+turns them into `StudySet`s of type `custom` and merges them with the app's own,
+so cards, progress, Learn, Study and My Studies work the same.
+`CustomSetsProvider` is the only place that knows where they are stored: to use
+a server later it is enough to change it.
 
-- **Vocabulario**: se busca con la misma búsqueda del diccionario y se guarda
-  el id. Nunca se copian ni se editan hanzi, pinyin, significados o trazos.
-  Se puede añadir cualquier entrada del diccionario completo, no solo de HSK
-  1-4 (ver «Diccionario completo»).
-- **Significado propio**: `meanings[itemId]` dentro del set. La ficha oficial
-  no cambia; el mismo elemento en otro set tiene sus propias notas. Quitar el
-  elemento del set borra sus notas en ese set.
-- **Frases propias**: `sentences` dentro del set, cada una con `id`, el
-  `itemId` al que acompaña, el chino que escribió el usuario y los `tokens`
-  generados (pinyin y tono por carácter, puntuación aparte). El pinyin se
-  guarda: mostrar una frase no necesita el motor.
-- **Pinyin automático** (`pinyinEngine.ts`): `pinyin-pro` con su diccionario
-  de palabras y los cambios de tono de 一/不. Un carácter con varias lecturas
-  solo se da por seguro si el motor lo lee dentro de una palabra o si coincide
-  con la lectura del dataset en ese punto (la palabra más larga del dataset que
-  empieza ahí, sin homógrafos). Si no, queda marcado como dudoso, sin color, y
-  el usuario elige entre las lecturas posibles; nunca escribe pinyin a mano.
-  Donde el dataset lee la misma sílaba en tono neutro (朋友 péng you), se usa
-  la del dataset. Las frases de ejemplo del diccionario usan el mismo motor
-  (`AnnotatedSentence`), pero sin elegir: lo dudoso se queda marcado.
-- **Colores**: los mismos de toda la app (`TONE_TEXT_CLASSES`). Sin color la
-  puntuación y los caracteres dudosos; el pinyin siempre visible.
-- La ficha del diccionario abierta desde un set propio (`?set=custom-...`)
-  añade una tarjeta «My notes in …»; en Learn, las notas van bajo la ficha.
+- **Vocabulary**: found with the same search as the dictionary, and the id is
+  stored. Hanzi, pinyin, meanings and strokes are never copied or edited.
+  Any entry of the full dictionary can be added, not just HSK
+  1-4 (see "Full dictionary").
+- **Custom meaning**: `meanings[itemId]` inside the set. The official detail page
+  does not change; the same item in another set has its own notes. Removing the
+  item from the set deletes its notes in that set.
+- **Custom sentences**: `sentences` inside the set, each with an `id`, the
+  `itemId` it accompanies, the Chinese the user wrote and the generated `tokens`
+  (pinyin and tone per character, punctuation separate). The pinyin is
+  stored: showing a sentence does not need the engine.
+- **Automatic pinyin** (`pinyinEngine.ts`): `pinyin-pro` with its word
+  dictionary and the tone changes of 一/不. A character with several readings
+  is only considered certain if the engine reads it inside a word or if it matches
+  the dataset reading at that point (the longest dataset word that
+  starts there, with no homographs). Otherwise it is marked as doubtful, without color, and
+  the user chooses among the possible readings; they never type pinyin by hand.
+  Where the dataset reads the same syllable in neutral tone (朋友 péng you), the
+  dataset's is used. The dictionary's example sentences use the same engine
+  (`AnnotatedSentence`), but without choosing: doubtful ones stay marked.
+- **Colors**: the same as in the rest of the app (`TONE_TEXT_CLASSES`). Punctuation
+  and doubtful characters have no color; the pinyin is always visible.
+- The dictionary detail page opened from a custom set (`?set=custom-...`)
+  adds a "My notes in …" card; in Learn, the notes go under the detail page.
 
-### Diccionario completo
+### Full dictionary
 
-HSK 1-4 va en el bundle (`src/data`), porque lo usan los sets, los ejercicios
-y las estadísticas. El resto de CC-CEDICT (unas 108.000 palabras y 9.900
-caracteres) está en el repositorio de datos `ItsCogo-lab/HanziDict`
-(servido por jsDelivr, ver «Fuentes en tiempo de ejecución»), repartido en 32
-archivos por el primer carácter (`fullDictionary.ts`), y se pide solo cuando
-hace falta:
+HSK 1-4 is in the bundle (`src/data`), because sets, exercises
+and statistics use it. The rest of CC-CEDICT (about 108,000 words and 9,900
+characters) is in the data repository `ItsCogo-lab/HanziDict`
+(served by jsDelivr, see "Runtime sources"), split into 32
+files by first character (`fullDictionary.ts`), and is requested only when
+needed:
 
-- **`dictionaryStore.ts`**: el diccionario de la interfaz. Empieza con HSK y
-  añade cada trozo que llega; nunca pide uno dos veces. Sigue el contrato de
-  `useSyncExternalStore`, así que la interfaz se vuelve a pintar sola.
-- **`DictionaryProvider`** lo comparte con toda la app. Por defecto pide los
-  trozos con `loadDictionaryChunk` (servicio del diccionario, con caché). Los
-  tests le pasan un `loadChunk` de prueba (`src/test/dictionaryChunks.ts`), sin red.
-- **`useLoadItems(itemIds)` / `<LoadEntries>`**: para abrir una ficha, un set
-  propio o una sesión de un set propio, carga los trozos de esos elementos y
-  de sus caracteres. Con elementos de HSK está listo al momento.
-- **`useSearchableItems(active)`**: al escribir la primera búsqueda se cargan
-  los 32 trozos (unos 4,7 MB con gzip, una vez por versión de los datos: se
-  guardan en IndexedDB); mientras llegan se busca en HSK y se avisa. Sin
-  búsqueda no se descarga nada.
-- **Orden de los resultados**: coincidencias exactas antes que parciales, y
-  dentro de cada grupo HSK antes que el resto.
-- **`useDictionarySearch(query)`**: lo que usan los dos buscadores. Busca
-  cuando se deja de escribir (200 ms; cada tecla cancela la espera anterior),
-  pide un hanzi o dos letras (una sola coincide con decenas de miles de
-  entradas) y recuerda las 30 últimas búsquedas por versión del diccionario.
-  Mientras se escribe se siguen viendo los resultados anteriores.
+- **`dictionaryStore.ts`**: the interface's dictionary. It starts with HSK and
+  adds each chunk that arrives; it never requests one twice. It follows the
+  `useSyncExternalStore` contract, so the interface re-renders on its own.
+- **`DictionaryProvider`** shares it with the whole app. By default it requests
+  chunks with `loadDictionaryChunk` (the dictionary service, with cache). Tests
+  pass it a test `loadChunk` (`src/test/dictionaryChunks.ts`), with no network.
+- **`useLoadItems(itemIds)` / `<LoadEntries>`**: to open a detail page, a custom
+  set or a custom set session, it loads the chunks for those items and
+  their characters. With HSK items it is ready immediately.
+- **`useSearchableItems(active)`**: when the first search is typed, all
+  32 chunks are loaded (about 4.7 MB gzipped, once per data version: they are
+  stored in IndexedDB); while they arrive, HSK is searched and the user is notified. Without
+  a search nothing is downloaded.
+- **Result order**: exact matches before partial ones, and
+  within each group HSK before the rest.
+- **`useDictionarySearch(query)`**: what both search boxes use. It searches
+  when typing stops (200 ms; each keystroke cancels the previous wait),
+  requires one hanzi or two letters (a single letter matches tens of thousands of
+  entries) and remembers the last 30 searches per dictionary version.
+  While typing, the previous results stay visible.
 
-### Fuentes en tiempo de ejecución
+### Runtime sources
 
-El diccionario completo (repositorio de datos en jsDelivr), el orden de
-trazos (jsDelivr) y las frases de ejemplo (API de Tatoeba) se piden en tiempo
-de ejecución; por qué estas fuentes y no otras, en `DATA_SOURCES.md`. Las
-capas, de arriba abajo:
+The full dictionary (data repository on jsDelivr), stroke
+order (jsDelivr) and example sentences (Tatoeba API) are requested at
+runtime; why these sources and not others is in `DATA_SOURCES.md`. The
+layers, from top to bottom:
 
 ```
-StrokeOrder, ExampleSentences, buscadores   (componentes: nunca llaman a una API)
-  └ useRuntimeData / dictionaryStore        (cancelan o reutilizan peticiones)
-     └ dictionaryService.ts                 (decide de dónde sale cada dato)
-        ├ resourceService.ts                (caché stale-while-revalidate)
-        │  └ dictionaryCache.ts             (IndexedDB; en memoria si no hay)
-        └ dictionarySource.ts, strokeSource.ts, tatoebaSource.ts   (adaptadores)
-           └ http.ts                        (errores clasificados, tiempo máximo, límite por minuto)
+StrokeOrder, ExampleSentences, search boxes   (components: never call an API)
+  └ useRuntimeData / dictionaryStore        (cancel or reuse requests)
+     └ dictionaryService.ts                 (decides where each piece of data comes from)
+        ├ resourceService.ts                (stale-while-revalidate cache)
+        │  └ dictionaryCache.ts             (IndexedDB; in memory if unavailable)
+        └ dictionarySource.ts, strokeSource.ts, tatoebaSource.ts   (adapters)
+           └ http.ts                        (classified errors, timeout, per-minute limit)
 ```
 
-- **Adaptadores**: uno por fuente. Construyen la URL (la versión va fijada),
-  validan la respuesta y la pasan al modelo de la app (`StrokeData`,
-  `ExampleSentence`). Nada del formato de la API sale de ahí: si la API cambia,
-  solo cambia su adaptador.
-- **Errores**: `http.ts` convierte cualquier fallo en un `SourceError` con su
-  tipo (`network`, `http`, `rate-limit`, `invalid`, `aborted`). Cada fuente
-  tiene su propio límite de peticiones por minuto en el navegador y, tras un
-  429, espera lo que pida la fuente.
-- **Caché**: IndexedDB (base `hanzivocab-dictionary`), no localStorage, porque
-  puede crecer a varios MB. Cada entrada guarda la clave, los datos, cuándo se
-  descargaron y de qué fuente y versión. Si IndexedDB falla, es como no tener
-  caché.
-- **Orden al pedir un dato**: caché al día → caché caducada (se enseña y se
-  renueva en segundo plano) → la API → la copia local de HSK 1-4 → la ficha
-  dice que no está disponible sin conexión. Nunca se enseña un dato inventado.
-- **Tests**: `renderWithProviders` usa una caché en memoria y un `fetch` sin
-  conexión; `src/test/setup.ts` sustituye el `fetch` global para que ningún
-  test salga a internet. Las respuestas de prueba de Tatoeba son copias de una
-  consulta real (`src/test/tatoebaResponses.ts`).
+- **Adapters**: one per source. They build the URL (the version is pinned),
+  validate the response and hand it to the app's model (`StrokeData`,
+  `ExampleSentence`). Nothing of the API's format leaves there: if the API changes,
+  only its adapter changes.
+- **Errors**: `http.ts` turns any failure into a `SourceError` with its
+  type (`network`, `http`, `rate-limit`, `invalid`, `aborted`). Each source
+  has its own per-minute request limit in the browser and, after a
+  429, waits as long as the source asks.
+- **Cache**: IndexedDB (database `hanzivocab-dictionary`), not localStorage, because
+  it can grow to several MB. Each entry stores the key, the data, when it was
+  downloaded and from which source and version. If IndexedDB fails, it is like having no
+  cache.
+- **Order when requesting data**: fresh cache → stale cache (shown and
+  refreshed in the background) → the API → the local HSK 1-4 copy → the detail page
+  says it is not available offline. Made-up data is never shown.
+- **Tests**: `renderWithProviders` uses an in-memory cache and an offline
+  `fetch`; `src/test/setup.ts` replaces the global `fetch` so that no
+  test goes out to the internet. The Tatoeba test responses are copies of a real
+  query (`src/test/tatoebaResponses.ts`).
 
-### Diccionario dentro de la sesión
+### Dictionary inside the session
 
-`DictionaryPanel` se abre encima de la sesión (panel lateral en escritorio,
-hoja inferior en móvil) sin cambiar de ruta: el ejercicio sigue montado debajo
-con su estado, y al cerrar (botón, Escape) el foco vuelve al botón Dictionary.
-Las fichas reciben un `EntryOpener`: en la página enlazan a otra ruta; en el
-panel abren la ficha dentro del panel, con historial para volver. Consultar el
-elemento de la pregunta solo se ofrece después de responder, para no dar la
-respuesta.
+`DictionaryPanel` opens on top of the session (side panel on desktop,
+bottom sheet on mobile) without changing route: the exercise stays mounted underneath
+with its state, and on close (button, Escape) focus returns to the Dictionary button.
+Detail pages receive an `EntryOpener`: on the page they link to another route; in the
+panel they open the detail page inside the panel, with history to go back. Looking up the
+question's item is only offered after answering, so as not to give away the
+answer.
 
-### Móvil e instalación
+### Mobile and installation
 
-La app se diseña primero para el móvil (360 px de ancho). La barra de
-navegación inferior mide `--mobile-nav-height` (`index.css`): 3.5rem más la
-franja del sistema de los iPhone (`env(safe-area-inset-bottom)`, gracias a
-`viewport-fit=cover`); el contenido y los botones fijos de Learn la usan para
-no quedar tapados. En móvil todo va más compacto: la raíz baja a 15 px (todo
-está en rem, así que textos y espacios se reducen a la vez) y márgenes, gaps y
-paddings usan valores pequeños que crecen desde `sm:`. Los campos de formulario
-miden 16 px fijos para que Safari no haga zoom al escribir.
+The app is designed mobile-first (360 px wide). The bottom navigation
+bar is `--mobile-nav-height` tall (`index.css`): 3.5rem plus the iPhone system
+strip (`env(safe-area-inset-bottom)`, thanks to
+`viewport-fit=cover`); the content and Learn's fixed buttons use it so as not
+to be covered. On mobile everything is more compact: the root drops to 15 px (everything
+is in rem, so text and spacing shrink together) and margins, gaps and
+paddings use small values that grow from `sm:`. Form fields
+are a fixed 16 px so Safari does not zoom when typing.
 
-Se puede instalar como app (`public/manifest.webmanifest`). `start_url` y
-`scope` son relativos (`./`), así valen igual en `/` que en `/HanziBloom/`.
-El logotipo (`public/logo.svg`, y con fondo en `public/favicon.svg` y
-`public/icons/`) es una flor de cinco pétalos: cada pétalo es el trazo punto
-(丶) de 汉 de hanzi-writer-data, pintado con el color de uno de los cinco tonos.
-Es un dibujo, no una fuente, para que se vea igual en todas partes.
+It can be installed as an app (`public/manifest.webmanifest`). `start_url` and
+`scope` are relative (`./`), so they work the same at `/` and at `/HanziBloom/`.
+The logo (`public/logo.svg`, and with a background in `public/favicon.svg` and
+`public/icons/`) is a five-petal flower: each petal is the dot stroke
+(丶) of 汉 from hanzi-writer-data, painted with the color of one of the five tones.
+It is a drawing, not a font, so it looks the same everywhere.
 
-Las claves de localStorage (`hanzivocab.*`) y la base de IndexedDB
-(`hanzivocab-dictionary`) conservan el nombre antiguo de la app a propósito:
-cambiarlas haría perder el progreso ya guardado. No hay service worker: los navegadores ya no lo exigen para
-instalar, y así cada despliegue llega sin cachés que lo retrasen (el
-diccionario ya se guarda en IndexedDB).
+The localStorage keys (`hanzivocab.*`) and the IndexedDB database
+(`hanzivocab-dictionary`) keep the app's old name on purpose:
+changing them would lose the progress already saved. There is no service worker: browsers no longer require one to
+install, and this way each deployment arrives without caches delaying it (the
+dictionary is already stored in IndexedDB).
 
-`features/install`: Chrome/Edge/Samsung lanzan `beforeinstallprompt`, que se
-escucha desde `main.tsx` antes de montar React y se guarda para el botón
-Install. Safari en iPhone no tiene ese diálogo: se explican los pasos
-«Compartir → Añadir a pantalla de inicio». El aviso (`InstallBanner`) sale una
-vez, no durante las sesiones, y no vuelve al cerrarlo; Ajustes → App sigue
-ofreciendo instalar.
+`features/install`: Chrome/Edge/Samsung fire `beforeinstallprompt`, which is
+listened for from `main.tsx` before mounting React and stored for the Install
+button. Safari on iPhone has no such dialog: the steps
+"Share → Add to Home Screen" are explained. The banner (`InstallBanner`) appears
+once, not during sessions, and does not come back after being closed; Settings → App still
+offers installing.
 
-### Colores de tono
+### Tone colors
 
-`getCharacterTones` (`features/dictionary/tones.ts`) saca el tono de cada
-carácter del pinyin con marcas de la entrada. En palabras, sílaba a sílaba (así
-un polifónico toma la lectura de la palabra); en caracteres sueltos, solo si
-todas sus lecturas tienen el mismo tono. Si algo no cuadra, el carácter queda
-sin color: no se adivina. Colores en `index.css` (`--color-tone-1..5`), todos
-con contraste ≥ 4.5:1. El color nunca es la única pista: el pinyin con marcas
-va al lado, y se oculta en los ejercicios que preguntan la pronunciación hasta
-responder. Ajustes: activar colores y añadir números de tono.
+`getCharacterTones` (`features/dictionary/tones.ts`) derives the tone of each
+character from the entry's pinyin with tone marks. For words, syllable by syllable (so
+a polyphonic character takes the word's reading); for single characters, only if
+all their readings have the same tone. If something does not add up, the character has
+no color: nothing is guessed. Colors are in `index.css` (`--color-tone-1..5`), all
+with contrast ≥ 4.5:1. Color is never the only cue: the pinyin with marks
+is next to it, and is hidden in exercises that ask for the pronunciation until
+answered. Settings: turn colors on and add tone numbers.
 
-### Tema oscuro
+### Dark theme
 
-Los componentes solo usan tokens de color (`bg-paper`, `text-ink`,
-`text-tone-3`...), nunca colores sueltos. El tema oscuro redefine esos mismos
-tokens en `html[data-theme='dark']` (`index.css`), así que no hay clases
-`dark:`. En oscuro el acento y los tonos se aclaran y siguen con contraste
-≥ 4.5:1; sobre un relleno de acento el texto es `on-accent` (blanco en claro,
-oscuro en oscuro).
+Components only use color tokens (`bg-paper`, `text-ink`,
+`text-tone-3`...), never loose colors. The dark theme redefines those same
+tokens in `html[data-theme='dark']` (`index.css`), so there are no `dark:`
+classes. In dark mode the accent and the tones get lighter and keep contrast
+≥ 4.5:1; on an accent fill the text is `on-accent` (white in light,
+dark in dark).
 
-Ajustes → Appearance: System (por defecto), Light o Dark, guardado con el resto
-de ajustes. Un script pequeño en `index.html` pone `data-theme` antes de pintar,
-para que no se vea el tema equivocado al cargar; luego `SettingsProvider` lo
-mantiene (`features/settings/theme.ts`), escucha los cambios del sistema y
-pinta `theme-color` (barra del navegador) con el fondo. Hanzi Writer dibuja con
-colores fijos, así que el orden de trazos se vuelve a crear al cambiar de tema.
+Settings → Appearance: System (default), Light or Dark, saved with the rest
+of the settings. A small script in `index.html` sets `data-theme` before painting,
+so the wrong theme is not visible on load; then `SettingsProvider` keeps it up
+(`features/settings/theme.ts`), listens for system changes and
+paints `theme-color` (the browser bar) with the background. Hanzi Writer draws with
+fixed colors, so the stroke order is recreated when the theme changes.
 
-## 6. Entidades principales
+## 6. Main entities
 
-El modelo está en `src/features/dictionary/types.ts`. Resumen:
+The model is in `src/features/dictionary/types.ts`. Summary:
 
 ```ts
 type HskLevel = 1 | 2 | 3 | 4
-type Translations = { en: string[]; es?: string[]; ca?: string[] } // en viene de CC-CEDICT
+type Translations = { en: string[]; es?: string[]; ca?: string[] } // en comes from CC-CEDICT
 
 interface Character {
-  id: string              // el propio hanzi, p. ej. "好"
+  id: string              // the hanzi itself, e.g. "好"
   hanzi: string
-  pinyin: string[]        // puede tener varias lecturas (了: le, liǎo)
+  pinyin: string[]        // may have several readings (了: le, liǎo)
   meanings: Translations
   hskLevel: HskLevel
   strokeCount?: number    // hanzi-writer-data
-  radical?: string        // Unihan: 木, o su forma simplificada 讠
+  radical?: string        // Unihan: 木, or its simplified form 讠
   radicalNumber?: number  // Unihan: 1-214 (木 → 75)
-  frequencyRank?: number  // sin fuente todavía
+  frequencyRank?: number  // no source yet
   traditional?: string[]  // Unihan: 柠 → ["檸"]
   decomposition?: string  // Make Me a Hanzi: "⿰木宁"
-  etymology?: Etymology   // Make Me a Hanzi: tipo, semántico, fonético
+  etymology?: Etymology   // Make Me a Hanzi: type, semantic, phonetic
 }
 
 interface Word {
-  id: string              // p. ej. "你好"
+  id: string              // e.g. "你好"
   hanzi: string
   pinyin: string          // "nǐ hǎo"
   meanings: Translations
@@ -366,7 +366,7 @@ interface Word {
   frequencyRank?: number
 }
 
-// Frase de ejemplo de Tatoeba, en public/examples/hsk1.json
+// Tatoeba example sentence, in public/examples/hsk1.json
 interface ExampleSentence {
   tatoebaId: number
   zh: string
@@ -377,11 +377,11 @@ interface ExampleSentence {
   words: string[]
 }
 
-// Un carácter o una palabra; los ejercicios y el progreso trabajan con esto
+// A character or a word; exercises and progress work with this
 type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
 type StudyItemId = `char:${string}` | `word:${string}`   // "char:好", "word:好"
 
-// Progreso de un elemento estudiado (src/features/progress/types.ts)
+// Progress of a studied item (src/features/progress/types.ts)
 interface ItemProgress {
   itemId: StudyItemId
   timesSeen: number
@@ -392,224 +392,224 @@ interface ItemProgress {
   nextReviewAt: string
 }
 
-// Todo el progreso: los elementos que no están en `items` son nuevos
+// All progress: items that are not in `items` are new
 interface ProgressData {
   items: Partial<Record<StudyItemId, ItemProgress>>
-  activity: Record<string, { answers: number; correct: number }> // por día "2026-09-28"
+  activity: Record<string, { answers: number; correct: number }> // per day "2026-09-28"
 }
 ```
 
-Los campos opcionales son opcionales precisamente para no inventar datos: si
-la fuente dueña de un campo no lo tiene, se queda vacío y la ficha no muestra
-esa sección. Qué fuente manda en cada campo y cómo se genera el dataset
-(adaptadores por fuente, fusión y validación en `scripts/dataset/`) está en
+Optional fields are optional precisely so as not to make up data: if
+the source that owns a field does not have it, it stays empty and the detail page does not show
+that section. Which source takes precedence for each field and how the dataset is generated
+(adapters per source, merging and validation in `scripts/dataset/`) is in
 `docs/DATA_SOURCES.md`.
 
-**Datos grandes, fuera del bundle.** Los trazos (`public/strokes/`) y las
-frases de ejemplo (`public/examples/`) se piden con `fetch` al abrir una ficha.
-La librería Hanzi Writer también se carga en ese momento.
+**Large data, outside the bundle.** Strokes (`public/strokes/`) and
+example sentences (`public/examples/`) are requested with `fetch` when a detail page is opened.
+The Hanzi Writer library is also loaded at that moment.
 
-**Datos derivados, no guardados.** Los caracteres que forman una palabra y las
-palabras relacionadas con un carácter no se guardan en el dataset: se calculan
-a partir de `hanzi` (`getCharactersOfWord`, `getWordsWithCharacter`). Si se
-guardaran, podrían quedar desincronizados al editar los datos.
+**Derived data, not stored.** The characters that make up a word and the
+words related to a character are not stored in the dataset: they are computed
+from `hanzi` (`getCharactersOfWord`, `getWordsWithCharacter`). If they were
+stored, they could get out of sync when the data is edited.
 
-**Consultas.** `src/features/dictionary/dictionary.ts` construye un
-`Dictionary` (dos `Map` indexados por id) y ofrece funciones puras para buscar
-y listar. `validation.ts` comprueba la coherencia de los datos (ids únicos,
-pinyin y significados presentes, caracteres de cada palabra existentes); los
-tests del dataset la usarán para que un error en los datos haga fallar la CI.
+**Queries.** `src/features/dictionary/dictionary.ts` builds a
+`Dictionary` (two `Map`s indexed by id) and offers pure functions to search
+and list. `validation.ts` checks the consistency of the data (unique ids,
+pinyin and meanings present, characters of each word existing); the
+dataset tests will use it so that an error in the data makes CI fail.
 
-### Ejercicios extensibles
+### Extensible exercises
 
-Está en `src/features/practice/`. Cada tipo de ejercicio tiene:
+It lives in `src/features/practice/`. Each exercise type has:
 
-1. Su interfaz en `types.ts`, dentro de la unión `Exercise` (discriminada por `type`).
-2. Su definición en `exerciseDefinitions.ts`:
+1. Its interface in `types.ts`, within the `Exercise` union (discriminated by `type`).
+2. Its definition in `exerciseDefinitions.ts`:
 
    ```ts
    interface ExerciseDefinition<E extends Exercise> {
      type: E['type']
-     canBuild(item, pool): boolean   // ¿hay datos suficientes para este ejercicio?
-     build(item, pool, random): E    // genera pregunta y opciones
+     canBuild(item, pool): boolean   // is there enough data for this exercise?
+     build(item, pool, random): E    // generates question and options
    }
    ```
 
-3. Su componente, elegido en `components/ExerciseView.tsx` con un `switch` que
-   TypeScript obliga a completar.
+3. Its component, chosen in `components/ExerciseView.tsx` with a `switch` that
+   TypeScript forces to be exhaustive.
 
-Añadir un ejercicio nuevo (p. ej. escritura) consiste en esos tres pasos, sin
-tocar los demás. El `random` se inyecta para que los tests sean deterministas.
+Adding a new exercise (e.g. writing) consists of those three steps, without
+touching the others. `random` is injected so that tests are deterministic.
 
-**Tipos actuales.** `flashcard` (el usuario dice si lo sabía) y tres de opción
-múltiple con cuatro opciones, en `choiceExercises.ts`:
+**Current types.** `flashcard` (the user says whether they knew it) and three
+multiple-choice ones with four options, in `choiceExercises.ts`:
 
-| Tipo | Se muestra | Se elige |
+| Type | Shown | Chosen |
 | --- | --- | --- |
-| `meaning-choice` | hanzi | significado |
+| `meaning-choice` | hanzi | meaning |
 | `pinyin-choice` | hanzi | pinyin |
-| `hanzi-choice` | significado | hanzi |
+| `hanzi-choice` | meaning | hanzi |
 
-Reglas de los distractores (cubiertas por tests):
+Distractor rules (covered by tests):
 
-- Son del mismo tipo que la respuesta (carácter o palabra) y, si se puede, con
-  el mismo número de caracteres, para que no se adivine por la forma.
-- No pueden ser también una respuesta válida: se descartan los que comparten
-  un significado (sinónimos), una lectura de pinyin o el mismo hanzi, y
-  tampoco pueden coincidir entre sí.
-- Los significados que citan el propio hanzi ("used in 漂亮") se ocultan; si a
-  un elemento no le queda ninguno (子, 漂, 么), no se pregunta por su
-  significado, solo por su pinyin.
-- En los caracteres con varias lecturas se muestra la primera, para que la
-  opción correcta no se distinga por ser una lista.
+- They are of the same type as the answer (character or word) and, if possible, with
+  the same number of characters, so that it cannot be guessed by shape.
+- They cannot also be a valid answer: those that share
+  a meaning (synonyms), a pinyin reading or the same hanzi are discarded, and
+  they cannot coincide with each other either.
+- Meanings that quote the hanzi itself ("used in 漂亮") are hidden; if
+  an item is left with none (子, 漂, 么), its meaning is not asked,
+  only its pinyin.
+- For characters with several readings the first one is shown, so that the
+  correct option is not distinguishable by being a list.
 
-**Sesión.** `session.ts` crea los ejercicios (elementos al azar y un tipo
-construible para cada uno) y gestiona el avance con un reducer puro
-(`sessionReducer`), que `PracticeSession` usa con `useReducer`. Cada respuesta
-produce un `ExerciseResult { itemId, exerciseType, correct }`, que es lo que
-consumirá el sistema de progreso en la Fase 8.
+**Session.** `session.ts` creates the exercises (random items and a buildable
+type for each) and manages advancement with a pure reducer
+(`sessionReducer`), which `PracticeSession` uses with `useReducer`. Each answer
+produces an `ExerciseResult { itemId, exerciseType, correct }`, which is what the
+progress system will consume in Phase 8.
 
-### Repetición espaciada
+### Spaced repetition
 
-`src/features/srs/srs.ts` expone dos funciones:
+`src/features/srs/srs.ts` exposes two functions:
 
 ```ts
 scheduleNextReview(masteryLevel: number, wasCorrect: boolean, now: Date): { masteryLevel, nextReviewAt }
 isReviewDue(nextReviewAt: string, now: Date): boolean
 ```
 
-Para el MVP: sistema de cajas tipo Leitner. Acierto → sube un nivel; fallo →
-vuelve a 0. Intervalos por nivel: 0, 1, 3, 7, 14, 30 días, contados por días
-del calendario local (el repaso "de mañana" está disponible desde las 00:00).
-El resto de la app solo conoce estas funciones, así que cambiar a SM-2 o FSRS
-más adelante no afecta a nada más.
+For the MVP: a Leitner-style box system. Correct → goes up a level; wrong →
+back to 0. Intervals per level: 0, 1, 3, 7, 14, 30 days, counted in local
+calendar days (the "tomorrow" review is available from 00:00).
+The rest of the app only knows these functions, so switching to SM-2 or FSRS
+later does not affect anything else.
 
-**Progreso** (`src/features/progress/`):
+**Progress** (`src/features/progress/`):
 
-- `progress.ts`: `recordAnswer` actualiza los contadores del elemento, le
-  pide al SRS su siguiente repaso y suma la respuesta a la actividad del día.
-  Estado de cada elemento: nuevo (nunca visto), en aprendizaje o dominado
-  (nivel 4 o más: siguiente repaso a 14 días o más).
-- `streak.ts`: racha actual y más larga, por días locales. Si hoy aún no has
-  estudiado, la racha de ayer sigue contando.
-- `ProgressProvider` + `useProgress()`: el progreso vive en un Context de
-  React y se guarda en cada cambio. Cada respuesta se guarda al momento, así
-  que salir a mitad de una sesión no pierde nada.
+- `progress.ts`: `recordAnswer` updates the item's counters, asks
+  the SRS for its next review and adds the answer to the day's activity.
+  State of each item: new (never seen), learning or mastered
+  (level 4 or more: next review in 14 days or more).
+- `streak.ts`: current and longest streak, by local days. If you have not yet
+  studied today, yesterday's streak still counts.
+- `ProgressProvider` + `useProgress()`: progress lives in a React
+  Context and is saved on every change. Each answer is saved immediately, so
+  leaving in the middle of a session loses nothing.
 
-**Qué entra en una sesión** (`selectSessionItems`): primero los repasos
-pendientes (los más atrasados antes), luego elementos nuevos y, si aún faltan,
-los estudiados cuyo repaso está más cerca. Después se barajan.
+**What goes into a session** (`selectSessionItems`): first the pending
+reviews (the most overdue first), then new items and, if more are still needed,
+the studied ones whose review is closest. Then they are shuffled.
 
-### Persistencia
+### Persistence
 
-`localStorage` detrás de un pequeño módulo (`loadProgress` / `saveProgress`
-en `progress/storage.ts`, sobre `lib/storage.ts`). El objeto guardado lleva un
-campo `version` para poder migrar datos cuando el formato cambie. Si lo
-guardado está corrupto o localStorage no está disponible (modo privado), la
-app funciona igual, sin guardar. Con cuenta, lo guardado se copia además en
-Supabase (ver «Cuentas y sincronización»). Lo descargado de fuentes externas no va aquí sino en IndexedDB (ver
-«Fuentes en tiempo de ejecución»); no son datos del usuario y se pueden
-borrar sin perder nada.
+`localStorage` behind a small module (`loadProgress` / `saveProgress`
+in `progress/storage.ts`, on top of `lib/storage.ts`). The stored object carries a
+`version` field so data can be migrated when the format changes. If what is
+stored is corrupt or localStorage is unavailable (private mode), the
+app works the same, without saving. With an account, what is stored is also copied to
+Supabase (see "Accounts and sync"). What is downloaded from external sources does not go here but in IndexedDB (see
+"Runtime sources"); it is not user data and can be
+deleted without losing anything.
 
-### Cuentas y sincronización
+### Accounts and sync
 
-La cuenta es opcional: sin iniciar sesión todo sigue en localStorage como
-siempre. Con sesión (Google o enlace por email, en Perfil), los datos del
-usuario se sincronizan entre dispositivos.
+The account is optional: without signing in everything stays in localStorage as
+always. When signed in (Google or email link, in Profile), the user's data is
+synced across devices.
 
-- **Dónde**: Supabase, en la tabla `user_data` (`supabase/schema.sql`): una
-  fila por usuario con el mismo JSON que hay en localStorage (progreso, My
-  Studies, sets propios y ajustes) y un `updated_at`. Las políticas de la
-  tabla solo dejan a cada usuario leer y escribir su fila, así que la URL y la
-  clave pública del proyecto pueden ir en el navegador (`.env.production` y
-  `.env.development`). Sin clave, no hay cuentas y la tarjeta de Perfil no se
-  muestra. En los tests nunca hay proyecto.
-- **Cómo** (`features/account/AccountProvider.tsx` y `features/sync/`): los
-  Providers de datos guardan a través de un almacenamiento observado
-  (`observeStorage`), así que cada cambio real se apunta como pendiente y se
-  sube unos segundos después, agrupado. Al entrar, al volver a la app y al
-  recuperar la conexión se sincroniza (`syncUserData`), y `planSync` decide
-  qué hacer comparando el `updated_at` de la nube con el último visto aquí:
-  subir, bajar, juntar o nada. Si cambia lo guardado, los Providers se
-  vuelven a montar para cargarlo.
-- **Juntar** (`merge.ts`): de cada carácter o palabra se queda el repasado
-  más tarde; de cada día, el registro con más respuestas; los sets se unen.
-  Solo pasa cuando los dos lados han cambiado o la primera vez que un
-  dispositivo usa la cuenta. Limitación conocida: un set quitado en un
-  dispositivo vuelve si otro dispositivo lo tenía y los dos habían cambiado
-  a la vez.
-- **Cerrar sesión** sube lo pendiente y deja los datos en el navegador. La
-  siguiente cuenta que entre en ese navegador juntará sus datos con ellos.
-- Las claves de localStorage (`hanzivocab.*`, y `hanzivocab.sync` para el
-  estado de la sincronización) conservan el nombre antiguo de la app.
+- **Where**: Supabase, in the `user_data` table (`supabase/schema.sql`): one
+  row per user with the same JSON that is in localStorage (progress, My
+  Studies, custom sets and settings) and an `updated_at`. The table's
+  policies only let each user read and write their own row, so the project's URL and
+  public key can go in the browser (`.env.production` and
+  `.env.development`). Without a key, there are no accounts and the Profile card is not
+  shown. In tests there is never a project.
+- **How** (`features/account/AccountProvider.tsx` and `features/sync/`): the data
+  Providers save through an observed storage
+  (`observeStorage`), so each real change is marked as pending and
+  uploaded a few seconds later, batched. On sign-in, on returning to the app and on
+  regaining connection it syncs (`syncUserData`), and `planSync` decides
+  what to do by comparing the cloud's `updated_at` with the last one seen here:
+  upload, download, merge or nothing. If what is stored changes, the Providers are
+  remounted to load it.
+- **Merge** (`merge.ts`): for each character or word, the one reviewed
+  latest is kept; for each day, the record with more answers; sets are unioned.
+  It only happens when both sides have changed or the first time a
+  device uses the account. Known limitation: a set removed on one
+  device comes back if another device had it and both had changed
+  at the same time.
+- **Signing out** uploads what is pending and leaves the data in the browser. The
+  next account to sign in on that browser will merge its data with it.
+- The localStorage keys (`hanzivocab.*`, and `hanzivocab.sync` for the
+  sync state) keep the app's old name.
 
-### Audio (futuro, fuera del MVP)
+### Audio (future, outside the MVP)
 
-Idea prevista: interfaz `speak(text)` implementada con la Web Speech API del navegador
-(`speechSynthesis`, voz `zh-CN`): gratis y sin servidor. Limitación: depende de
-las voces instaladas en el sistema. Como toda la app usa la interfaz, más
-adelante se puede cambiar por audios grabados sin tocar los componentes.
+Planned idea: a `speak(text)` interface implemented with the browser's Web Speech API
+(`speechSynthesis`, `zh-CN` voice): free and serverless. Limitation: it depends on
+the voices installed on the system. Since the whole app uses the interface, it
+can later be swapped for recorded audio without touching the components.
 
-### Internacionalización
+### Internationalization
 
-- Textos de la interfaz: `src/i18n/en.ts` es la fuente y el idioma activo;
-  `es.ts` (y más adelante `ca.ts`) deben tener las mismas claves (lo comprueba
-  TypeScript). Función `t('clave')`.
-- Contenido: `meanings` es un objeto por idioma con el inglés obligatorio
-  (viene de CC-CEDICT), así que añadir español o catalán no cambia el modelo.
+- Interface texts: `src/i18n/en.ts` is the source and the active language;
+  `es.ts` (and later `ca.ts`) must have the same keys (TypeScript checks
+  this). Function `t('key')`.
+- Content: `meanings` is an object per language with English required
+  (it comes from CC-CEDICT), so adding Spanish or Catalan does not change the model.
 
-## 7. Problemas identificados
+## 7. Identified problems
 
-1. **Versión de HSK.** Existen dos estándares: HSK 2.0 (nivel 1 = 150 palabras)
-   y el nuevo estándar de 2021, "HSK 3.0" (nivel 1 = 500 palabras y 300
-   caracteres, y los niveles no equivalen a los antiguos).
-   **Decidido: HSK 2.0 para el MVP**, porque es más pequeño y es el que usan
-   la mayoría de materiales. El campo `hskLevel` se puede acompañar de un
-   campo de estándar si más adelante incluimos ambos.
-2. **Idioma y fuente de los significados.** Las fuentes abiertas fiables
-   (CC-CEDICT, licencia CC BY-SA 4.0) dan los significados en **inglés** y no
-   hay un diccionario chino-español abierto equivalente.
-   **Decidido: de momento la interfaz y los significados están en inglés**,
-   usando CC-CEDICT. El español queda preparado (`i18n/es.ts` y
-   `meanings.es`). Detalles y licencia del dataset en `docs/DATA_SOURCES.md`.
-3. **Carácter y palabra a la vez.** 好 es un carácter y también una palabra
-   HSK 1. Por eso el progreso usa ids con prefijo (`char:好`, `word:好`) y los
-   dos se estudian por separado.
-4. **Varias lecturas de pinyin.** Algunos caracteres tienen más de una
-   pronunciación; en el ejercicio de pinyin se muestra una y los
-   distractores no pueden coincidir con ninguna. **Resuelto en la fase 7.**
-5. **Distractores.** Las opciones incorrectas no deben ser sinónimos de la
-   correcta ni repetirse. **Resuelto en la fase 7** (ver «Tipos actuales»).
-6. **Fechas y racha.** La racha se calcula por día local, no por UTC; si no,
-   estudiar a medianoche daría resultados raros.
-7. **Fuentes chinas.** Se usan fuentes del sistema (PingFang SC, Noto Sans SC,
-   Microsoft YaHei) para no descargar varios MB ni depender de internet.
+1. **HSK version.** There are two standards: HSK 2.0 (level 1 = 150 words)
+   and the new 2021 standard, "HSK 3.0" (level 1 = 500 words and 300
+   characters, and the levels do not match the old ones).
+   **Decided: HSK 2.0 for the MVP**, because it is smaller and is the one most
+   materials use. The `hskLevel` field can be accompanied by a
+   standard field if we later include both.
+2. **Language and source of meanings.** The reliable open sources
+   (CC-CEDICT, CC BY-SA 4.0 license) give meanings in **English** and there is
+   no equivalent open Chinese-Spanish dictionary.
+   **Decided: for now the interface and the meanings are in English**,
+   using CC-CEDICT. Spanish is kept ready (`i18n/es.ts` and
+   `meanings.es`). Dataset details and license in `docs/DATA_SOURCES.md`.
+3. **Character and word at once.** 好 is a character and also an HSK 1
+   word. That is why progress uses prefixed ids (`char:好`, `word:好`) and the
+   two are studied separately.
+4. **Several pinyin readings.** Some characters have more than one
+   pronunciation; in the pinyin exercise one is shown and the
+   distractors cannot match any of them. **Solved in phase 7.**
+5. **Distractors.** Incorrect options must not be synonyms of the
+   correct one or repeat. **Solved in phase 7** (see "Current types").
+6. **Dates and streak.** The streak is computed by local day, not UTC; otherwise
+   studying at midnight would give odd results.
+7. **Chinese fonts.** System fonts are used (PingFang SC, Noto Sans SC,
+   Microsoft YaHei) so as not to download several MB or depend on the internet.
 
-## 8. Plan técnico del MVP
+## 8. MVP technical plan
 
-| Fase | Entregable | Tests |
+| Phase | Deliverable | Tests |
 | --- | --- | --- |
-| 1 | Este documento | — |
-| 2 | Proyecto Vite + React + TS estricto + Tailwind + oxlint + Vitest, ejecutable | Test de humo del componente raíz |
-| 3 | Layout, navegación (react-router), páginas vacías, componentes UI base, i18n | Navegación entre secciones |
-| 4 | Tipos de dominio y funciones de consulta | Funciones de datos |
-| 5 | Dataset HSK 1 con fuentes documentadas | Validación del dataset (ids únicos, referencias válidas) |
-| 6 | Flashcards | Componente de flashcard |
-| 7 | Ejercicios de reconocimiento (significado, pinyin, inverso) | Generación de opciones y distractores |
-| 8 | Progreso + SRS + persistencia | Cálculo de progreso, planificación, racha |
+| 1 | This document | — |
+| 2 | Vite + React + strict TS + Tailwind + oxlint + Vitest project, runnable | Smoke test of the root component |
+| 3 | Layout, navigation (react-router), empty pages, base UI components, i18n | Navigation between sections |
+| 4 | Domain types and query functions | Data functions |
+| 5 | HSK 1 dataset with documented sources | Dataset validation (unique ids, valid references) |
+| 6 | Flashcards | Flashcard component |
+| 7 | Recognition exercises (meaning, pinyin, reverse) | Option and distractor generation |
+| 8 | Progress + SRS + persistence | Progress calculation, scheduling, streak |
 | 9 | Dashboard | — |
-| 10 | Estadísticas básicas | Cálculo de estadísticas |
-| 11 | Completar tests de lo crítico | — |
-| 12 | Revisión, refactor, accesibilidad | — |
+| 10 | Basic statistics | Statistics calculation |
+| 11 | Complete tests for critical parts | — |
+| 12 | Review, refactor, accessibility | — |
 
-**Estado: MVP completo (fases 1-12).** Además del plan, se hicieron las listas y
-fichas de Vocabulario y Caracteres y la página de Ajustes, que estaban en la
-tabla de secciones. Revisión final: sin errores de axe-core (accesibilidad) en
-ninguna página, navegable con teclado y probado a 390 px y 1280 px.
+**Status: MVP complete (phases 1-12).** In addition to the plan, the Vocabulary and
+Characters lists and detail pages and the Settings page were built, which were in the
+sections table. Final review: no axe-core (accessibility) errors on
+any page, keyboard navigable and tested at 390 px and 1280 px.
 
-**Pendiente para después del MVP:** audio (Web Speech API), práctica de
-escritura, significados en español, frecuencia, niveles HSK 2-4.
+**Pending for after the MVP:** audio (Web Speech API), writing
+practice, Spanish meanings, frequency, HSK levels 2-4.
 
-**Integración de datos (después del MVP):** fichas de caracteres con datos de
-CC-CEDICT, Unihan, Make Me a Hanzi, hanzi-writer-data y Tatoeba, generados con
-el pipeline descrito en `docs/DATA_SOURCES.md`.
+**Data integration (after the MVP):** character detail pages with data from
+CC-CEDICT, Unihan, Make Me a Hanzi, hanzi-writer-data and Tatoeba, generated with
+the pipeline described in `docs/DATA_SOURCES.md`.

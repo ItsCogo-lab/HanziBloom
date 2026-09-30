@@ -6,18 +6,18 @@ import { DictionaryPanel } from '../../dictionary/components/DictionaryPanel.tsx
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 
 type SessionFrameProps = {
-  /** Texto del avance, p. ej. "Card 3 of 10". */
+  /** Progress text, e.g. "Card 3 of 10". */
   progressText: string
   value: number
   max: number
-  /** El contenido recibe `lookUp` para abrir la ficha de un elemento en el panel. */
+  /** The content receives `lookUp` to open an item's entry in the panel. */
   children: (lookUp: (item: StudyItem) => void) => ReactNode
 }
 
 /**
- * Lo común a las sesiones Learn y Study: el avance, el botón Dictionary y el
- * panel del diccionario. El panel se abre encima de la sesión: el contenido
- * sigue montado debajo, con su estado, y al cerrar todo sigue igual.
+ * What Learn and Study sessions share: the progress, the Dictionary button and
+ * the dictionary panel. The panel opens on top of the session: the content
+ * stays mounted underneath, with its state, and on close everything is as it was.
  */
 export function SessionFrame({ progressText, value, max, children }: SessionFrameProps) {
   const [dictionaryOpen, setDictionaryOpen] = useState<{ item?: StudyItem }>()
@@ -29,7 +29,7 @@ export function SessionFrame({ progressText, value, max, children }: SessionFram
   }
 
   return (
-    // Con el diccionario abierto en escritorio, la sesión se aparta a la izquierda para que se vean los dos
+    // With the dictionary open on desktop, the session moves to the left so both are visible
     <div className={dictionaryOpen ? 'md:pr-[28rem]' : undefined}>
       <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
         <div className="flex flex-col gap-2">
@@ -56,7 +56,7 @@ export function SessionFrame({ progressText, value, max, children }: SessionFram
       </div>
       {dictionaryOpen && (
         <DictionaryPanel
-          // key: consultar otro elemento abre su ficha aunque el panel ya estuviera abierto
+          // key: looking up another item opens its entry even if the panel was already open
           key={dictionaryOpen.item ? getStudyItemId(dictionaryOpen.item) : 'search'}
           initialItem={dictionaryOpen.item}
           onClose={closeDictionary}

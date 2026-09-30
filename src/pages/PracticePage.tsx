@@ -30,17 +30,17 @@ let nextSessionId = 0
 
 function createPracticeSession(pool: readonly StudyItem[], progress: ProgressData, size: number) {
   nextSessionId += 1
-  // Las respuestas incorrectas salen de todo el diccionario, aunque el set sea pequeño
+  // Wrong answers come from the whole dictionary, even if the set is small
   const exercises = createSessionExercises(pool, { progress, size, distractorPool: hskStudyItems })
   return { id: nextSessionId, exercises }
 }
 
 /**
- * Sesiones de estudio. Con un set, la URL fija el contexto de la sesión:
- * /study/practice?set=hsk-1&mode=learn (vocabulario nuevo) o &mode=study
- * (repaso de lo aprendido; &scope=all incluye lo que aún no toca). Sin set,
- * la sesión mezclada de todo el vocabulario. La `key` hace que cambiar de
- * set o de tipo cree una sesión nueva.
+ * Study sessions. With a set, the URL sets the session context:
+ * /study/practice?set=hsk-1&mode=learn (new vocabulary) or &mode=study
+ * (review of what was learned; &scope=all includes what is not due yet).
+ * Without a set, the mixed session over all vocabulary. The `key` makes
+ * changing set or type create a new session.
  */
 export function PracticePage() {
   const [searchParams] = useSearchParams()
@@ -58,7 +58,7 @@ export function PracticePage() {
       <div className="mb-4 sm:mb-6">
         <SessionTypeLabel type={mode} />
       </div>
-      {/* Un set propio puede tener palabras de fuera de HSK: la sesión empieza cuando están cargadas */}
+      {/* A custom set can have non-HSK words: the session starts once they are loaded */}
       <LoadEntries itemIds={set.itemIds}>
         {mode === 'learn' ? (
           <LearnPractice key={`${set.id}:learn`} set={set} />
@@ -70,19 +70,19 @@ export function PracticePage() {
   )
 }
 
-/** Sesión mezclada de todo el vocabulario (repasos pendientes y nuevos). */
+/** Mixed session over all vocabulary (due reviews and new items). */
 function Practice() {
   const dictionary = useDictionary()
   const { progress, recordAnswer } = useProgress()
   const { sessionSize } = useSettings().settings
-  // useState con función: la sesión se crea una vez al entrar, no en cada render.
-  // Usa el progreso de ese momento; las respuestas no cambian la sesión en curso.
+  // useState with a function: the session is created once on entering, not on every render.
+  // It uses the progress at that moment; answers do not change the ongoing session.
   const [session, setSession] = useState(() => createPracticeSession(hskStudyItems, progress, sessionSize))
 
   return (
     <>
       <PageHeader title={t('practice.title')} description={t('practice.description')} />
-      {/* key: una sesión nueva monta un PracticeSession nuevo, con su estado desde cero */}
+      {/* key: a new session mounts a new PracticeSession, with its state from scratch */}
       <PracticeSession
         key={session.id}
         exercises={session.exercises}
@@ -94,7 +94,7 @@ function Practice() {
   )
 }
 
-/** Marca el set como estudiado hoy con la primera acción de cada sesión. */
+/** Marks the set as studied today on the first action of each session. */
 function useMarkSetStudied(set: StudySet) {
   const { markSetStudied } = useMyStudies()
   const [markedSession, setMarkedSession] = useState<number>()
@@ -106,9 +106,9 @@ function useMarkSetStudied(set: StudySet) {
 }
 
 /**
- * Study: repaso. Solo entran elementos ya aprendidos del set, primero los que
- * toca repasar. Si no toca ninguno, se ofrece repasar igualmente (scope=all),
- * pero nunca se cuela un elemento sin aprender.
+ * Study: review. Only already learned items of the set go in, due ones first.
+ * If none are due, reviewing anyway is offered (scope=all), but an unlearned
+ * item never slips in.
  */
 function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }) {
   const dictionary = useDictionary()
@@ -152,11 +152,11 @@ function StudyPractice({ set, reviewAll }: { set: StudySet; reviewAll: boolean }
   )
 }
 
-/** Learn: presenta elementos del set que aún no se han aprendido. */
+/** Learn: introduces set items that have not been learned yet. */
 function LearnPractice({ set }: { set: StudySet }) {
   const dictionary = useDictionary()
   const { progress, introduceItem, markItemKnown } = useProgress()
-  // En un set propio, las notas del usuario acompañan a la ficha
+  // In a custom set, the user's notes accompany the entry
   const customSet = useCustomSet(set.type === 'custom' ? set.id : undefined)
   const { sessionSize } = useSettings().settings
   const markStudied = useMarkSetStudied(set)
@@ -201,7 +201,7 @@ function LearnPractice({ set }: { set: StudySet }) {
   )
 }
 
-/** Sesión sin elementos: explica por qué y ofrece la acción que tiene sentido. Nunca cambia de tipo sola. */
+/** Session without items: explains why and offers the action that makes sense. It never switches type on its own. */
 function EmptySession({ set, message, children }: { set: StudySet; message: string; children: ReactNode }) {
   return (
     <Card className="mx-auto flex max-w-xl flex-col items-start gap-4">

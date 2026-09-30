@@ -11,13 +11,13 @@ const TONE_LABELS: Record<Tone, MessageKey> = {
   5: 'tones.neutral',
 }
 
-/** Ejemplo de cada tono con la sílaba "ma": mā, má, mǎ, mà, ma. */
+/** Example of each tone with the syllable "ma": mā, má, mǎ, mà, ma. */
 const TONE_EXAMPLES: Record<Tone, string> = { 1: 'mā', 2: 'má', 3: 'mǎ', 4: 'mà', 5: 'ma' }
 
 /**
- * Leyenda de colores de los tonos. Cada fila dice el tono con texto, lleva
- * una muestra del color y un ejemplo de pinyin con su marca: no depende de
- * distinguir los colores.
+ * Tone color legend. Each row states the tone in text, has a color swatch
+ * and a pinyin example with its mark: it doesn't rely on telling colors
+ * apart.
  */
 export function ToneLegend({ className = '' }: { className?: string }) {
   const titleId = useId()

@@ -6,10 +6,10 @@ import './index.css'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
-  throw new Error('No se encontró el elemento #root en index.html')
+  throw new Error('Element #root not found in index.html')
 }
 
-// Antes de montar React: el navegador puede ofrecer instalar la app nada más cargar
+// Before mounting React: the browser may offer to install the app right after loading
 listenForInstallPrompt()
 
 createRoot(rootElement).render(

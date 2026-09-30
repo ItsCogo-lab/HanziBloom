@@ -1,17 +1,17 @@
 name: Publish data
 
-# Regenera el diccionario completo desde sus fuentes y lo publica como una
-# versión nueva en ItsCogo-lab/HanziDict, de donde lo lee la app a través
-# de jsDelivr. La app no cambia ni se vuelve a compilar.
+# Regenerates the full dictionary from its sources and publishes it as a
+# new version in ItsCogo-lab/HanziDict, where the app reads it from via
+# jsDelivr. The app does not change and is not rebuilt.
 #
-# Necesita el secreto DATA_REPO_TOKEN: un token de GitHub (fine-grained) con
-# permiso «Contents: Read and write» solo sobre ItsCogo-lab/HanziDict.
+# Needs the DATA_REPO_TOKEN secret: a (fine-grained) GitHub token with
+# "Contents: Read and write" permission on ItsCogo-lab/HanziDict only.
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Versión nueva de los datos, mayor que la publicada (p. ej. 1.1.0)'
+        description: 'New data version, greater than the published one (e.g. 1.1.0)'
         required: true
 
 concurrency:
@@ -36,11 +36,11 @@ jobs:
           repository: ItsCogo-lab/HanziDict
           token: ${{ secrets.DATA_REPO_TOKEN }}
           path: data-repo
-      - name: Preparar la versión
+      - name: Prepare the version
         env:
           VERSION: ${{ inputs.version }}
         run: npm run data:release -- "$VERSION" data-repo
-      - name: Publicar
+      - name: Publish
         env:
           VERSION: ${{ inputs.version }}
         working-directory: data-repo
@@ -50,6 +50,6 @@ jobs:
           git add -A
           git commit -m "Publish the full dictionary, version $VERSION"
           git push
-      - name: Avisar a jsDelivr del manifiesto nuevo
-        # Sin esto, jsDelivr puede servir el manifiesto anterior hasta 12 horas
+      - name: Notify jsDelivr of the new manifest
+        # Without this, jsDelivr may serve the previous manifest for up to 12 hours
         run: curl -sSf "https://purge.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v1/manifest.json"

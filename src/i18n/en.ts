@@ -1,9 +1,9 @@
 /**
- * Textos de la interfaz en inglés.
+ * English UI texts.
  *
- * Es el idioma de referencia: las claves que existen aquí son las únicas
- * válidas. Los demás idiomas (es.ts) deben tener exactamente las mismas
- * claves, y TypeScript lo comprueba.
+ * This is the reference language: the keys that exist here are the only
+ * valid ones. Other languages (es.ts) must have exactly the same keys, and
+ * TypeScript checks it.
  */
 export const en = {
   'app.name': 'HanziBloom',

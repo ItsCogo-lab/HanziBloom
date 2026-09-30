@@ -41,8 +41,8 @@ function getVocabulary() {
   return screen.getByRole('region', { name: 'Vocabulary' })
 }
 
-describe('Sets propios', () => {
-  it('crea un set y lo lleva a su página, donde se añade vocabulario del diccionario', async () => {
+describe('Custom sets', () => {
+  it('creates a set and goes to its page, where vocabulary from the dictionary is added', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -59,11 +59,11 @@ describe('Sets propios', () => {
     expect(within(getVocabulary()).getAllByRole('listitem')).toHaveLength(3)
     const [saved] = loadCustomSets(storage)
     expect(saved).toMatchObject({ name: 'My Chinese', itemIds: ['word:苹果', 'word:机场', 'word:学习'] })
-    // El set solo guarda ids: la palabra del diccionario sigue igual
+    // The set only stores ids: the dictionary word stays the same
     expect(getStudyItem(hskDictionary, 'word:苹果')?.entry.meanings.en[0]).toBe('apple')
   })
 
-  it('añade palabras de fuera de HSK desde el diccionario completo y abre su ficha', async () => {
+  it('adds non-HSK words from the full dictionary and opens their entry', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -78,7 +78,7 @@ describe('Sets propios', () => {
 
     await user.click(within(vocabulary).getByRole('link', { name: /企鹅/ }))
     expect(await screen.findByRole('heading', { level: 1, name: '企鹅' })).toBeInTheDocument()
-    // Ficha completa: significado y sus caracteres (también de fuera de HSK), sin nivel HSK
+    // Full entry: meaning and its characters (also non-HSK), without an HSK level
     expect(screen.getByText('penguin')).toBeInTheDocument()
     const characters = screen.getByRole('heading', { name: 'Characters' }).parentElement!
     expect(within(characters).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
@@ -88,7 +88,7 @@ describe('Sets propios', () => {
     expect(screen.queryByText(/^HSK \d/)).not.toBeInTheDocument()
   })
 
-  it('al recargar, carga del diccionario completo las palabras de fuera de HSK del set', async () => {
+  it('on reload, loads the set\'s non-HSK words from the full dictionary', async () => {
     const storage = memoryStorage()
     saveCustomSets([addItem(createCustomSet({ name: 'Zoo', description: '' }, 'custom-zoo', new Date()), 'word:企鹅')], storage)
     renderAt('/study/sets/custom-zoo', storage)
@@ -97,7 +97,7 @@ describe('Sets propios', () => {
     expect(await within(await screen.findByRole('region', { name: 'Vocabulary' })).findByText('penguin')).toBeInTheDocument()
   })
 
-  it('no deja añadir dos veces el mismo elemento', async () => {
+  it('does not allow adding the same item twice', async () => {
     const user = userEvent.setup()
     renderAt('/study/custom')
     await createSet(user, 'Mine')
@@ -108,7 +108,7 @@ describe('Sets propios', () => {
     expect(within(results).getByText('In set')).toBeInTheDocument()
   })
 
-  it('quita un elemento del set sin tocar el diccionario', async () => {
+  it('removes an item from the set without touching the dictionary', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -121,7 +121,7 @@ describe('Sets propios', () => {
     expect(getStudyItem(hskDictionary, 'word:苹果')).toBeDefined()
   })
 
-  it('renombra el set y no acepta un nombre vacío', async () => {
+  it('renames the set and rejects an empty name', async () => {
     const user = userEvent.setup()
     renderAt('/study/custom')
     await createSet(user, 'Mine')
@@ -138,7 +138,7 @@ describe('Sets propios', () => {
     expect(screen.getByText('Words for my trip')).toBeInTheDocument()
   })
 
-  it('borra el set después de confirmar y vuelve a la lista', async () => {
+  it('deletes the set after confirming and returns to the list', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -152,7 +152,7 @@ describe('Sets propios', () => {
     expect(loadCustomSets(storage)).toEqual([])
   })
 
-  it('añade, edita y borra un significado propio sin cambiar el del diccionario', async () => {
+  it('adds, edits and deletes a custom meaning without changing the dictionary one', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -177,7 +177,7 @@ describe('Sets propios', () => {
     expect(loadCustomSets(storage)[0]?.meanings).toEqual({})
   })
 
-  it('desde el set, la ficha del diccionario es la de siempre y además muestra las notas del set', async () => {
+  it('from the set, the dictionary entry is the usual one and also shows the set notes', async () => {
     const user = userEvent.setup()
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
     renderAt('/study/custom')
@@ -189,17 +189,17 @@ describe('Sets propios', () => {
 
     await user.click(within(getVocabulary()).getByRole('link', { name: 'Open 苹果 in the dictionary' }))
 
-    // La ficha oficial sigue ahí, con el significado del diccionario
+    // The official entry is still there, with the dictionary meaning
     const meanings = screen.getByRole('heading', { name: 'Meanings' }).parentElement!
     expect(within(meanings).getByText('apple')).toBeInTheDocument()
-    // Y aparte, las notas del set
+    // And separately, the set notes
     expect(screen.getByRole('heading', { name: 'My notes in Travel' })).toBeInTheDocument()
     expect(screen.getByText('apple for the supermarket')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to Travel' })).toBeInTheDocument()
     vi.unstubAllGlobals()
   })
 
-  it('añade, edita y borra una frase propia escribiendo solo el chino', async () => {
+  it('adds, edits and deletes a custom sentence by writing only the Chinese', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -227,7 +227,7 @@ describe('Sets propios', () => {
     expect(loadCustomSets(storage)[0]?.sentences).toEqual([])
   })
 
-  it('genera el pinyin de la frase al guardarla y deja elegir la lectura de un carácter dudoso', async () => {
+  it('generates the sentence pinyin on save and lets you pick the reading of an uncertain character', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/custom', storage)
@@ -251,7 +251,7 @@ describe('Sets propios', () => {
     await user.selectOptions(await screen.findByLabelText('Pronunciation of 长'), 'zhǎng')
     const saved = loadCustomSets(storage)[0]!.sentences[2]!
     expect(saved.tokens[1]).toEqual({ text: '长', pinyin: 'zhǎng', tone: 3 })
-    // El diccionario no cambia: 长 sigue teniendo sus dos lecturas
+    // The dictionary does not change: 长 still has its two readings
     expect(getStudyItem(hskDictionary, 'char:长')?.entry.pinyin).toEqual(['cháng', 'zhǎng'])
   })
 })

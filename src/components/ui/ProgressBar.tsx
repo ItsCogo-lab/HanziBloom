@@ -1,7 +1,7 @@
 type ProgressBarProps = {
   value: number
   max: number
-  /** Texto para lectores de pantalla, p. ej. "Session progress". */
+  /** Text for screen readers, e.g. "Session progress". */
   label: string
 }
 

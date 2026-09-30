@@ -6,30 +6,30 @@ import { getSetItems } from './studySets.ts'
 import type { StudySet } from './types.ts'
 
 /**
- * Qué entra en cada tipo de sesión de un set. Toda la app filtra con estas
- * funciones, así Learn y Study nunca se mezclan:
+ * What goes into each session type of a set. The whole app filters with these
+ * functions, so Learn and Study never mix:
  *
- * - Learn: elementos del set sin aprender (sin registro en el SRS).
- * - Study: solo elementos ya aprendidos (ver isLearned). Nunca uno nuevo.
+ * - Learn: set items not yet learned (no record in the SRS).
+ * - Study: only items already learned (see isLearned). Never a new one.
  */
 export type SetSessionType = 'learn' | 'study'
 
-/** Elementos del set que aún no se han aprendido, en el orden del set. */
+/** Set items not learned yet, in the set's order. */
 export function getLearnableItems(set: StudySet, dictionary: Dictionary, progress: ProgressData): StudyItem[] {
   return getSetItems(set, dictionary).filter((item) => !isLearned(progress, getStudyItemId(item)))
 }
 
 export interface ReviewItems {
-  /** Aprendidos cuyo repaso toca ya, empezando por los que llevan más tiempo esperando. */
+  /** Learned items whose review is due now, starting with the ones waiting longest. */
   due: StudyItem[]
-  /** Aprendidos al día, empezando por los que tocan antes. */
+  /** Learned items that are up to date, starting with the ones due soonest. */
   upToDate: StudyItem[]
 }
 
-/** Elementos del set ya aprendidos, separados en pendientes de repaso y al día. */
+/** Set items already learned, split into due for review and up to date. */
 export function getReviewItems(set: StudySet, dictionary: Dictionary, progress: ProgressData, now: Date): ReviewItems {
   const nextReviewOf = (item: StudyItem) => progress.items[getStudyItemId(item)]?.nextReviewAt ?? ''
-  // Las fechas ISO en UTC se ordenan bien como texto
+  // ISO dates in UTC sort correctly as text
   const learned = getSetItems(set, dictionary)
     .filter((item) => isLearned(progress, getStudyItemId(item)))
     .sort((a, b) => nextReviewOf(a).localeCompare(nextReviewOf(b)))
@@ -40,15 +40,15 @@ export function getReviewItems(set: StudySet, dictionary: Dictionary, progress: 
 }
 
 export interface SetSessionCounts {
-  /** Sin aprender: lo que puede introducir Learn. */
+  /** Not learned: what Learn can introduce. */
   learnable: number
-  /** Aprendidos: lo único que puede repasar Study. */
+  /** Learned: the only thing Study can review. */
   learned: number
-  /** Aprendidos cuyo repaso toca ya. */
+  /** Learned items whose review is due now. */
   due: number
 }
 
-/** Los números de las acciones Learn y Study, calculados con el progreso actual. */
+/** The counts for the Learn and Study actions, computed from current progress. */
 export function getSetSessionCounts(set: StudySet, progress: ProgressData, now: Date): SetSessionCounts {
   const learnedIds = set.itemIds.filter((itemId) => isLearned(progress, itemId))
   return {

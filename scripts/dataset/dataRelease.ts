@@ -1,12 +1,12 @@
 /**
- * Publicación del diccionario completo en el repositorio de datos
- * (ItsCogo-lab/HanziDict), del que la app lo lee en tiempo de ejecución
- * a través de jsDelivr. Ver docs/DATA_SOURCES.md, «Repositorio de datos».
+ * Publishing the full dictionary to the data repository
+ * (ItsCogo-lab/HanziDict), which the app reads it from at runtime
+ * via jsDelivr. See docs/DATA_SOURCES.md, "Data repository".
  *
- * Contenido del repositorio:
- * - v1/manifest.json: formato, versión actual, fecha y versiones de las fuentes.
- * - v1/<versión>/dictionary/0.json ... 31.json: los trozos, tal cual los genera data:build.
- * - README.md: qué es, licencias y atribución.
+ * Repository contents:
+ * - v1/manifest.json: format, current version, date and source versions.
+ * - v1/<version>/dictionary/0.json ... 31.json: the chunks, exactly as data:build generates them.
+ * - README.md: what it is, licenses and attribution.
  */
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -18,12 +18,12 @@ import {
   type DataManifest,
 } from '../../src/features/dictionary/runtime/dictionarySource.ts'
 
-/** Donde data:build deja el diccionario completo (no se sube al repositorio de la app). */
+/** Where data:build leaves the full dictionary (not committed to the app repository). */
 export const DATA_RELEASE_DIR = join(dirname(fileURLToPath(import.meta.url)), '../../data-release')
 
 /**
- * Versiones de las fuentes del diccionario completo. Tienen que coincidir con
- * las que descarga fetch-sources.sh (lo comprueba dataRelease.test.ts).
+ * Source versions of the full dictionary. They must match the ones
+ * fetch-sources.sh downloads (checked by dataRelease.test.ts).
  */
 export const SOURCE_VERSIONS = {
   'cc-cedict': 'cedict-json@1.3.20251213 (CC-CEDICT 2025-12-13)',
@@ -54,53 +54,53 @@ export function createManifest(version: string, generatedAt: string): DataManife
   })
 }
 
-/** Versiones anteriores que se conservan, para quien aún tenga en caché un manifiesto antiguo. */
+/** Previous versions that are kept, for anyone who still has an old manifest cached. */
 const KEPT_PREVIOUS_VERSIONS = 2
 
 const README = (manifest: DataManifest) => `# HanziDict
 
-Datos del diccionario completo de [HanziBloom](https://github.com/ItsCogo-lab/HanziBloom),
-que la app lee en tiempo de ejecución a través de jsDelivr. **No se edita a
-mano**: se genera con \`npm run data:build\` en el repositorio de la app y se
-publica con \`npm run data:release\` (o el workflow «Publish data»).
+Full dictionary data for [HanziBloom](https://github.com/ItsCogo-lab/HanziBloom),
+which the app reads at runtime via jsDelivr. **Not edited by
+hand**: it is generated with \`npm run data:build\` in the app repository and
+published with \`npm run data:release\` (or the "Publish data" workflow).
 
-Versión actual: **${manifest.version}** (generada el ${manifest.generatedAt}).
+Current version: **${manifest.version}** (generated on ${manifest.generatedAt}).
 
-## Contenido
+## Contents
 
-- \`v${manifest.format}/manifest.json\`: formato, versión actual, fecha y versiones de las fuentes.
-- \`v${manifest.format}/<versión>/dictionary/0.json\` a \`${CHUNK_COUNT - 1}.json\`: todo CC-CEDICT salvo
-  HSK 1-4 (que va dentro de la app). Cada entrada está en el archivo del punto
-  de código de su primer carácter módulo ${CHUNK_COUNT}.
+- \`v${manifest.format}/manifest.json\`: format, current version, date and source versions.
+- \`v${manifest.format}/<version>/dictionary/0.json\` to \`${CHUNK_COUNT - 1}.json\`: all of CC-CEDICT except
+  HSK 1-4 (which ships inside the app). Each entry is in the file for the code
+  point of its first character modulo ${CHUNK_COUNT}.
 
-La app pide \`https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v${manifest.format}/manifest.json\`
-y después los trozos de la carpeta de esa versión. Una carpeta de versión no se
-modifica nunca: una versión nueva es una carpeta nueva y un manifiesto nuevo.
-Se conservan las ${KEPT_PREVIOUS_VERSIONS} versiones anteriores. Un cambio de formato incompatible
-va en \`v${manifest.format + 1}/\`, sin romper las versiones de la app que leen \`v${manifest.format}/\`.
+The app requests \`https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v${manifest.format}/manifest.json\`
+and then the chunks in that version's folder. A version folder is never
+modified: a new version is a new folder and a new manifest.
+The ${KEPT_PREVIOUS_VERSIONS} previous versions are kept. An incompatible format change
+goes in \`v${manifest.format + 1}/\`, without breaking the app versions that read \`v${manifest.format}/\`.
 
-## Fuentes, licencias y atribución
+## Sources, licenses and attribution
 
 ${Object.entries(manifest.sources)
   .map(([source, version]) => `- **${source}**: ${version}`)
   .join('\n')}
 
-- Significados, pinyin y formas tradicionales: [CC-CEDICT](https://cc-cedict.org/wiki/),
-  [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Estos datos,
-  al derivar de CC-CEDICT, se distribuyen con la misma licencia.
-- Radical, número de trazos y variantes: [Unicode Unihan](https://www.unicode.org/charts/unihan.html),
+- Meanings, pinyin and traditional forms: [CC-CEDICT](https://cc-cedict.org/wiki/),
+  [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Being derived
+  from CC-CEDICT, this data is distributed under the same license.
+- Radical, stroke count and variants: [Unicode Unihan](https://www.unicode.org/charts/unihan.html),
   [Unicode License v3](https://www.unicode.org/license.txt). Copyright © Unicode, Inc.
-- Descomposición y etimología: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi),
-  LGPL 3.0 o posterior.
-- Número de trazos: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data),
+- Decomposition and etymology: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi),
+  LGPL 3.0 or later.
+- Stroke count: [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data),
   Arphic Public License.
 `
 
 /**
- * Prepara una versión en \`targetDir\` (una copia del repositorio de datos):
- * copia los trozos de \`sourceDir\` a su carpeta de versión, escribe el
- * manifiesto y el README y borra las versiones más antiguas. Se niega a
- * publicar una versión que no sea mayor que la que ya hay.
+ * Prepares a version in \`targetDir\` (a copy of the data repository):
+ * copies the chunks from \`sourceDir\` into its version folder, writes the
+ * manifest and the README and deletes the oldest versions. It refuses to
+ * publish a version that is not greater than the existing one.
  */
 export function writeDataRelease(options: {
   sourceDir: string
@@ -115,12 +115,12 @@ export function writeDataRelease(options: {
   if (existsSync(manifestPath)) {
     const current = parseManifest(JSON.parse(readFileSync(manifestPath, 'utf8')))
     if (compareVersions(version, current.version) <= 0) {
-      throw new Error(`La versión ${version} no es mayor que la publicada (${current.version}).`)
+      throw new Error(`Version ${version} is not greater than the published one (${current.version}).`)
     }
   }
   for (let index = 0; index < CHUNK_COUNT; index++) {
     if (!existsSync(join(sourceDir, chunkFileName(index))))
-      throw new Error(`Falta ${chunkFileName(index)} en ${sourceDir}`)
+      throw new Error(`Missing ${chunkFileName(index)} in ${sourceDir}`)
   }
   const dictionaryDir = join(formatDir, version, 'dictionary')
   mkdirSync(dictionaryDir, { recursive: true })

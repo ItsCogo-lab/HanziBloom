@@ -20,29 +20,29 @@ function hanziOf(entries: { hanzi: string }[]): string[] {
 }
 
 describe('getCharacter / getWord', () => {
-  it('encuentra una entrada por su id', () => {
+  it('finds an entry by its id', () => {
     expect(getCharacter(dictionary, '你')?.pinyin).toEqual(['nǐ'])
     expect(getWord(dictionary, '你好')?.pinyin).toBe('nǐ hǎo')
   })
 
-  it('devuelve undefined si el id no existe', () => {
+  it('returns undefined if the id does not exist', () => {
     expect(getCharacter(dictionary, '龙')).toBeUndefined()
     expect(getWord(dictionary, '龙')).toBeUndefined()
   })
 
-  it('distingue el carácter 好 de la palabra 好', () => {
+  it('tells the character 好 apart from the word 好', () => {
     expect(getCharacter(dictionary, '好')).toBeDefined()
     expect(getWord(dictionary, '好')).toBeDefined()
   })
 })
 
 describe('listCharacters / listWords', () => {
-  it('lista todas las entradas en el orden del dataset', () => {
+  it('lists all entries in dataset order', () => {
     expect(hanziOf(listCharacters(dictionary))).toEqual(['你', '好', '谢', '了'])
     expect(hanziOf(listWords(dictionary))).toEqual(['你好', '好', '谢谢'])
   })
 
-  it('filtra por nivel HSK', () => {
+  it('filters by HSK level', () => {
     const level2Character: Character = {
       id: '吃',
       hanzi: '吃',
@@ -59,13 +59,13 @@ describe('listCharacters / listWords', () => {
 })
 
 describe('getCharactersOfWord', () => {
-  it('devuelve los caracteres de la palabra en orden', () => {
+  it('returns the word\'s characters in order', () => {
     const word = getWord(dictionary, '你好')!
 
     expect(hanziOf(getCharactersOfWord(dictionary, word))).toEqual(['你', '好'])
   })
 
-  it('no repite caracteres', () => {
+  it('does not repeat characters', () => {
     const word = getWord(dictionary, '谢谢')!
 
     expect(hanziOf(getCharactersOfWord(dictionary, word))).toEqual(['谢'])
@@ -73,35 +73,35 @@ describe('getCharactersOfWord', () => {
 })
 
 describe('getWordsWithCharacter', () => {
-  it('devuelve las palabras que contienen el carácter', () => {
+  it('returns the words that contain the character', () => {
     expect(hanziOf(getWordsWithCharacter(dictionary, '好'))).toEqual(['你好', '好'])
   })
 
-  it('devuelve una lista vacía si ninguna palabra lo contiene', () => {
+  it('returns an empty list if no word contains it', () => {
     expect(getWordsWithCharacter(dictionary, '了')).toEqual([])
   })
 })
 
 describe('getMeanings', () => {
-  it('devuelve los significados en inglés por defecto', () => {
+  it('returns the English meanings by default', () => {
     expect(getMeanings({ en: ['thanks'], es: ['gracias'] })).toEqual(['thanks'])
   })
 
-  it('devuelve el idioma pedido si existe', () => {
+  it('returns the requested language if it exists', () => {
     expect(getMeanings({ en: ['thanks'], es: ['gracias'] }, 'es')).toEqual(['gracias'])
   })
 
-  it('usa el inglés si falta el idioma pedido', () => {
+  it('falls back to English if the requested language is missing', () => {
     expect(getMeanings({ en: ['thanks'] }, 'ca')).toEqual(['thanks'])
   })
 })
 
 describe('formatPinyin', () => {
-  it('muestra el pinyin de una palabra tal cual', () => {
+  it('shows a word\'s pinyin as is', () => {
     expect(formatPinyin(getWord(dictionary, '你好')!)).toBe('nǐ hǎo')
   })
 
-  it('separa con comas las lecturas de un carácter', () => {
+  it('separates a character\'s readings with commas', () => {
     expect(formatPinyin(getCharacter(dictionary, '了')!)).toBe('le, liǎo')
   })
 })

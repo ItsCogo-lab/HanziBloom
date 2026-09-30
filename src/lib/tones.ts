@@ -1,22 +1,22 @@
 /**
- * Tonos del mandarín a partir del pinyin con marcas de tono.
+ * Mandarin tones from pinyin with tone marks.
  *
- * 1-4 son los cuatro tonos (mā má mǎ mà) y 5 el tono neutro (ma), que en
- * pinyin se escribe sin marca.
+ * 1-4 are the four tones (mā má mǎ mà) and 5 is the neutral tone (ma), which
+ * is written without a mark in pinyin.
  */
 export type Tone = 1 | 2 | 3 | 4 | 5
 
 export const TONES: readonly Tone[] = [1, 2, 3, 4, 5]
 
-/** Marcas de tono sobre cada vocal: índice 0 → tono 1, ..., índice 3 → tono 4. */
+/** Tone marks on each vowel: index 0 → tone 1, ..., index 3 → tone 4. */
 const MARKED_VOWELS: readonly string[] = ['āēīōūǖ', 'áéíóúǘ', 'ǎěǐǒǔǚ', 'àèìòùǜ']
 
 /**
- * Tono de una sílaba de pinyin: "hǎo" → 3, "ma" → 5.
+ * Tone of a pinyin syllable: "hǎo" → 3, "ma" → 5.
  *
- * Devuelve `undefined` si no se puede saber con seguridad, en lugar de
- * adivinar: si no es una sílaba (la "r" suelta de 一会儿 yī huì r, que no
- * tiene tono propio) o si tiene más de una marca.
+ * Returns `undefined` when it can't be known for sure, instead of guessing:
+ * if it isn't a syllable (the lone "r" in 一会儿 yī huì r, which has no tone
+ * of its own) or if it has more than one mark.
  */
 export function getSyllableTone(syllable: string): Tone | undefined {
   const lower = syllable.toLowerCase()
@@ -28,11 +28,11 @@ export function getSyllableTone(syllable: string): Tone | undefined {
   })
   if (tones.length > 1) return undefined
   if (tones.length === 1) return tones[0]
-  // Sin marca: tono neutro, pero solo si es una sílaba de verdad (tiene vocal)
+  // No mark: neutral tone, but only if it is a real syllable (has a vowel)
   return /[aeiouü]/.test(lower) ? 5 : undefined
 }
 
-/** Sílabas de un pinyin separado por espacios: "nǐ hǎo" → ["nǐ", "hǎo"]. */
+/** Syllables of a space-separated pinyin: "nǐ hǎo" → ["nǐ", "hǎo"]. */
 export function splitSyllables(pinyin: string): string[] {
   return pinyin.trim().split(/\s+/).filter((syllable) => syllable !== '')
 }
@@ -42,9 +42,9 @@ const TONE_MARK_TO_PLAIN: Record<string, string> = Object.fromEntries(
 )
 
 /**
- * Pinyin con el número de tono detrás de cada sílaba, como alternativa que
- * no depende de ver las marcas: "nǐ hǎo" → "ni3 hao3", "xiè xie" → "xie4 xie5".
- * Lo que no es una sílaba se deja tal cual.
+ * Pinyin with the tone number after each syllable, as an alternative that
+ * doesn't depend on seeing the marks: "nǐ hǎo" → "ni3 hao3", "xiè xie" → "xie4 xie5".
+ * Anything that isn't a syllable is left as is.
  */
 export function toToneNumbers(pinyin: string): string {
   return pinyin

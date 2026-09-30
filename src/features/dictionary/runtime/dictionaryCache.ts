@@ -1,20 +1,20 @@
 /**
- * Caché local de lo que se descarga en tiempo de ejecución (trazos, frases,
- * entradas del diccionario). Va en IndexedDB y no en localStorage: puede
- * crecer a varios MB y localStorage está limitado a unos 5 MB para toda la app.
+ * Local cache of what's downloaded at runtime (strokes, sentences,
+ * dictionary entries). It lives in IndexedDB and not localStorage: it can
+ * grow to several MB and localStorage is limited to about 5 MB for the whole app.
  *
- * Si IndexedDB no está disponible (modo privado de algunos navegadores, tests),
- * se usa una caché en memoria: la app funciona igual, solo que sin recordar
- * nada al recargar.
+ * If IndexedDB isn't available (private mode in some browsers, tests),
+ * an in-memory cache is used: the app works the same, just without remembering
+ * anything on reload.
  */
 
-/** Una respuesta guardada, con de dónde salió y cuándo. */
+/** A stored response, with where it came from and when. */
 export interface CacheEntry<T = unknown> {
   key: string
   data: T
-  /** Momento de la descarga, en milisegundos (Date.now()). */
+  /** Time of download, in milliseconds (Date.now()). */
   fetchedAt: number
-  /** Fuente y versión: "hanzi-writer-data@2.0.1", "tatoeba-api-v1". */
+  /** Source and version: "hanzi-writer-data@2.0.1", "tatoeba-api-v1". */
   source: string
 }
 
@@ -35,7 +35,7 @@ export function createMemoryCache(): DictionaryCache {
 
 const DATABASE = 'hanzivocab-dictionary'
 const STORE = 'cache'
-/** Si cambia el formato de lo guardado, se sube y la caché empieza de cero. */
+/** If the stored format changes, bump this and the cache starts from scratch. */
 const DATABASE_VERSION = 1
 
 function request<T>(req: IDBRequest<T>): Promise<T> {
@@ -56,8 +56,8 @@ function openDatabase(factory: IDBFactory): Promise<IDBDatabase> {
 }
 
 /**
- * Caché en IndexedDB. Cualquier error de IndexedDB (cuota llena, base de datos
- * bloqueada) se trata como «no está en caché»: nunca rompe una ficha.
+ * IndexedDB cache. Any IndexedDB error (quota full, database
+ * blocked) is treated as "not in cache": it never breaks an entry page.
  */
 export function createIndexedDbCache(factory: IDBFactory): DictionaryCache {
   let database: Promise<IDBDatabase> | undefined
@@ -76,18 +76,18 @@ export function createIndexedDbCache(factory: IDBFactory): DictionaryCache {
         const store = (await db()).transaction(STORE, 'readwrite').objectStore(STORE)
         await request(store.put(entry))
       } catch {
-        // Sin espacio o sin permiso: se sigue sin guardar
+        // No space or no permission: carry on without saving
       }
     },
   }
 }
 
-/** La caché de la app: IndexedDB si existe, memoria si no. */
+/** The app's cache: IndexedDB if it exists, memory if not. */
 export function createBrowserCache(): DictionaryCache {
   try {
     if (typeof indexedDB !== 'undefined') return createIndexedDbCache(indexedDB)
   } catch {
-    // Acceder a indexedDB puede lanzar en algunos modos privados
+    // Accessing indexedDB can throw in some private modes
   }
   return createMemoryCache()
 }

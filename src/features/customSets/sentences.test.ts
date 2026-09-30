@@ -19,22 +19,22 @@ function sentence(chinese: string, id = 'sentence-1') {
   return createSentence({ chinese, tokens: splitSentence(chinese), itemId: 'word:机场' }, id, now)
 }
 
-describe('frases propias', () => {
-  it('valida que haya texto chino', () => {
+describe('custom sentences', () => {
+  it('validates that there is Chinese text', () => {
     expect(validateSentence('  我在机场等你。 ')).toEqual({ chinese: '我在机场等你。' })
     expect(validateSentence('   ')).toEqual({ problem: 'emptySentence' })
     expect(validateSentence('hello!')).toEqual({ problem: 'noChinese' })
     expect(validateSentence('好'.repeat(121))).toEqual({ problem: 'sentenceTooLong' })
   })
 
-  it('parte la frase en caracteres chinos y trozos de otro texto, sin perder nada', () => {
+  it('splits the sentence into Chinese characters and chunks of other text, without losing anything', () => {
     const tokens = splitSentence('你好, world! 我们。')
 
     expect(tokens.map((token) => token.text)).toEqual(['你', '好', ', world! ', '我', '们', '。'])
     expect(tokens.map((token) => token.text).join('')).toBe('你好, world! 我们。')
   })
 
-  it('se añaden, se editan y se borran dentro del set', () => {
+  it('are added, edited and deleted within the set', () => {
     let set = addSentence(travel, sentence('我在机场等你。'))
     expect(getItemSentences(set, 'word:机场').map((s) => s.chinese)).toEqual(['我在机场等你。'])
 
@@ -44,7 +44,7 @@ describe('frases propias', () => {
     expect(deleteSentence(set, 'sentence-1').sentences).toEqual([])
   })
 
-  it('no admite dos frases con el mismo id ni frases de elementos que no están en el set', () => {
+  it('does not allow two sentences with the same id or sentences for items not in the set', () => {
     const set = addSentence(travel, sentence('我在机场等你。'))
     expect(addSentence(set, sentence('机场很大。'))).toBe(set)
 
@@ -52,12 +52,12 @@ describe('frases propias', () => {
     expect(addSentence(set, other)).toBe(set)
   })
 
-  it('al quitar el elemento del set se borran sus frases', () => {
+  it('removing the item from the set deletes its sentences', () => {
     const set = addSentence(travel, sentence('我在机场等你。'))
     expect(removeItem(set, 'word:机场').sentences).toEqual([])
   })
 
-  it('se guardan y se cargan; una frase con datos rotos se descarta', () => {
+  it('are saved and loaded; a sentence with broken data is discarded', () => {
     const storage = memoryStorage()
     const set = addSentence(travel, sentence('我在机场等你。'))
     saveCustomSets([set], storage)

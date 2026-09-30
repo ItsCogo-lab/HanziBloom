@@ -11,7 +11,7 @@ import { memoryStorage } from '../test/memoryStorage.ts'
 import { renderWithProviders } from '../test/renderWithProviders.tsx'
 import { PracticePage } from './PracticePage.tsx'
 
-/** Responde el ejercicio actual, sea del tipo que sea (el tipo es aleatorio). */
+/** Answers the current exercise, whatever its type (the type is random). */
 async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
   const showAnswer = screen.queryByRole('button', { name: 'Show answer' })
   if (showAnswer) {
@@ -25,7 +25,7 @@ async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe('PracticePage', () => {
-  it('usa el tamaño de sesión de los ajustes', () => {
+  it('uses the session size from the settings', () => {
     const storage = memoryStorage()
     saveSettings({ ...DEFAULT_SETTINGS, sessionSize: 5 }, storage)
     renderWithProviders(<PracticePage />, { storage })
@@ -33,7 +33,7 @@ describe('PracticePage', () => {
     expect(screen.getByText('Card 1 of 5')).toBeInTheDocument()
   })
 
-  it('guarda cada respuesta en el progreso', async () => {
+  it('saves each answer to progress', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderWithProviders(<PracticePage />, { storage })
@@ -46,12 +46,12 @@ describe('PracticePage', () => {
   })
 })
 
-describe('PracticePage: Learn y Study de un set', () => {
+describe('PracticePage: Learn and Study of a set', () => {
   const colorIds = topicDefinitions.find((topic) => topic.id === 'colors')!.words.map((word) => `word:${word}` as const)
   const now = new Date()
 
   beforeEach(() => {
-    // Las fichas piden trazos y frases al abrirse; aquí no hay servidor
+    // Entry pages request strokes and sentences when opened; there is no server here
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
   })
   afterEach(() => {
@@ -65,12 +65,12 @@ describe('PracticePage: Learn y Study de un set', () => {
     return storage
   }
 
-  /** El hanzi grande de la ficha que presenta Learn. */
+  /** The large hanzi of the entry Learn introduces. */
   function currentLearnHanzi() {
     return document.querySelector('.text-7xl')?.textContent
   }
 
-  it('Learn presenta solo elementos sin aprender del set y guarda los que se confirman', async () => {
+  it('Learn introduces only unlearned set items and saves the confirmed ones', async () => {
     const user = userEvent.setup()
     const alreadyLearned = introduceItem(createEmptyProgress(), colorIds[0]!, now)
     const storage = renderSession('mode=learn', alreadyLearned)
@@ -88,12 +88,12 @@ describe('PracticePage: Learn y Study de un set', () => {
     expect(Object.keys(progress.items).toSorted()).toEqual(
       [colorIds[0], `word:${shown[0]}`, `word:${shown[2]}`].toSorted(),
     )
-    // Aprender no es responder: no suma a la actividad ni a la racha
+    // Learning is not answering: it does not add to activity or the streak
     expect(progress.activity).toEqual({})
     expect(Object.keys(loadMyStudies(storage).lastStudied)).toEqual(['topic-colors'])
   })
 
-  it('Learn permite marcar un elemento como ya dominado: no toca repasarlo hasta dentro de mucho', async () => {
+  it('Learn lets you mark an item as already mastered: it is not due for review for a long time', async () => {
     const user = userEvent.setup()
     const storage = renderSession('mode=learn')
 
@@ -105,7 +105,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     expect(isDue(item, new Date())).toBe(false)
   })
 
-  it('Learn sin nada nuevo lo dice y no cambia a Study por su cuenta', () => {
+  it('Learn with nothing new says so and does not switch to Study on its own', () => {
     renderSession('mode=learn', colorIds.reduce((result, itemId) => introduceItem(result, itemId, now), createEmptyProgress()))
 
     expect(screen.getByText("You're caught up. There are no new words to learn in this set.")).toBeInTheDocument()
@@ -113,7 +113,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     expect(screen.getByRole('link', { name: 'Study' })).toHaveAttribute('href', '/study/practice?set=topic-colors&mode=study')
   })
 
-  it('Study solo pregunta elementos aprendidos, nunca uno nuevo', async () => {
+  it('Study only asks about learned items, never a new one', async () => {
     const user = userEvent.setup()
     const learned = colorIds.slice(0, 3)
     const storage = renderSession('mode=study', learned.reduce((result, itemId) => introduceItem(result, itemId, now), createEmptyProgress()))
@@ -126,7 +126,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     expect(Object.keys(loadProgress(storage).items).toSorted()).toEqual(learned.toSorted())
   })
 
-  it('Study sin nada aprendido lo dice y ofrece empezar a aprender', () => {
+  it('Study with nothing learned says so and offers to start learning', () => {
     renderSession('mode=study')
 
     expect(screen.getByText("You haven't learned any words from this set yet.")).toBeInTheDocument()
@@ -137,8 +137,8 @@ describe('PracticePage: Learn y Study de un set', () => {
     )
   })
 
-  it('Study con todo al día ofrece repasar igualmente, y ese repaso solo usa lo aprendido', () => {
-    const upToDate = recordAnswer(createEmptyProgress(), colorIds[0]!, true, now) // toca mañana
+  it('Study with everything up to date offers to review anyway, and that review only uses learned items', () => {
+    const upToDate = recordAnswer(createEmptyProgress(), colorIds[0]!, true, now) // due tomorrow
     renderSession('mode=study', upToDate)
 
     expect(screen.getByText('All learned items are currently up to date.')).toBeInTheDocument()
@@ -148,13 +148,13 @@ describe('PracticePage: Learn y Study de un set', () => {
     )
   })
 
-  it('«Review anyway» repasa lo aprendido aunque no toque', () => {
+  it('"Review anyway" reviews learned items even if not due', () => {
     renderSession('mode=study&scope=all', recordAnswer(createEmptyProgress(), colorIds[0]!, true, now))
 
     expect(screen.getByText('Card 1 of 1')).toBeInTheDocument()
   })
 
-  /** Abre el diccionario, busca y cierra: devuelve el texto de la página antes y después. */
+  /** Opens the dictionary, searches and closes: returns the page text before and after. */
   async function openAndCloseDictionary(user: ReturnType<typeof userEvent.setup>) {
     const before = document.body.textContent
     await user.click(screen.getByRole('button', { name: 'Dictionary' }))
@@ -166,7 +166,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     return { before, after: document.body.textContent }
   }
 
-  it('en Learn el diccionario funciona y al cerrarlo sigue el mismo elemento y el mismo tipo de sesión', async () => {
+  it('in Learn the dictionary works and after closing it the same item and session type remain', async () => {
     const user = userEvent.setup()
     renderSession('mode=learn')
     await user.click(screen.getByRole('button', { name: "I've learned it" }))
@@ -180,7 +180,7 @@ describe('PracticePage: Learn y Study de un set', () => {
     expect(currentLearnHanzi()).toBe(hanzi)
   })
 
-  it('en Study el diccionario funciona y al cerrarlo sigue la misma tarjeta y el mismo tipo de sesión', async () => {
+  it('in Study the dictionary works and after closing it the same card and session type remain', async () => {
     const user = userEvent.setup()
     renderSession('mode=study', colorIds.reduce((result, itemId) => introduceItem(result, itemId, now), createEmptyProgress()))
     await answerCurrentExercise(user)

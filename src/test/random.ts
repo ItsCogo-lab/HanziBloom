@@ -1,8 +1,8 @@
 import type { RandomFn } from '../lib/random.ts'
 
 /**
- * Generador pseudoaleatorio con semilla (mulberry32) para tests:
- * con la misma semilla produce siempre la misma secuencia.
+ * Seeded pseudorandom generator (mulberry32) for tests:
+ * the same seed always produces the same sequence.
  */
 export function seededRandom(seed: number): RandomFn {
   let state = seed

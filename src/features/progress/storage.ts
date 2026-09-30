@@ -5,8 +5,8 @@ import type { DailyActivity, ItemProgress, ProgressData } from './types.ts'
 export const PROGRESS_STORAGE_KEY = 'hanzivocab.progress'
 
 /**
- * Versión del formato guardado. Si algún día cambia la forma de los datos, se
- * sube este número y se añade aquí la conversión desde la versión anterior.
+ * Version of the saved format. If the shape of the data ever changes, bump
+ * this number and add the conversion from the previous version here.
  */
 const CURRENT_VERSION = 1
 
@@ -18,9 +18,9 @@ export function saveProgress(progress: ProgressData, storage?: KeyValueStorage):
 }
 
 /**
- * Carga el progreso guardado. Si no hay nada, o lo guardado no tiene el
- * formato esperado, empieza de cero en lugar de romper la app. Las entradas
- * sueltas que estén mal se descartan y el resto se conserva.
+ * Loads saved progress. If there is nothing, or what is saved doesn't have
+ * the expected format, it starts from scratch instead of breaking the app.
+ * Individual bad entries are discarded and the rest is kept.
  */
 export function loadProgress(storage?: KeyValueStorage): ProgressData {
   const saved = readJson(PROGRESS_STORAGE_KEY, storage)
@@ -33,7 +33,7 @@ export function loadProgress(storage?: KeyValueStorage): ProgressData {
   }
 }
 
-/** Copia del objeto solo con los valores que pasan la comprobación. */
+/** Copy of the object with only the values that pass the check. */
 function keepValid<T>(record: Record<string, unknown>, isValid: (value: unknown) => value is T): Record<string, T> {
   const result: Record<string, T> = {}
   for (const [key, value] of Object.entries(record)) {

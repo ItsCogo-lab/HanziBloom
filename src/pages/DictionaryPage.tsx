@@ -19,23 +19,23 @@ function isKindFilter(value: string | null): value is KindFilter {
   return KIND_FILTERS.some((filter) => filter.value === value)
 }
 
-/** Marca las navegaciones que hace el propio buscador al escribir. */
+/** Marks the navigations the search box itself makes while typing. */
 const FROM_SEARCH_INPUT = 'dictionary-search-input'
 
 /**
- * Diccionario: busca en todo CC-CEDICT (HSK 1-4 y el diccionario completo). La
- * búsqueda y el filtro van en la URL (/dictionary?q=果&kind=word), así el
- * botón atrás vuelve a los mismos resultados y se pueden compartir.
+ * Dictionary: searches all of CC-CEDICT (HSK 1-4 and the full dictionary). The
+ * search and the filter live in the URL (/dictionary?q=果&kind=word), so the
+ * back button returns to the same results and they can be shared.
  */
 export function DictionaryPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const urlQuery = searchParams.get('q') ?? ''
-  // El texto del buscador vive aquí y la URL lo sigue. La URL cambia con una
-  // navegación, que llega un poco más tarde: si el input leyera de ella, el
-  // teclado chino (IME) perdería lo que está componiendo y duplicaría el texto.
+  // The search text lives here and the URL follows it. The URL changes through
+  // a navigation, which arrives a bit later: if the input read from it, the
+  // Chinese keyboard (IME) would lose what it is composing and duplicate the text.
   const [query, setQuery] = useState(urlQuery)
-  // Si la URL cambia por otra razón (un enlace, atrás), manda la URL
+  // If the URL changes for another reason (a link, back), the URL wins
   const [locationKey, setLocationKey] = useState(location.key)
   if (location.key !== locationKey) {
     setLocationKey(location.key)
@@ -50,7 +50,7 @@ export function DictionaryPage() {
     const params = new URLSearchParams()
     if (next.q !== '') params.set('q', next.q)
     if (next.kind !== 'all') params.set('kind', next.kind)
-    // replace: escribir no llena el historial con una entrada por letra
+    // replace: typing does not fill the history with one entry per letter
     setSearchParams(params, { replace: true, state: FROM_SEARCH_INPUT })
   }
 

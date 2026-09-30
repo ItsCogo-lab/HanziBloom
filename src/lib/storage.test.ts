@@ -13,14 +13,14 @@ const failingStorage: KeyValueStorage = {
 }
 
 describe('readJson / writeJson', () => {
-  it('guarda y recupera un valor', () => {
+  it('saves and retrieves a value', () => {
     const storage = memoryStorage()
 
     expect(writeJson('key', { a: [1, 2] }, storage)).toBe(true)
     expect(readJson('key', storage)).toEqual({ a: [1, 2] })
   })
 
-  it('devuelve undefined si no hay nada o el JSON está roto', () => {
+  it('returns undefined if there is nothing or the JSON is broken', () => {
     const storage = memoryStorage()
     storage.setItem('broken', '{not json')
 
@@ -28,14 +28,14 @@ describe('readJson / writeJson', () => {
     expect(readJson('broken', storage)).toBeUndefined()
   })
 
-  it('no lanza errores si el almacenamiento falla', () => {
+  it("doesn't throw if the storage fails", () => {
     expect(readJson('key', failingStorage)).toBeUndefined()
     expect(writeJson('key', 1, failingStorage)).toBe(false)
   })
 })
 
 describe('isRecord', () => {
-  it('solo acepta objetos normales', () => {
+  it('only accepts plain objects', () => {
     expect(isRecord({})).toBe(true)
     expect(isRecord(null)).toBe(false)
     expect(isRecord([])).toBe(false)

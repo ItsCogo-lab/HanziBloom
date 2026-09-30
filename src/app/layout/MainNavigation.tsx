@@ -3,9 +3,9 @@ import { t } from '../../i18n/index.ts'
 import { NAVIGATION_ITEMS } from '../navigation.ts'
 
 /**
- * Una sola lista de enlaces que cambia de forma según el ancho de pantalla:
- * barra inferior fija en móvil y barra lateral a partir de `md`.
- * Así no duplicamos la navegación para cada tamaño.
+ * A single list of links that changes shape with the screen width:
+ * a fixed bottom bar on mobile and a sidebar from `md` up.
+ * That way we don't duplicate the navigation for each size.
  */
 export function MainNavigation() {
   return (
@@ -21,13 +21,13 @@ export function MainNavigation() {
         {t('app.name')}
       </Link>
 
-      {/* En móvil cada enlace mide justo 3.5rem (--mobile-nav-height en index.css) */}
+      {/* On mobile each link is exactly 3.5rem tall (--mobile-nav-height in index.css) */}
       <ul className="grid grid-cols-4 md:flex md:flex-col md:gap-1">
         {NAVIGATION_ITEMS.map((item) => (
           <li key={item.path}>
             <NavLink
               to={item.path}
-              // Sin `end`, «Inicio» (/) aparecería activo en todas las rutas
+              // Without `end`, "Home" (/) would appear active on every route
               end={item.path === '/'}
               className={({ isActive }) =>
                 `flex h-14 flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] font-medium tracking-tight transition-colors md:h-auto md:flex-row md:justify-start md:gap-3 md:rounded-xl md:px-3 md:py-2.5 md:text-base md:tracking-normal ${

@@ -7,7 +7,7 @@ const STATUS_STYLES: Record<ItemStatus, { labelKey: MessageKey; className: strin
   mastered: { labelKey: 'status.mastered', className: 'border-success/40 bg-success/10 text-success' },
 }
 
-/** Etiqueta con el estado de un elemento: nuevo, aprendiendo o dominado. */
+/** Badge with an item's state: new, learning or mastered. */
 export function StatusBadge({ status }: { status: ItemStatus }) {
   const { labelKey, className } = STATUS_STYLES[status]
   return (

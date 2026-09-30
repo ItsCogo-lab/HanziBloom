@@ -4,9 +4,9 @@ import { splitSyllables } from '../../lib/tones.ts'
 import type { SentenceToken } from './types.ts'
 
 /**
- * Procesa una frase del usuario (ya validada) y devuelve sus trozos con
- * pinyin y tono, que se guardan con la frase. El motor de pinyin se carga
- * bajo demanda: solo quien escribe una frase lo descarga.
+ * Processes a user sentence (already validated) and returns its tokens with
+ * pinyin and tone, which are saved with the sentence. The pinyin engine is
+ * loaded on demand: only someone who writes a sentence downloads it.
  */
 export async function processSentence(chinese: string): Promise<SentenceToken[]> {
   const { annotateSentence } = await import('./pinyinEngine.ts')
@@ -14,8 +14,8 @@ export async function processSentence(chinese: string): Promise<SentenceToken[]>
 }
 
 /**
- * Palabras del dataset con una sola lectura: hanzi → sílabas. Los homógrafos
- * (长 cháng / zhǎng) se dejan fuera: ahí el dataset no puede decidir.
+ * Dataset words with a single reading: hanzi → syllables. Homographs
+ * (长 cháng / zhǎng) are left out: there the dataset cannot decide.
  */
 const unambiguousWords = (() => {
   const words = new Map<string, string[] | null>()
@@ -30,9 +30,9 @@ const unambiguousWords = (() => {
 const LONGEST_WORD = Math.max(...[...unambiguousWords.keys()].map((hanzi) => Array.from(hanzi).length))
 
 /**
- * Lectura de cada carácter según el dataset: se recorre la frase buscando
- * la palabra más larga del dataset que empieza en cada punto (学习, 中文, 的).
- * Donde no hay palabra, o es un homógrafo, no hay lectura.
+ * Reading of each character according to the dataset: walks the sentence
+ * looking for the longest dataset word starting at each point (学习, 中文, 的).
+ * Where there is no word, or it is a homograph, there is no reading.
  */
 export function getDatasetReadings(chinese: string): (string | undefined)[] {
   const characters = Array.from(chinese)

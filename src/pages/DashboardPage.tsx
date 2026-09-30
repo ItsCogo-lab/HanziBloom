@@ -20,10 +20,10 @@ import { t, type MessageKey } from '../i18n/index.ts'
 const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
 const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
-/** Sets de My Studies que se muestran en Inicio; el resto, en Study. */
+/** My Studies sets shown on Home; the rest, in Study. */
 const MAX_SETS_ON_HOME = 3
 
-/** Qué decir en «Today» según cómo va el usuario. */
+/** What to say in "Today" depending on how the user is doing. */
 function getTodayMessage(summary: ItemsSummary): MessageKey {
   if (summary.due > 0) return 'dashboard.message.due'
   if (summary.studied === 0) return 'dashboard.message.welcome'

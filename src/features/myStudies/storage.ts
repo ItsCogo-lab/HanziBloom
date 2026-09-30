@@ -2,14 +2,14 @@ import { isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/s
 import { createEmptyMyStudies, type MyStudies, type StudiedSet } from './myStudies.ts'
 
 export const MY_STUDIES_STORAGE_KEY = 'hanzivocab.studies'
-/** Versión del formato guardado, igual que en progress/storage.ts. */
+/** Version of the saved format, same as in progress/storage.ts. */
 const CURRENT_VERSION = 1
 
 export function saveMyStudies(myStudies: MyStudies, storage?: KeyValueStorage): boolean {
   return writeJson(MY_STUDIES_STORAGE_KEY, { version: CURRENT_VERSION, ...myStudies }, storage)
 }
 
-/** Carga los sets del usuario. Lo que no tenga el formato esperado se descarta. */
+/** Loads the user's sets. Anything without the expected format is discarded. */
 export function loadMyStudies(storage?: KeyValueStorage): MyStudies {
   const saved = readJson(MY_STUDIES_STORAGE_KEY, storage)
   if (!isRecord(saved) || saved.version !== CURRENT_VERSION) return createEmptyMyStudies()
@@ -21,7 +21,7 @@ export function loadMyStudies(storage?: KeyValueStorage): MyStudies {
       if (typeof date === 'string') lastStudied[setId] = date
     }
   }
-  // Sin repetidos, por si lo guardado se editó a mano
+  // No duplicates, in case the saved data was edited by hand
   const unique = sets.filter((set, index) => sets.findIndex((other) => other.setId === set.setId) === index)
   return { sets: unique, lastStudied }
 }

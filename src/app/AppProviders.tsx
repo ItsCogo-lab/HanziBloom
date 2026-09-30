@@ -12,17 +12,17 @@ import { SettingsProvider } from '../features/settings/SettingsProvider.tsx'
 
 type AppProvidersProps = {
   children: ReactNode
-  /** Almacenamiento de los datos del usuario; por defecto localStorage. */
+  /** Storage for the user's data; localStorage by default. */
   storage?: KeyValueStorage
-  /** De dónde salen los trozos del diccionario completo; por defecto, el repositorio de datos. */
+  /** Where the full dictionary chunks come from; the data repository by default. */
   loadChunk?: LoadChunk
-  /** Caché de las fuentes externas (trazos, frases); por defecto IndexedDB. */
+  /** Cache for external sources (strokes, sentences); IndexedDB by default. */
   cache?: DictionaryCache
-  /** Cómo se llama a las fuentes externas; por defecto, el fetch del navegador. */
+  /** How external sources are called; the browser's fetch by default. */
   fetchFn?: typeof fetch
 }
 
-/** Estado compartido por toda la app. Los tests lo usan igual que <App>. */
+/** State shared by the whole app. Tests use it just like <App>. */
 export function AppProviders({ children, storage, loadChunk, cache, fetchFn }: AppProvidersProps) {
   return (
     <RuntimeSourcesProvider cache={cache} fetchFn={fetchFn}>

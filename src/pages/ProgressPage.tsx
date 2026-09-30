@@ -54,7 +54,7 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
   ]
   const dictionary = useDictionary()
   const missed = getMostMissed(progress)
-  // Un elemento de un set propio puede ser de fuera de HSK: se carga su entrada
+  // An item from a custom set can be non-HSK: its entry is loaded
   useLoadItems(missed.map((item) => item.itemId))
   const mostMissed = missed.flatMap((item) => {
     const studyItem = getStudyItem(dictionary, item.itemId)
@@ -82,7 +82,7 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
           rows={recent.map((day) => [
             formatShortDay(fromDateKey(day.date)),
             <span key="answers" className="inline-flex items-center gap-3">
-              {/* Barra decorativa: la cifra al lado ya da el dato */}
+              {/* Decorative bar: the number next to it already gives the value */}
               <span
                 aria-hidden="true"
                 className="h-2 rounded-full bg-accent"

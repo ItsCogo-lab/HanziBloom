@@ -9,7 +9,7 @@ import { renderWithProviders } from '../test/renderWithProviders.tsx'
 import { SettingsPage } from './SettingsPage.tsx'
 
 describe('SettingsPage', () => {
-  it('cambia y guarda el número de ejercicios por sesión', async () => {
+  it('changes and saves the number of exercises per session', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderWithProviders(<SettingsPage />, { storage })
@@ -21,12 +21,12 @@ describe('SettingsPage', () => {
     expect(loadSettings(storage).sessionSize).toBe(20)
   })
 
-  it('cambia el tema y lo aplica a la página', async () => {
+  it('changes the theme and applies it to the page', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderWithProviders(<SettingsPage />, { storage })
 
-    // Sin matchMedia (jsdom), «System» se resuelve como claro
+    // Without matchMedia (jsdom), "System" resolves to light
     expect(screen.getByRole('radio', { name: 'System' })).toBeChecked()
     expect(document.documentElement.dataset.theme).toBe('light')
 
@@ -37,7 +37,7 @@ describe('SettingsPage', () => {
     delete document.documentElement.dataset.theme
   })
 
-  it('activa y desactiva los colores y los números de tono', async () => {
+  it('turns tone colors and tone numbers on and off', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderWithProviders(<SettingsPage />, { storage })
@@ -51,11 +51,11 @@ describe('SettingsPage', () => {
     await user.click(numbers)
 
     expect(loadSettings(storage)).toMatchObject({ toneColors: false, toneNumbers: true })
-    // La leyenda explica los tonos también con texto, no solo con color
+    // The legend also explains the tones with text, not only with color
     expect(screen.getByText('mā')).toBeInTheDocument()
   })
 
-  it('borra el progreso solo después de confirmar', async () => {
+  it('resets progress only after confirming', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     saveProgress(recordAnswer(createEmptyProgress(), 'char:你', true, new Date()), storage)
@@ -74,7 +74,7 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Your progress has been deleted.')
   })
 
-  it('cita las fuentes del dataset y sus licencias', () => {
+  it('credits the dataset sources and their licenses', () => {
     renderWithProviders(<SettingsPage />)
 
     expect(screen.getByRole('link', { name: 'CC-CEDICT' })).toHaveAttribute('href', 'https://cc-cedict.org/wiki/')

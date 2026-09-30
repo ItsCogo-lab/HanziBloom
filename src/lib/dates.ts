@@ -1,12 +1,12 @@
 /**
- * Utilidades de fechas en la hora local del usuario.
+ * Date utilities in the user's local time.
  *
- * Los repasos y la racha van por días del calendario local: si alguien
- * estudia a las 23:30 y a las 00:15, son dos días distintos para él, aunque
- * en UTC fueran el mismo.
+ * Reviews and the streak go by local calendar days: if someone studies at
+ * 23:30 and at 00:15, those are two different days for them, even if they
+ * were the same day in UTC.
  */
 
-/** Clave del día local, p. ej. "2026-09-28". Se puede ordenar como texto. */
+/** Local day key, e.g. "2026-09-28". Sorts correctly as text. */
 export type DateKey = string
 
 export function toDateKey(date: Date): DateKey {
@@ -15,20 +15,20 @@ export function toDateKey(date: Date): DateKey {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-/** Fecha (00:00 hora local) de una clave "YYYY-MM-DD". */
+/** Date (00:00 local time) for a "YYYY-MM-DD" key. */
 export function fromDateKey(key: DateKey): Date {
   const [year = 0, month = 1, day = 1] = key.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
 
-/** Fecha a las 00:00 (hora local) del día de `date`. */
+/** Date at 00:00 (local time) on the day of `date`. */
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
 /**
- * Suma días del calendario. Se usa setDate y no «+ 24 h» porque en los
- * cambios de hora un día puede durar 23 o 25 horas.
+ * Adds calendar days. Uses setDate rather than "+ 24 h" because on
+ * daylight saving changes a day can last 23 or 25 hours.
  */
 export function addDays(date: Date, days: number): Date {
   const result = new Date(date)

@@ -10,8 +10,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 }
 
 /**
- * Clases de Tailwind de un botón. Están separadas del componente para que
- * <Button> y <ButtonLink> (un enlace con aspecto de botón) se vean igual.
+ * Tailwind classes for a button. They live apart from the component so that
+ * <Button> and <ButtonLink> (a link that looks like a button) look the same.
  */
 export function buttonClasses(variant: ButtonVariant = 'primary'): string {
   return `${baseClasses} ${variantClasses[variant]}`

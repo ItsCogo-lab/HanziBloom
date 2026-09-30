@@ -8,14 +8,14 @@ type ExerciseViewProps = {
   exercise: Exercise
   dictionary: Dictionary
   onAnswer: (correct: boolean) => void
-  /** Abre un elemento en el diccionario sin salir de la sesión. */
+  /** Opens an item in the dictionary without leaving the session. */
   onLookUp: (item: StudyItem) => void
 }
 
 /**
- * Elige el componente que pinta cada tipo de ejercicio. Al añadir un tipo
- * nuevo, TypeScript obliga a añadir aquí su caso (el `switch` debe cubrir
- * todos los valores de `exercise.type`).
+ * Picks the component that renders each exercise type. When a new type is
+ * added, TypeScript forces adding its case here (the `switch` must cover
+ * every value of `exercise.type`).
  */
 export function ExerciseView({ exercise, dictionary, onAnswer, onLookUp }: ExerciseViewProps) {
   switch (exercise.type) {
@@ -26,9 +26,9 @@ export function ExerciseView({ exercise, dictionary, onAnswer, onLookUp }: Exerc
     case 'hanzi-choice':
       return <ChoiceQuestion exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} onLookUp={onLookUp} />
     default: {
-      // Si falta un caso, `exercise` no sería `never` y TypeScript daría error aquí
+      // If a case is missing, `exercise` would not be `never` and TypeScript would error here
       const missingCase: never = exercise
-      throw new Error(`Tipo de ejercicio sin componente: ${JSON.stringify(missingCase)}`)
+      throw new Error(`Exercise type without a component: ${JSON.stringify(missingCase)}`)
     }
   }
 }

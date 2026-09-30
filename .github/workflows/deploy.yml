@@ -1,7 +1,7 @@
 name: Deploy
 
-# Publica la app en GitHub Pages (https://itscogo-lab.github.io/HanziBloom/)
-# cada vez que cambia main. Requiere Settings → Pages → Source: GitHub Actions.
+# Publishes the app to GitHub Pages (https://itscogo-lab.github.io/HanziBloom/)
+# every time main changes. Requires Settings → Pages → Source: GitHub Actions.
 on:
   push:
     branches: [main]
@@ -12,7 +12,7 @@ permissions:
   pages: write
   id-token: write
 
-# Si llegan dos pushes seguidos, el despliegue más nuevo sustituye al anterior.
+# If two pushes arrive in a row, the newest deployment replaces the previous one.
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -29,8 +29,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build -- --base=/${{ github.event.repository.name }}/
-      # GitHub Pages no sabe de rutas de React: al recargar /study responde con
-      # 404.html, así que ese archivo es una copia de la app y el router hace el resto.
+      # GitHub Pages knows nothing about React routes: reloading /study responds with
+      # 404.html, so that file is a copy of the app and the router does the rest.
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:

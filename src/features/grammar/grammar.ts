@@ -4,12 +4,12 @@ import type { StudyItem } from '../dictionary/studyItem.ts'
 import type { GrammarPoint } from './types.ts'
 
 /**
- * Notas de gramática de una ficha.
+ * Grammar notes for an entry.
  *
- * - Un carácter las muestra siempre: su ficha cubre todas sus lecturas.
- * - Una palabra, solo si se lee como la partícula (sin contar el tono): 得
- *   «de» sí, 得 «děi» (tener que) no; 过 «guò» sí, porque el 过 de
- *   experiencia es el mismo verbo sin tono.
+ * - A character always shows them: its entry covers all its readings.
+ * - A word, only if it is read as the particle (ignoring tone): 得 "de"
+ *   yes, 得 "děi" (to have to) no; 过 "guò" yes, because the experiential
+ *   过 is the same verb without the tone.
  */
 export function getGrammarPoints(item: StudyItem, points: readonly GrammarPoint[] = grammarPoints): GrammarPoint[] {
   return points.filter(

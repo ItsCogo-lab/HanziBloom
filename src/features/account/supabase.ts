@@ -1,7 +1,7 @@
 /**
- * Conexión con Supabase (cuentas y copia en la nube). La librería se carga
- * solo cuando hay proyecto configurado, así quien no inicia sesión no la
- * descarga al abrir la app.
+ * Connection to Supabase (accounts and cloud copy). The library is only
+ * loaded when a project is configured, so people who don't sign in don't
+ * download it when opening the app.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { CloudStore } from '../sync/sync.ts'
@@ -12,7 +12,7 @@ export interface SupabaseConfig {
   publishableKey: string
 }
 
-/** Proyecto de Supabase de `.env.production` / `.env.development`; `null` si no hay (y entonces no hay cuentas). */
+/** Supabase project from `.env.production` / `.env.development`; `null` if there is none (and then there are no accounts). */
 export function getSupabaseConfig(env: Record<string, unknown> = import.meta.env): SupabaseConfig | null {
   const url = env.VITE_SUPABASE_URL
   const publishableKey = env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -25,15 +25,15 @@ let clientPromise: Promise<SupabaseClient> | null = null
 export function loadSupabaseClient(config: SupabaseConfig): Promise<SupabaseClient> {
   clientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
     createClient(config.url, config.publishableKey, {
-      // PKCE: al volver de Google o del enlace del email, la URL trae un
-      // ?code= de un solo uso en lugar de los tokens
+      // PKCE: on returning from Google or the email link, the URL carries a
+      // single-use ?code= instead of the tokens
       auth: { flowType: 'pkce' },
     }),
   )
   return clientPromise
 }
 
-/** Tabla con una fila por usuario (ver supabase/schema.sql). */
+/** Table with one row per user (see supabase/schema.sql). */
 const TABLE = 'user_data'
 
 export function createSupabaseCloud(client: SupabaseClient): CloudStore {

@@ -11,21 +11,21 @@ import { memoryStorage } from './memoryStorage.ts'
 
 const EMPTY_CHUNK: DictionaryChunk = { characters: [], words: [] }
 
-/** Por defecto, el diccionario completo está vacío: los tests no descargan nada. */
+/** By default the full dictionary is empty: tests download nothing. */
 const emptyChunks: LoadChunk = async () => EMPTY_CHUNK
 
 interface Options {
-  /** Ruta inicial del router. */
+  /** Initial router path. */
   path?: string
-  /** Almacenamiento con datos ya guardados; por defecto, vacío. */
+  /** Storage with already-saved data; empty by default. */
   storage?: KeyValueStorage
-  /** Trozos del diccionario completo; por defecto, vacíos. */
+  /** Full dictionary chunks; empty by default. */
   loadChunk?: LoadChunk
-  /** Respuestas de las fuentes externas; por defecto, sin conexión. */
+  /** External source responses; offline by default. */
   fetchFn?: typeof fetch
 }
 
-/** Renderiza como en la app: con router y con el estado compartido (progreso, ajustes). */
+/** Renders as in the app: with the router and the shared state (progress, settings). */
 export function renderWithProviders(
   ui: ReactElement,
   { path = '/', storage = memoryStorage(), loadChunk = emptyChunks, fetchFn = offlineFetch }: Options = {},

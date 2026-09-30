@@ -13,7 +13,7 @@ function setup() {
 }
 
 describe('createResourceService', () => {
-  it('sin caché descarga, guarda y devuelve el dato con su fuente', async () => {
+  it('without cache downloads, stores and returns the data with its source', async () => {
     const { cache, service } = setup()
     const fetch = vi.fn(async () => ({ data: 'a', source: 'src@1' }))
     const resource = await service.load({ key: 'k', ttlMs: TTL, fetch })
@@ -31,7 +31,7 @@ describe('createResourceService', () => {
     })
   })
 
-  it('con caché al día no llama a la fuente', async () => {
+  it('with an up-to-date cache does not call the source', async () => {
     const { service, setTime } = setup()
     await service.load({
       key: 'k',
@@ -44,7 +44,7 @@ describe('createResourceService', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
-  it('con caché caducada devuelve lo guardado y lo renueva en segundo plano', async () => {
+  it('with an expired cache returns the stored data and refreshes it in the background', async () => {
     const { cache, service, setTime } = setup()
     await service.load({
       key: 'k',
@@ -64,7 +64,7 @@ describe('createResourceService', () => {
     expect((await cache.get('k'))?.data).toBe('b')
   })
 
-  it('con caché caducada y sin conexión sigue usando lo guardado', async () => {
+  it('with an expired cache and offline keeps using the stored data', async () => {
     const { cache, service, setTime } = setup()
     await service.load({
       key: 'k',
@@ -85,7 +85,7 @@ describe('createResourceService', () => {
     expect((await cache.get('k'))?.data).toBe('a')
   })
 
-  it('sin caché y con la fuente caída pasa el error a quien lo pidió', async () => {
+  it('without cache and with the source down passes the error to the caller', async () => {
     const { cache, service } = setup()
     const failing = async () => {
       throw new SourceError('http', 'HTTP 500', { status: 500 })
@@ -94,7 +94,7 @@ describe('createResourceService', () => {
     expect(await cache.get('k')).toBeUndefined()
   })
 
-  it('dos peticiones a la vez de la misma clave comparten una descarga', async () => {
+  it('two simultaneous requests for the same key share one download', async () => {
     const { service } = setup()
     const fetch = vi.fn(async () => ({ data: 'a', source: 's' }))
     await Promise.all([service.load({ key: 'k', ttlMs: TTL, fetch }), service.load({ key: 'k', ttlMs: TTL, fetch })])

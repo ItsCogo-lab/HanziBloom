@@ -1,15 +1,15 @@
 import { addDays, startOfDay } from '../../lib/dates.ts'
 
 /**
- * Repetición espaciada con cajas de Leitner.
+ * Spaced repetition with Leitner boxes.
  *
- * Cada elemento está en un nivel de dominio de 0 a 5. Al acertar sube un
- * nivel y al fallar vuelve a 0. Cada nivel fija cuántos días esperar hasta el
- * siguiente repaso: lo que ya sabes aparece cada vez menos y lo que fallas,
- * enseguida.
+ * Each item sits at a mastery level from 0 to 5. A correct answer moves it up
+ * a level and a miss sends it back to 0. Each level sets how many days to wait
+ * until the next review: what you already know shows up less and less, and
+ * what you miss, right away.
  *
- * El resto de la app solo usa `scheduleNextReview` e `isReviewDue`: cambiar
- * a otro algoritmo (SM-2, FSRS) no afectaría a nada más.
+ * The rest of the app only uses `scheduleNextReview` and `isReviewDue`:
+ * switching to another algorithm (SM-2, FSRS) wouldn't affect anything else.
  */
 export const REVIEW_INTERVAL_DAYS = [0, 1, 3, 7, 14, 30] as const
 
@@ -17,16 +17,15 @@ export const MAX_MASTERY_LEVEL = REVIEW_INTERVAL_DAYS.length - 1
 
 export interface ReviewSchedule {
   masteryLevel: number
-  /** Fecha (ISO 8601) a partir de la cual toca repasar. */
+  /** Date (ISO 8601) from which a review is due. */
   nextReviewAt: string
 }
 
 /**
- * Nivel y fecha del siguiente repaso después de responder.
+ * Level and date of the next review after answering.
  *
- * Los repasos van por días: el repaso "de mañana" está disponible desde las
- * 00:00 de mañana, no 24 horas exactas después. El nivel 0 (0 días) queda
- * pendiente para hoy mismo.
+ * Reviews go by days: "tomorrow's" review is available from 00:00 tomorrow,
+ * not exactly 24 hours later. Level 0 (0 days) stays due for today.
  */
 export function scheduleNextReview(masteryLevel: number, wasCorrect: boolean, now: Date): ReviewSchedule {
   const nextLevel = wasCorrect ? Math.min(masteryLevel + 1, MAX_MASTERY_LEVEL) : 0
@@ -37,18 +36,18 @@ export function scheduleNextReview(masteryLevel: number, wasCorrect: boolean, no
   }
 }
 
-/** Programación de un elemento recién aprendido: nivel 0, que toca repasar hoy. */
+/** Schedule for a just-learned item: level 0, due for review today. */
 export function scheduleFirstReview(now: Date): ReviewSchedule {
   return { masteryLevel: 0, nextReviewAt: addDays(startOfDay(now), REVIEW_INTERVAL_DAYS[0]).toISOString() }
 }
 
 /**
- * Programación de un elemento que el usuario ya conocía: empieza en el nivel
- * máximo, así que vuelve a los 30 días. Si lo acierta sigue cada 30 días; si
- * lo falla, vuelve al nivel 0 como cualquier otro.
+ * Schedule for an item the user already knew: it starts at the maximum
+ * level, so it comes back after 30 days. If answered correctly it stays at
+ * every 30 days; if missed, it goes back to level 0 like any other.
  *
- * `extraDays` retrasa el primer repaso: al marcar muchos elementos a la vez
- * sirve para repartirlos y que no toquen todos el mismo día.
+ * `extraDays` delays the first review: when marking many items at once it
+ * spreads them out so they aren't all due on the same day.
  */
 export function scheduleKnownItem(now: Date, extraDays = 0): ReviewSchedule {
   const interval = (REVIEW_INTERVAL_DAYS[MAX_MASTERY_LEVEL] ?? 0) + extraDays

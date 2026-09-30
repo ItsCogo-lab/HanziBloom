@@ -1,9 +1,9 @@
 import type { MessageKey } from './en.ts'
 
 /**
- * Textos de la interfaz en español. De momento la app está en inglés;
- * se mantienen para poder activar el español más adelante.
- * El tipo obliga a tener exactamente las mismas claves que en.ts.
+ * Spanish UI texts. The app is in English for now; these are kept so
+ * Spanish can be enabled later.
+ * The type enforces exactly the same keys as en.ts.
  */
 export const es: Record<MessageKey, string> = {
   'app.name': 'HanziBloom',

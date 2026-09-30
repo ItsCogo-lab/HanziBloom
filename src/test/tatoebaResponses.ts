@@ -1,7 +1,7 @@
 /**
- * Respuestas de la API v1 de Tatoeba para los tests, copiadas de una consulta
- * real (q=柠, sort=words) hecha desde GitHub Actions el 2026-09-29 y
- * recortadas a los campos que usa el adaptador.
+ * Tatoeba API v1 responses for tests, copied from a real query
+ * (q=柠, sort=words) made from GitHub Actions on 2026-09-29 and trimmed
+ * to the fields the adapter uses.
  */
 
 const translation = (id: number, text: string, owner: string | null, isDirect = true) => ({

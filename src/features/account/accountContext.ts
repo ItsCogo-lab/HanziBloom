@@ -5,19 +5,19 @@ export interface AccountUser {
   email: string | null
 }
 
-/** Estado de la copia en la nube: `idle` sin sesión, `error` si la última vez falló (se reintenta sola). */
+/** State of the cloud copy: `idle` when signed out, `error` if the last attempt failed (it retries on its own). */
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 
 export interface AccountContextValue {
-  /** Hay proyecto de Supabase configurado. Si no, la app funciona sin cuentas. */
+  /** A Supabase project is configured. Otherwise the app works without accounts. */
   enabled: boolean
-  /** Aún no se sabe si hay sesión (se está cargando). */
+  /** Not yet known whether there is a session (loading). */
   loading: boolean
   user: AccountUser | null
   syncStatus: SyncStatus
-  /** Lleva a la página de Google; al volver, la sesión ya está iniciada. */
+  /** Goes to Google's page; on return, the session is already signed in. */
   signInWithGoogle: () => Promise<void>
-  /** Manda un email con un enlace para entrar sin contraseña. */
+  /** Sends an email with a passwordless sign-in link. */
   sendEmailLink: (email: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -34,7 +34,7 @@ const noAccounts: AccountContextValue = {
 
 export const AccountContext = createContext<AccountContextValue>(noAccounts)
 
-/** La cuenta del usuario, si la hay. Sin <AccountProvider> la app funciona sin cuentas. */
+/** The user's account, if any. Without <AccountProvider> the app works without accounts. */
 export function useAccount(): AccountContextValue {
   return use(AccountContext)
 }

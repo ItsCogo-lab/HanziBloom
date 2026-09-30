@@ -1,6 +1,6 @@
 import { createMemoryStorage, type KeyValueStorage } from '../lib/storage.ts'
 
-/** Almacenamiento en memoria para tests: como localStorage, pero aislado en cada test. */
+/** In-memory storage for tests: like localStorage, but isolated per test. */
 export function memoryStorage(initial: Record<string, string> = {}): KeyValueStorage {
   return createMemoryStorage(initial)
 }

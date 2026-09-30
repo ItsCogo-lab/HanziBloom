@@ -1,6 +1,6 @@
 import type { Tone } from '../../lib/tones.ts'
 
-/** Clase de color de cada tono (tokens --color-tone-* de index.css). Enteras para que Tailwind las encuentre. */
+/** Color class for each tone (--color-tone-* tokens in index.css). Written out in full so Tailwind finds them. */
 export const TONE_TEXT_CLASSES: Record<Tone, string> = {
   1: 'text-tone-1',
   2: 'text-tone-2',

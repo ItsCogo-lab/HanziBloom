@@ -1,12 +1,12 @@
 /**
- * El diálogo de instalación del navegador (Chrome, Edge, Samsung Internet).
+ * The browser's install dialog (Chrome, Edge, Samsung Internet).
  *
- * El navegador lanza `beforeinstallprompt` una sola vez, a menudo antes de que
- * React monte la app. Por eso lo escuchamos desde main.tsx y lo guardamos
- * aquí, y los componentes lo leen con useNativeInstallPrompt().
+ * The browser fires `beforeinstallprompt` only once, often before React
+ * mounts the app. That's why we listen for it from main.tsx and store it
+ * here, and components read it with useInstallPrompt().
  */
 
-/** No está en los tipos de TypeScript porque no es estándar (Safari y Firefox no lo tienen). */
+/** Not in the TypeScript types because it's non-standard (Safari and Firefox don't have it). */
 export type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
@@ -20,10 +20,10 @@ function setSavedPrompt(prompt: BeforeInstallPromptEvent | undefined) {
   listeners.forEach((listener) => listener())
 }
 
-/** Empieza a escuchar los eventos de instalación. Devuelve una función para dejar de hacerlo. */
+/** Starts listening for install events. Returns a function to stop. */
 export function listenForInstallPrompt(target: Window = window): () => void {
   const onPrompt = (event: Event) => {
-    // Sin esto, Chrome enseña su propia barra; preferimos mostrar el aviso nosotros
+    // Without this, Chrome shows its own bar; we prefer to show the prompt ourselves
     event.preventDefault()
     setSavedPrompt(event as BeforeInstallPromptEvent)
   }
@@ -47,8 +47,8 @@ export function getInstallPrompt(): BeforeInstallPromptEvent | undefined {
 }
 
 /**
- * Abre el diálogo del navegador. Cada evento solo sirve una vez, así que se
- * descarta después. Devuelve si la persona ha aceptado instalar.
+ * Opens the browser dialog. Each event can only be used once, so it is
+ * discarded afterwards. Returns whether the person accepted the install.
  */
 export async function showInstallPrompt(): Promise<boolean> {
   const prompt = savedPrompt

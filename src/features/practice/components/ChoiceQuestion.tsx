@@ -24,9 +24,9 @@ type ChoiceQuestionProps = {
 }
 
 /**
- * Pregunta de opción múltiple. Al elegir una opción se corrige al momento
- * (la correcta en verde, la elegida en rojo si falla) y se muestra la
- * respuesta completa; «Continue» pasa al siguiente ejercicio.
+ * Multiple-choice question. Picking an option grades it right away
+ * (the correct one in green, the picked one in red if wrong) and shows the
+ * full answer; "Continue" moves on to the next exercise.
  */
 export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: ChoiceQuestionProps) {
   const [selected, setSelected] = useState<StudyItem>()
@@ -36,9 +36,9 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
   const isAnswered = selected !== undefined
   const isCorrect = isAnswered && isCorrectOption(exercise, selected)
 
-  // Las opciones se desactivan al responder: el foco pasa a «Continue», que
-  // queda a la vista y lleva la corrección como descripción para los lectores
-  // de pantalla. Así también se puede seguir solo con el teclado.
+  // Options are disabled on answering: focus moves to "Continue", which
+  // stays in view and carries the feedback as its description for screen
+  // readers. This way you can also keep going with the keyboard only.
   useEffect(() => {
     if (isAnswered) continueRef.current?.focus()
   }, [isAnswered])
@@ -52,7 +52,7 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
         {type === 'hanzi-choice' ? (
           <p className="text-2xl font-medium">{getMeaningLabel(item)}</p>
         ) : (
-          // Si se pregunta la pronunciación, los colores de tono no aparecen hasta responder
+          // If the question is about pronunciation, tone colors do not appear until answered
           <ToneHanzi
             entry={item.entry}
             showTones={isAnswered || type !== 'pinyin-choice'}
@@ -82,7 +82,7 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
             <p className={`text-lg font-semibold ${isCorrect ? 'text-success' : 'text-danger'}`}>
               {t(isCorrect ? 'practice.choice.correct' : 'practice.choice.incorrect')}
             </p>
-            {/* Los {' '} separan las palabras al leerlo en voz alta; el hueco visual lo pone gap */}
+            {/* The {' '} separate the words when read aloud; the visual gap comes from gap */}
             <p className="mt-2 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
               <ToneHanzi entry={item.entry} className="text-2xl" />{' '}
               <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />{' '}
@@ -142,7 +142,7 @@ function ChoiceOption({ type, option, state, disabled, onSelect }: ChoiceOptionP
           {type === 'pinyin-choice' ? <PinyinText pinyin={getPinyinLabel(option)} /> : getMeaningLabel(option)}
         </span>
       )}
-      {/* El color no basta para todo el mundo: también un símbolo y un texto para lectores de pantalla */}
+      {/* Color is not enough for everyone: also a symbol and a text for screen readers */}
       {state === 'correct' && <OptionMark symbol="✓" label={t('practice.choice.correctOption')} />}
       {state === 'wrong' && <OptionMark symbol="✗" label={t('practice.choice.yourOption')} />}
     </button>
@@ -152,7 +152,7 @@ function ChoiceOption({ type, option, state, disabled, onSelect }: ChoiceOptionP
 function OptionMark({ symbol, label }: { symbol: string; label: string }) {
   return (
     <>
-      {/* Sin este espacio, el lector de pantalla juntaría el texto: «two(correct answer)» */}
+      {/* Without this space, the screen reader would run the text together: "two(correct answer)" */}
       {' '}
       <span aria-hidden="true" className="font-semibold">
         {symbol}

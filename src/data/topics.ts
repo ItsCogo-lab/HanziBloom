@@ -1,29 +1,30 @@
 /**
- * Sets de vocabulario por temas.
+ * Vocabulary sets by topic.
  *
- * CURADO A MANO. A diferencia del resto de src/data, este archivo no lo
- * genera ningún script: la pertenencia de cada palabra a un tema es una
- * decisión editorial. Criterios (docs/DATA_SOURCES.md, «Sets por temas»):
+ * CURATED BY HAND. Unlike the rest of src/data, this file is not generated
+ * by any script: which topic each word belongs to is an editorial
+ * decision. Criteria (docs/DATA_SOURCES.md, "Topic sets"):
  *
- * - Solo se usan palabras que ya están en el dataset (HSK 1-4). Aquí no se
- *   añade vocabulario, ni significados, ni pinyin: todo eso viene del
- *   dataset. Un test comprueba que cada id existe.
- * - Una palabra entra en un tema si alguno de los significados que muestra
- *   la app (los de CC-CEDICT) pertenece a ese tema: 云 «(classical) to say;
- *   cloud» entra en «Weather». Si el sentido del tema no está entre ellos, no
- *   entra aunque exista: 点 no está en «Time» porque no muestra «o'clock».
- * - Una palabra puede estar en varios temas (鱼: «Food & drink» y «Animals»).
+ * - Only words already in the dataset (HSK 1-4) are used. No vocabulary,
+ *   meanings or pinyin are added here: all of that comes from the
+ *   dataset. A test checks that every id exists.
+ * - A word goes into a topic if any of the meanings the app shows
+ *   (CC-CEDICT's) belongs to that topic: 云 "(classical) to say;
+ *   cloud" goes into "Weather". If the topic's sense is not among them, the
+ *   word stays out even if it has that sense: 点 is not in "Time" because
+ *   it does not show "o'clock".
+ * - A word can be in several topics (鱼: "Food & drink" and "Animals").
  *
- * Añadir un tema = añadir un objeto a esta lista; la interfaz no cambia.
+ * Adding a topic = adding an object to this list; the UI does not change.
  */
 export interface TopicDefinition {
-  /** Id del set: "topic-" + este id. */
+  /** Set id: "topic-" + this id. */
   id: string
   name: string
   description: string
-  /** Un carácter decorativo para la tarjeta del set. */
+  /** A decorative character for the set's card. */
   icon: string
-  /** Ids de palabras del dataset (Word.id). */
+  /** Dataset word ids (Word.id). */
   words: readonly string[]
 }
 

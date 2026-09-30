@@ -5,22 +5,22 @@ import type { DailyActivity, ItemProgress, ProgressData } from './types.ts'
 
 export interface ItemsSummary {
   total: number
-  /** Nunca estudiados. */
+  /** Never studied. */
   new: number
   learning: number
   mastered: number
-  /** Estudiados al menos una vez (en aprendizaje + dominados). */
+  /** Studied at least once (learning + mastered). */
   studied: number
-  /** Con el repaso pendiente ahora mismo. */
+  /** With a review due right now. */
   due: number
 }
 
-/** Cuántos elementos hay en cada estado. */
+/** How many items are in each state. */
 export function summarizeItems(items: readonly StudyItem[], progress: ProgressData, now: Date): ItemsSummary {
   return summarizeItemIds(items.map(getStudyItemId), progress, now)
 }
 
-/** Igual que summarizeItems, a partir de los ids (así los guardan los sets de estudio). */
+/** Same as summarizeItems, from the ids (that's how study sets store them). */
 export function summarizeItemIds(itemIds: readonly StudyItemId[], progress: ProgressData, now: Date): ItemsSummary {
   const summary: ItemsSummary = { total: itemIds.length, new: 0, learning: 0, mastered: 0, studied: 0, due: 0 }
   for (const itemId of itemIds) {
@@ -35,11 +35,11 @@ export function summarizeItemIds(itemIds: readonly StudyItemId[], progress: Prog
 export interface AnswerTotals {
   answers: number
   correct: number
-  /** Proporción de aciertos (0-1), o `undefined` si aún no hay respuestas. */
+  /** Share of correct answers (0-1), or `undefined` if there are no answers yet. */
   accuracy: number | undefined
 }
 
-/** Respuestas y aciertos de toda la historia. */
+/** All-time answers and correct answers. */
 export function getAnswerTotals(activity: Record<DateKey, DailyActivity>): AnswerTotals {
   let answers = 0
   let correct = 0
@@ -54,7 +54,7 @@ export interface DayActivity extends DailyActivity {
   date: DateKey
 }
 
-/** Actividad de los últimos `days` días, del más antiguo a hoy; los días sin estudiar valen 0. */
+/** Activity over the last `days` days, from oldest to today; days without study count as 0. */
 export function getRecentActivity(activity: Record<DateKey, DailyActivity>, today: Date, days = 7): DayActivity[] {
   return Array.from({ length: days }, (_, index) => {
     const date = toDateKey(addDays(today, index - days + 1))
@@ -62,7 +62,7 @@ export function getRecentActivity(activity: Record<DateKey, DailyActivity>, toda
   })
 }
 
-/** Los elementos con más fallos; a igualdad de fallos, los de peor porcentaje de acierto. */
+/** The items with the most mistakes; on ties, those with the worst accuracy. */
 export function getMostMissed(progress: ProgressData, limit = 5): ItemProgress[] {
   const accuracy = (item: ItemProgress) => item.timesCorrect / item.timesSeen
   return Object.values(progress.items)

@@ -7,8 +7,8 @@ import type { StudySet } from '../types.ts'
 import { SessionTypeLabel } from './SessionTypeLabel.tsx'
 
 /**
- * Las dos acciones de un set, Learn y Study, con cuántos elementos tiene cada
- * una ahora mismo (calculado con el progreso actual, nunca fijo).
+ * The two actions of a set, Learn and Study, with how many items each one has
+ * right now (computed from current progress, never fixed).
  */
 export function SetSessionActions({ set }: { set: StudySet }) {
   const { progress } = useProgress()
@@ -62,7 +62,7 @@ export function SetSessionActions({ set }: { set: StudySet }) {
   )
 }
 
-/** Versión compacta para listas (My Studies, Home): un botón por acción disponible. */
+/** Compact version for lists (My Studies, Home): one button per available action. */
 export function SetSessionButtons({ set }: { set: StudySet }) {
   const { progress } = useProgress()
   const counts = getSetSessionCounts(set, progress, new Date())

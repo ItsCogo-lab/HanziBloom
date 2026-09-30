@@ -11,21 +11,21 @@ interface CreateSessionOptions {
   size?: number
   random?: RandomFn
   definitions?: readonly ExerciseDefinition[]
-  /** Progreso del usuario: decide qué elementos entran en la sesión. */
+  /** The user's progress: decides which items go into the session. */
   progress?: ProgressData
   now?: Date
   /**
-   * De dónde salen las respuestas incorrectas de las preguntas de opciones.
-   * Por defecto, el mismo `pool`. Al estudiar un set pequeño (un tema de 7
-   * palabras) conviene sacarlas de todo el diccionario.
+   * Where the wrong answers of choice questions come from. By default, the
+   * same `pool`. When studying a small set (a 7-word topic) it is better to
+   * take them from the whole dictionary.
    */
   distractorPool?: readonly StudyItem[]
 }
 
 /**
- * Crea los ejercicios de una sesión: elige los elementos según el progreso
- * (ver selectSessionItems) y, para cada uno, un tipo de ejercicio al azar
- * entre los que se pueden construir.
+ * Creates the exercises of a session: picks the items based on progress
+ * (see selectSessionItems) and, for each one, a random exercise type among
+ * those that can be built.
  */
 export function createSessionExercises(
   pool: readonly StudyItem[],
@@ -48,14 +48,14 @@ export function createSessionExercises(
 }
 
 /**
- * Elige los elementos de una sesión, por orden de prioridad:
+ * Picks the items of a session, in order of priority:
  *
- * 1. Repasos pendientes, empezando por los que llevan más tiempo esperando.
- * 2. Elementos nuevos, al azar.
- * 3. Si aún faltan, elementos ya estudiados cuyo repaso está más cerca
- *    (los básicos, los últimos).
+ * 1. Due reviews, starting with the ones that have been waiting longest.
+ * 2. New items, at random.
+ * 3. If still short, already studied items whose review is closest
+ *    (basic ones last).
  *
- * Al final se barajan para que no salgan agrupados por tipo.
+ * At the end they are shuffled so they do not come out grouped by kind.
  */
 export function selectSessionItems(
   pool: readonly StudyItem[],
@@ -65,14 +65,14 @@ export function selectSessionItems(
   random: RandomFn,
 ): StudyItem[] {
   const progressOf = (item: StudyItem) => progress.items[getStudyItemId(item)]
-  // Las fechas ISO en UTC se ordenan bien como texto
+  // ISO dates in UTC sort correctly as text
   const byNextReview = (a: StudyItem, b: StudyItem) =>
     (progressOf(a)?.nextReviewAt ?? '').localeCompare(progressOf(b)?.nextReviewAt ?? '')
 
   const shuffled = shuffle(pool, random)
   const due = shuffled.filter((item) => isDue(progressOf(item), now)).sort(byNextReview)
   const fresh = shuffled.filter((item) => progressOf(item) === undefined)
-  // Los básicos (ver applyHskLevel) nunca tocan: van al final de todo
+  // Basic items (see applyHskLevel) are never due: they go at the very end
   const isBasic = (item: StudyItem) => Number(progressOf(item)?.basic === true)
   const upcoming = shuffled
     .filter((item) => progressOf(item) !== undefined && !isDue(progressOf(item), now))
@@ -81,7 +81,7 @@ export function selectSessionItems(
   return shuffle([...due, ...fresh, ...upcoming].slice(0, size), random)
 }
 
-// --- Estado de una sesión en curso ------------------------------------------
+// --- State of an ongoing session -------------------------------------------
 
 export interface SessionState {
   exercises: readonly Exercise[]
@@ -96,9 +96,9 @@ export function createSessionState(exercises: readonly Exercise[]): SessionState
 }
 
 /**
- * Reducer de la sesión: recibe el estado y una acción y devuelve el estado
- * nuevo, sin modificar el anterior. Es una función pura, así que se puede
- * probar sin React; el componente la usa con useReducer.
+ * Session reducer: takes the state and an action and returns the new state,
+ * without modifying the previous one. It is a pure function, so it can be
+ * tested without React; the component uses it with useReducer.
  */
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   const exercise = getCurrentExercise(state)

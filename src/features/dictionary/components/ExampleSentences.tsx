@@ -10,10 +10,10 @@ import { useRuntimeData } from '../runtime/runtimeSourcesContext.ts'
 import { getStudyItemId, type StudyItem } from '../studyItem.ts'
 
 /**
- * Frases de ejemplo de Tatoeba, con su pinyin y con enlace y autor de cada
- * frase como pide su licencia. Se piden al servicio del diccionario al abrir la ficha (Tatoeba en
- * tiempo de ejecución, o las frases locales de HSK). Si no hay frases, no se
- * muestra nada; si no se han podido consultar, se dice.
+ * Example sentences from Tatoeba, with their pinyin and each sentence's link
+ * and author as its license requires. Requested from the dictionary service when the entry page opens (Tatoeba at
+ * runtime, or the local HSK sentences). If there are no sentences, nothing
+ * is shown; if they couldn't be fetched, it says so.
  */
 export function ExampleSentences({ item }: { item: StudyItem }) {
   const itemId = getStudyItemId(item)
@@ -58,10 +58,10 @@ export function ExampleSentences({ item }: { item: StudyItem }) {
 }
 
 /**
- * La frase con su pinyin. La API de Tatoeba no da transcripciones, así que se
- * usa el mismo motor que en las frases propias (pinyin-pro comprobado con
- * CC-CEDICT): lo que no puede asegurar sale marcado con «?» y sin color.
- * Mientras se carga el motor, o si falla, se ve solo el chino.
+ * The sentence with its pinyin. The Tatoeba API doesn't give transcriptions, so
+ * the same engine as for custom sentences is used (pinyin-pro checked against
+ * CC-CEDICT): whatever it can't be sure of is marked with "?" and no color.
+ * While the engine loads, or if it fails, only the Chinese is shown.
  */
 export function ExampleText({ chinese }: { chinese: string }) {
   const [annotated, setAnnotated] = useState<{ chinese: string; tokens: SentenceToken[] }>()

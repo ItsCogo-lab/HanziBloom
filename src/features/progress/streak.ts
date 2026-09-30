@@ -2,10 +2,10 @@ import { addDays, fromDateKey, toDateKey, type DateKey } from '../../lib/dates.t
 import type { DailyActivity } from './types.ts'
 
 /**
- * Racha actual: días seguidos con alguna respuesta, contando hasta hoy.
+ * Current streak: consecutive days with at least one answer, counting up to today.
  *
- * Si hoy aún no has estudiado, la racha de ayer sigue viva (tienes hasta
- * medianoche para mantenerla), así que se cuenta desde ayer.
+ * If you haven't studied yet today, yesterday's streak is still alive (you
+ * have until midnight to keep it), so it is counted from yesterday.
  */
 export function getCurrentStreak(activity: Record<DateKey, DailyActivity>, today: Date): number {
   const studied = (date: Date) => (activity[toDateKey(date)]?.answers ?? 0) > 0
@@ -19,7 +19,7 @@ export function getCurrentStreak(activity: Record<DateKey, DailyActivity>, today
   return streak
 }
 
-/** Racha más larga de toda la historia. */
+/** Longest streak ever. */
 export function getLongestStreak(activity: Record<DateKey, DailyActivity>): number {
   const days = Object.keys(activity)
     .filter((key) => (activity[key]?.answers ?? 0) > 0)

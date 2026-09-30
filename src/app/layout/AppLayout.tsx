@@ -3,11 +3,11 @@ import { InstallBanner } from '../../features/install/components/InstallBanner.t
 import { t } from '../../i18n/index.ts'
 import { MainNavigation } from './MainNavigation.tsx'
 
-/** Estructura común a todas las páginas: navegación + contenido de la ruta actual. */
+/** Layout shared by every page: navigation + content of the current route. */
 export function AppLayout() {
   return (
     <div className="min-h-dvh md:flex">
-      {/* Primer elemento enfocable: permite saltar la navegación con el teclado */}
+      {/* First focusable element: lets keyboard users skip the navigation */}
       <a
         href="#main-content"
         className="sr-only z-20 rounded-lg bg-surface shadow-md focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:px-4 focus:py-2"
@@ -17,7 +17,7 @@ export function AppLayout() {
 
       <MainNavigation />
 
-      {/* El padding inferior deja sitio para la barra de navegación fija en móvil */}
+      {/* The bottom padding leaves room for the fixed navigation bar on mobile */}
       <main
         id="main-content"
         tabIndex={-1}

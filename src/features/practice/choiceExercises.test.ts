@@ -25,26 +25,26 @@ function word(hanzi: string, pinyin: string, meanings: string[]): StudyItem {
 const hanziOf = (items: readonly StudyItem[]) => items.map((item) => item.entry.hanzi)
 
 describe('getMeaningClues', () => {
-  it('quita los paréntesis que citan el propio hanzi', () => {
+  it('removes parentheses that quote the hanzi itself', () => {
     expect(getMeaningClues(character('大', ['dà'], ['big; large', 'eldest (as in 大姐)']))).toEqual([
       'big; large',
       'eldest',
     ])
   })
 
-  it('descarta los significados que aun así revelan el hanzi', () => {
+  it('discards meanings that still reveal the hanzi', () => {
     expect(getMeaningClues(character('漂', ['piào'], ['used in 漂亮']))).toEqual([])
   })
 
-  it('mantiene los paréntesis y hanzi que no revelan nada', () => {
+  it('keeps parentheses and hanzi that reveal nothing', () => {
     const item = character('你', ['nǐ'], ['you (informal, as opposed to courteous 您)'])
     expect(getMeaningClues(item)).toEqual(['you (informal, as opposed to courteous 您)'])
   })
 })
 
 describe('getMeaningLabel', () => {
-  it('junta significados mientras quepan', () => {
-    // Con el tercero pasaría de 40 caracteres
+  it('joins meanings while they fit', () => {
+    // With the third one it would exceed 40 characters
     expect(getMeaningLabel(word('朋友', 'péng you', ['friend', 'companion', 'boyfriend or girlfriend']))).toBe(
       'friend; companion',
     )
@@ -53,14 +53,14 @@ describe('getMeaningLabel', () => {
     )
   })
 
-  it('siempre incluye el primer significado, aunque sea largo', () => {
+  it('always includes the first meaning, even if it is long', () => {
     const long = 'plural marker for pronouns, and nouns referring to individuals'
     expect(getMeaningLabel(character('们', ['men'], [long, 'other']))).toBe(long)
   })
 })
 
 describe('getPinyinLabel', () => {
-  it('usa la primera lectura de un carácter con varias', () => {
+  it('uses the first reading of a character with several', () => {
     expect(getPinyinLabel(character('了', ['le', 'liǎo'], ['completed action marker']))).toBe('le')
   })
 })
@@ -77,22 +77,22 @@ describe('pickDistractors', () => {
     character('好', ['hǎo'], ['good']),
   ]
 
-  it('no incluye la respuesta, otro tipo de elemento ni sinónimos', () => {
+  it('does not include the answer, another item kind or synonyms', () => {
     const distractors = pickDistractors('meaning-choice', pool[1]!, pool) // 喜欢
 
     expect(distractors).toHaveLength(CHOICE_OPTION_COUNT - 1)
-    // 爱 comparte "to like" y 好 es un carácter
+    // 爱 shares "to like" and 好 is a character
     expect(hanziOf(distractors)).not.toContain('喜欢')
     expect(hanziOf(distractors)).not.toContain('爱')
     expect(hanziOf(distractors)).not.toContain('好')
   })
 
-  it('prefiere distractores con el mismo número de caracteres', () => {
-    // 爱 tiene un solo carácter: pasa al final y no hace falta
+  it('prefers distractors with the same number of characters', () => {
+    // 爱 has a single character: it goes to the end and is not needed
     expect(hanziOf(pickDistractors('meaning-choice', pool[0]!, pool))).toEqual(['喜欢', '老师', '医生'])
   })
 
-  it('en pinyin descarta las lecturas iguales', () => {
+  it('for pinyin discards identical readings', () => {
     const items = [
       character('是', ['shì'], ['to be']),
       character('事', ['shì'], ['matter']),
@@ -103,11 +103,11 @@ describe('pickDistractors', () => {
     ]
     const distractors = pickDistractors('pinyin-choice', items[0]!, items)
 
-    // 事 se lee igual que 是; 了 y 瞭 comparten liǎo, así que solo va uno de los dos
+    // 事 reads the same as 是; 了 and 瞭 share liǎo, so only one of the two goes in
     expect(hanziOf(distractors)).toEqual(['了', '十', '四'])
   })
 
-  it('no repite el mismo hanzi en las opciones de hanzi', () => {
+  it('does not repeat the same hanzi in hanzi options', () => {
     const items = [
       character('你', ['nǐ'], ['you']),
       character('好', ['hǎo'], ['good']),
@@ -121,13 +121,13 @@ describe('pickDistractors', () => {
   })
 })
 
-describe('definiciones de opción múltiple', () => {
+describe('multiple-choice definitions', () => {
   const pool = ['一', '二', '三', '四', '五', '六'].map((hanzi, index) =>
     character(hanzi, [`p${index}`], [`number ${index + 1}`]),
   )
 
   it.each([meaningChoiceDefinition, pinyinChoiceDefinition, hanziChoiceDefinition])(
-    '$type crea cuatro opciones distintas con la respuesta entre ellas',
+    '$type creates four distinct options with the answer among them',
     (definition) => {
       const item = pool[0]!
       expect(definition.canBuild(item, pool)).toBe(true)
@@ -141,18 +141,18 @@ describe('definiciones de opción múltiple', () => {
     },
   )
 
-  it('con la misma semilla crea las mismas opciones, y con otras semillas cambian', () => {
+  it('creates the same options with the same seed, and they change with other seeds', () => {
     const build = (seed: number) => hanziOf(meaningChoiceDefinition.build(pool[0]!, pool, seededRandom(seed)).options)
 
     expect(build(1)).toEqual(build(1))
     expect(new Set([1, 2, 3, 4, 5].map((seed) => build(seed).join(''))).size).toBeGreaterThan(1)
   })
 
-  it('no se puede construir sin distractores suficientes', () => {
+  it('cannot be built without enough distractors', () => {
     expect(meaningChoiceDefinition.canBuild(pool[0]!, pool.slice(0, CHOICE_OPTION_COUNT - 1))).toBe(false)
   })
 
-  it('no pregunta por significados que revelan el hanzi', () => {
+  it('does not ask about meanings that reveal the hanzi', () => {
     const revealing = character('漂', ['piào'], ['used in 漂亮'])
     const withRevealing = [...pool, revealing]
 
@@ -162,10 +162,10 @@ describe('definiciones de opción múltiple', () => {
   })
 })
 
-describe('con el dataset HSK 1', () => {
+describe('with the HSK 1 dataset', () => {
   const pool = listStudyItems(hskDictionary)
 
-  it('todos los elementos admiten al menos un ejercicio de opción múltiple', () => {
+  it('every item supports at least one multiple-choice exercise', () => {
     const definitions = [meaningChoiceDefinition, pinyinChoiceDefinition, hanziChoiceDefinition]
     const withoutChoice = pool.filter((item) => !definitions.some((definition) => definition.canBuild(item, pool)))
 

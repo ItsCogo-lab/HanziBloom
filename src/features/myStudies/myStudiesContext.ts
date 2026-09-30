@@ -10,9 +10,9 @@ export interface MyStudiesContextValue {
 
 export const MyStudiesContext = createContext<MyStudiesContextValue | null>(null)
 
-/** Los sets que estudia el usuario. Requiere un <MyStudiesProvider> por encima. */
+/** The sets the user is studying. Requires a <MyStudiesProvider> above. */
 export function useMyStudies(): MyStudiesContextValue {
   const value = use(MyStudiesContext)
-  if (!value) throw new Error('useMyStudies debe usarse dentro de <MyStudiesProvider>')
+  if (!value) throw new Error('useMyStudies must be used within <MyStudiesProvider>')
   return value
 }

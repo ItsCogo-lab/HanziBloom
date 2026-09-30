@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
 
 describe('App', () => {
-  it('arranca en el inicio con la navegación principal', () => {
+  it('starts on the home page with the main navigation', () => {
     render(<App />)
 
     expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument()

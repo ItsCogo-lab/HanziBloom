@@ -2,9 +2,9 @@ import { toToneNumbers } from '../../../lib/tones.ts'
 import { useSettings } from '../../settings/settingsContext.ts'
 
 /**
- * Pinyin con marcas de tono y, si el usuario lo ha activado en Ajustes,
- * también con números: "nǐ hǎo (ni3 hao3)". Es la alternativa a los colores
- * para quien no distingue bien las marcas.
+ * Pinyin with tone marks and, if the user has turned it on in Settings,
+ * also with numbers: "nǐ hǎo (ni3 hao3)". It's the alternative to colors
+ * for those who can't easily tell the marks apart.
  */
 export function PinyinText({ pinyin, className = '' }: { pinyin: string; className?: string }) {
   const { toneNumbers } = useSettings().settings

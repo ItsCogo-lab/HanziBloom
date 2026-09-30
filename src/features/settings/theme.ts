@@ -1,9 +1,9 @@
 /**
- * Tema de colores (claro u oscuro).
+ * Color theme (light or dark).
  *
- * El usuario elige en Ajustes entre seguir al sistema, claro u oscuro. Los
- * colores están en index.css: el tema oscuro redefine los mismos tokens bajo
- * `html[data-theme='dark']`, así que los componentes no cambian.
+ * In Settings the user chooses between following the system, light or dark.
+ * The colors live in index.css: the dark theme redefines the same tokens under
+ * `html[data-theme='dark']`, so components don't change.
  */
 export const THEME_OPTIONS = ['system', 'light', 'dark'] as const
 
@@ -15,7 +15,7 @@ export function isThemePreference(value: unknown): value is ThemePreference {
   return THEME_OPTIONS.some((option) => option === value)
 }
 
-/** Tema que se ve: la elección del usuario o, con «sistema», la del dispositivo. */
+/** The theme shown: the user's choice or, with "system", the device's. */
 export function resolveTheme(preference: ThemePreference, systemPrefersDark: boolean): Theme {
   if (preference === 'system') return systemPrefersDark ? 'dark' : 'light'
   return preference
@@ -23,12 +23,12 @@ export function resolveTheme(preference: ThemePreference, systemPrefersDark: boo
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
-/** Si el dispositivo pide tema oscuro. Sin matchMedia (tests) se asume claro. */
+/** Whether the device asks for dark theme. Without matchMedia (tests) light is assumed. */
 export function systemPrefersDark(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia(DARK_QUERY).matches
 }
 
-/** Avisa cuando el dispositivo cambia entre claro y oscuro; devuelve cómo dejar de escuchar. */
+/** Notifies when the device switches between light and dark; returns how to stop listening. */
 export function subscribeToSystemTheme(onChange: () => void): () => void {
   if (typeof window.matchMedia !== 'function') return () => {}
   const query = window.matchMedia(DARK_QUERY)
@@ -37,12 +37,12 @@ export function subscribeToSystemTheme(onChange: () => void): () => void {
 }
 
 /**
- * Aplica el tema a la página. index.html hace lo mismo antes de cargar la app,
- * para que no se vea un destello del tema equivocado.
+ * Applies the theme to the page. index.html does the same before the app
+ * loads, so there's no flash of the wrong theme.
  */
 export function applyTheme(theme: Theme, root: HTMLElement = document.documentElement): void {
   root.dataset.theme = theme
-  // Color de la barra del navegador y del sistema en móvil: el mismo que el fondo
+  // Browser and system bar color on mobile: the same as the background
   const paper = getComputedStyle(root).getPropertyValue('--color-paper').trim()
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   if (meta && paper) meta.content = paper

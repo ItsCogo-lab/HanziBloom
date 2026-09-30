@@ -6,8 +6,8 @@ import type { CustomSet } from '../types.ts'
 import { SentenceView } from './SentenceView.tsx'
 
 /**
- * Las notas del usuario sobre un elemento en un set propio, para leerlas
- * junto a la ficha del diccionario (que no cambia). Si no hay notas, nada.
+ * The user's notes about an item in a custom set, to read alongside the
+ * dictionary entry (which does not change). If there are no notes, nothing.
  */
 export function CustomNotesView({ set, item }: { set: CustomSet; item: StudyItem }) {
   const itemId = getStudyItemId(item)

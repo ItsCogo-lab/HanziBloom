@@ -10,14 +10,14 @@ import { HSK_LEVELS } from '../../studySets/studySets.ts'
 import type { LeveledItem } from '../progress.ts'
 import { useProgress } from '../progressContext.ts'
 
-/** Todos los caracteres y palabras de HSK con su nivel. */
+/** All HSK characters and words with their level. */
 const leveledItems: LeveledItem[] = hskStudyItems.flatMap((item) =>
   item.entry.hskLevel === undefined ? [] : [{ itemId: getStudyItemId(item), hskLevel: item.entry.hskLevel }],
 )
 
 /**
- * El usuario indica su nivel HSK y el progreso se ajusta (ver applyHskLevel).
- * Se aplica con un botón y no al elegir: marca cientos de elementos a la vez.
+ * The user states their HSK level and progress adjusts (see applyHskLevel).
+ * It is applied with a button rather than on selection: it marks hundreds of items at once.
  */
 export function HskLevelCard() {
   const { settings, updateSettings } = useSettings()

@@ -20,7 +20,7 @@ function customSet(id: string, updatedAt: string, name = id): CustomSet {
 }
 
 describe('mergeProgress', () => {
-  it('conserva los elementos que solo están en un lado', () => {
+  it('keeps items that are only on one side', () => {
     const merged = mergeProgress(
       { items: { 'char:你': item('char:你', '2026-09-28T10:00:00.000Z') }, activity: {} },
       { items: { 'char:好': item('char:好', '2026-09-27T10:00:00.000Z') }, activity: {} },
@@ -28,20 +28,20 @@ describe('mergeProgress', () => {
     expect(Object.keys(merged.items).toSorted()).toEqual(['char:你', 'char:好'])
   })
 
-  it('de un elemento en los dos lados se queda el repasado más tarde', () => {
+  it('for an item on both sides, keeps the one reviewed later', () => {
     const older = item('char:你', '2026-09-28T10:00:00.000Z', 5)
     const newer = item('char:你', '2026-09-29T10:00:00.000Z', 2)
     expect(mergeProgress({ items: { 'char:你': older }, activity: {} }, { items: { 'char:你': newer }, activity: {} }).items['char:你']).toBe(newer)
     expect(mergeProgress({ items: { 'char:你': newer }, activity: {} }, { items: { 'char:你': older }, activity: {} }).items['char:你']).toBe(newer)
   })
 
-  it('si se repasaron a la vez, gana el visto más veces', () => {
+  it('if reviewed at the same time, the one seen more often wins', () => {
     const date = '2026-09-28T10:00:00.000Z'
     const more = item('char:你', date, 4)
     expect(mergeProgress({ items: { 'char:你': item('char:你', date, 1) }, activity: {} }, { items: { 'char:你': more }, activity: {} }).items['char:你']).toBe(more)
   })
 
-  it('de cada día se queda el registro con más respuestas, sin sumarlos', () => {
+  it('for each day, keeps the record with more answers, without adding them', () => {
     const merged = mergeProgress(
       { items: {}, activity: { '2026-09-28': { answers: 10, correct: 8 }, '2026-09-29': { answers: 2, correct: 1 } } },
       { items: {}, activity: { '2026-09-28': { answers: 4, correct: 4 }, '2026-09-27': { answers: 3, correct: 3 } } },
@@ -55,7 +55,7 @@ describe('mergeProgress', () => {
 })
 
 describe('mergeMyStudies', () => {
-  it('junta los sets sin repetirlos y guarda la última sesión más reciente', () => {
+  it('merges sets without duplicates and keeps the most recent last session', () => {
     const merged = mergeMyStudies(
       {
         sets: [{ setId: 'hsk-1', addedAt: '2026-09-28T00:00:00.000Z' }],
@@ -80,7 +80,7 @@ describe('mergeMyStudies', () => {
 })
 
 describe('mergeCustomSets', () => {
-  it('junta los sets y, si están en los dos lados, se queda el editado más tarde', () => {
+  it('merges sets and, if on both sides, keeps the one edited later', () => {
     const merged = mergeCustomSets(
       [customSet('custom-a', '2026-09-28T00:00:00.000Z', 'Old name'), customSet('custom-b', '2026-09-28T00:00:00.000Z')],
       [customSet('custom-a', '2026-09-29T00:00:00.000Z', 'New name'), customSet('custom-c', '2026-09-29T00:00:00.000Z')],

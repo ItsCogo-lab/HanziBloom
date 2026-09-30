@@ -28,10 +28,10 @@ import { t } from '../../i18n/index.ts'
 import { getEntryPath } from '../../features/dictionary/entryPaths.ts'
 import { NotFoundPage } from '../NotFoundPage.tsx'
 
-/** Elementos que se muestran de golpe en la lista; el resto, con «Show more». */
+/** Items shown at once in the list; the rest, with "Show more". */
 const PAGE_SIZE = 100
 
-/** Página de un set: progreso, acciones y su vocabulario. */
+/** Page of a set: progress, actions and its vocabulary. */
 export function SetDetailPage() {
   const { setId = '' } = useParams()
   const dictionary = useDictionary()
@@ -77,7 +77,7 @@ export function SetDetailPage() {
 
         {set.type === 'custom' ? (
           <>
-            {/* Puede tener palabras de fuera de HSK, que se cargan la primera vez */}
+            {/* It can have non-HSK words, which are loaded the first time */}
             <LoadEntries itemIds={set.itemIds}>
               <CustomItemList set={set} items={items} />
             </LoadEntries>
@@ -105,7 +105,7 @@ export function SetDetailPage() {
 
 type ItemListProps = { title: string; items: readonly StudyItem[]; progress: ProgressData }
 
-/** Lista de elementos del set; cada uno abre su ficha del diccionario. */
+/** List of the set's items; each one opens its dictionary entry. */
 function ItemList({ title, items, progress }: ItemListProps) {
   const [shown, setShown] = useState(PAGE_SIZE)
   const titleId = useId()

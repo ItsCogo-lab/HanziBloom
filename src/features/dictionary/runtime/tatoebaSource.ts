@@ -2,21 +2,21 @@ import type { ExampleSentence } from '../types.ts'
 import { createRateLimiter, fetchJson, SourceError, type FetchOptions } from './http.ts'
 
 /*
- * Adaptador de frases: API v1 de Tatoeba (https://api.tatoeba.org), pública y
- * sin clave. Devuelve CORS `*` y admite `sort=words` (las frases más cortas
- * primero) con 50 resultados como máximo por página (comprobado en GitHub
- * Actions). No publica límites de uso; sus condiciones prohíben saturarla,
- * así que cada navegador hace como mucho 20 peticiones por minuto y todo se
- * guarda en caché.
+ * Sentence adapter: Tatoeba API v1 (https://api.tatoeba.org), public and
+ * keyless. Returns CORS `*` and supports `sort=words` (shortest sentences
+ * first) with at most 50 results per page (verified in GitHub
+ * Actions). It doesn't publish usage limits; its terms forbid overloading it,
+ * so each browser makes at most 20 requests per minute and everything is
+ * cached.
  */
 
 export const TATOEBA_SOURCE = 'Tatoeba API v1'
 export const TATOEBA_LICENSE = 'CC BY 2.0 FR'
 const ENDPOINT = 'https://api.tatoeba.org/v1/sentences'
-/** Máximo que devuelve la API por página. */
+/** Maximum the API returns per page. */
 const PAGE_SIZE = 50
 
-/** Las mismas reglas que las frases de HSK (scripts/dataset/sources/tatoeba.ts). */
+/** The same rules as the HSK sentences (scripts/dataset/sources/tatoeba.ts). */
 export const MAX_SENTENCE_LENGTH = 16
 const HAN = /\p{Script=Han}/u
 const LATIN_OR_DIGIT = /[A-Za-z0-9Ａ-Ｚａ-ｚ０-９]/
@@ -54,8 +54,8 @@ function parseTranslation(value: unknown): ApiTranslation | undefined {
 }
 
 /**
- * Comprueba el formato de /v1/sentences. Una respuesta sin `data` es un
- * error; una frase suelta mal formada solo se descarta.
+ * Checks the /v1/sentences format. A response without `data` is an
+ * error; a single malformed sentence is just dropped.
  */
 export function parseSentencesResponse(json: unknown): ApiSentence[] {
   if (!isObject(json) || !Array.isArray(json.data)) throw new SourceError('invalid', 'Tatoeba response without data')
@@ -63,7 +63,7 @@ export function parseSentencesResponse(json: unknown): ApiSentence[] {
     if (!isObject(value) || value.lang !== 'cmn') return []
     const sentence = parseTranslation({ ...value, lang: undefined })
     if (!sentence) return []
-    // showtrans devuelve una lista plana de traducciones
+    // showtrans returns a flat list of translations
     const translations = (Array.isArray(value.translations) ? value.translations.flat() : [])
       .map(parseTranslation)
       .filter((translation) => translation !== undefined)
@@ -72,13 +72,13 @@ export function parseSentencesResponse(json: unknown): ApiSentence[] {
 }
 
 /**
- * Pasa las frases de la API al modelo de la app. Solo quedan las que se pueden
- * atribuir y mostrar bien: con autor, aprobadas, con licencia CC BY 2.0 FR,
- * cortas, sin letras latinas ni cifras, que contienen el término tal cual
- * (Tatoeba también devuelve frases en tradicional) y con traducción inglesa
- * directa: las indirectas (traducción de una traducción) pueden no
- * corresponder a la frase china. Como traducción, la de id más bajo (la misma
- * regla que en HSK, que solo usa enlaces directos).
+ * Converts the API sentences to the app model. Only those that can be
+ * attributed and displayed properly remain: with an author, approved, licensed CC BY 2.0 FR,
+ * short, without Latin letters or digits, containing the term as is
+ * (Tatoeba also returns sentences in traditional) and with a direct English
+ * translation: indirect ones (a translation of a translation) may not
+ * match the Chinese sentence. As the translation, the one with the lowest id (the same
+ * rule as in HSK, which only uses direct links).
  */
 export function toExampleSentences(term: string, sentences: readonly ApiSentence[]): ExampleSentence[] {
   const usable = (sentence: Omit<ApiTranslation, 'isDirect'>) =>
@@ -107,7 +107,7 @@ export function toExampleSentences(term: string, sentences: readonly ApiSentence
   })
 }
 
-/** URL de búsqueda: el término va entre comillas para buscarlo como frase exacta. */
+/** Search URL: the term goes in quotes to search for it as an exact phrase. */
 export function tatoebaSearchUrl(term: string): string {
   const params = new URLSearchParams({
     lang: 'cmn',
@@ -120,9 +120,9 @@ export function tatoebaSearchUrl(term: string): string {
   return `${ENDPOINT}?${params}`
 }
 
-/** Frases candidatas para un hanzi o una palabra, de más corta a más larga. */
+/** Candidate sentences for a hanzi or word, from shortest to longest. */
 export async function fetchTatoebaExamples(term: string, options: FetchOptions = {}) {
-  // Solo términos chinos cortos: nunca texto libre del usuario sin límite
+  // Only short Chinese terms: never unbounded free text from the user
   if (!HAN.test(term) || Array.from(term).length > 12) throw new SourceError('invalid', 'Not a Chinese term')
   const json = await limiter.schedule(() => fetchJson(tatoebaSearchUrl(term), options))
   return {

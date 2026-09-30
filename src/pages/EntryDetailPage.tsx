@@ -18,8 +18,8 @@ import { getEntryPath } from '../features/dictionary/entryPaths.ts'
 import { NotFoundPage } from './NotFoundPage.tsx'
 
 /**
- * Ficha de un carácter (/characters/好) o de una palabra (/vocabulary/你好).
- * Si no es de HSK 1-4, primero se carga su trozo del diccionario completo.
+ * Entry page for a character (/characters/好) or a word (/vocabulary/你好).
+ * If it is not from HSK 1-4, its chunk of the full dictionary is loaded first.
  */
 export function EntryDetailPage({ kind }: { kind: StudyItem['kind'] }) {
   const { id = '' } = useParams()
@@ -34,7 +34,7 @@ export function EntryDetailPage({ kind }: { kind: StudyItem['kind'] }) {
 function Entry({ itemId }: { itemId: StudyItemId }) {
   const dictionary = useDictionary()
   const { progress } = useProgress()
-  // Abierta desde un set propio (?set=custom-...): muestra también las notas del usuario en ese set
+  // Opened from a custom set (?set=custom-...): also shows the user's notes in that set
   const [searchParams] = useSearchParams()
   const customSet = useCustomSet(searchParams.get('set') ?? undefined)
   const item = getStudyItem(dictionary, itemId)
@@ -70,7 +70,7 @@ function Entry({ itemId }: { itemId: StudyItemId }) {
   )
 }
 
-/** Los sets en los que está el elemento (puede estar en varios: 苹果 en HSK 1 y en «Food & drink»). */
+/** The sets the item is in (it can be in several: 苹果 in HSK 1 and in "Food & drink"). */
 function StudySetsOfItem({ item }: { item: StudyItem }) {
   const studySets = useStudySets()
   const sets = getSetsWithItem(studySets, getStudyItemId(item))

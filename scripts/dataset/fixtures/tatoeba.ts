@@ -1,10 +1,10 @@
 /*
- * Frases reales de Tatoeba (CC BY 2.0 FR) en el formato de las exportaciones
- * por idioma, para los tests. Los ids y textos son los de Tatoeba; los
- * autores de las frases chinas se comprobaron en tatoeba.org. Las
- * traducciones inglesas se dejan sin autor ("\N") porque no se pudo
- * comprobar el suyo desde este entorno. Las frases 999999999 y 999999998 son
- * inventadas (ese id no existe) solo para probar el filtro de frases huérfanas.
+ * Real Tatoeba sentences (CC BY 2.0 FR) in the per-language export format,
+ * for the tests. The ids and texts are Tatoeba's; the authors of the
+ * Chinese sentences were checked on tatoeba.org. The English
+ * translations are left without an author ("\N") because theirs could not
+ * be checked from this environment. Sentences 999999999 and 999999998 are
+ * made up (that id does not exist) only to test the orphaned-sentence filter.
  */
 export const cmnSentencesFixture = [
   '8934441\tcmn\t柠檬很酸。\tiiujik\t\\N\t\\N',

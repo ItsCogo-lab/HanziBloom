@@ -3,9 +3,9 @@ import type { StudySet } from '../studySets/types.ts'
 import type { CustomSet, CustomSetDetails } from './types.ts'
 
 /**
- * Operaciones sobre los sets del usuario. Son funciones puras: reciben la
- * lista y devuelven una nueva, sin modificar la anterior. El Provider las usa
- * con useState y los tests las prueban sin React.
+ * Operations on the user's sets. They are pure functions: they take the
+ * list and return a new one, without modifying the previous one. The Provider
+ * uses them with useState and the tests exercise them without React.
  */
 
 export const MAX_NAME_LENGTH = 60
@@ -14,7 +14,7 @@ export const MAX_MEANING_LENGTH = 200
 
 export type DetailsProblem = 'emptyName' | 'nameTooLong' | 'descriptionTooLong'
 
-/** Nombre y descripción ya limpios, o el problema que tienen. */
+/** Name and description, already cleaned up, or the problem with them. */
 export function validateDetails(details: CustomSetDetails): { details: CustomSetDetails } | { problem: DetailsProblem } {
   const name = details.name.trim()
   const description = details.description.trim()
@@ -24,7 +24,7 @@ export function validateDetails(details: CustomSetDetails): { details: CustomSet
   return { details: { name, description } }
 }
 
-/** Un id que no se repite: "custom-" + UUID. */
+/** A unique id: "custom-" + UUID. */
 export function createCustomSetId(): string {
   return `custom-${crypto.randomUUID()}`
 }
@@ -34,7 +34,7 @@ export function createCustomSet(details: CustomSetDetails, id: string, now: Date
   return { id, ...details, itemIds: [], meanings: {}, sentences: [], createdAt: date, updatedAt: date }
 }
 
-/** Aplica `change` al set con ese id y actualiza su fecha. Los demás no cambian. */
+/** Applies `change` to the set with that id and updates its date. The others do not change. */
 export function updateCustomSet(
   sets: readonly CustomSet[],
   id: string,
@@ -48,14 +48,14 @@ export function deleteCustomSet(sets: readonly CustomSet[], id: string): CustomS
   return sets.filter((set) => set.id !== id)
 }
 
-/** Añade un elemento al final. Si ya estaba, el set no cambia (no hay repetidos). */
+/** Adds an item at the end. If it was already there, the set does not change (no duplicates). */
 export function addItem(set: CustomSet, itemId: StudyItemId): CustomSet {
   return set.itemIds.includes(itemId) ? set : { ...set, itemIds: [...set.itemIds, itemId] }
 }
 
 /**
- * Quita un elemento del set, con sus notas en este set. El elemento sigue en
- * el diccionario y su progreso no se toca.
+ * Removes an item from the set, along with its notes in this set. The item
+ * stays in the dictionary and its progress is left untouched.
  */
 export function removeItem(set: CustomSet, itemId: StudyItemId): CustomSet {
   return {
@@ -67,7 +67,7 @@ export function removeItem(set: CustomSet, itemId: StudyItemId): CustomSet {
 
 export type MeaningProblem = 'emptyMeaning' | 'meaningTooLong'
 
-/** El significado propio ya limpio, o el problema que tiene. */
+/** The custom meaning, already cleaned up, or the problem with it. */
 export function validateMeaning(meaning: string): { meaning: string } | { problem: MeaningProblem } {
   const trimmed = meaning.trim()
   if (trimmed === '') return { problem: 'emptyMeaning' }
@@ -75,7 +75,7 @@ export function validateMeaning(meaning: string): { meaning: string } | { proble
   return { meaning: trimmed }
 }
 
-/** Guarda el significado propio de un elemento del set (ya validado). */
+/** Saves the custom meaning of a set item (already validated). */
 export function setMeaning(set: CustomSet, itemId: StudyItemId, meaning: string): CustomSet {
   if (!set.itemIds.includes(itemId)) return set
   return { ...set, meanings: { ...set.meanings, [itemId]: meaning } }
@@ -89,9 +89,9 @@ export function deleteMeaning(set: CustomSet, itemId: StudyItemId): CustomSet {
 }
 
 /**
- * El StudySet que usa el resto de la app (tarjetas, progreso, Learn, Study).
- * Guarda todos los ids: las entradas de fuera de HSK se cargan al abrir el
- * set, y getSetItems ignora un id que ya no exista en el diccionario.
+ * The StudySet used by the rest of the app (cards, progress, Learn, Study).
+ * It keeps all the ids: non-HSK entries are loaded when the set is opened,
+ * and getSetItems ignores an id that no longer exists in the dictionary.
  */
 export function toStudySet(set: CustomSet): StudySet {
   return {

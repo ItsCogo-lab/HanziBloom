@@ -11,7 +11,7 @@ import { useCustomSet, useCustomSets } from '../customSetsContext.ts'
 import { CustomItemNotes } from './CustomItemNotes.tsx'
 import { getCustomEntryPath } from '../customPaths.ts'
 
-/** Vocabulario de un set propio: cada elemento con su progreso, su ficha y el botón para quitarlo. */
+/** Vocabulary of a custom set: each item with its progress, its entry page and the button to remove it. */
 export function CustomItemList({ set, items }: { set: StudySet; items: readonly StudyItem[] }) {
   const { progress } = useProgress()
   const { removeItem } = useCustomSets()

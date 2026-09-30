@@ -101,7 +101,7 @@ function SettingsSection({ title, children }: { title: string; children: ReactNo
   )
 }
 
-/** Botón de opción con aspecto de selector segmentado (el input real queda oculto pero accesible). */
+/** Radio button styled as a segmented control (the real input stays hidden but accessible). */
 const SEGMENTED_OPTION_CLASSES =
   'cursor-pointer rounded-xl border-2 border-line px-5 py-2 font-medium has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent'
 
@@ -169,7 +169,7 @@ type ToggleSettingProps = {
   hint: string
 }
 
-/** Un ajuste de sí o no, con una casilla nativa (accesible con teclado y lector de pantalla). */
+/** A yes/no setting, with a native checkbox (accessible with keyboard and screen reader). */
 function ToggleSetting({ setting, label, hint }: ToggleSettingProps) {
   const { settings, updateSettings } = useSettings()
   return (
@@ -188,7 +188,7 @@ function ToggleSetting({ setting, label, hint }: ToggleSettingProps) {
   )
 }
 
-/** Borrar el progreso pide confirmación en dos pasos, porque no se puede deshacer. */
+/** Resetting progress asks for confirmation in two steps, because it cannot be undone. */
 function ResetProgress() {
   const { resetProgress } = useProgress()
   const [step, setStep] = useState<'idle' | 'confirming' | 'done'>('idle')
@@ -205,7 +205,7 @@ function ResetProgress() {
         <div className="flex flex-col gap-3 rounded-xl border border-danger/40 bg-danger/5 p-4">
           <p>{t('settings.resetConfirm')}</p>
           <div className="flex flex-wrap gap-3">
-            {/* El foco va a «Cancel»: pulsar Enter sin mirar no debe borrar nada */}
+            {/* Focus goes to "Cancel": pressing Enter without looking must not delete anything */}
             <Button ref={cancelRef} variant="secondary" onClick={() => setStep('idle')}>
               {t('common.cancel')}
             </Button>

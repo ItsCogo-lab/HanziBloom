@@ -25,8 +25,8 @@ function getStudyTabs() {
   return screen.getByRole('navigation', { name: 'Study sections' })
 }
 
-describe('Study: sets HSK y por temas', () => {
-  it('la pestaña HSK lista los niveles 1-4 con su tamaño', () => {
+describe('Study: HSK and topic sets', () => {
+  it('the HSK tab lists levels 1-4 with their size', () => {
     renderAt('/study/hsk')
 
     for (const [level, words, characters] of [
@@ -40,14 +40,14 @@ describe('Study: sets HSK y por temas', () => {
     }
   })
 
-  it('la pestaña Topics lista todos los temas definidos', () => {
+  it('the Topics tab lists all defined topics', () => {
     renderAt('/study/topics')
 
     expect(screen.getAllByRole('article')).toHaveLength(topicDefinitions.length)
     expect(screen.getByRole('heading', { name: 'Food & drink' })).toBeInTheDocument()
   })
 
-  it('añadir un set lo muestra en My Studies y quitarlo lo saca, sin perder progreso', async () => {
+  it('adding a set shows it in My Studies and removing it takes it out, without losing progress', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderAt('/study/hsk', storage)
@@ -58,7 +58,7 @@ describe('Study: sets HSK y por temas', () => {
 
     await user.click(within(getStudyTabs()).getByRole('link', { name: 'My Studies' }))
     expect(screen.getByRole('link', { name: 'HSK 2' })).toBeInTheDocument()
-    // Sin nada aprendido solo se puede aprender: Study no aparece
+    // With nothing learned you can only learn: Study does not appear
     expect(screen.getByRole('link', { name: 'Learn HSK 2' })).toHaveAttribute('href', '/study/practice?set=hsk-2&mode=learn')
     expect(screen.queryByRole('link', { name: 'Study HSK 2' })).not.toBeInTheDocument()
 
@@ -67,9 +67,9 @@ describe('Study: sets HSK y por temas', () => {
     expect(loadMyStudies(storage).sets).toEqual([])
   })
 
-  it('un mismo elemento cuenta en todos los sets que lo contienen', () => {
+  it('the same item counts in every set that contains it', () => {
     const storage = memoryStorage()
-    // 苹果 está en HSK 1 y en Food & drink: dominarlo una vez cuenta en los dos
+    // 苹果 is in HSK 1 and in Food & drink: mastering it once counts in both
     let progress = createEmptyProgress()
     for (let day = 1; day <= 6; day++) {
       progress = recordAnswer(progress, 'word:苹果', true, new Date(2026, 0, day * 10))
@@ -81,8 +81,8 @@ describe('Study: sets HSK y por temas', () => {
   })
 })
 
-describe('Página de un set', () => {
-  it('muestra el progreso, el vocabulario enlazado al diccionario y el botón de empezar', () => {
+describe('Set page', () => {
+  it('shows the progress, the vocabulary linked to the dictionary and the start button', () => {
     renderAt('/study/sets/topic-food')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Food & drink' })).toBeInTheDocument()
@@ -95,12 +95,12 @@ describe('Página de un set', () => {
     expect(screen.getByText(/· 0 of 51 mastered$/)).toBeInTheDocument()
   })
 
-  it('las acciones Learn y Study cuentan con el progreso real', () => {
+  it('the Learn and Study actions count using real progress', () => {
     const storage = memoryStorage()
     const now = new Date()
     let progress = createEmptyProgress()
-    progress = introduceItem(progress, 'word:苹果', now) // aprendido: toca repasar hoy
-    progress = recordAnswer(progress, 'word:米饭', true, now) // aprendido: al día
+    progress = introduceItem(progress, 'word:苹果', now) // learned: due for review today
+    progress = recordAnswer(progress, 'word:米饭', true, now) // learned: up to date
     saveProgress(progress, storage)
     renderAt('/study/sets/topic-food', storage)
 
@@ -114,7 +114,7 @@ describe('Página de un set', () => {
     )
   })
 
-  it('sin nada aprendido, Study lo dice y ofrece empezar a aprender', () => {
+  it('with nothing learned, Study says so and offers to start learning', () => {
     renderAt('/study/sets/topic-colors')
 
     const study = screen.getByRole('heading', { name: 'Study' }).closest('section')!
@@ -125,7 +125,7 @@ describe('Página de un set', () => {
     )
   })
 
-  it('con todo aprendido y al día, Learn está al día y Study ofrece repasar igualmente', () => {
+  it('with everything learned and up to date, Learn is up to date and Study offers to review anyway', () => {
     const storage = memoryStorage()
     const colors = topicDefinitions.find((topic) => topic.id === 'colors')!
     const progress = colors.words.reduce(
@@ -144,7 +144,7 @@ describe('Página de un set', () => {
     )
   })
 
-  it('un set que no existe muestra la página de no encontrado', () => {
+  it('a nonexistent set shows the not found page', () => {
     renderAt('/study/sets/topic-nope')
     expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()
   })

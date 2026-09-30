@@ -4,37 +4,37 @@ import { isChineseCharacter } from './sentences.ts'
 import type { SentenceToken } from './types.ts'
 
 /**
- * Pinyin de las frases del usuario con pinyin-pro (MIT), un motor
- * determinista: la misma frase da siempre el mismo resultado. Tiene un
- * diccionario de palabras, así que un carácter con varias lecturas se lee
- * según la palabra en la que está (银行 yínháng, 行长 hángzhǎng).
+ * Pinyin for the user's sentences with pinyin-pro (MIT), a deterministic
+ * engine: the same sentence always gives the same result. It has a word
+ * dictionary, so a character with several readings is read according to
+ * the word it is in (银行 yínháng, 行长 hángzhǎng).
  *
- * Aplica los cambios de tono de 一 y 不 (一个 yí gè, 不对 bú duì), porque es
- * lo que se pronuncia. La versión está fijada en package.json para que el
- * pinyin generado no cambie solo.
+ * It applies the tone sandhi of 一 and 不 (一个 yí gè, 不对 bú duì), because
+ * that is what is pronounced. The version is pinned in package.json so the
+ * generated pinyin does not change on its own.
  *
- * El motor no conoce los tonos neutros de muchas palabras (朋友 péng yǒu):
- * donde el dataset HSK lee esa misma sílaba en tono neutro (朋友 péng you),
- * se usa la del dataset.
+ * The engine does not know the neutral tones of many words (朋友 péng yǒu):
+ * where the HSK dataset reads that same syllable in neutral tone (朋友 péng you),
+ * the dataset's one is used.
  *
- * Nunca se adivina. Un carácter con varias lecturas solo se da por seguro
- * si el motor lo lee dentro de una de sus palabras (行长), o si su lectura
- * coincide con la del dataset HSK (CC-CEDICT) en ese punto de la frase: la
- * palabra del dataset que empieza ahí (中文 zhōng wén) o el carácter como
- * palabra suelta (的 de). Si no, se marca como dudoso, sin color, y el
- * usuario elige entre las lecturas posibles.
+ * It never guesses. A character with several readings is only considered
+ * certain if the engine reads it inside one of its words (行长), or if its
+ * reading matches the HSK dataset (CC-CEDICT) at that point of the sentence:
+ * the dataset word starting there (中文 zhōng wén) or the character as a
+ * standalone word (的 de). Otherwise it is marked as uncertain, without
+ * color, and the user picks among the possible readings.
  */
 
-/** Para cada carácter de la frase, su lectura según el dataset si la hay (ver sentenceProcessing.ts). */
+/** For each character of the sentence, its dataset reading if there is one (see sentenceProcessing.ts). */
 export type DatasetReadings = (chinese: string) => readonly (string | undefined)[]
 
 export function annotateSentence(chinese: string, datasetReadings: DatasetReadings): SentenceToken[] {
   const characters = Array.from(chinese)
   const readings = pinyin(chinese, { type: 'array' })
-  // Sin cambios de tono de 一/不: la lectura de diccionario, para compararla con el dataset
+  // Without the 一/不 tone sandhi: the dictionary reading, to compare it with the dataset
   const citations = pinyin(chinese, { type: 'array', toneSandhi: false })
   if (readings.length !== characters.length || citations.length !== characters.length) {
-    throw new Error('pinyin-pro no ha devuelto una sílaba por carácter')
+    throw new Error('pinyin-pro did not return one syllable per character')
   }
   const inWord = getCharactersInWords(chinese)
   const fromDataset = datasetReadings(chinese)
@@ -43,7 +43,7 @@ export function annotateSentence(chinese: string, datasetReadings: DatasetReadin
   characters.forEach((character, index) => {
     const last = tokens.at(-1)
     if (!isChineseCharacter(character)) {
-      // Puntuación, espacios y letras: tal cual, sin pinyin ni tono
+      // Punctuation, spaces and letters: as is, without pinyin or tone
       if (last && !isChineseCharacter(last.text)) last.text += character
       else tokens.push({ text: character })
       return
@@ -64,7 +64,7 @@ export function annotateSentence(chinese: string, datasetReadings: DatasetReadin
   return tokens
 }
 
-/** La sílaba del dataset si es la misma que la del motor pero en tono neutro; si no, la del motor. */
+/** The dataset syllable if it is the engine's one but in neutral tone; otherwise the engine's. */
 function neutralFromDataset(reading: string, datasetReading: string | undefined): string {
   if (datasetReading === undefined || getSyllableTone(datasetReading) !== 5) return reading
   return withoutToneMarks(datasetReading) === withoutToneMarks(reading) ? datasetReading : reading
@@ -74,13 +74,13 @@ function withoutToneMarks(syllable: string): string {
   return syllable.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
-/** Todas las lecturas de un carácter según el motor, sin repetidos. */
+/** All readings of a character according to the engine, without duplicates. */
 function getReadings(character: string): string[] {
   const [readings = ''] = polyphonic(character)
   return [...new Set(readings.split(' ').filter((reading) => getSyllableTone(reading) !== undefined))]
 }
 
-/** Para cada carácter de la frase: ¿está dentro de una palabra de varias sílabas del diccionario del motor? */
+/** For each character of the sentence: is it inside a multi-syllable word of the engine's dictionary? */
 function getCharactersInWords(chinese: string): boolean[] {
   const result: boolean[] = []
   for (const { origin } of segment(chinese, { format: OutputFormat.AllSegment })) {

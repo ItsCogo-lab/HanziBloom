@@ -23,7 +23,7 @@ function renderSearch(initial = '') {
 }
 
 describe('isLongEnough', () => {
-  it('basta un hanzi; en pinyin o inglés hacen falta dos letras', () => {
+  it('one hanzi is enough; pinyin or English need two letters', () => {
     expect(isLongEnough('果')).toBe(true)
     expect(isLongEnough('a')).toBe(false)
     expect(isLongEnough(' a ')).toBe(false)
@@ -40,7 +40,7 @@ describe('useDictionarySearch', () => {
     vi.restoreAllMocks()
   })
 
-  it('no busca hasta que se deja de escribir y solo busca lo último', async () => {
+  it('does not search until typing stops and only searches the latest input', async () => {
     const spy = vi.spyOn(search, 'searchItems')
     const { result, rerender } = renderSearch()
     for (const query of ['a', 'ap', 'app', 'appl', 'apple']) rerender({ query })
@@ -49,12 +49,12 @@ describe('useDictionarySearch', () => {
 
     await act(() => vi.advanceTimersByTimeAsync(SEARCH_DEBOUNCE_MS))
     expect(result.current.status).toBe('ready')
-    // Las búsquedas intermedias se cancelan: solo se busca «apple» (una vez con HSK, otra con todo)
+    // Intermediate searches are cancelled: only "apple" is searched (once with HSK, once with everything)
     expect(new Set(spy.mock.calls.map(([, query]) => query))).toEqual(new Set(['apple']))
     expect(result.current.results[0]!.entry.hanzi).toBe('苹果')
   })
 
-  it('con menos texto del mínimo no busca y lo dice', async () => {
+  it('with less than the minimum text it does not search and says so', async () => {
     const spy = vi.spyOn(search, 'searchItems')
     const { result } = renderSearch('a')
     await act(() => vi.advanceTimersByTimeAsync(SEARCH_DEBOUNCE_MS))
@@ -62,7 +62,7 @@ describe('useDictionarySearch', () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
-  it('mantiene el orden: lo exacto primero y HSK antes que el resto', async () => {
+  it('keeps the order: exact first and HSK before the rest', async () => {
     const { result } = renderSearch('企鹅')
     await act(() => vi.advanceTimersByTimeAsync(SEARCH_DEBOUNCE_MS))
     expect(result.current.dictionary).toBe('complete')
@@ -71,7 +71,7 @@ describe('useDictionarySearch', () => {
 })
 
 describe('cachedSearch', () => {
-  it('repetir una búsqueda reciente no vuelve a recorrer el diccionario', () => {
+  it('repeating a recent search does not walk the dictionary again', () => {
     const spy = vi.spyOn(search, 'searchItems')
     const first = cachedSearch(hskStudyItems, 'Hao ', 10)
     const second = cachedSearch(hskStudyItems, 'hao', 10)

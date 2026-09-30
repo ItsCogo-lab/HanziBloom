@@ -1,10 +1,10 @@
 import type { CacheEntry, DictionaryCache } from './dictionaryCache.ts'
 import { SourceError } from './http.ts'
 
-/** Lo que devuelve un adaptador: los datos ya normalizados y de dónde salen. */
+/** What an adapter returns: the already normalized data and where it comes from. */
 export interface Fetched<T> {
   data: T
-  /** Fuente y versión, p. ej. "hanzi-writer-data@2.0.1 (jsDelivr)". */
+  /** Source and version, e.g. "hanzi-writer-data@2.0.1 (jsDelivr)". */
   source: string
 }
 
@@ -12,19 +12,19 @@ export interface Resource<T> {
   data: T
   source: string
   fetchedAt: number
-  /** Viene de la caché y ya pasó su tiempo de vida: se está pidiendo de nuevo. */
+  /** Comes from the cache and its lifetime has passed: it's being requested again. */
   stale: boolean
 }
 
 export interface LoadOptions<T> {
-  /** Clave de caché, p. ej. "strokes:柠". */
+  /** Cache key, e.g. "strokes:柠". */
   key: string
-  /** Tiempo que un dato guardado se considera al día. */
+  /** How long stored data is considered up to date. */
   ttlMs: number
-  /** Pide el dato a la fuente (a través de su adaptador). */
+  /** Requests the data from the source (through its adapter). */
   fetch: (signal: AbortSignal | undefined) => Promise<Fetched<T>>
   signal?: AbortSignal
-  /** Se llama si, después de devolver un dato caducado, llega uno nuevo. */
+  /** Called if, after returning expired data, new data arrives. */
   onUpdate?: (resource: Resource<T>) => void
 }
 
@@ -33,16 +33,16 @@ export interface ResourceService {
 }
 
 /**
- * Carga datos de las fuentes externas con caché «stale-while-revalidate»:
+ * Loads data from external sources with a "stale-while-revalidate" cache:
  *
- * 1. En caché y al día: se devuelve sin llamar a nadie.
- * 2. En caché pero caducado: se devuelve al momento y se pide de nuevo en
- *    segundo plano; si llega, se guarda y se avisa con `onUpdate`. Si la
- *    fuente falla, se sigue usando lo guardado.
- * 3. Sin caché: se pide a la fuente, se guarda y se devuelve. Si falla, el
- *    error llega a quien lo pidió, que decide qué enseñar (nunca se inventa).
+ * 1. Cached and up to date: returned without calling anyone.
+ * 2. Cached but expired: returned right away and requested again in the
+ *    background; if it arrives, it's stored and reported via `onUpdate`. If the
+ *    source fails, the stored data keeps being used.
+ * 3. Not cached: requested from the source, stored and returned. If it fails, the
+ *    error reaches the caller, who decides what to show (nothing is ever made up).
  *
- * Dos peticiones de la misma clave a la vez comparten una sola descarga.
+ * Two simultaneous requests for the same key share a single download.
  */
 export function createResourceService(cache: DictionaryCache, now: () => number = Date.now): ResourceService {
   const inFlight = new Map<string, Promise<CacheEntry>>()
@@ -76,10 +76,10 @@ export function createResourceService(cache: DictionaryCache, now: () => number 
       if (cached) {
         const stale = now() - cached.fetchedAt > ttlMs
         if (stale) {
-          // En segundo plano, sin la señal de quien pidió: el dato nuevo sirve a la siguiente vez
+          // In the background, without the caller's signal: the new data serves the next time
           download(key, fetch, undefined).then(
             (fresh) => onUpdate?.(toResource(fresh, false)),
-            () => {}, // Sin conexión: se sigue con lo guardado
+            () => {}, // Offline: carry on with the stored data
           )
         }
         return toResource(cached, stale)

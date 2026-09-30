@@ -12,14 +12,14 @@ import { renderWithProviders } from '../test/renderWithProviders.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
 
 describe('ProfilePage', () => {
-  it('sin datos invita a elegir un set', () => {
+  it('with no data invites the user to pick a set', () => {
     renderWithProviders(<ProfilePage />)
 
     expect(screen.getByRole('link', { name: 'Browse HSK levels' })).toBeInTheDocument()
     expect(screen.getByText('No study sessions with a set yet.')).toBeInTheDocument()
   })
 
-  it('resume el progreso guardado, los sets que se estudian y los recientes', () => {
+  it('summarizes saved progress, the sets being studied and the recent ones', () => {
     const storage = memoryStorage()
     const now = new Date()
     let progress = createEmptyProgress()
@@ -42,7 +42,7 @@ describe('ProfilePage', () => {
     expect(within(recent).getAllByRole('link').map((link) => link.textContent)).toEqual(['Food & drink'])
   })
 
-  it('guardar el nivel HSK marca ese vocabulario como dominado y lo de dos niveles menos como básico', async () => {
+  it('saving the HSK level marks that vocabulary as mastered and two levels below as basic', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     renderWithProviders(<ProfilePage />, { storage })

@@ -9,8 +9,8 @@ import { hsk4Characters } from './hsk4/characters.ts'
 import { hsk4Words } from './hsk4/words.ts'
 
 /*
- * Punto de entrada de los datos (HSK 2.0, niveles 1 a 4). Cada nivel tiene
- * sus archivos generados; el resto de la app solo usa estas dos listas.
+ * Entry point for the data (HSK 2.0, levels 1 to 4). Each level has its own
+ * generated files; the rest of the app only uses these two lists.
  */
 
 export const allCharacters: readonly Character[] = [

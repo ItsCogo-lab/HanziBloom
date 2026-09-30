@@ -3,7 +3,7 @@ import { memoryStorage } from '../../test/memoryStorage.ts'
 import { observeStorage } from './observeStorage.ts'
 
 describe('observeStorage', () => {
-  it('avisa solo cuando el valor guardado cambia', () => {
+  it('notifies only when the stored value changes', () => {
     const onChange = vi.fn()
     const storage = observeStorage(memoryStorage({ a: '1' }), onChange)
 

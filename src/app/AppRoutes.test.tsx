@@ -23,13 +23,13 @@ function getMainNavigation() {
 }
 
 describe('AppRoutes', () => {
-  it.each(NAVIGATION_ITEMS)('la ruta $path muestra su página', ({ path, labelKey }) => {
+  it.each(NAVIGATION_ITEMS)('route $path shows its page', ({ path, labelKey }) => {
     renderAt(path)
 
     expect(screen.getByRole('heading', { level: 1, name: t(labelKey) })).toBeInTheDocument()
   })
 
-  it('navega a otra sección al pulsar un enlace y lo marca como actual', async () => {
+  it('navigates to another section when a link is clicked and marks it as current', async () => {
     const user = userEvent.setup()
     renderAt('/')
 
@@ -45,7 +45,7 @@ describe('AppRoutes', () => {
     )
   })
 
-  it('el botón «Start session» del inicio lleva a la práctica', async () => {
+  it('the home "Start session" button leads to practice', async () => {
     const user = userEvent.setup()
     renderAt('/')
 
@@ -54,7 +54,7 @@ describe('AppRoutes', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument()
   })
 
-  it('muestra una página de error en rutas desconocidas', () => {
+  it('shows an error page on unknown routes', () => {
     renderAt('/no-existe')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()

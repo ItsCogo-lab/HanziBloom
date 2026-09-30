@@ -13,12 +13,12 @@ async function errorOf(promise: Promise<unknown>): Promise<SourceError> {
 }
 
 describe('fetchJson', () => {
-  it('devuelve el JSON de una respuesta correcta', async () => {
+  it('returns the JSON of a successful response', async () => {
     const { fetch } = createFakeFetch([['https://a.test/', jsonResponse({ ok: 1 })]])
     await expect(fetchJson('https://a.test/x', { fetchFn: fetch })).resolves.toEqual({ ok: 1 })
   })
 
-  it('clasifica los errores HTTP, los 429 y las respuestas que no son JSON', async () => {
+  it('classifies HTTP errors, 429s and non-JSON responses', async () => {
     const { fetch } = createFakeFetch([
       ['https://a.test/404', new Response('', { status: 404 })],
       ['https://a.test/429', new Response('', { status: 429, headers: { 'Retry-After': '30' } })],
@@ -36,7 +36,7 @@ describe('fetchJson', () => {
     expect(html.kind).toBe('invalid')
   })
 
-  it('distingue sin conexión, tiempo agotado y cancelado', async () => {
+  it('tells offline, timed out and cancelled apart', async () => {
     const offline = await errorOf(fetchJson('https://a.test/', { fetchFn: createFakeFetch().fetch }))
     expect(offline.kind).toBe('network')
 
@@ -58,7 +58,7 @@ describe('fetchJson', () => {
 })
 
 describe('createRateLimiter', () => {
-  it('no deja pasar más peticiones por minuto de las permitidas', async () => {
+  it('does not allow more requests per minute than permitted', async () => {
     let time = 0
     const limiter = createRateLimiter(2, () => time)
     const task = async () => 'ok'
@@ -69,7 +69,7 @@ describe('createRateLimiter', () => {
     await expect(limiter.schedule(task)).resolves.toBe('ok')
   })
 
-  it('después de un 429 espera lo que pide la fuente antes de volver a llamar', async () => {
+  it('after a 429 waits as long as the source asks before calling again', async () => {
     let time = 0
     let calls = 0
     const limiter = createRateLimiter(100, () => time)

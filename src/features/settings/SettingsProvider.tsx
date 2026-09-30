@@ -9,7 +9,7 @@ type SettingsProviderProps = {
   storage?: KeyValueStorage
 }
 
-/** Igual que ProgressProvider: carga los ajustes al arrancar y los guarda en cada cambio. */
+/** Same as ProgressProvider: loads settings at startup and saves them on every change. */
 export function SettingsProvider({ children, storage }: SettingsProviderProps) {
   const [settings, setSettings] = useState(() => loadSettings(storage))
   const prefersDark = useSyncExternalStore(subscribeToSystemTheme, systemPrefersDark)
@@ -19,8 +19,8 @@ export function SettingsProvider({ children, storage }: SettingsProviderProps) {
     saveSettings(settings, storage)
   }, [settings, storage])
 
-  // De layout y no normal: así el tema ya está puesto cuando los efectos de los
-  // hijos (como el orden de trazos) leen los colores de la página
+  // A layout effect rather than a normal one: that way the theme is already set
+  // when the children's effects (like stroke order) read the page colors
   useLayoutEffect(() => {
     applyTheme(theme)
   }, [theme])

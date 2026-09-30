@@ -4,7 +4,7 @@ import { listSetsOfType } from '../../features/studySets/studySets.ts'
 import { useStudySets } from '../../features/studySets/useStudySets.ts'
 import { t } from '../../i18n/index.ts'
 
-/** Pestaña «My sets»: los sets que ha creado el usuario. */
+/** "My sets" tab: the sets the user has created. */
 export function CustomSetListPage() {
   const sets = listSetsOfType(useStudySets(), 'custom')
   return (

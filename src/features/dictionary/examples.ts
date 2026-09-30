@@ -1,13 +1,13 @@
 import type { StudyItem } from './studyItem.ts'
 import type { ExampleSentence, ExampleSet, HskLevel } from './types.ts'
 
-/** Frases de ejemplo que se muestran como máximo en una ficha. */
+/** Maximum number of example sentences shown on an entry page. */
 export const MAX_EXAMPLES_SHOWN = 3
 
 /**
- * Carga las frases de ejemplo de un nivel (public/examples/hsk1.json, que
- * genera `npm run data:build` a partir de Tatoeba). Se piden al abrir una
- * ficha para no cargar todas las frases al arrancar la app.
+ * Loads a level's example sentences (public/examples/hsk1.json, generated
+ * by `npm run data:build` from Tatoeba). They're requested when an entry page
+ * opens so all sentences aren't loaded at app startup.
  */
 export async function loadExampleSet(level: HskLevel, fetchFn: typeof fetch = fetch): Promise<ExampleSet> {
   const response = await fetchFn(`${import.meta.env.BASE_URL}examples/hsk${level}.json`)
@@ -16,8 +16,8 @@ export async function loadExampleSet(level: HskLevel, fetchFn: typeof fetch = fe
 }
 
 /**
- * Frases de una ficha: las elegidas para esa palabra o, en un carácter, las
- * de las palabras que lo contienen.
+ * Sentences for an entry page: the ones chosen for that word or, for a
+ * character, those of the words that contain it.
  */
 export function getExamplesFor(set: ExampleSet, item: StudyItem): ExampleSentence[] {
   const matches =
@@ -27,7 +27,7 @@ export function getExamplesFor(set: ExampleSet, item: StudyItem): ExampleSentenc
   return set.sentences.filter((sentence) => matches(sentence.words)).slice(0, MAX_EXAMPLES_SHOWN)
 }
 
-/** Página de una frase en Tatoeba, para atribuirla. */
+/** A sentence's page on Tatoeba, for attribution. */
 export function tatoebaSentenceUrl(id: number): string {
   return `https://tatoeba.org/en/sentences/show/${id}`
 }

@@ -9,7 +9,7 @@ import { LookUpButtons } from './LookUpButtons.tsx'
 import { PinyinText } from '../../dictionary/components/PinyinText.tsx'
 import { ToneHanzi } from '../../dictionary/components/ToneHanzi.tsx'
 
-/** Máximo de elementos relacionados que se muestran (un carácter puede estar en muchas palabras). */
+/** Maximum number of related items shown (a character can appear in many words). */
 const MAX_RELATED_ITEMS = 4
 
 type FlashcardProps = {
@@ -24,8 +24,8 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
   const answerRef = useRef<HTMLDivElement>(null)
   const { item } = exercise
 
-  // Al revelar, el botón «Show answer» desaparece: movemos el foco a la
-  // respuesta para que el teclado y el lector de pantalla sigan en su sitio.
+  // On reveal, the "Show answer" button disappears: we move focus to the
+  // answer so the keyboard and screen reader stay in place.
   useEffect(() => {
     if (isRevealed) answerRef.current?.focus()
   }, [isRevealed])
@@ -35,7 +35,7 @@ export function Flashcard({ exercise, dictionary, onAnswer, onLookUp }: Flashcar
       <p className="text-sm font-medium tracking-wide text-ink-muted uppercase">
         {t(item.kind === 'character' ? 'practice.kind.character' : 'practice.kind.word')}
       </p>
-      {/* Los colores de tono dan pistas de la pronunciación: solo tras mostrar la respuesta */}
+      {/* Tone colors give away the pronunciation: only after showing the answer */}
       <ToneHanzi entry={item.entry} showTones={isRevealed} className="text-7xl leading-tight sm:text-8xl" />
 
       {isRevealed ? (

@@ -15,11 +15,11 @@ const valid = {
 }
 
 describe('parseStrokeData', () => {
-  it('acepta el formato de hanzi-writer-data', () => {
+  it('accepts the hanzi-writer-data format', () => {
     expect(parseStrokeData(valid)).toEqual(valid)
   })
 
-  it('rechaza respuestas mal formadas', () => {
+  it('rejects malformed responses', () => {
     for (const malformed of [
       null,
       'M 1 2',
@@ -37,7 +37,7 @@ describe('parseStrokeData', () => {
 })
 
 describe('fetchStrokeData', () => {
-  it('pide el carácter a la versión fijada de hanzi-writer-data', async () => {
+  it('requests the character from the pinned hanzi-writer-data version', async () => {
     const fake = createFakeFetch([[/hanzi-writer-data@2\.0\.1\//, jsonResponse(valid)]])
     const result = await fetchStrokeData('柠', { fetchFn: fake.fetch })
     expect(result).toEqual({ data: valid, source: STROKE_SOURCE })
@@ -46,13 +46,13 @@ describe('fetchStrokeData', () => {
     ])
   })
 
-  it('no construye URLs con texto que no sea un solo carácter', async () => {
+  it('does not build URLs with text that is not a single character', async () => {
     const fake = createFakeFetch([[/./, jsonResponse(valid)]])
     await expect(fetchStrokeData('../x', { fetchFn: fake.fetch })).rejects.toMatchObject({ kind: 'invalid' })
     expect(fake.requested).toEqual([])
   })
 
-  it('un 404 llega como error HTTP (el carácter no tiene trazos)', async () => {
+  it('a 404 arrives as an HTTP error (the character has no strokes)', async () => {
     const fake = createFakeFetch([[/./, new Response('', { status: 404 })]])
     await expect(fetchStrokeData('柠', { fetchFn: fake.fetch })).rejects.toMatchObject({ kind: 'http', status: 404 })
   })

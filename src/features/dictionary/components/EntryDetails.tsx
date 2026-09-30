@@ -14,23 +14,23 @@ import { EntryLink, type EntryOpener } from './EntryLink.tsx'
 import { ExampleSentences } from './ExampleSentences.tsx'
 import { StrokeOrder } from './StrokeOrder.tsx'
 
-/** Palabras relacionadas que se muestran de golpe; el resto, con «Show more». */
+/** Related words shown at once; the rest, with "Show more". */
 const RELATED_PAGE_SIZE = 20
 
 type EntryDetailsProps = {
   item: StudyItem
   dictionary: Dictionary
-  /** Qué hacer al pulsar un elemento relacionado: ir a su página o abrirlo aquí mismo. */
+  /** What to do when a related item is pressed: go to its page or open it right here. */
   opener: EntryOpener
 }
 
 /**
- * Ficha de un carácter o una palabra. Solo muestra las secciones de las que
- * hay datos: si una fuente no tiene un dato, la sección no aparece.
+ * Entry page for a character or a word. Only shows sections that have
+ * data: if a source lacks some data, the section doesn't appear.
  */
 export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
   const related = getRelatedItems(dictionary, item)
-  // Con el diccionario completo, un carácter como 一 aparece en miles de palabras: se muestran por tandas
+  // With the full dictionary, a character like 一 appears in thousands of words: they're shown in batches
   const itemId = getStudyItemId(item)
   const [shown, setShown] = useState({ itemId, count: RELATED_PAGE_SIZE })
   const relatedCount = shown.itemId === itemId ? shown.count : RELATED_PAGE_SIZE
@@ -67,7 +67,7 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
       {item.kind === 'character' && (
         <>
           <CharacterFacts character={item.entry} dictionary={dictionary} opener={opener} />
-          {/* public/strokes/ solo tiene los de HSK 1-4: los demás dependen de jsDelivr (docs/DATA_SOURCES.md) */}
+          {/* public/strokes/ only has HSK 1-4 ones: the rest depend on jsDelivr (docs/DATA_SOURCES.md) */}
           <StrokeOrder hanzi={item.entry.hanzi} hasLocalCopy={item.entry.hskLevel !== undefined} />
         </>
       )}
@@ -117,7 +117,7 @@ export function EntryDetails({ item, dictionary, opener }: EntryDetailsProps) {
   )
 }
 
-/** Una palabra relacionada: hanzi, tradicional, pinyin, significado y nivel. */
+/** A related word: hanzi, traditional, pinyin, meaning and level. */
 function RelatedWord({ item, opener }: { item: StudyItem; opener: EntryOpener }) {
   const traditional = getTraditionalForms(item.entry)
   return (
@@ -129,7 +129,7 @@ function RelatedWord({ item, opener }: { item: StudyItem; opener: EntryOpener })
         </HanziText>
       )}
       <PinyinText pinyin={formatPinyin(item.entry)} className="text-accent-strong" />
-      {/* Con poco sitio, el significado baja a su propia línea en vez de salirse */}
+      {/* With little room, the meaning drops to its own line instead of overflowing */}
       <span className="min-w-32 flex-1 break-words text-ink-muted">{getMeanings(item.entry.meanings)[0]}</span>
       {item.entry.hskLevel !== undefined && (
         <span className="text-sm text-ink-muted">{t('dictionary.hskLevelValue', { level: item.entry.hskLevel })}</span>

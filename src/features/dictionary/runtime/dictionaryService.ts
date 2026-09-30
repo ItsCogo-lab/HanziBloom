@@ -13,22 +13,22 @@ import { fetchStrokeData, parseStrokeData, STROKE_DATA_VERSION } from './strokeS
 import { fetchTatoebaExamples, TATOEBA_LICENSE } from './tatoebaSource.ts'
 
 /**
- * Servicio del diccionario en tiempo de ejecución: lo único que usan los
- * componentes para pedir datos externos. Decide de dónde sale cada dato, en
- * este orden:
+ * Runtime dictionary service: the only thing components use to request
+ * external data. Decides where each piece of data comes from, in
+ * this order:
  *
- * 1. Caché (IndexedDB) al día.
- * 2. Caché caducada (se renueva en segundo plano).
- * 3. La API de la fuente.
- * 4. Los datos locales de HSK 1-4 (public/strokes/, public/examples/).
- * 5. «No disponible»: la ficha lo dice y no inventa nada.
+ * 1. Up-to-date cache (IndexedDB).
+ * 2. Expired cache (refreshed in the background).
+ * 3. The source's API.
+ * 4. The local HSK 1-4 data (public/strokes/, public/examples/).
+ * 5. "Unavailable": the entry page says so and makes nothing up.
  */
 
-/** Los trazos de una versión de hanzi-writer-data no cambian nunca. */
+/** The strokes of a hanzi-writer-data version never change. */
 export const STROKE_TTL_MS = 365 * 24 * 60 * 60 * 1000
-/** Las frases de Tatoeba se corrigen y se añaden: una semana. */
+/** Tatoeba sentences get corrected and added: one week. */
 export const EXAMPLES_TTL_MS = 7 * 24 * 60 * 60 * 1000
-/** Cada cuánto se mira si hay una versión nueva del diccionario completo. */
+/** How often to check for a new version of the full dictionary. */
 export const MANIFEST_TTL_MS = 24 * 60 * 60 * 1000
 
 export interface RuntimeSources {
@@ -39,18 +39,18 @@ export interface RuntimeSources {
 
 export type Availability<T> =
   | { status: 'ready'; data: T; source: string; stale: boolean }
-  /** La fuente no tiene este dato (p. ej., un carácter sin trazos): no se muestra la sección. */
+  /** The source doesn't have this data (e.g. a character without strokes): the section isn't shown. */
   | { status: 'missing' }
-  /** No se ha podido consultar (sin conexión, límite de peticiones): la ficha lo dice. */
+  /** Couldn't be fetched (offline, rate limit): the entry page says so. */
   | { status: 'unavailable' }
 
 export interface LoadOptions<T> {
   signal?: AbortSignal
-  /** Llega un dato más nuevo después de haber devuelto uno caducado. */
+  /** Newer data arrives after an expired one was returned. */
   onUpdate?: (result: Availability<T>) => void
 }
 
-/** Si la fuente dice que no tiene el dato, frente a que no se ha podido preguntar. */
+/** Whether the source says it doesn't have the data, as opposed to not being able to ask. */
 function isMissing(error: unknown): boolean {
   return error instanceof SourceError && (error.kind === 'invalid' || (error.kind === 'http' && error.status === 404))
 }
@@ -60,8 +60,8 @@ function rethrowAbort(error: unknown) {
 }
 
 /**
- * Trazos de un carácter: hanzi-writer-data desde jsDelivr y, si no se puede,
- * la copia local de public/strokes/ (solo caracteres de HSK 1-4).
+ * A character's strokes: hanzi-writer-data from jsDelivr and, if that fails,
+ * the local copy in public/strokes/ (HSK 1-4 characters only).
  */
 export async function loadStrokes(
   sources: RuntimeSources,
@@ -112,9 +112,9 @@ export interface Examples {
 let knownCharacters: Set<string> | undefined
 
 /**
- * Elige las frases que se muestran: primero las que solo usan caracteres de
- * HSK 1-4 (o del propio término), que el alumno puede leer enteras; después,
- * las más cortas. La API ya las da de más corta a más larga.
+ * Picks the sentences to show: first those that only use HSK 1-4 characters
+ * (or those of the term itself), which the learner can read in full; then,
+ * the shortest. The API already returns them from shortest to longest.
  */
 export function pickExamples(term: string, candidates: readonly ExampleSentence[]): ExampleSentence[] {
   knownCharacters ??= new Set([...hskDictionary.characters.values()].map((character) => character.hanzi))
@@ -133,8 +133,8 @@ export function pickExamples(term: string, candidates: readonly ExampleSentence[
 }
 
 /**
- * Frases de ejemplo de un carácter o una palabra: Tatoeba en tiempo de
- * ejecución y, si no se puede o no hay, las frases locales de su nivel HSK.
+ * Example sentences for a character or word: Tatoeba at runtime and, if
+ * that fails or there are none, the local sentences for its HSK level.
  */
 export async function loadExamples(
   sources: RuntimeSources,
@@ -192,26 +192,26 @@ export async function loadExamples(
         }
       }
     } catch {
-      // Sin copia local: queda lo que dijo la fuente remota
+      // No local copy: keep what the remote source said
     }
   }
   return remote
 }
 
-/** Un trozo guardado, con la versión de los datos de la que salió. */
+/** A stored chunk, with the data version it came from. */
 interface CachedChunk {
   version: string
   chunk: DictionaryChunk
 }
 
 /**
- * Un trozo del diccionario completo (repositorio de datos en jsDelivr). La
- * versión actual sale del manifiesto (con su propia caché de un día); cada
- * trozo se guarda con su versión y se vuelve a pedir solo cuando cambia. Así
- * la caché nunca mezcla versiones ni acumula las antiguas.
+ * A chunk of the full dictionary (data repository on jsDelivr). The
+ * current version comes from the manifest (with its own one-day cache); each
+ * chunk is stored with its version and requested again only when it changes. That way
+ * the cache never mixes versions or piles up old ones.
  *
- * Sin conexión: un trozo guardado se usa aunque sea de una versión anterior.
- * Si no hay nada guardado, falla y la búsqueda se queda en HSK 1-4, diciéndolo.
+ * Offline: a stored chunk is used even if it's from an older version.
+ * If nothing is stored, it fails and search stays on HSK 1-4, saying so.
  */
 export async function loadDictionaryChunk(
   sources: RuntimeSources,

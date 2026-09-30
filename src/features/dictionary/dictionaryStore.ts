@@ -5,32 +5,32 @@ import { getStudyItem, listStudyItems, type StudyItem, type StudyItemId } from '
 export type LoadChunk = (index: number) => Promise<DictionaryChunk>
 
 /**
- * El diccionario que usa la interfaz: HSK 1-4 (en el bundle) más los trozos
- * del diccionario completo que ya se han cargado. Empieza solo con HSK y
- * crece a medida que se piden trozos; nunca descarga uno dos veces.
+ * The dictionary the UI uses: HSK 1-4 (in the bundle) plus the chunks of
+ * the full dictionary that have already loaded. Starts with just HSK and
+ * grows as chunks are requested; never downloads one twice.
  *
- * Sigue el contrato de useSyncExternalStore: `getSnapshot` devuelve el mismo
- * objeto mientras no cambie nada, y uno nuevo cuando llega un trozo.
+ * Follows the useSyncExternalStore contract: `getSnapshot` returns the same
+ * object while nothing changes, and a new one when a chunk arrives.
  */
 export interface DictionaryStore {
   subscribe: (listener: () => void) => () => void
   getSnapshot: () => Dictionary
-  /** Los elementos de HSK 1-4, que están siempre. */
+  /** The HSK 1-4 items, which are always there. */
   baseItems: readonly StudyItem[]
-  /** Todos los elementos cargados, calculados una vez por versión del diccionario. */
+  /** All loaded items, computed once per dictionary version. */
   getItems: () => readonly StudyItem[]
-  /** Si ya se pueden mostrar todos estos elementos. */
+  /** Whether all these items can be shown yet. */
   hasItems: (itemIds: readonly StudyItemId[]) => boolean
-  /** Si ya están cargados todos los trozos. */
+  /** Whether all chunks have been loaded. */
   isComplete: () => boolean
-  /** Carga lo necesario para mostrar estos elementos (los de HSK ya están). */
+  /** Loads what's needed to show these items (HSK ones are already there). */
   loadItems: (itemIds: readonly StudyItemId[]) => Promise<void>
-  /** Carga todo el diccionario, para buscar en él. */
+  /** Loads the whole dictionary, to search in it. */
   loadAll: () => Promise<void>
 }
 
 export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): DictionaryStore {
-  // Copias: el diccionario HSK del bundle no se toca
+  // Copies: the bundled HSK dictionary is left untouched
   const characters = new Map(base.characters)
   const words = new Map(base.words)
   let snapshot: Dictionary = { characters, words }
@@ -52,7 +52,7 @@ export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): D
           for (const listener of listeners) listener()
         },
         (error: unknown) => {
-          // Se puede volver a intentar más tarde
+          // Can be retried later
           requests.delete(index)
           throw error
         },
@@ -73,7 +73,7 @@ export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): D
     },
     getSnapshot: () => snapshot,
     baseItems,
-    // HSK primero y luego los trozos en orden, llegue antes el que llegue: los resultados no cambian de orden
+    // HSK first, then the chunks in order, whichever arrives first: results don't change order
     getItems: () => {
       if (items?.for !== snapshot) {
         const chunks = [...loaded].sort(([a], [b]) => a - b).map(([, chunk]) => chunk)
@@ -90,7 +90,7 @@ export function createDictionaryStore(base: Dictionary, loadChunk: LoadChunk): D
     },
     hasItems: (itemIds) => itemIds.every((itemId) => getStudyItem(snapshot, itemId) !== undefined),
     isComplete: () => loaded.size === CHUNK_COUNT,
-    // Lo de HSK no necesita nada; de lo demás, su trozo y los de sus caracteres
+    // HSK items need nothing; for the rest, their chunk and those of their characters
     loadItems: (itemIds) =>
       loadChunks(itemIds.filter((itemId) => !getStudyItem(base, itemId)).flatMap(getChunksFor)),
     loadAll: () => loadChunks(Array.from({ length: CHUNK_COUNT }, (_, index) => index)),

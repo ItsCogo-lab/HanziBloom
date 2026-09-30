@@ -10,9 +10,9 @@ import { useRuntimeData } from '../runtime/runtimeSourcesContext.ts'
 const SIZE = 180
 
 /**
- * Orden de trazos con Hanzi Writer. Los trazos (a través del servicio del
- * diccionario) y la librería se cargan solo al abrir la ficha. Si la fuente no
- * tiene el carácter, no se muestra nada; si no se ha podido consultar, se dice.
+ * Stroke order with Hanzi Writer. The strokes (through the dictionary
+ * service) and the library load only when the entry page opens. If the source
+ * doesn't have the character, nothing is shown; if it couldn't be fetched, it says so.
  */
 export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCopy: boolean }) {
   const strokes = useRuntimeData<StrokeData>(`${hanzi}|${hasLocalCopy}`, (sources, options) =>
@@ -21,7 +21,7 @@ export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCo
   const data = strokes.status === 'ready' ? strokes.data : undefined
   const targetRef = useRef<HTMLDivElement>(null)
   const writerRef = useRef<HanziWriter>(null)
-  // Al cambiar de tema se vuelve a crear el dibujo con los nuevos colores
+  // Changing theme recreates the drawing with the new colors
   const { theme } = useSettings()
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCo
     import('hanzi-writer').then(
       ({ default: Writer }) => {
         if (cancelled) return
-        // Hanzi Writer pinta con colores fijos: tomamos los del tema de la página
+        // Hanzi Writer draws with fixed colors: we take the page theme's ones
         const color = getComputedStyle(target).color
         const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
         writerRef.current = Writer.create(target, hanzi, {
@@ -40,7 +40,7 @@ export function StrokeOrder({ hanzi, hasLocalCopy }: { hanzi: string; hasLocalCo
           padding: 8,
           strokeColor: color,
           radicalColor: token('--color-accent') || color,
-          // El contorno gris claro por defecto brillaría demasiado en el tema oscuro
+          // The default light gray outline would be too bright in the dark theme
           outlineColor: token('--color-line') || '#dddddd',
           charDataLoader: () => data,
         })

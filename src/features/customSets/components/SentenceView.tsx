@@ -6,16 +6,16 @@ import { countUncertain } from '../sentences.ts'
 import type { CustomSentence, SentenceToken } from '../types.ts'
 
 /**
- * Una frase del usuario: el chino coloreado por tonos (el mismo sistema que
- * el resto de la app) y el pinyin siempre debajo, así el color nunca es la
- * única pista. La puntuación no lleva color, y un carácter dudoso tampoco:
- * se marca con «?».
+ * A user sentence: the Chinese colored by tone (the same system as the rest
+ * of the app) and the pinyin always below, so color is never the only cue.
+ * Punctuation has no color, and neither does an uncertain character: it is
+ * marked with "?".
  */
 export function SentenceView({ sentence }: { sentence: CustomSentence }) {
   return <AnnotatedSentence tokens={sentence.tokens} />
 }
 
-/** Una frase ya pasada por el motor de pinyin; también la usan las frases de ejemplo del diccionario. */
+/** A sentence already run through the pinyin engine; also used by the dictionary's example sentences. */
 export function AnnotatedSentence({ tokens }: { tokens: readonly SentenceToken[] }) {
   const { toneColors, toneNumbers } = useSettings().settings
   const uncertain = countUncertain(tokens)
@@ -47,10 +47,10 @@ export function AnnotatedSentence({ tokens }: { tokens: readonly SentenceToken[]
   )
 }
 
-/** La sílaba de un carácter (con «?» si es dudosa) o la puntuación tal cual, pegada a lo anterior. */
+/** The syllable of a character (with "?" if uncertain) or punctuation as is, attached to what comes before. */
 function PinyinPart({ token, first }: { token: SentenceToken; first: boolean }) {
   if (token.pinyin === undefined && !token.uncertain) {
-    // Texto que no es chino: se mantiene, sin los espacios de alrededor
+    // Non-Chinese text: kept, without the surrounding spaces
     return <>{token.text.trim() === '' ? ' ' : token.text.trim()}</>
   }
   const space = first ? '' : ' '

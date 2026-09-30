@@ -1,6 +1,6 @@
 import { t } from '../../../i18n/index.ts'
 
-/** Los dos pasos de Safari, con los mismos iconos que ve la persona en el iPhone. */
+/** The two Safari steps, with the same icons the person sees on the iPhone. */
 export function IosInstallSteps() {
   return (
     <ol className="flex flex-col gap-2 text-sm">
@@ -18,7 +18,7 @@ export function IosInstallSteps() {
 
 const iconClasses = 'size-7 shrink-0 rounded-lg bg-paper p-1 text-accent-strong'
 
-/** Icono «Compartir» de Safari: un cuadrado con una flecha hacia arriba. */
+/** Safari's "Share" icon: a square with an upward arrow. */
 function ShareIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={iconClasses}>
@@ -28,7 +28,7 @@ function ShareIcon() {
   )
 }
 
-/** Icono «Añadir a pantalla de inicio»: un cuadrado con un +. */
+/** "Add to Home Screen" icon: a square with a +. */
 function AddIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={iconClasses}>

@@ -5,8 +5,8 @@ import { isReviewDue, MAX_MASTERY_LEVEL, scheduleFirstReview, scheduleKnownItem,
 import type { ItemProgress, ProgressData } from './types.ts'
 
 /**
- * Nivel a partir del cual un elemento se considera dominado: su siguiente
- * repaso está a 14 días o más.
+ * Level from which an item counts as mastered: its next review is 14 or
+ * more days away.
  */
 export const MASTERED_LEVEL = 4
 
@@ -17,13 +17,13 @@ export function createEmptyProgress(): ProgressData {
 }
 
 /**
- * Registra una respuesta: actualiza los contadores del elemento, programa su
- * siguiente repaso y suma la respuesta a la actividad del día. Devuelve un
- * objeto nuevo sin modificar el anterior (así React detecta el cambio).
+ * Records an answer: updates the item's counters, schedules its next review
+ * and adds the answer to the day's activity. Returns a new object without
+ * modifying the previous one (so React detects the change).
  */
 export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correct: boolean, now: Date): ProgressData {
   const previous = progress.items[itemId]
-  // Sin las marcas `basic` ni `fromLevel`: lo respondido ya es progreso propio
+  // Without the `basic` or `fromLevel` flags: answered items are the user's own progress
   const item: ItemProgress = {
     itemId,
     timesSeen: (previous?.timesSeen ?? 0) + 1,
@@ -46,51 +46,51 @@ export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correc
 }
 
 /**
- * Marca un elemento como aprendido en una sesión Learn: le crea su registro
- * en la repetición espaciada (nivel 0, primer repaso hoy). No cuenta como
- * respuesta, así que no cambia la actividad ni la racha. Si el elemento ya
- * tenía registro, no se toca.
+ * Marks an item as learned in a Learn session: creates its spaced repetition
+ * record (level 0, first review today). It doesn't count as an answer, so it
+ * doesn't change activity or the streak. If the item already had a record,
+ * it is left alone.
  */
 export function introduceItem(progress: ProgressData, itemId: StudyItemId, now: Date): ProgressData {
   return addItem(progress, itemId, now, scheduleFirstReview(now))
 }
 
 /**
- * Como introduceItem, pero para un elemento que el usuario ya domina: entra
- * directamente como dominado y su primer repaso llega dentro de mucho (ver
- * scheduleKnownItem). Sigue saliendo en Study, pero muy de vez en cuando.
+ * Like introduceItem, but for an item the user already knows: it goes
+ * straight in as mastered and its first review is a long way off (see
+ * scheduleKnownItem). It still comes up in Study, but only very occasionally.
  */
 export function markItemKnown(progress: ProgressData, itemId: StudyItemId, now: Date): ProgressData {
   return addItem(progress, itemId, now, scheduleKnownItem(now))
 }
 
-/** Un elemento de HSK con su nivel, para aplicar el nivel del usuario. */
+/** An HSK item with its level, for applying the user's level. */
 export interface LeveledItem {
   itemId: StudyItemId
   hskLevel: HskLevel
 }
 
 /**
- * Niveles por debajo del del usuario a partir de los cuales el vocabulario es
- * básico: con HSK 3, lo de HSK 1 ya no hace falta repasarlo.
+ * How many levels below the user's own vocabulary becomes basic: with HSK 3,
+ * HSK 1 no longer needs reviewing.
  */
 export const BASIC_LEVEL_GAP = 2
 
-/** Días entre los que se reparten los primeros repasos al marcar un nivel entero. */
+/** Number of days the first reviews are spread over when marking a whole level. */
 const LEVEL_SPREAD_DAYS = 30
 
 /**
- * Aplica el nivel HSK que el usuario dice tener (`null` si no indica ninguno):
+ * Applies the HSK level the user says they have (`null` if they give none):
  *
- * - Hasta su nivel, lo que aún no tenía registro entra como dominado (ver
- *   markItemKnown), con los primeros repasos repartidos en 30 días más.
- * - Lo que está BASIC_LEVEL_GAP niveles o más por debajo es básico: dominado
- *   y sin repasos, aunque ya se estuviera estudiando.
- * - Al bajar de nivel, lo que quedó por encima y solo se había marcado por el
- *   nivel (`fromLevel`, nunca respondido) vuelve a ser nuevo. Lo que era
- *   básico y ya se estudiaba vuelve a repasarse de vez en cuando como dominado.
+ * - Up to their level, items with no record yet go in as mastered (see
+ *   markItemKnown), with the first reviews spread over 30 more days.
+ * - Items BASIC_LEVEL_GAP or more levels below are basic: mastered and
+ *   never reviewed, even if they were already being studied.
+ * - When lowering the level, items left above it that were only marked by the
+ *   level (`fromLevel`, never answered) become new again. Items that were
+ *   basic and already being studied are reviewed now and then again as mastered.
  *
- * Lo demás no se toca. Como las demás funciones, devuelve un objeto nuevo.
+ * Everything else is left alone. Like the other functions, returns a new object.
  */
 export function applyHskLevel(
   progress: ProgressData,
@@ -123,7 +123,7 @@ export function applyHskLevel(
   return { ...progress, items: updated }
 }
 
-/** Registro sin respuestas; quien lo usa le pone su propia programación. */
+/** Record with no answers; callers apply their own schedule. */
 function newItem(itemId: StudyItemId, now: Date): ItemProgress {
   return { itemId, timesSeen: 0, timesCorrect: 0, timesWrong: 0, lastReviewedAt: now.toISOString(), ...scheduleKnownItem(now) }
 }
@@ -134,9 +134,9 @@ function addItem(progress: ProgressData, itemId: StudyItemId, now: Date, schedul
 }
 
 /**
- * Un elemento está aprendido si ya tiene registro en la repetición espaciada:
- * se marcó en Learn o ya se respondió alguna vez. Es lo mismo que decir que
- * su estado no es 'new' (ver getItemStatus).
+ * An item is learned if it already has a spaced repetition record: it was
+ * marked in Learn or has been answered at least once. This is the same as
+ * saying its state is not 'new' (see getItemStatus).
  */
 export function isLearned(progress: ProgressData, itemId: StudyItemId): boolean {
   return progress.items[itemId] !== undefined
@@ -147,7 +147,7 @@ export function getItemStatus(item: ItemProgress | undefined): ItemStatus {
   return item.masteryLevel >= MASTERED_LEVEL ? 'mastered' : 'learning'
 }
 
-/** ¿Toca repasar este elemento? Los nuevos y los básicos no cuentan como repaso pendiente. */
+/** Is this item due for review? New and basic items don't count as due. */
 export function isDue(item: ItemProgress | undefined, now: Date): boolean {
   return item !== undefined && !item.basic && isReviewDue(item.nextReviewAt, now)
 }
