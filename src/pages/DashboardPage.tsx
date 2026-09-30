@@ -4,10 +4,10 @@ import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { ProgressBar } from '../components/ui/ProgressBar.tsx'
 import { StatCard } from '../components/ui/StatCard.tsx'
-import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { hskCharacterItems, hskWordItems } from '../features/dictionary/hskDictionary.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
-import { summarizeItems, type ItemsSummary } from '../features/progress/stats.ts'
+import { summarizeCharacters, summarizeItems, type ItemsSummary } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
 import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { getSetPath } from '../features/studySets/setPaths.ts'
@@ -16,9 +16,6 @@ import { SetProgressBar } from '../features/studySets/components/SetProgressBar.
 import { getSetProgress } from '../features/studySets/setProgress.ts'
 import { getStudySet } from '../features/studySets/studySets.ts'
 import { t, type MessageKey } from '../i18n/index.ts'
-
-const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
-const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
 /** My Studies sets shown on Home; the rest, in Study. */
 const MAX_SETS_ON_HOME = 3
@@ -36,7 +33,7 @@ export function DashboardPage() {
   const { myStudies } = useMyStudies()
   const studySets = useStudySets()
   const now = new Date()
-  const summary = summarizeItems(hskStudyItems, progress, now)
+  const summary = summarizeItems(hskWordItems, progress, now)
   const studyingSets = myStudies.sets
     .map(({ setId }) => getStudySet(studySets, setId))
     .filter((set) => set !== undefined)
@@ -108,8 +105,11 @@ export function DashboardPage() {
         <Card>
           <h2 className="mb-4 text-lg font-semibold">{t('dashboard.hskProgress')}</h2>
           <div className="flex flex-col gap-3 sm:gap-5">
-            <KindProgress label={t('dashboard.characters')} summary={summarizeItems(characterItems, progress, now)} />
-            <KindProgress label={t('dashboard.words')} summary={summarizeItems(wordItems, progress, now)} />
+            <KindProgress
+              label={t('dashboard.characters')}
+              summary={summarizeCharacters(hskCharacterItems, hskWordItems, progress, now)}
+            />
+            <KindProgress label={t('dashboard.words')} summary={summarizeItems(hskWordItems, progress, now)} />
           </div>
         </Card>
       </div>

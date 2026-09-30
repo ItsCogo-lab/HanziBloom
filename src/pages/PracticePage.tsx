@@ -8,7 +8,7 @@ import { CustomNotesView } from '../features/customSets/components/CustomNotesVi
 import { useCustomSet } from '../features/customSets/customSetsContext.ts'
 import { LoadEntries } from '../features/dictionary/components/LoadEntries.tsx'
 import { useDictionary } from '../features/dictionary/dictionaryContext.ts'
-import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { hskStudyItems, hskWordItems } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItem, getStudyItemId, type StudyItem, type StudyItemId } from '../features/dictionary/studyItem.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { LearnSession } from '../features/practice/components/LearnSession.tsx'
@@ -86,7 +86,7 @@ function Practice() {
   const { settings } = useSettings()
   // useState with a function: the session is created once on entering, not on every render.
   // It uses the progress at that moment; answers do not change the ongoing session.
-  const [session, setSession] = useState(() => createPracticeSession(hskStudyItems, progress, settings))
+  const [session, setSession] = useState(() => createPracticeSession(hskWordItems, progress, settings))
 
   return (
     <>
@@ -97,7 +97,7 @@ function Practice() {
         exercises={session.exercises}
         dictionary={dictionary}
         onResult={recordResult}
-        onRestart={() => setSession(createPracticeSession(hskStudyItems, progress, settings))}
+        onRestart={() => setSession(createPracticeSession(hskWordItems, progress, settings))}
       />
     </>
   )

@@ -7,3 +7,13 @@ export const hskDictionary = createDictionary(allCharacters, allWords)
 
 /** All characters and words in the dataset as study items. */
 export const hskStudyItems = listStudyItems(hskDictionary)
+
+/**
+ * What the app teaches: the dataset's words. Characters are learned through
+ * them (each word's card breaks it down, and the dictionary has every
+ * character), so they are not studied as cards of their own.
+ */
+export const hskWordItems = hskStudyItems.filter((item) => item.kind === 'word')
+
+/** The dataset's characters, for the "characters learned" statistics (see summarizeCharacters). */
+export const hskCharacterItems = hskStudyItems.filter((item) => item.kind === 'character')

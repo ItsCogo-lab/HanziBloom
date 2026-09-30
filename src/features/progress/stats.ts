@@ -20,6 +20,42 @@ export function summarizeItems(items: readonly StudyItem[], progress: ProgressDa
   return summarizeItemIds(items.map(getStudyItemId), progress, now)
 }
 
+const STATUS_RANK = { new: 0, learning: 1, mastered: 2 } as const
+
+/**
+ * How far along the characters are. Characters are learned through words, so
+ * a character counts as far as the furthest word that contains it (学 is
+ * mastered once 学习 or 学生 is). Its own card counts too, for characters
+ * added to custom sets and progress saved when HSK sets had character cards.
+ */
+export function summarizeCharacters(
+  characters: readonly StudyItem[],
+  words: readonly StudyItem[],
+  progress: ProgressData,
+  now: Date,
+): ItemsSummary {
+  const wordIdsByHanzi = new Map<string, StudyItemId[]>()
+  for (const word of words) {
+    for (const hanzi of new Set(Array.from(word.entry.hanzi))) {
+      wordIdsByHanzi.set(hanzi, [...(wordIdsByHanzi.get(hanzi) ?? []), getStudyItemId(word)])
+    }
+  }
+
+  const summary: ItemsSummary = { total: characters.length, new: 0, learning: 0, mastered: 0, studied: 0, due: 0 }
+  for (const character of characters) {
+    const ownId = getStudyItemId(character)
+    const statuses = [ownId, ...(wordIdsByHanzi.get(character.entry.hanzi) ?? [])].map((id) =>
+      getItemStatus(progress.items[id]),
+    )
+    const best = statuses.reduce((a, b) => (STATUS_RANK[b] > STATUS_RANK[a] ? b : a))
+    summary[best] += 1
+    // Only the character's own card can be due; its words have their own reviews
+    if (isDue(progress.items[ownId], now)) summary.due += 1
+  }
+  summary.studied = summary.learning + summary.mastered
+  return summary
+}
+
 /** Same as summarizeItems, from the ids (that's how study sets store them). */
 export function summarizeItemIds(itemIds: readonly StudyItemId[], progress: ProgressData, now: Date): ItemsSummary {
   const summary: ItemsSummary = { total: itemIds.length, new: 0, learning: 0, mastered: 0, studied: 0, due: 0 }

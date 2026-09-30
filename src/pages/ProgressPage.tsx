@@ -6,13 +6,14 @@ import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { StatCard } from '../components/ui/StatCard.tsx'
 import { EntryLabel } from '../features/dictionary/components/EntryLabel.tsx'
 import { useDictionary, useLoadItems } from '../features/dictionary/dictionaryContext.ts'
-import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { hskCharacterItems, hskWordItems } from '../features/dictionary/hskDictionary.ts'
 import { getStudyItem } from '../features/dictionary/studyItem.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import {
   getAnswerTotals,
   getDifficultItems,
   getRecentActivity,
+  summarizeCharacters,
   summarizeItems,
   summarizeWriting,
   type AnswerTotals,
@@ -24,9 +25,6 @@ import { fromDateKey } from '../lib/dates.ts'
 
 /** Difficult items listed; the practice button covers all of them. */
 const MAX_DIFFICULT_SHOWN = 10
-
-const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
-const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
 export function ProgressPage() {
   const { progress } = useProgress()
@@ -53,8 +51,8 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
   const recent = getRecentActivity(progress.activity, now)
   const maxAnswers = Math.max(...recent.map((day) => day.answers), 1)
   const byKind = [
-    { label: t('dashboard.characters'), summary: summarizeItems(characterItems, progress, now) },
-    { label: t('dashboard.words'), summary: summarizeItems(wordItems, progress, now) },
+    { label: t('dashboard.characters'), summary: summarizeCharacters(hskCharacterItems, hskWordItems, progress, now) },
+    { label: t('dashboard.words'), summary: summarizeItems(hskWordItems, progress, now) },
   ]
   const writing = summarizeWriting(progress)
   const dictionary = useDictionary()
