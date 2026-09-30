@@ -1,9 +1,9 @@
 /**
- * Cómo se juntan los datos de dos dispositivos cuando los dos han cambiado
- * desde la última sincronización. Son funciones puras: no leen ni guardan.
+ * How data from two devices is combined when both changed since the last
+ * sync. Pure functions: they don't read or save anything.
  *
- * La regla general es no perder nada: de cada elemento se queda la versión
- * más reciente y lo que solo está en un lado se conserva.
+ * The general rule is to lose nothing: each item keeps its most recent
+ * version, and anything that exists on only one side is kept.
  */
 import type { CustomSet } from '../customSets/types.ts'
 import type { MyStudies } from '../myStudies/myStudies.ts'
@@ -16,8 +16,8 @@ export function mergeProgress(local: ProgressData, remote: ProgressData): Progre
     items[id] = other && isNewer(other, item) ? other : item
   }
 
-  // No se pueden sumar: si un día se sincronizó a medias, las respuestas
-  // saldrían dos veces. Se queda el registro con más respuestas.
+  // They can't be added up: if a day was partly synced already, answers would
+  // be counted twice. Keep the record with more answers.
   const activity: Record<string, DailyActivity> = { ...remote.activity }
   for (const [day, value] of Object.entries(local.activity)) {
     const other = activity[day]
@@ -26,7 +26,7 @@ export function mergeProgress(local: ProgressData, remote: ProgressData): Progre
   return { items, activity }
 }
 
-/** `a` es más reciente que `b`: se repasó después o, si empatan, se ha visto más veces. */
+/** `a` is newer than `b`: reviewed later or, on a tie, seen more times. */
 function isNewer(a: ItemProgress, b: ItemProgress): boolean {
   if (a.lastReviewedAt !== b.lastReviewedAt) return a.lastReviewedAt > b.lastReviewedAt
   return a.timesSeen > b.timesSeen

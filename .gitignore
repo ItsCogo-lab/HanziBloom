@@ -69,7 +69,7 @@ web_modules/
 .env
 .env.*
 !.env.example
-# Configuración pública de Supabase (URL y clave pública, que ya van en el navegador)
+# Public Supabase config (URL and publishable key, which ship to the browser anyway)
 !.env.development
 !.env.production
 

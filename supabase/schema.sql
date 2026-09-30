@@ -1,10 +1,10 @@
--- Copia en la nube de los datos de cada usuario de HanziBloom.
--- Se ejecuta una vez en Supabase → SQL Editor.
+-- Cloud copy of each HanziBloom user's data.
+-- Run once in Supabase → SQL Editor.
 --
--- Una fila por usuario con el mismo JSON que la app guarda en localStorage
--- (progreso, sets, sets propios y ajustes). Las políticas hacen que cada
--- usuario solo pueda leer y escribir su propia fila: por eso la clave pública (publishable)
--- puede ir en el navegador.
+-- One row per user with the same JSON the app stores in localStorage
+-- (progress, study sets, custom sets and settings). The policies only let
+-- each user read and write their own row, which is why the publishable key
+-- can ship to the browser.
 
 create table if not exists public.user_data (
   user_id uuid primary key references auth.users (id) on delete cascade,
