@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { t, tCount } from '../../../i18n/index.ts'
 import { toToneNumbers } from '../../../lib/tones.ts'
 import { EntryLink, type EntryOpener } from '../../dictionary/components/EntryLink.tsx'
@@ -19,9 +20,9 @@ export function SentenceView({ sentence }: { sentence: CustomSentence }) {
 }
 
 /**
- * The sentence split into dictionary words: each word is underlined and
- * opens its entry, so you can see where words of one or more characters
- * begin and end.
+ * The sentence split into dictionary words: each word opens its entry, and
+ * its pinyin is underlined as one piece, so you can see where words of one
+ * or more characters begin and end.
  */
 export interface SentenceWords {
   words: readonly SentenceWord[]
@@ -48,9 +49,13 @@ export function AnnotatedSentence({ tokens, links }: { tokens: readonly Sentence
         )}
       </p>
       <p className="text-accent-strong">
-        {tokens.map((token, index) => (
-          <PinyinPart key={index} token={token} first={index === 0} />
-        ))}
+        {links ? (
+          <LinkedPinyin tokens={tokens} links={links} toneColors={toneColors} />
+        ) : (
+          tokens.map((token, index) => (
+            <PinyinPart key={index} token={token} first={index === 0} toneColors={toneColors} />
+          ))
+        )}
         {toneNumbers && pinyin && <span className="text-ink-muted"> ({toToneNumbers(pinyin)})</span>}
       </p>
       {uncertain > 0 && (
@@ -60,11 +65,7 @@ export function AnnotatedSentence({ tokens, links }: { tokens: readonly Sentence
   )
 }
 
-/**
- * Each dictionary word as a link with its own underline, in a neutral color
- * so the tone colors stay readable; the small margin keeps the underlines of
- * neighboring words apart.
- */
+/** Each dictionary word as a link to its entry; the tone colors stay as they are. */
 function LinkedWords({ links, tones }: { links: SentenceWords; tones: readonly (Tone | undefined)[] }) {
   let offset = 0
   return links.words.map((word, index) => {
@@ -73,14 +74,68 @@ function LinkedWords({ links, tones }: { links: SentenceWords; tones: readonly (
     const characters = <ToneCharacters text={word.text} tones={tones.slice(start)} />
     if (!word.item) return <span key={index}>{characters}</span>
     return (
-      <EntryLink
-        key={index}
-        item={word.item}
-        opener={links.opener}
-        className="mx-[0.08em] underline decoration-ink-muted/60 decoration-1 underline-offset-[0.3em] hover:decoration-accent-strong"
-      >
+      <EntryLink key={index} item={word.item} opener={links.opener} className="hover:opacity-70">
         {characters}
       </EntryLink>
+    )
+  })
+}
+
+/**
+ * The pinyin grouped by word: the syllables of each dictionary word are
+ * underlined together (in a neutral color, so the tone colors stay readable)
+ * and also open its entry. The Chinese line already has that link for
+ * keyboards and screen readers, so this one is left out of them.
+ */
+function LinkedPinyin({
+  tokens,
+  links,
+  toneColors,
+}: {
+  tokens: readonly SentenceToken[]
+  links: SentenceWords
+  toneColors: boolean
+}) {
+  // Which word each token falls in: a token never spans two words (see segmentSentence)
+  const wordEnds: number[] = []
+  let end = 0
+  for (const word of links.words) wordEnds.push((end += Array.from(word.text).length))
+  const groups: SentenceToken[][] = links.words.map(() => [])
+  let offset = 0
+  for (const token of tokens) {
+    groups[wordEnds.findIndex((wordEnd) => offset < wordEnd)]?.push(token)
+    offset += Array.from(token.text).length
+  }
+
+  let first = true
+  return groups.map((group, index) => {
+    const item = links.words[index]?.item
+    const isFirst = first
+    if (group.length > 0) first = false
+    if (!item) {
+      return group.map((token, tokenIndex) => (
+        <PinyinPart
+          key={`${index}-${tokenIndex}`}
+          token={token}
+          first={isFirst && tokenIndex === 0}
+          toneColors={toneColors}
+        />
+      ))
+    }
+    return (
+      <Fragment key={index}>
+        {isFirst ? '' : ' '}
+        <EntryLink
+          item={item}
+          opener={links.opener}
+          decorative
+          className="underline decoration-ink-muted/60 decoration-1 underline-offset-4 hover:decoration-accent-strong"
+        >
+          {group.map((token, tokenIndex) => (
+            <PinyinPart key={tokenIndex} token={token} first={tokenIndex === 0} toneColors={toneColors} />
+          ))}
+        </EntryLink>
+      </Fragment>
     )
   })
 }
@@ -99,14 +154,25 @@ function ToneCharacters({ text, tones }: { text: string; tones: readonly (Tone |
   })
 }
 
-/** The syllable of a character (with "?" if uncertain) or punctuation as is, attached to what comes before. */
-function PinyinPart({ token, first }: { token: SentenceToken; first: boolean }) {
+/**
+ * The syllable of a character (with "?" if uncertain), colored by its tone
+ * like the character, or punctuation as is, attached to what comes before.
+ */
+function PinyinPart({ token, first, toneColors }: { token: SentenceToken; first: boolean; toneColors: boolean }) {
   if (token.pinyin === undefined && !token.uncertain) {
     // Non-Chinese text: kept, without the surrounding spaces
     return <>{token.text.trim() === '' ? ' ' : token.text.trim()}</>
   }
   const space = first ? '' : ' '
-  if (!token.uncertain) return <>{`${space}${token.pinyin}`}</>
+  if (!token.uncertain) {
+    if (!toneColors || token.tone === undefined) return <>{`${space}${token.pinyin}`}</>
+    return (
+      <>
+        {space}
+        <span className={TONE_TEXT_CLASSES[token.tone]}>{token.pinyin}</span>
+      </>
+    )
+  }
   return (
     <>
       {space}

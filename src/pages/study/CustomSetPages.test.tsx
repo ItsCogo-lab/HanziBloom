@@ -11,6 +11,7 @@ import { getStudyItem } from '../../features/dictionary/studyItem.ts'
 import type { KeyValueStorage } from '../../lib/storage.ts'
 import { createChunkLoader } from '../../test/dictionaryChunks.ts'
 import { memoryStorage } from '../../test/memoryStorage.ts'
+import { paragraphWithText } from '../../test/text.ts'
 
 function renderAt(path: string, storage: KeyValueStorage = memoryStorage()) {
   render(
@@ -237,7 +238,7 @@ describe('Custom sets', () => {
     await user.click(within(getVocabulary()).getByRole('button', { name: 'Add a sentence' }))
     await user.type(screen.getByLabelText('Sentence in Chinese'), '我每天学习中文。')
     await user.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await within(getVocabulary()).findByText('wǒ měi tiān xué xí zhōng wén。')).toBeInTheDocument()
+    expect(await within(getVocabulary()).findByText(paragraphWithText('wǒ měi tiān xué xí zhōng wén。'))).toBeInTheDocument()
     const [sentence] = loadCustomSets(storage)[0]!.sentences
     expect(sentence?.tokens.map((token) => token.tone ?? '-').join('')).toBe('3312212-')
 

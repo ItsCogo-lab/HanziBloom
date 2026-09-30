@@ -7,6 +7,7 @@ import { ningCharacter, ningmengWord, testCharacters, testExampleSet, testWords 
 import { createChunkLoader } from '../../../test/dictionaryChunks.ts'
 import { createFakeFetch, jsonResponse } from '../../../test/fakeFetch.ts'
 import { ningResponse } from '../../../test/tatoebaResponses.ts'
+import { paragraphWithText } from '../../../test/text.ts'
 import { EntryDetails } from './EntryDetails.tsx'
 
 const dictionary = createDictionary([...testCharacters, ningCharacter], [...testWords, ningmengWord])
@@ -146,7 +147,13 @@ describe('EntryDetails for a character', () => {
     // The app's dictionary is HSK 1-4 plus the (empty, in tests) full dictionary: 柠檬 isn't in it
     const word = await screen.findByRole('link', { name: '很' })
     expect(word).toHaveAttribute('href', '/vocabulary/%E5%BE%88')
-    expect(word).toHaveClass('underline')
+    // Only the pinyin is underlined, word by word, colored by tone; it's a second, hidden link
+    const pinyin = screen.getByText('hěn').closest('a')!
+    expect(pinyin).toHaveAttribute('href', '/vocabulary/%E5%BE%88')
+    expect(pinyin).toHaveClass('underline')
+    expect(pinyin).toHaveAttribute('aria-hidden', 'true')
+    expect(word).not.toHaveClass('underline')
+    expect(screen.getByText('hěn')).toHaveClass('text-tone-3')
     expect(screen.queryByRole('link', { name: '柠檬' })).not.toBeInTheDocument()
   })
 
@@ -193,9 +200,9 @@ describe('EntryDetails for a character', () => {
   })
 })
 
-/** The example sentence, with the engine's pinyin underneath (the Chinese goes in one span per character). */
+/** The example sentence, with the engine's pinyin underneath (both split into spans per character, syllable or word). */
 async function expectSentenceWithPinyin(chinese: string, pinyin: string) {
-  const pinyinLine = await screen.findByText(pinyin)
+  const pinyinLine = (await screen.findAllByText(paragraphWithText(pinyin)))[0]!
   expect(pinyinLine.previousElementSibling).toHaveTextContent(chinese)
 }
 
