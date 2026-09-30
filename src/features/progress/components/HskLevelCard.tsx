@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
 import { t } from '../../../i18n/index.ts'
-import { hskStudyItems } from '../../dictionary/hskDictionary.ts'
+import { hskWordItems } from '../../dictionary/hskDictionary.ts'
 import { getStudyItemId } from '../../dictionary/studyItem.ts'
 import type { HskLevel } from '../../dictionary/types.ts'
 import { useSettings } from '../../settings/settingsContext.ts'
@@ -10,8 +10,8 @@ import { HSK_LEVELS } from '../../studySets/studySets.ts'
 import type { LeveledItem } from '../progress.ts'
 import { useProgress } from '../progressContext.ts'
 
-/** All HSK characters and words with their level. */
-const leveledItems: LeveledItem[] = hskStudyItems.flatMap((item) =>
+/** All HSK words with their level (characters are learned through them). */
+const leveledItems: LeveledItem[] = hskWordItems.flatMap((item) =>
   item.entry.hskLevel === undefined ? [] : [{ itemId: getStudyItemId(item), hskLevel: item.entry.hskLevel }],
 )
 

@@ -1,6 +1,6 @@
 import type { TopicDefinition } from '../../data/topics.ts'
 import { t, type MessageKey } from '../../i18n/index.ts'
-import { listCharacters, listWords, type Dictionary } from '../dictionary/dictionary.ts'
+import { listWords, type Dictionary } from '../dictionary/dictionary.ts'
 import { getStudyItem, type StudyItem, type StudyItemId } from '../dictionary/studyItem.ts'
 import type { HskLevel } from '../dictionary/types.ts'
 import type { StudySet, StudySetType } from './types.ts'
@@ -17,8 +17,9 @@ const HSK_DESCRIPTIONS: Record<HskLevel, MessageKey> = {
 const HSK_ICONS: Record<HskLevel, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
 
 /**
- * Set for an HSK level: its words and the characters studied for the first
- * time at that level. It is computed from the dataset, never written by hand.
+ * Set for an HSK level: its words. Characters are learned through the words
+ * that contain them, not as cards of their own (发 is studied in 发烧 and
+ * 头发). It is computed from the dataset, never written by hand.
  */
 export function createHskSet(dictionary: Dictionary, level: HskLevel): StudySet {
   return {
@@ -28,10 +29,7 @@ export function createHskSet(dictionary: Dictionary, level: HskLevel): StudySet 
     name: t('sets.hsk.name', { level }),
     description: t(HSK_DESCRIPTIONS[level]),
     icon: HSK_ICONS[level],
-    itemIds: [
-      ...listWords(dictionary, level).map((word): StudyItemId => `word:${word.id}`),
-      ...listCharacters(dictionary, level).map((character): StudyItemId => `char:${character.id}`),
-    ],
+    itemIds: listWords(dictionary, level).map((word): StudyItemId => `word:${word.id}`),
   }
 }
 

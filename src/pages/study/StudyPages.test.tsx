@@ -29,14 +29,14 @@ describe('Study: HSK and topic sets', () => {
   it('the HSK tab lists levels 1-4 with their size', () => {
     renderAt('/study/hsk')
 
-    for (const [level, words, characters] of [
-      [1, 150, 178],
-      [2, 149, 166],
-      [3, 299, 272],
-      [4, 598, 454],
+    for (const [level, words] of [
+      [1, 150],
+      [2, 149],
+      [3, 299],
+      [4, 598],
     ]) {
       const card = screen.getByRole('heading', { name: `HSK ${level}` }).closest('article')!
-      expect(within(card).getByText(`${words} words · ${characters} characters`)).toBeInTheDocument()
+      expect(within(card).getByText(`${words} words`)).toBeInTheDocument()
     }
   })
 
@@ -77,7 +77,7 @@ describe('Study: HSK and topic sets', () => {
     saveProgress(progress, storage)
 
     renderAt('/study/sets/hsk-1', storage)
-    expect(screen.getByText(/· 1 of 328 mastered$/)).toBeInTheDocument()
+    expect(screen.getByText(/· 1 of 150 mastered$/)).toBeInTheDocument()
   })
 })
 

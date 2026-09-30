@@ -107,8 +107,15 @@ A `StudySet` (`features/studySets/types.ts`) is an id, a type (`hsk`, `topic`,
 `summarizeItemIds` from the per-item progress, so an item that is in
 several sets counts in all of them without duplicating data. Mastered = SRS level ≥ 4.
 
-- HSK sets: they come from `hskN/words.ts` and `hskN/characters.ts` (the level's
-  words and the characters that debut in it). There are no hand-written lists.
+- HSK sets: the level's words, from `hskN/words.ts`. There are no hand-written
+  lists. Characters are not cards of their own: they are learned through the
+  words that contain them (发 in 发烧 and 头发), and every HSK character is in
+  at least one HSK word (a test checks it). The general Practice session uses
+  words only too.
+- Character statistics ("characters learned" on Home, Progress and Profile)
+  come from `summarizeCharacters`: a character is as far along as the furthest
+  word that contains it, or its own card (custom sets can still add single
+  characters, and older progress may have character cards).
 - Topic sets: `src/data/topics.ts`, curated by hand (criteria in
   DATA_SOURCES.md, "Topic sets"). Adding a topic is adding an object.
 - `validateStudySets` checks for duplicate ids, empty sets and items that do not

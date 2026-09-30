@@ -5,12 +5,12 @@ import { ButtonLink } from '../components/ui/ButtonLink.tsx'
 import { Card } from '../components/ui/Card.tsx'
 import { PageHeader } from '../components/ui/PageHeader.tsx'
 import { StatCard } from '../components/ui/StatCard.tsx'
-import { hskStudyItems } from '../features/dictionary/hskDictionary.ts'
+import { hskCharacterItems, hskWordItems } from '../features/dictionary/hskDictionary.ts'
 import { getRecentlyStudied } from '../features/myStudies/myStudies.ts'
 import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { HskLevelCard } from '../features/progress/components/HskLevelCard.tsx'
 import { useProgress } from '../features/progress/progressContext.ts'
-import { getAnswerTotals, summarizeItems } from '../features/progress/stats.ts'
+import { getAnswerTotals, summarizeCharacters, summarizeItems } from '../features/progress/stats.ts'
 import { getCurrentStreak } from '../features/progress/streak.ts'
 import { useStudySets } from '../features/studySets/useStudySets.ts'
 import { getSetPath } from '../features/studySets/setPaths.ts'
@@ -18,9 +18,6 @@ import { SetProgressBar } from '../features/studySets/components/SetProgressBar.
 import { getSetProgress } from '../features/studySets/setProgress.ts'
 import { getStudySet } from '../features/studySets/studySets.ts'
 import { formatDate, formatPercent, t } from '../i18n/index.ts'
-
-const characterItems = hskStudyItems.filter((item) => item.kind === 'character')
-const wordItems = hskStudyItems.filter((item) => item.kind === 'word')
 
 /**
  * Profile: a summary of what is stored in this browser and, when accounts
@@ -33,7 +30,7 @@ export function ProfilePage() {
   const { myStudies } = useMyStudies()
   const studySets = useStudySets()
   const now = new Date()
-  const overall = summarizeItems(hskStudyItems, progress, now)
+  const overall = summarizeItems(hskWordItems, progress, now)
   const studyingSets = myStudies.sets
     .map(({ setId }) => getStudySet(studySets, setId))
     .filter((set) => set !== undefined)
@@ -53,13 +50,13 @@ export function ProfilePage() {
           <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard
               label={t('profile.charactersMastered')}
-              value={summarizeItems(characterItems, progress, now).mastered}
-              detail={t('stats.studiedOf', { total: characterItems.length })}
+              value={summarizeCharacters(hskCharacterItems, hskWordItems, progress, now).mastered}
+              detail={t('stats.studiedOf', { total: hskCharacterItems.length })}
             />
             <StatCard
               label={t('profile.wordsMastered')}
-              value={summarizeItems(wordItems, progress, now).mastered}
-              detail={t('stats.studiedOf', { total: wordItems.length })}
+              value={summarizeItems(hskWordItems, progress, now).mastered}
+              detail={t('stats.studiedOf', { total: hskWordItems.length })}
             />
             <StatCard label={t('profile.reviews')} value={getAnswerTotals(progress.activity).answers} />
             <StatCard label={t('stats.streak')} value={getCurrentStreak(progress.activity, now)} />

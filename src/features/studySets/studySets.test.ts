@@ -33,32 +33,35 @@ describe('app sets', () => {
 
   /*
    * The numbers come from the dataset (docs/DATA_SOURCES.md explains why they
-   * are not exactly 150/150/300/600). Characters: the new ones at each level.
+   * are not exactly 150/150/300/600). Only words: characters are learned
+   * through them.
    */
   it.each([
-    ['hsk-1', 150, 178],
-    ['hsk-2', 149, 166],
-    ['hsk-3', 299, 272],
-    ['hsk-4', 598, 454],
-  ])('%s has %i words and %i characters', (setId, words, characters) => {
-    expect(countSetItems(getStudySet(appStudySets, setId)!)).toEqual({ words, characters })
+    ['hsk-1', 150],
+    ['hsk-2', 149],
+    ['hsk-3', 299],
+    ['hsk-4', 598],
+  ])('%s has %i words and no characters', (setId, words) => {
+    expect(countSetItems(getStudySet(appStudySets, setId)!)).toEqual({ words, characters: 0 })
   })
 
-  it('HSK sets contain exactly the words and characters of their level', () => {
+  it('HSK sets contain exactly the words of their level', () => {
     for (const level of [1, 2, 3, 4] as const) {
       const set = getStudySet(appStudySets, `hsk-${level}`)!
-      const expected = [
-        ...allWords.filter((word) => word.hskLevel === level).map((word) => `word:${word.id}`),
-        ...allCharacters.filter((character) => character.hskLevel === level).map((character) => `char:${character.id}`),
-      ]
+      const expected = allWords.filter((word) => word.hskLevel === level).map((word) => `word:${word.id}`)
       expect(set.itemIds).toEqual(expected)
     }
   })
 
-  it('together the HSK sets cover the whole dataset, without repeats', () => {
+  it('together the HSK sets cover every word, without repeats', () => {
     const ids = listSetsOfType(appStudySets, 'hsk').flatMap((set) => set.itemIds)
     expect(new Set(ids).size).toBe(ids.length)
-    expect(ids).toHaveLength(allWords.length + allCharacters.length)
+    expect(ids).toHaveLength(allWords.length)
+  })
+
+  it('every HSK character appears in at least one HSK word, so it is still learned', () => {
+    const hanzi = new Set(allWords.flatMap((word) => Array.from(word.hanzi)))
+    expect(allCharacters.filter((character) => !hanzi.has(character.hanzi)).map((c) => c.hanzi)).toEqual([])
   })
 
   it('there is one set per curated topic, with its words', () => {
@@ -102,7 +105,7 @@ describe('StudySet model', () => {
   it('creates an HSK set from the dictionary', () => {
     const set = createHskSet(dictionary, 1)
     expect(set).toMatchObject({ id: 'hsk-1', type: 'hsk', level: 1, name: 'HSK 1' })
-    expect(set.itemIds).toEqual(['word:你好', 'word:好', 'word:谢谢', 'char:你', 'char:好', 'char:谢', 'char:了'])
+    expect(set.itemIds).toEqual(['word:你好', 'word:好', 'word:谢谢'])
   })
 
   it('supports custom sets (CUSTOM) without changing anything', () => {

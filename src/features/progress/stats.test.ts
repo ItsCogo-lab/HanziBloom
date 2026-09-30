@@ -3,7 +3,14 @@ import { createDictionary } from '../dictionary/dictionary.ts'
 import { listStudyItems, type StudyItemId } from '../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, MASTERED_LEVEL, recordAnswer, recordWritingAnswer } from './progress.ts'
-import { getAnswerTotals, getDifficultItems, getRecentActivity, summarizeItems, summarizeWriting } from './stats.ts'
+import {
+  getAnswerTotals,
+  getDifficultItems,
+  getRecentActivity,
+  summarizeCharacters,
+  summarizeItems,
+  summarizeWriting,
+} from './stats.ts'
 import type { ProgressData } from './types.ts'
 
 const items = listStudyItems(createDictionary(testCharacters, testWords)) // 4 characters and 3 words
@@ -43,6 +50,30 @@ describe('summarizeItems', () => {
 
   it('with no progress, everything is new', () => {
     expect(summarizeItems(items, createEmptyProgress(), monday)).toMatchObject({ total: 7, new: 7, studied: 0, due: 0 })
+  })
+})
+
+describe('summarizeCharacters', () => {
+  const characters = items.filter((item) => item.kind === 'character')
+  const words = items.filter((item) => item.kind === 'word')
+
+  it('a character is as far along as the furthest word that contains it', () => {
+    let progress = recordAnswer(createEmptyProgress(), 'word:谢谢', true, monday)
+    expect(summarizeCharacters(characters, words, progress, monday)).toEqual({
+      total: 4,
+      new: 3,
+      learning: 1, // 谢, through 谢谢
+      mastered: 0,
+      studied: 1,
+      due: 0,
+    })
+    progress = exampleProgress()
+    // 你 and 好 are mastered through 你好, even though their own cards are only learning
+    expect(summarizeCharacters(characters, words, progress, monday)).toMatchObject({ new: 2, mastered: 2 })
+  })
+
+  it("only the character's own card can be due", () => {
+    expect(summarizeCharacters(characters, words, exampleProgress(), monday).due).toBe(1) // char:好
   })
 })
 
