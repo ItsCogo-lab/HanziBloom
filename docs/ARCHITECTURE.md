@@ -60,7 +60,7 @@ src/
   features/
     dictionary/     Domain types (Character, Word), search, tones and the dictionary panel
       runtime/      Service, cache (IndexedDB) and adapters for the external sources
-    grammar/        Grammar notes for particles (data in data/grammar.ts)
+    grammar/        Grammar notes for function words (data in data/grammar.ts)
     studySets/      StudySet model (HSK, topics, custom) and its derived progress
     myStudies/      Sets the user follows and when they last studied them (localStorage)
     practice/       Exercise types, session generation, exercise components
