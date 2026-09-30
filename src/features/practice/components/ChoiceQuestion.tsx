@@ -1,10 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
+import { Kbd } from '../../../components/ui/Kbd.tsx'
 import { t, type MessageKey } from '../../../i18n/index.ts'
 import { formatPinyin, type Dictionary } from '../../dictionary/dictionary.ts'
 import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { getMeaningLabel, getPinyinLabel, isCorrectOption } from '../choiceExercises.ts'
+import { useSessionShortcuts, type Shortcuts } from '../shortcuts.ts'
 import type { ChoiceExercise, ChoiceExerciseType } from '../types.ts'
 import { LookUpButtons } from './LookUpButtons.tsx'
 import { PinyinText } from '../../dictionary/components/PinyinText.tsx'
@@ -35,6 +37,12 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
   const { type, item, options } = exercise
   const isAnswered = selected !== undefined
   const isCorrect = isAnswered && isCorrectOption(exercise, selected)
+  const next = () => onAnswer(isCorrect)
+  // Keys 1-4 pick an option; once answered, Enter or Space continue
+  const shortcuts: Shortcuts = isAnswered
+    ? { Enter: next, ' ': next }
+    : Object.fromEntries(options.map((option, index) => [String(index + 1), () => setSelected(option)]))
+  useSessionShortcuts(shortcuts)
 
   // Options are disabled on answering: focus moves to "Continue", which
   // stays in view and carries the feedback as its description for screen
@@ -63,11 +71,12 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
       </div>
 
       <ul aria-label={t('practice.choice.options')} className="grid gap-3 sm:grid-cols-2">
-        {options.map((option) => (
+        {options.map((option, index) => (
           <li key={getStudyItemId(option)}>
             <ChoiceOption
               type={type}
               option={option}
+              shortcut={String(index + 1)}
               state={getOptionState(exercise, option, selected)}
               disabled={isAnswered}
               onSelect={() => setSelected(option)}
@@ -94,7 +103,8 @@ export function ChoiceQuestion({ exercise, dictionary, onAnswer, onLookUp }: Cho
             ref={continueRef}
             aria-describedby={feedbackId}
             className="w-full sm:w-auto"
-            onClick={() => onAnswer(isCorrect)}
+            aria-keyshortcuts="Enter"
+            onClick={next}
           >
             {t('practice.continue')}
           </Button>
@@ -122,19 +132,27 @@ const OPTION_STATE_CLASSES: Record<OptionState, string> = {
 type ChoiceOptionProps = {
   type: ChoiceExerciseType
   option: StudyItem
+  /** Key that picks this option. */
+  shortcut: string
   state: OptionState
   disabled: boolean
   onSelect: () => void
 }
 
-function ChoiceOption({ type, option, state, disabled, onSelect }: ChoiceOptionProps) {
+function ChoiceOption({ type, option, shortcut, state, disabled, onSelect }: ChoiceOptionProps) {
   return (
     <button
       type="button"
+      aria-keyshortcuts={shortcut}
       disabled={disabled}
       onClick={onSelect}
-      className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2 text-center transition-colors ${OPTION_STATE_CLASSES[state]}`}
+      className={`relative flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 py-2 text-center transition-colors ${OPTION_STATE_CLASSES[state]}`}
     >
+      {!disabled && (
+        <span className="absolute top-1.5 left-2">
+          <Kbd>{shortcut}</Kbd>
+        </span>
+      )}
       {type === 'hanzi-choice' ? (
         <ToneHanzi entry={option.entry} className="text-3xl" />
       ) : (

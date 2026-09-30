@@ -112,6 +112,23 @@ describe('PracticePage: Learn and Study of a set', () => {
     expect(isDue(item, new Date())).toBe(false)
   })
 
+  it('Learn also works with the keys 1 (skip), 2 (already know it) and 3 (learned)', async () => {
+    const user = userEvent.setup()
+    const storage = renderSession('mode=learn')
+
+    const skipped = currentLearnHanzi()!
+    await user.keyboard('1')
+    const known = currentLearnHanzi()!
+    await user.keyboard('2')
+    const learned = currentLearnHanzi()!
+    await user.keyboard('3')
+
+    const { items } = loadProgress(storage)
+    expect(items[`word:${skipped}`]).toBeUndefined()
+    expect(getItemStatus(items[`word:${known}`])).toBe('mastered')
+    expect(getItemStatus(items[`word:${learned}`])).toBe('learning')
+  })
+
   it('Learn with nothing new says so and does not switch to Study on its own', () => {
     renderSession('mode=learn', colorIds.reduce((result, itemId) => introduceItem(result, itemId, now), createEmptyProgress()))
 

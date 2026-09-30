@@ -178,6 +178,23 @@ describe('PracticeSession: dictionary without leaving the session', () => {
     expect(onResult).toHaveBeenCalledWith({ itemId: 'char:谢', exerciseType: 'meaning-choice', correct: false })
   })
 
+  it('keyboard shortcuts are off while the dictionary is open', async () => {
+    const user = userEvent.setup()
+    const onResult = vi.fn()
+    renderSession({ onResult })
+    await user.keyboard(' ')
+
+    await user.click(screen.getByRole('button', { name: 'Dictionary' }))
+    ;(document.activeElement as HTMLElement).blur()
+    await user.keyboard('2')
+    expect(onResult).not.toHaveBeenCalled()
+
+    await user.click(within(getPanel()).getByRole('button', { name: 'Close' }))
+    ;(document.activeElement as HTMLElement).blur()
+    await user.keyboard('2')
+    expect(onResult).toHaveBeenCalledOnce()
+  })
+
   it('does not offer to look up the item before answering, so as not to give away the answer', () => {
     renderSession()
     expect(screen.queryByRole('button', { name: /^Look up/ })).not.toBeInTheDocument()
