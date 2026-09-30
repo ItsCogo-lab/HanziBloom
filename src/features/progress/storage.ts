@@ -29,6 +29,8 @@ export function loadProgress(storage?: KeyValueStorage): ProgressData {
 
   return {
     items: keepValid(saved.items, isItemProgress),
+    // Writing progress came later: data saved before it has none, and that's fine
+    writing: isRecord(saved.writing) ? keepValid(saved.writing, isItemProgress) : {},
     activity: keepValid(saved.activity, isDailyActivity),
   }
 }

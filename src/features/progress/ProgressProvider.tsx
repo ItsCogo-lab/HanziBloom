@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { KeyValueStorage } from '../../lib/storage.ts'
-import { applyHskLevel, createEmptyProgress, introduceItem, markItemKnown, recordAnswer } from './progress.ts'
+import { applyHskLevel, createEmptyProgress, introduceItem, markItemKnown, recordAnswer, recordWritingAnswer } from './progress.ts'
 import { ProgressContext, type ProgressContextValue } from './progressContext.ts'
 import { loadProgress, saveProgress } from './storage.ts'
 
@@ -25,6 +25,10 @@ export function ProgressProvider({ children, storage }: ProgressProviderProps) {
     () => ({
       progress,
       recordAnswer: (itemId, correct) => setProgress((current) => recordAnswer(current, itemId, correct, new Date())),
+      recordResult: ({ itemId, exerciseType, correct }) => {
+        const record = exerciseType === 'writing' ? recordWritingAnswer : recordAnswer
+        setProgress((current) => record(current, itemId, correct, new Date()))
+      },
       introduceItem: (itemId) => setProgress((current) => introduceItem(current, itemId, new Date())),
       markItemKnown: (itemId) => setProgress((current) => markItemKnown(current, itemId, new Date())),
       applyHskLevel: (items, level) => setProgress((current) => applyHskLevel(current, items, level, new Date())),

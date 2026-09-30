@@ -37,5 +37,12 @@ export interface DailyActivity {
  */
 export interface ProgressData {
   items: Partial<Record<StudyItemId, ItemProgress>>
+  /**
+   * Writing progress, apart from `items` (recognition): writing is much
+   * harder, so a miss while writing doesn't send the item back to level 0
+   * for reading too. Same record shape, never with `basic` or `fromLevel`.
+   * An item not in here has never been written.
+   */
+  writing: Partial<Record<StudyItemId, ItemProgress>>
   activity: Record<DateKey, DailyActivity>
 }

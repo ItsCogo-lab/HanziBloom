@@ -14,6 +14,7 @@ import {
   getDifficultItems,
   getRecentActivity,
   summarizeItems,
+  summarizeWriting,
   type AnswerTotals,
 } from '../features/progress/stats.ts'
 import { getCurrentStreak, getLongestStreak } from '../features/progress/streak.ts'
@@ -55,6 +56,7 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
     { label: t('dashboard.characters'), summary: summarizeItems(characterItems, progress, now) },
     { label: t('dashboard.words'), summary: summarizeItems(wordItems, progress, now) },
   ]
+  const writing = summarizeWriting(progress)
   const dictionary = useDictionary()
   const difficult = getDifficultItems(progress)
   // An item from a custom set can be non-HSK: its entry is loaded
@@ -102,7 +104,13 @@ function Statistics({ progress, totals, now }: StatisticsProps) {
         <DataTable
           labelledBy="stats-by-status"
           headers={[t('stats.type'), t('stats.new'), t('stats.learning'), t('stats.mastered')]}
-          rows={byKind.map(({ label, summary }) => [label, summary.new, summary.learning, summary.mastered])}
+          rows={[
+            ...byKind.map(({ label, summary }) => [label, summary.new, summary.learning, summary.mastered]),
+            // Writing has its own progress; "new" doesn't apply: anything you can read can be written
+            ...(writing.learning + writing.mastered > 0
+              ? [[t('stats.writing'), '–', writing.learning, writing.mastered]]
+              : []),
+          ]}
         />
       </StatsSection>
 

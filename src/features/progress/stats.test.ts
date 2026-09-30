@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { createDictionary } from '../dictionary/dictionary.ts'
 import { listStudyItems, type StudyItemId } from '../dictionary/studyItem.ts'
 import { testCharacters, testWords } from '../dictionary/testData.ts'
-import { createEmptyProgress, MASTERED_LEVEL, recordAnswer } from './progress.ts'
-import { getAnswerTotals, getDifficultItems, getRecentActivity, summarizeItems } from './stats.ts'
+import { createEmptyProgress, MASTERED_LEVEL, recordAnswer, recordWritingAnswer } from './progress.ts'
+import { getAnswerTotals, getDifficultItems, getRecentActivity, summarizeItems, summarizeWriting } from './stats.ts'
 import type { ProgressData } from './types.ts'
 
 const items = listStudyItems(createDictionary(testCharacters, testWords)) // 4 characters and 3 words
@@ -95,5 +95,13 @@ describe('getDifficultItems', () => {
     progress = answer(progress, 'char:谢', [false, false, false])
 
     expect(getDifficultItems(progress).map((item) => item.itemId)).toEqual(['char:好', 'char:谢', 'char:你'])
+  })
+})
+
+describe('summarizeWriting', () => {
+  it('counts writing records by status, apart from recognition', () => {
+    let progress = recordAnswer(createEmptyProgress(), 'char:好', true, monday)
+    progress = recordWritingAnswer(progress, 'char:你', false, monday)
+    expect(summarizeWriting(progress)).toEqual({ learning: 1, mastered: 0 })
   })
 })

@@ -356,6 +356,18 @@ export const en = {
   'settings.themeDark': 'Dark',
   'settings.themeHint': 'System follows the light or dark mode of your device.',
   'settings.app': 'App',
+  'writing.question': 'Write it',
+  'writing.characters': 'Characters to write',
+  'writing.pad': 'Writing box: draw the strokes here',
+  'writing.hint': 'Hint',
+  'writing.showMe': 'Show me',
+  'writing.withHelp': 'Done, with some help',
+  'writing.revealed': 'Shown for you',
+  'writing.strokesUnavailable': "Couldn't load the strokes (are you offline?).",
+  'writing.skip': 'Skip this one',
+  'settings.writing': 'Writing exercises',
+  'settings.writingHint': 'Once you can read a word, write it stroke by stroke in Study sessions.',
+  'stats.writing': 'Writing',
 } as const
 
 export type MessageKey = keyof typeof en

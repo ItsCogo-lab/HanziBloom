@@ -22,8 +22,8 @@ function customSet(id: string, updatedAt: string, name = id): CustomSet {
 describe('mergeProgress', () => {
   it('keeps items that exist on only one side', () => {
     const merged = mergeProgress(
-      { items: { 'char:你': item('char:你', '2026-09-28T10:00:00.000Z') }, activity: {} },
-      { items: { 'char:好': item('char:好', '2026-09-27T10:00:00.000Z') }, activity: {} },
+      { items: { 'char:你': item('char:你', '2026-09-28T10:00:00.000Z') }, writing: {}, activity: {} },
+      { items: { 'char:好': item('char:好', '2026-09-27T10:00:00.000Z') }, writing: {}, activity: {} },
     )
     expect(Object.keys(merged.items).toSorted()).toEqual(['char:你', 'char:好'])
   })
@@ -31,20 +31,32 @@ describe('mergeProgress', () => {
   it('for an item on both sides, keeps the one reviewed later', () => {
     const older = item('char:你', '2026-09-28T10:00:00.000Z', 5)
     const newer = item('char:你', '2026-09-29T10:00:00.000Z', 2)
-    expect(mergeProgress({ items: { 'char:你': older }, activity: {} }, { items: { 'char:你': newer }, activity: {} }).items['char:你']).toBe(newer)
-    expect(mergeProgress({ items: { 'char:你': newer }, activity: {} }, { items: { 'char:你': older }, activity: {} }).items['char:你']).toBe(newer)
+    expect(mergeProgress({ items: { 'char:你': older }, writing: {}, activity: {} }, { items: { 'char:你': newer }, writing: {}, activity: {} }).items['char:你']).toBe(newer)
+    expect(mergeProgress({ items: { 'char:你': newer }, writing: {}, activity: {} }, { items: { 'char:你': older }, writing: {}, activity: {} }).items['char:你']).toBe(newer)
   })
 
   it('on the same review time, keeps the one seen more times', () => {
     const date = '2026-09-28T10:00:00.000Z'
     const more = item('char:你', date, 4)
-    expect(mergeProgress({ items: { 'char:你': item('char:你', date, 1) }, activity: {} }, { items: { 'char:你': more }, activity: {} }).items['char:你']).toBe(more)
+    expect(mergeProgress({ items: { 'char:你': item('char:你', date, 1) }, writing: {}, activity: {} }, { items: { 'char:你': more }, writing: {}, activity: {} }).items['char:你']).toBe(more)
+  })
+
+  it('merges writing progress the same way, apart from recognition', () => {
+    const older = item('char:你', '2026-09-28T10:00:00.000Z')
+    const newer = item('char:你', '2026-09-29T10:00:00.000Z')
+    const merged = mergeProgress(
+      { items: {}, writing: { 'char:你': newer }, activity: {} },
+      { items: { 'char:你': older }, writing: { 'char:你': older, 'char:好': older }, activity: {} },
+    )
+    expect(merged.writing['char:你']).toBe(newer)
+    expect(Object.keys(merged.writing).toSorted()).toEqual(['char:你', 'char:好'])
+    expect(merged.items['char:你']).toBe(older)
   })
 
   it('keeps the day record with more answers instead of adding them up', () => {
     const merged = mergeProgress(
-      { items: {}, activity: { '2026-09-28': { answers: 10, correct: 8 }, '2026-09-29': { answers: 2, correct: 1 } } },
-      { items: {}, activity: { '2026-09-28': { answers: 4, correct: 4 }, '2026-09-27': { answers: 3, correct: 3 } } },
+      { items: {}, writing: {}, activity: { '2026-09-28': { answers: 10, correct: 8 }, '2026-09-29': { answers: 2, correct: 1 } } },
+      { items: {}, writing: {}, activity: { '2026-09-28': { answers: 4, correct: 4 }, '2026-09-27': { answers: 3, correct: 3 } } },
     )
     expect(merged.activity).toEqual({
       '2026-09-27': { answers: 3, correct: 3 },

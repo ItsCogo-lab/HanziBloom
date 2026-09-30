@@ -4,6 +4,7 @@ import type { ProgressData } from '../progress/types.ts'
 import { shuffle, type RandomFn } from '../../lib/random.ts'
 import { EXERCISE_DEFINITIONS, type ExerciseDefinition } from './exerciseDefinitions.ts'
 import type { Exercise, ExerciseResult } from './types.ts'
+import { isWritingDue } from './writing.ts'
 
 export const DEFAULT_SESSION_SIZE = 10
 
@@ -20,12 +21,18 @@ interface CreateSessionOptions {
    * take them from the whole dictionary.
    */
   distractorPool?: readonly StudyItem[]
+  /** Include writing exercises (the Settings switch). */
+  writing?: boolean
 }
 
 /**
  * Creates the exercises of a session: picks the items based on progress
- * (see selectSessionItems) and, for each one, a random exercise type among
- * those that can be built.
+ * (see selectSessionItems) and, for each one, the exercise. If writing is on
+ * and it is time to write the item (isWritingDue), it is written; otherwise,
+ * a random recognition type among those that can be built.
+ *
+ * So writing reviews happen when the item comes up in a session, and a
+ * miss while writing only affects the writing progress.
  */
 export function createSessionExercises(
   pool: readonly StudyItem[],
@@ -36,10 +43,15 @@ export function createSessionExercises(
     progress = createEmptyProgress(),
     now = new Date(),
     distractorPool = pool,
+    writing = false,
   }: CreateSessionOptions = {},
 ): Exercise[] {
   const exercises: Exercise[] = []
   for (const item of selectSessionItems(pool, progress, now, size, random)) {
+    if (writing && isWritingDue(item, progress, now)) {
+      exercises.push({ type: 'writing', item })
+      continue
+    }
     const candidates = definitions.filter((definition) => definition.canBuild(item, distractorPool))
     const definition = candidates[Math.floor(random() * candidates.length)]
     if (definition) exercises.push(definition.build(item, distractorPool, random))
@@ -95,7 +107,12 @@ export interface SessionState {
   firstAttemptCount: number
 }
 
-export type SessionAction = { type: 'answer'; correct: boolean }
+/**
+ * - `answer`: the current exercise was answered.
+ * - `skip`: it couldn't be done (a writing exercise without stroke data, when
+ *   offline): it leaves the session without counting as an answer.
+ */
+export type SessionAction = { type: 'answer'; correct: boolean } | { type: 'skip' }
 
 export function createSessionState(exercises: readonly Exercise[]): SessionState {
   return { exercises, currentIndex: 0, results: [], firstAttemptCount: exercises.length }
@@ -120,6 +137,12 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       const exercises = action.correct ? state.exercises : [...state.exercises, createRetryExercise(exercise)]
       return { ...state, exercises, currentIndex: state.currentIndex + 1, results: [...state.results, result] }
     }
+    case 'skip': {
+      // Removed rather than left without a result, so results keep matching exercises by position
+      const exercises = state.exercises.filter((_, index) => index !== state.currentIndex)
+      const firstAttemptCount = state.firstAttemptCount - (isRetry(state) ? 0 : 1)
+      return { ...state, exercises, firstAttemptCount }
+    }
   }
 }
 
@@ -128,7 +151,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
  * one place, so the answer can't be found by remembering where it was.
  */
 export function createRetryExercise(exercise: Exercise): Exercise {
-  if (exercise.type === 'flashcard') return exercise
+  if (exercise.type === 'flashcard' || exercise.type === 'writing') return exercise
   const [first, ...rest] = exercise.options
   return { ...exercise, options: first ? [...rest, first] : rest }
 }

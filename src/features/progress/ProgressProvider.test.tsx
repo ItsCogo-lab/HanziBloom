@@ -53,8 +53,8 @@ describe('ProgressProvider', () => {
 
     act(() => getContext().resetProgress())
 
-    expect(getContext().progress).toEqual({ items: {}, activity: {} })
-    expect(loadProgress(storage)).toEqual({ items: {}, activity: {} })
+    expect(getContext().progress).toEqual({ items: {}, writing: {}, activity: {} })
+    expect(loadProgress(storage)).toEqual({ items: {}, writing: {}, activity: {} })
   })
 
   it('useProgress outside the provider throws a clear error', () => {

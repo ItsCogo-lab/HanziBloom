@@ -23,10 +23,19 @@ export interface ChoiceExercise {
 }
 
 /**
+ * Writing: the meaning and pinyin are shown and the user writes the hanzi
+ * stroke by stroke. It has its own progress (ProgressData.writing).
+ */
+export interface WritingExercise {
+  type: 'writing'
+  item: StudyItem
+}
+
+/**
  * All exercise types. It is a union discriminated by `type`:
  * to add a new exercise, add its interface here.
  */
-export type Exercise = FlashcardExercise | ChoiceExercise
+export type Exercise = FlashcardExercise | ChoiceExercise | WritingExercise
 
 export type ExerciseType = Exercise['type']
 
