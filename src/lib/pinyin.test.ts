@@ -18,23 +18,23 @@ describe('numberedSyllableToToneMarks', () => {
     expect(numberedSyllableToToneMarks(numbered)).toBe(marked)
   })
 
-  it('el tono 5 (neutro) no lleva marca', () => {
+  it('tone 5 (neutral) has no mark', () => {
     expect(numberedSyllableToToneMarks('de5')).toBe('de')
   })
 
-  it('deja igual lo que no es una sílaba numerada', () => {
+  it("leaves anything that isn't a numbered syllable unchanged", () => {
     expect(numberedSyllableToToneMarks('hǎo')).toBe('hǎo')
   })
 })
 
 describe('numberedPinyinToToneMarks', () => {
-  it('convierte varias sílabas', () => {
+  it('converts several syllables', () => {
     expect(numberedPinyinToToneMarks('dong1 xi5')).toBe('dōng xi')
   })
 })
 
 describe('removeToneMarks', () => {
-  it('quita tonos y mayúsculas pero conserva la ü', () => {
+  it('removes tones and uppercase but keeps the ü', () => {
     expect(removeToneMarks('Nǐ hǎo')).toBe('ni hao')
     expect(removeToneMarks('nǚ ér')).toBe('nü er')
   })

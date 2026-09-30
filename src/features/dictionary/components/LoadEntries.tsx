@@ -9,9 +9,9 @@ type LoadEntriesProps = {
 }
 
 /**
- * Muestra `children` cuando ya están cargadas las entradas de estos
- * elementos. Las de HSK 1-4 están siempre; las del diccionario completo se
- * piden la primera vez (un set propio, una ficha).
+ * Shows `children` once the entries for these items have loaded.
+ * HSK 1-4 ones are always there; full dictionary ones are
+ * requested the first time (a custom set, an entry page).
  */
 export function LoadEntries({ itemIds, children }: LoadEntriesProps) {
   const status = useLoadItems(itemIds)

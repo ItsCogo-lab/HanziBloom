@@ -1,15 +1,15 @@
 name: Dataset
 
-# Regenera el dataset desde las fuentes (npm run data:fetch + data:build).
-# Hace falta porque algunas fuentes (unicode.org, tatoeba.org) no son
-# accesibles desde el entorno en la nube de Claude.
+# Regenerates the dataset from the sources (npm run data:fetch + data:build).
+# Needed because some sources (unicode.org, tatoeba.org) are not
+# reachable from Claude's cloud environment.
 #
-# - En una rama que no es main: si el resultado cambia, lo sube a la rama
-#   en un commit aparte.
-# - En main (lanzado a mano): solo comprueba que el dataset está al día.
+# - On a branch other than main: if the result changes, it pushes it to the
+#   branch in a separate commit.
+# - On main (triggered manually): it only checks that the dataset is up to date.
 #
-# El diccionario completo no va en este repositorio: queda como artefacto
-# («data-release») y se publica en HanziDict con el workflow «Publish data».
+# The full dictionary does not go in this repository: it is kept as an artifact
+# ("data-release") and published to HanziDict with the "Publish data" workflow.
 
 on:
   workflow_dispatch:
@@ -43,19 +43,19 @@ jobs:
         with:
           name: data-release
           path: data-release
-      - name: Subir el dataset regenerado
+      - name: Push the regenerated dataset
         if: github.ref != 'refs/heads/main'
         run: |
           git add src/data public/strokes public/examples docs/DATA_CONFLICTS.md
           if git diff --cached --quiet; then
-            echo "El dataset ya estaba al día."
+            echo "The dataset was already up to date."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(data): regenerate the dataset from its sources"
           git push
-      - name: Comprobar que el dataset de main está al día
+      - name: Check that the main dataset is up to date
         if: github.ref == 'refs/heads/main'
         run: |
           git add -N src/data public/strokes public/examples docs/DATA_CONFLICTS.md

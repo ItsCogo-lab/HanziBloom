@@ -11,17 +11,17 @@ import { loadUnihan } from './sources/unihan.ts'
 const cedict = createCedictIndex(cedictFixture)
 
 describe('buildBaseEntries', () => {
-  it('crea la palabra y sus caracteres con datos de CC-CEDICT', () => {
+  it('creates the word and its characters with CC-CEDICT data', () => {
     const { characters, words, problems } = buildBaseEntries([{ level: 1, words: [{ hanzi: '柠檬', pinyin: 'níng méng' }] }], cedict)
 
-    expect(problems).toEqual(['Carácter 檬 [méng] (en 柠檬): sin lectura en CC-CEDICT'])
+    expect(problems).toEqual(['Character 檬 [méng] (in 柠檬): no reading in CC-CEDICT'])
     expect(words).toEqual([ningmengWord])
     expect(characters).toEqual([
       { id: '柠', hanzi: '柠', pinyin: ['níng'], meanings: { en: ['used in 柠檬'] }, hskLevel: 1 },
     ])
   })
 
-  it('deja fuera las palabras que no están en CC-CEDICT en lugar de inventarlas, y lo dice', () => {
+  it('leaves out words that are not in CC-CEDICT instead of making them up, and says so', () => {
     const { problems } = buildBaseEntries([{ level: 1, words: [{ hanzi: '好', pinyin: 'hào' }] }], cedict)
     expect(problems).toEqual([])
     const missing = buildBaseEntries([{ level: 3, words: [{ hanzi: '好', pinyin: 'hā' }] }], cedict)
@@ -29,7 +29,7 @@ describe('buildBaseEntries', () => {
     expect(missing.characters).toEqual([])
     expect(missing.leftOut).toEqual(['好 [hā] (HSK 3)'])
   })
-  it('junta varios niveles: cada carácter queda en el primer nivel en que aparece', () => {
+  it('merges several levels: each character stays at the first level it appears in', () => {
     const { characters, words } = buildBaseEntries(
       [
         { level: 1, words: [{ hanzi: '好', pinyin: 'hǎo' }] },
@@ -49,7 +49,7 @@ describe('buildBaseEntries', () => {
     expect(characters.find((character) => character.hanzi === '柠')?.hskLevel).toBe(2)
   })
 
-  it('pone primero los significados generales si el carácter también se usa en minúscula', () => {
+  it('puts general meanings first if the character is also used in lowercase', () => {
     const fixture = createCedictIndex(
       JSON.stringify([
         { traditional: '京', simplified: '京', pinyin: 'Jing1', english: ['Jing ethnic minority'] },
@@ -76,7 +76,7 @@ describe('buildBaseEntries', () => {
     ])
   })
 
-  it('guarda una sola vez las palabras que la lista repite con el mismo pinyin', () => {
+  it('stores only once the words the list repeats with the same pinyin', () => {
     const { words, duplicates } = buildBaseEntries(
       [{ level: 4, words: [{ hanzi: '好', pinyin: 'hǎo' }, { hanzi: '好', pinyin: 'hǎo' }] }],
       cedict,
@@ -92,13 +92,13 @@ describe('enrichCharacter', () => {
   const unihan = loadUnihan([unihanIrgSourcesFixture, unihanVariantsFixture], cjkRadicalsFixture, new Set(['柠']))
   const makeMeAHanzi = parseMakeMeAHanzi(makeMeAHanziFixture, new Set(['柠']))
 
-  it('combina CC-CEDICT, Unihan y Make Me a Hanzi en la ficha de 柠', () => {
+  it('combines CC-CEDICT, Unihan and Make Me a Hanzi into the entry for 柠', () => {
     const enriched = enrichCharacter(ning, {
       unihan: unihan.get('柠'),
       makeMeAHanzi: makeMeAHanzi.get('柠'),
       hanziWriterStrokeCount: 9,
     })
-    // Los tests de la interfaz usan este mismo objeto (testData.ts)
+    // The UI tests use this same object (testData.ts)
     expect(enriched).toEqual(ningCharacter)
     expect(enriched).toMatchObject({
       pinyin: ['níng'],
@@ -110,7 +110,7 @@ describe('enrichCharacter', () => {
     })
   })
 
-  it('añade los campos de Unihan a 柠, sin su número de trazos', () => {
+  it('adds the Unihan fields to 柠, without its stroke count', () => {
     expect(enrichCharacter(ning, { unihan: unihan.get('柠') })).toEqual({
       ...ning,
       radical: '木',
@@ -119,12 +119,12 @@ describe('enrichCharacter', () => {
     })
   })
 
-  it('toma el número de trazos de hanzi-writer-data aunque Unihan diga otro', () => {
+  it('takes the stroke count from hanzi-writer-data even if Unihan says otherwise', () => {
     const sources = { unihan: { strokeCount: 12 }, hanziWriterStrokeCount: 11 }
     expect(enrichCharacter(ning, sources).strokeCount).toBe(11)
   })
 
-  it('no añade campos vacíos si una fuente no tiene el carácter', () => {
+  it('adds no empty fields if a source does not have the character', () => {
     const enriched = enrichCharacter(ning, {})
     expect(enriched).toEqual(ning)
     expect(Object.values(enriched)).not.toContain(undefined)
@@ -134,28 +134,28 @@ describe('enrichCharacter', () => {
 describe('crossCheckCharacter', () => {
   const unihan = { strokeCount: 9, radical: '木', radicalNumber: 75 }
 
-  it('no avisa cuando las fuentes coinciden', () => {
+  it('does not warn when the sources agree', () => {
     expect(
       crossCheckCharacter('柠', { unihan, makeMeAHanzi: { radical: '木' }, hanziWriterStrokeCount: 9 }),
     ).toEqual([])
   })
 
-  it('no avisa cuando el radical está escrito en otra forma del mismo radical Kangxi', () => {
+  it('does not warn when the radical is written in another form of the same Kangxi radical', () => {
     const person = { strokeCount: 5, radical: '人', radicalNumber: 9 }
     expect(crossCheckCharacter('X', { unihan: person, makeMeAHanzi: { radical: '亻' }, makeMeAHanziRadicalNumber: 9 })).toEqual([])
   })
 
-  it('avisa de los desacuerdos sin corregirlos', () => {
+  it('warns about disagreements without correcting them', () => {
     const conflicts = crossCheckCharacter('X', { unihan, makeMeAHanzi: { radical: '口' }, hanziWriterStrokeCount: 8 })
     expect(conflicts).toEqual([
-      'X: Unihan dice 9 trazos y hanzi-writer-data tiene 8. Se usa el de hanzi-writer-data.',
-      'X: el radical es 木 en Unihan y 口 en Make Me a Hanzi. Se usa el de Unihan.',
+      "X: Unihan says 9 strokes and hanzi-writer-data has 8. Using hanzi-writer-data's.",
+      "X: the radical is 木 in Unihan and 口 in Make Me a Hanzi. Using Unihan's.",
     ])
   })
 })
 
 describe('buildFullEntries', () => {
-  // Líneas reales de CC-CEDICT (edición 2025-12-13)
+  // Real CC-CEDICT lines (2025-12-13 edition)
   const fullCedict = createCedictIndex(
     JSON.stringify([
       { traditional: 'T恤', simplified: 'T恤', pinyin: 'T xu4', english: ['T-shirt'] },
@@ -172,7 +172,7 @@ describe('buildFullEntries', () => {
   const hsk = buildBaseEntries([{ level: 1, words: [{ hanzi: '苹果', pinyin: 'píng guǒ' }] }], fullCedict)
   const full = buildFullEntries(fullCedict, hsk)
 
-  it('no repite lo que ya está en HSK y separa las otras lecturas con su pinyin en el id', () => {
+  it('does not repeat what is already in HSK and separates other readings with their pinyin in the id', () => {
     expect(full.words).toEqual([
       {
         id: '苹果[Píng guǒ]',
@@ -184,12 +184,12 @@ describe('buildFullEntries', () => {
     ])
   })
 
-  it('añade los caracteres que no están en HSK, sin nivel', () => {
+  it('adds the characters not in HSK, without a level', () => {
     expect(full.characters).toEqual([{ id: '柠', hanzi: '柠', pinyin: ['níng'], meanings: { en: ['used in 柠檬'] } }])
   })
 
-  it('deja fuera lo que no puede enseñar, y dice por qué', () => {
-    expect(full.leftOut).toEqual(['々: CC-CEDICT no conoce su lectura', '宏碁 [Hóng jī]: sin entrada para 宏, 碁'])
+  it('leaves out what it cannot teach, and says why', () => {
+    expect(full.leftOut).toEqual(['々: CC-CEDICT does not know its reading', '宏碁 [Hóng jī]: no entry for 宏, 碁'])
     expect(full.words.map((word) => word.hanzi)).not.toContain('T恤')
   })
 })

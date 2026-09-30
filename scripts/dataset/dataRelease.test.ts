@@ -15,7 +15,7 @@ function chunksDir(): string {
 }
 
 describe('writeDataRelease', () => {
-  it('escribe los trozos, el manifiesto y el README', () => {
+  it('writes the chunks, the manifest and the README', () => {
     const target = mkdtempSync(join(tmpdir(), 'data-'))
     writeDataRelease({
       sourceDir: chunksDir(),
@@ -29,7 +29,7 @@ describe('writeDataRelease', () => {
     expect(readFileSync(join(target, 'README.md'), 'utf8')).toContain('CC BY-SA 4.0')
   })
 
-  it('conserva las dos versiones anteriores y borra las demás', () => {
+  it('keeps the two previous versions and deletes the rest', () => {
     const target = mkdtempSync(join(tmpdir(), 'data-'))
     const source = chunksDir()
     for (const version of ['1.0.0', '1.1.0', '1.2.0', '1.10.0']) {
@@ -38,7 +38,7 @@ describe('writeDataRelease', () => {
     expect(readdirSync(join(target, 'v1')).sort()).toEqual(['1.1.0', '1.10.0', '1.2.0', 'manifest.json'])
   })
 
-  it('no publica una versión que no sea mayor que la actual, ni sin todos los trozos', () => {
+  it('does not publish a version that is not greater than the current one, nor without all the chunks', () => {
     const target = mkdtempSync(join(tmpdir(), 'data-'))
     const source = chunksDir()
     writeDataRelease({ sourceDir: source, targetDir: target, version: '1.2.0', generatedAt: 'x' })
@@ -55,7 +55,7 @@ describe('writeDataRelease', () => {
     ).toThrow()
   })
 
-  it('anota las mismas versiones de las fuentes que descarga fetch-sources.sh', () => {
+  it('records the same source versions that fetch-sources.sh downloads', () => {
     const script = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'fetch-sources.sh'), 'utf8')
     expect(script).toContain('cedict-json@1.3.20251213')
     expect(script).toContain('UNICODE_VERSION=18.0.0')

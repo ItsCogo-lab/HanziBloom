@@ -17,8 +17,8 @@ import { memoryStorage } from '../../test/memoryStorage.ts'
 const now = new Date(2026, 8, 28, 12)
 const later = new Date(2026, 8, 29, 12)
 
-describe('sets propios', () => {
-  it('valida el nombre y limpia los espacios', () => {
+describe('custom sets', () => {
+  it('validates the name and trims whitespace', () => {
     expect(validateDetails({ name: '  My Chinese ', description: ' ' })).toEqual({
       details: { name: 'My Chinese', description: '' },
     })
@@ -26,7 +26,7 @@ describe('sets propios', () => {
     expect(validateDetails({ name: 'x'.repeat(61), description: '' })).toEqual({ problem: 'nameTooLong' })
   })
 
-  it('crea un set vacío y lo renombra sin tocar los demás', () => {
+  it('creates an empty set and renames it without touching the others', () => {
     const travel = createCustomSet({ name: 'Travel', description: '' }, 'custom-a', now)
     const exam = createCustomSet({ name: 'Exam', description: 'HSK 3' }, 'custom-b', now)
     expect(travel).toMatchObject({ id: 'custom-a', name: 'Travel', itemIds: [] })
@@ -36,12 +36,12 @@ describe('sets propios', () => {
     expect(renamed[1]).toBe(exam)
   })
 
-  it('borra un set', () => {
+  it('deletes a set', () => {
     const sets = [createCustomSet({ name: 'A', description: '' }, 'custom-a', now)]
     expect(deleteCustomSet(sets, 'custom-a')).toEqual([])
   })
 
-  it('añade elementos por id, sin repetidos, y los quita', () => {
+  it('adds items by id, without duplicates, and removes them', () => {
     let set = createCustomSet({ name: 'My Chinese', description: '' }, 'custom-a', now)
     set = addItem(set, 'word:苹果')
     set = addItem(set, 'word:机场')
@@ -51,7 +51,7 @@ describe('sets propios', () => {
     expect(removeItem(set, 'word:苹果').itemIds).toEqual(['word:机场'])
   })
 
-  it('se convierte en un StudySet de tipo custom, con elementos de todo el diccionario', () => {
+  it('converts to a custom StudySet, with items from the whole dictionary', () => {
     const set = {
       ...createCustomSet({ name: 'Mine', description: '' }, 'custom-a', now),
       itemIds: ['word:苹果' as const, 'word:苹果[Píng guǒ]' as const],
@@ -67,10 +67,10 @@ describe('sets propios', () => {
   })
 })
 
-describe('significados propios', () => {
+describe('custom meanings', () => {
   const base = addItem(addItem(createCustomSet({ name: 'Travel', description: '' }, 'custom-a', now), 'word:机场'), 'word:苹果')
 
-  it('se añaden, se editan y se borran por elemento del set', () => {
+  it('are added, edited and deleted per set item', () => {
     let set = setMeaning(base, 'word:机场', 'airport when travelling')
     expect(set.meanings).toEqual({ 'word:机场': 'airport when travelling' })
 
@@ -80,16 +80,16 @@ describe('significados propios', () => {
     expect(deleteMeaning(set, 'word:机场').meanings).toEqual({})
   })
 
-  it('no se puede poner a un elemento que no está en el set', () => {
+  it('cannot be set on an item that is not in the set', () => {
     expect(setMeaning(base, 'word:学习', 'to study')).toBe(base)
   })
 
-  it('al quitar el elemento del set se borra su significado propio', () => {
+  it('removing the item from the set deletes its custom meaning', () => {
     const set = setMeaning(base, 'word:机场', 'airport')
     expect(removeItem(set, 'word:机场').meanings).toEqual({})
   })
 
-  it('cada set tiene los suyos: el mismo elemento en otro set no se ve afectado', () => {
+  it('each set has its own: the same item in another set is not affected', () => {
     const other = addItem(createCustomSet({ name: 'Exam', description: '' }, 'custom-b', now), 'word:机场')
     const sets = updateCustomSet([base, other], 'custom-a', now, (set) => setMeaning(set, 'word:机场', 'airport'))
 
@@ -97,14 +97,14 @@ describe('significados propios', () => {
     expect(sets[1]?.meanings).toEqual({})
   })
 
-  it('no acepta un significado vacío', () => {
+  it('rejects an empty meaning', () => {
     expect(validateMeaning('   ')).toEqual({ problem: 'emptyMeaning' })
     expect(validateMeaning(' apple ')).toEqual({ meaning: 'apple' })
   })
 })
 
-describe('guardar sets propios', () => {
-  it('guarda y carga los sets tal cual', () => {
+describe('saving custom sets', () => {
+  it('saves and loads the sets as they are', () => {
     const storage = memoryStorage()
     const sets = [setMeaning(addItem(createCustomSet({ name: 'Mine', description: 'd' }, 'custom-a', now), 'word:苹果'), 'word:苹果', 'my apple')]
     saveCustomSets(sets, storage)
@@ -112,7 +112,7 @@ describe('guardar sets propios', () => {
     expect(loadCustomSets(storage)).toEqual(sets)
   })
 
-  it('descarta lo que tiene mal formato sin romper el resto', () => {
+  it('discards malformed data without breaking the rest', () => {
     const storage = memoryStorage()
     storage.setItem(
       'hanzivocab.customSets',

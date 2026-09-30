@@ -1,107 +1,107 @@
-/** Niveles HSK que cubrirá la app (estándar HSK 2.0). */
+/** HSK levels the app will cover (HSK 2.0 standard). */
 export type HskLevel = 1 | 2 | 3 | 4
 
-/** Idiomas en los que puede estar el contenido educativo (significados). */
+/** Languages the learning content (meanings) can be in. */
 export type ContentLocale = 'es' | 'en' | 'ca'
 
 /**
- * Significados de una entrada por idioma. El inglés es obligatorio porque
- * es el idioma de la fuente (CC-CEDICT); español y catalán se podrán añadir
- * más adelante sin cambiar el modelo.
+ * An entry's meanings by language. English is required because it's the
+ * source's language (CC-CEDICT); Spanish and Catalan can be added later
+ * without changing the model.
  */
 export type Translations = { en: string[] } & Partial<Record<Exclude<ContentLocale, 'en'>, string[]>>
 
 /**
- * Cómo se formó un carácter (Make Me a Hanzi). En los pictofonéticos, el
- * componente semántico aporta el significado y el fonético, la pronunciación:
- * 柠 = 木 (árbol) + 宁 (níng).
+ * How a character was formed (Make Me a Hanzi). In pictophonetic ones, the
+ * semantic component provides the meaning and the phonetic one, the pronunciation:
+ * 柠 = 木 (tree) + 宁 (níng).
  */
 export interface Etymology {
   type: 'pictographic' | 'ideographic' | 'pictophonetic'
-  /** Pista breve en inglés: "tree" en 柠, o la explicación en los pictográficos. */
+  /** Short hint in English: "tree" in 柠, or the explanation for pictographic ones. */
   hint?: string
   semantic?: string
   phonetic?: string
 }
 
-/** Un carácter chino (hanzi) individual. */
+/** A single Chinese character (hanzi). */
 export interface Character {
-  /** Identificador único: el propio carácter, p. ej. "好". */
+  /** Unique identifier: the character itself, e.g. "好". */
   id: string
   hanzi: string
-  /** Pinyin con marcas de tono. Algunos caracteres tienen varias lecturas (了: le, liǎo). */
+  /** Pinyin with tone marks. Some characters have several readings (了: le, liǎo). */
   pinyin: string[]
   meanings: Translations
-  /** Nivel HSK. Los caracteres del diccionario completo que no están en HSK 1-4 no tienen. */
+  /** HSK level. Characters from the full dictionary that aren't in HSK 1-4 have none. */
   hskLevel?: HskLevel
   /*
-   * Opcionales a propósito: solo se rellenan si tenemos una fuente fiable.
-   * Mejor un dato vacío que un dato inventado.
+   * Optional on purpose: only filled in if we have a reliable source.
+   * Better missing data than made-up data.
    */
-  /** Número total de trazos (Unihan kTotalStrokes). */
+  /** Total number of strokes (Unihan kTotalStrokes). */
   strokeCount?: number
-  /** Radical Kangxi como carácter normal: 木, o su forma simplificada: 讠 (Unihan kRSUnicode). */
+  /** Kangxi radical as a regular character: 木, or its simplified form: 讠 (Unihan kRSUnicode). */
   radical?: string
-  /** Número del radical Kangxi, del 1 al 214: 木 → 75 (Unihan kRSUnicode). */
+  /** Kangxi radical number, from 1 to 214: 木 → 75 (Unihan kRSUnicode). */
   radicalNumber?: number
-  /** Posición en una lista de frecuencia (1 = el más frecuente). */
+  /** Position in a frequency list (1 = the most frequent). */
   frequencyRank?: number
   /**
-   * Formas tradicionales (Unihan kTraditionalVariant): 柠 → ["檸"]. Puede
-   * incluir el propio carácter si también se usa en tradicional.
+   * Traditional forms (Unihan kTraditionalVariant): 柠 → ["檸"]. May
+   * include the character itself if it's also used in traditional.
    */
   traditional?: string[]
   /**
-   * Descomposición en componentes como secuencia IDS de Unicode (Make Me a
-   * Hanzi): 柠 → "⿰木宁" (木 a la izquierda, 宁 a la derecha).
+   * Decomposition into components as a Unicode IDS sequence (Make Me a
+   * Hanzi): 柠 → "⿰木宁" (木 on the left, 宁 on the right).
    */
   decomposition?: string
   etymology?: Etymology
 }
 
-/** Una palabra del vocabulario, formada por uno o más caracteres. */
+/** A vocabulary word, made of one or more characters. */
 export interface Word {
   /**
-   * Identificador único: la propia palabra, p. ej. "你好". Si hay varias
-   * palabras con el mismo hanzi y distinta pronunciación (长 cháng «largo» y
-   * 长 zhǎng «crecer»), cada una lleva su pinyin: "长[cháng]" (ver getWordId).
+   * Unique identifier: the word itself, e.g. "你好". If there are several
+   * words with the same hanzi and different pronunciation (长 cháng "long" and
+   * 长 zhǎng "to grow"), each one carries its pinyin: "长[cháng]" (see getWordId).
    */
   id: string
   hanzi: string
-  /** Pinyin de la palabra completa con marcas de tono, p. ej. "nǐ hǎo". */
+  /** Pinyin of the whole word with tone marks, e.g. "nǐ hǎo". */
   pinyin: string
   meanings: Translations
-  /** Nivel HSK. Las palabras del diccionario completo que no están en HSK 1-4 no tienen. */
+  /** HSK level. Words from the full dictionary that aren't in HSK 1-4 have none. */
   hskLevel?: HskLevel
-  /** Forma tradicional de la palabra (CC-CEDICT): 柠檬 → "檸檬". */
+  /** Traditional form of the word (CC-CEDICT): 柠檬 → "檸檬". */
   traditional?: string
-  /** Posición en una lista de frecuencia (1 = la más frecuente). */
+  /** Position in a frequency list (1 = the most frequent). */
   frequencyRank?: number
 }
 
 /**
- * Una frase de ejemplo de Tatoeba con su traducción al inglés. Se guardan
- * los ids y autores de las dos frases para poder atribuirlas y enlazarlas.
+ * An example sentence from Tatoeba with its English translation. The ids
+ * and authors of both sentences are kept so they can be attributed and linked.
  */
 export interface ExampleSentence {
   tatoebaId: number
   zh: string
-  /** Usuario de Tatoeba que escribió la frase en chino. */
+  /** Tatoeba user who wrote the Chinese sentence. */
   author: string
   en: string
   translationTatoebaId: number
-  /** Autor de la traducción; algunas traducciones antiguas no tienen (huérfanas). */
+  /** Author of the translation; some old translations have none (orphaned). */
   translationAuthor?: string
-  /** Palabras del dataset para las que se eligió la frase como ejemplo. */
+  /** Dataset words the sentence was chosen as an example for. */
   words: string[]
 }
 
-/** Archivo de ejemplos de un nivel (public/examples/hsk1.json ... hsk4.json). */
+/** A level's examples file (public/examples/hsk1.json ... hsk4.json). */
 export interface ExampleSet {
   source: 'Tatoeba'
-  /** Todas las frases de Tatoeba tienen esta licencia (algunas, además, CC0). */
+  /** All Tatoeba sentences have this license (some are also CC0). */
   license: 'CC BY 2.0 FR'
-  /** Fecha de la exportación de Tatoeba usada, "2026-09-26". */
+  /** Date of the Tatoeba export used, "2026-09-26". */
   exportDate: string
   sentences: ExampleSentence[]
 }

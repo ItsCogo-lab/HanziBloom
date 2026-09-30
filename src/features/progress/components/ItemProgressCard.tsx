@@ -5,12 +5,12 @@ import type { ItemProgress } from '../types.ts'
 import { StatusBadge } from './StatusBadge.tsx'
 
 type ItemProgressCardProps = {
-  /** `undefined` si el elemento aún no se ha estudiado. */
+  /** `undefined` if the item hasn't been studied yet. */
   item: ItemProgress | undefined
   now: Date
 }
 
-/** Cómo va el usuario con un carácter o una palabra concretos. */
+/** How the user is doing with a specific character or word. */
 export function ItemProgressCard({ item, now }: ItemProgressCardProps) {
   return (
     <Card className="flex flex-col gap-4">

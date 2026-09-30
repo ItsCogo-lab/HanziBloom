@@ -4,7 +4,7 @@ import { isStandalone } from '../install.ts'
 import { useInstallPrompt } from '../useInstallPrompt.ts'
 import { IosInstallSteps } from './IosInstallSteps.tsx'
 
-/** Sección de Ajustes: instalar la app aunque se haya cerrado el aviso. */
+/** Settings section: install the app even if the banner was dismissed. */
 export function InstallSetting() {
   const { mode, install } = useInstallPrompt()
 

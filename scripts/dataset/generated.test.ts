@@ -8,28 +8,28 @@ import type { ExampleSet } from '../../src/features/dictionary/types.ts'
 import { validateDictionaryData, validateExampleSet } from '../../src/features/dictionary/validation.ts'
 
 /*
- * Los archivos generados en public/ que carga la app. El diccionario completo
- * ya no está en este repositorio: `npm run data:validate` lo revisa antes de
- * publicarlo en el repositorio de datos.
+ * The generated files in public/ that the app loads. The full dictionary is
+ * no longer in this repository: `npm run data:validate` checks it before
+ * publishing it to the data repository.
  */
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '../../public')
 const exampleFiles = [1, 2, 3, 4].map((level) => join(publicDir, `examples/hsk${level}.json`))
 
-describe('archivos generados en public/', () => {
-  it('tienen los trazos de cada carácter', () => {
+describe('generated files in public/', () => {
+  it('have the strokes for each character', () => {
     const missing = allCharacters.filter(
       (character) => !existsSync(join(publicDir, 'strokes', strokeFileName(character.hanzi))),
     )
     expect(missing.map((character) => character.hanzi)).toEqual([])
   })
 
-  it.each(exampleFiles.filter((file) => existsSync(file)))('tienen frases de ejemplo válidas (%s)', (file) => {
+  it.each(exampleFiles.filter((file) => existsSync(file)))('have valid example sentences (%s)', (file) => {
     const set: ExampleSet = JSON.parse(readFileSync(file, 'utf8'))
     expect(validateExampleSet(set, allWords)).toEqual([])
   })
 
-  it('HSK 1-4 es coherente', () => {
+  it('HSK 1-4 is consistent', () => {
     expect(validateDictionaryData(allCharacters, allWords)).toEqual([])
   })
 })

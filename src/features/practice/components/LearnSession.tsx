@@ -10,23 +10,23 @@ import { getStudyItemId, type StudyItem } from '../../dictionary/studyItem.ts'
 import { SessionFrame } from './SessionFrame.tsx'
 
 type LearnSessionProps = {
-  /** Elementos nuevos que presenta la sesión, en orden. */
+  /** New items the session introduces, in order. */
   items: readonly StudyItem[]
   dictionary: Dictionary
-  /** Se llama al confirmar que un elemento está aprendido, para guardarlo al momento. */
+  /** Called when an item is confirmed as learned, to save it right away. */
   onLearned: (item: StudyItem) => void
-  /** Se llama cuando el usuario ya dominaba el elemento: vuelve a salir en Study muy de vez en cuando. */
+  /** Called when the user already knew the item: it comes back in Study only very occasionally. */
   onKnown: (item: StudyItem) => void
-  /** Acciones del resumen final (p. ej. repasar lo aprendido). */
+  /** Actions of the final summary (e.g. review what was learned). */
   summaryActions: ReactNode
-  /** Contenido extra bajo la ficha, p. ej. las notas del usuario en un set propio. */
+  /** Extra content below the entry, e.g. the user's notes in a custom set. */
   renderExtra?: (item: StudyItem) => ReactNode
 }
 
 /**
- * Sesión Learn: presenta elementos nuevos uno a uno con su ficha completa
- * (la misma del diccionario) y el usuario confirma cuáles ha aprendido. No
- * hay preguntas: eso es Study.
+ * Learn session: introduces new items one by one with their full entry
+ * (the same as in the dictionary) and the user confirms which ones they have
+ * learned. There are no questions: that is Study.
  */
 export function LearnSession({
   items,
@@ -37,7 +37,7 @@ export function LearnSession({
   renderExtra,
 }: LearnSessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  // Lo aprendido en la sesión; `known` indica si el usuario ya lo dominaba
+  // What was learned in the session; `known` says whether the user already knew it
   const [learned, setLearned] = useState<readonly { item: StudyItem; known: boolean }[]>([])
   const item = items[currentIndex]
 
@@ -84,10 +84,10 @@ export function LearnSession({
           <p className="text-center text-sm font-medium tracking-wide text-ink-muted uppercase">
             {t(item.kind === 'word' ? 'learn.newWord' : 'learn.newCharacter')}
           </p>
-          {/* key: cada elemento empieza con su ficha desde arriba */}
+          {/* key: each item starts with its entry scrolled to the top */}
           <EntryDetails key={getStudyItemId(item)} item={item} dictionary={dictionary} opener={{ onOpen: lookUp }} />
           {renderExtra?.(item)}
-          {/* En móvil "Ya lo sé" ocupa su propia fila encima de las otras dos */}
+          {/* On mobile "I already know it" takes its own row above the other two */}
           <div className="sticky bottom-(--mobile-nav-height) -mx-1 grid grid-cols-2 gap-3 bg-paper px-1 py-3 sm:grid-cols-3 md:bottom-0">
             <Button variant="secondary" onClick={() => next('skip')}>
               {t('learn.skip')}

@@ -4,7 +4,7 @@ import { useCustomSets } from '../customSets/customSetsContext.ts'
 import { appStudySets } from './appStudySets.ts'
 import type { StudySet } from './types.ts'
 
-/** Todos los sets: los de la app (HSK y temas) y los del usuario, con el mismo modelo. */
+/** All sets: the app's (HSK and topics) and the user's, with the same model. */
 export function useStudySets(): readonly StudySet[] {
   const { customSets } = useCustomSets()
   return useMemo(

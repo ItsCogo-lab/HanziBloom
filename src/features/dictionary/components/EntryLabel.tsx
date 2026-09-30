@@ -5,13 +5,13 @@ import { ToneHanzi } from './ToneHanzi.tsx'
 
 type EntryLabelProps = {
   entry: Character | Word
-  /** Añade el primer significado detrás del pinyin. */
+  /** Adds the first meaning after the pinyin. */
   withMeaning?: boolean
 }
 
-/** Hanzi y pinyin (y opcionalmente el significado) en una línea, para listas y tablas. */
+/** Hanzi and pinyin (and optionally the meaning) on one line, for lists and tables. */
 export function EntryLabel({ entry, withMeaning = false }: EntryLabelProps) {
-  // Los {' '} separan las palabras al leerlo en voz alta; el hueco visual lo pone gap
+  // The {' '} separate the words when read aloud; gap provides the visual spacing
   return (
     <span className="inline-flex flex-wrap items-baseline gap-x-2">
       <ToneHanzi entry={entry} className="text-xl" />{' '}

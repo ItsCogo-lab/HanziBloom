@@ -1,8 +1,8 @@
 /**
- * Adaptador de Make Me a Hanzi, archivo `dictionary.txt` (LGPL 3.0 o posterior).
+ * Make Me a Hanzi adapter, `dictionary.txt` file (LGPL 3.0 or later).
  *
- * Responsabilidad: descomposición en componentes, etimología (semántico y
- * fonético) y radical. El radical solo se usa para comprobar el de Unihan.
+ * Responsibility: decomposition into components, etymology (semantic and
+ * phonetic) and radical. The radical is only used to check Unihan's.
  */
 import type { Etymology } from '../../../src/features/dictionary/types.ts'
 
@@ -22,14 +22,14 @@ interface RawEntry {
 }
 
 /**
- * Quita los null de la fuente: en el dataset, un dato que no existe no
- * aparece. También los espacios y saltos de línea de los extremos, que
- * alguna entrada trae por error (瓣: fonético "\n\n…辡").
+ * Removes the source's nulls: in the dataset, a value that does not exist does
+ * not appear. Also leading and trailing spaces and line breaks, which
+ * some entries contain by mistake (瓣: phonetic "\n\n…辡").
  */
 function toEtymology(raw: RawEntry['etymology']): Etymology | undefined {
   if (!raw) return undefined
   if (!ETYMOLOGY_TYPES.includes(raw.type as Etymology['type'])) {
-    throw new Error(`Make Me a Hanzi: tipo de etimología desconocido "${raw.type}"`)
+    throw new Error(`Make Me a Hanzi: unknown etymology type "${raw.type}"`)
   }
   const hint = raw.hint?.trim()
   const semantic = raw.semantic?.trim()
@@ -43,9 +43,9 @@ function toEtymology(raw: RawEntry['etymology']): Etymology | undefined {
 }
 
 /**
- * Lee `dictionary.txt` (un objeto JSON por línea) y devuelve los caracteres
- * pedidos. Una descomposición que empieza por "？" es desconocida según el
- * propio proyecto, así que no se usa.
+ * Reads `dictionary.txt` (one JSON object per line) and returns the requested
+ * characters. A decomposition starting with "？" is unknown according to the
+ * project itself, so it is not used.
  */
 export function parseMakeMeAHanzi(text: string, wanted: ReadonlySet<string>): Map<string, MakeMeAHanziCharacter> {
   const result = new Map<string, MakeMeAHanziCharacter>()

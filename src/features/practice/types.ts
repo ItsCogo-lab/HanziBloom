@@ -1,36 +1,36 @@
 import type { StudyItem, StudyItemId } from '../dictionary/studyItem.ts'
 
-/** Flashcard: se muestra el hanzi y el usuario dice si lo sabía. */
+/** Flashcard: the hanzi is shown and the user says whether they knew it. */
 export interface FlashcardExercise {
   type: 'flashcard'
   item: StudyItem
 }
 
 /**
- * Tipos de ejercicio de opción múltiple:
- * - `meaning-choice`: se muestra el hanzi y se elige su significado.
- * - `pinyin-choice`: se muestra el hanzi y se elige su pinyin.
- * - `hanzi-choice`: se muestra el significado y se elige el hanzi.
+ * Multiple-choice exercise types:
+ * - `meaning-choice`: the hanzi is shown and its meaning is picked.
+ * - `pinyin-choice`: the hanzi is shown and its pinyin is picked.
+ * - `hanzi-choice`: the meaning is shown and the hanzi is picked.
  */
 export type ChoiceExerciseType = 'meaning-choice' | 'pinyin-choice' | 'hanzi-choice'
 
-/** Opción múltiple: una de las opciones es `item` y las demás son distractores. */
+/** Multiple choice: one of the options is `item` and the rest are distractors. */
 export interface ChoiceExercise {
   type: ChoiceExerciseType
   item: StudyItem
-  /** Opciones en el orden en que se muestran. */
+  /** Options in the order they are shown. */
   options: readonly StudyItem[]
 }
 
 /**
- * Todos los tipos de ejercicio. Es una unión discriminada por `type`:
- * para añadir un ejercicio nuevo se añade aquí su interfaz.
+ * All exercise types. It is a union discriminated by `type`:
+ * to add a new exercise, add its interface here.
  */
 export type Exercise = FlashcardExercise | ChoiceExercise
 
 export type ExerciseType = Exercise['type']
 
-/** Resultado de responder un ejercicio. Con él se actualiza el progreso. */
+/** Result of answering an exercise. Progress is updated with it. */
 export interface ExerciseResult {
   itemId: StudyItemId
   exerciseType: ExerciseType

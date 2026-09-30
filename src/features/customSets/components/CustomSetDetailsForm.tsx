@@ -11,7 +11,7 @@ type CustomSetDetailsFormProps = {
   onCancel?: () => void
 }
 
-/** Nombre y descripción de un set: el mismo formulario para crear y para editar. */
+/** Name and description of a set: the same form for creating and editing. */
 export function CustomSetDetailsForm({ initial, submitLabel, onSubmit, onCancel }: CustomSetDetailsFormProps) {
   const [name, setName] = useState(initial?.name ?? '')
   const [description, setDescription] = useState(initial?.description ?? '')

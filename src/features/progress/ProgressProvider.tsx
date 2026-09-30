@@ -6,13 +6,13 @@ import { loadProgress, saveProgress } from './storage.ts'
 
 type ProgressProviderProps = {
   children: ReactNode
-  /** Dónde guardar; por defecto localStorage. Los tests pasan uno en memoria. */
+  /** Where to save; localStorage by default. Tests pass an in-memory one. */
   storage?: KeyValueStorage
 }
 
 /**
- * Guarda el progreso en el estado de React y lo sincroniza con el
- * almacenamiento: se carga una vez al arrancar y se guarda en cada cambio.
+ * Keeps progress in React state and syncs it with storage: it is loaded
+ * once at startup and saved on every change.
  */
 export function ProgressProvider({ children, storage }: ProgressProviderProps) {
   const [progress, setProgress] = useState(() => loadProgress(storage))

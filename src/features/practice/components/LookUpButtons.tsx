@@ -10,9 +10,9 @@ type LookUpButtonsProps = {
 }
 
 /**
- * Botones para abrir en el diccionario el elemento del ejercicio y, si es una
- * palabra, cada uno de sus caracteres (苹果 → 苹果, 苹, 果). Se muestran
- * después de responder, para que consultar no dé la respuesta.
+ * Buttons to open the exercise's item in the dictionary and, if it is a
+ * word, each of its characters (苹果 → 苹果, 苹, 果). They are shown after
+ * answering, so that looking up does not give away the answer.
  */
 export function LookUpButtons({ item, dictionary, onLookUp }: LookUpButtonsProps) {
   const characters =

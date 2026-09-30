@@ -17,12 +17,12 @@ import {
 } from './studySets.ts'
 import type { StudySet } from './types.ts'
 
-describe('sets de la app', () => {
-  it('son coherentes: ids únicos y todos sus elementos existen en el dataset', () => {
+describe('app sets', () => {
+  it('are consistent: unique ids and all their items exist in the dataset', () => {
     expect(validateStudySets(appStudySets, hskDictionary)).toEqual([])
   })
 
-  it('hay un set por nivel HSK del 1 al 4', () => {
+  it('there is one set per HSK level from 1 to 4', () => {
     expect(listSetsOfType(appStudySets, 'hsk').map((set) => [set.id, set.name, set.level])).toEqual([
       ['hsk-1', 'HSK 1', 1],
       ['hsk-2', 'HSK 2', 2],
@@ -32,19 +32,19 @@ describe('sets de la app', () => {
   })
 
   /*
-   * Los números salen del dataset (docs/DATA_SOURCES.md explica por qué no
-   * son exactamente 150/150/300/600). Caracteres: los nuevos de cada nivel.
+   * The numbers come from the dataset (docs/DATA_SOURCES.md explains why they
+   * are not exactly 150/150/300/600). Characters: the new ones at each level.
    */
   it.each([
     ['hsk-1', 150, 178],
     ['hsk-2', 149, 166],
     ['hsk-3', 299, 272],
     ['hsk-4', 598, 454],
-  ])('%s tiene %i palabras y %i caracteres', (setId, words, characters) => {
+  ])('%s has %i words and %i characters', (setId, words, characters) => {
     expect(countSetItems(getStudySet(appStudySets, setId)!)).toEqual({ words, characters })
   })
 
-  it('los sets HSK contienen exactamente las palabras y caracteres de su nivel', () => {
+  it('HSK sets contain exactly the words and characters of their level', () => {
     for (const level of [1, 2, 3, 4] as const) {
       const set = getStudySet(appStudySets, `hsk-${level}`)!
       const expected = [
@@ -55,13 +55,13 @@ describe('sets de la app', () => {
     }
   })
 
-  it('entre todos los sets HSK cubren el dataset entero, sin repetir', () => {
+  it('together the HSK sets cover the whole dataset, without repeats', () => {
     const ids = listSetsOfType(appStudySets, 'hsk').flatMap((set) => set.itemIds)
     expect(new Set(ids).size).toBe(ids.length)
     expect(ids).toHaveLength(allWords.length + allCharacters.length)
   })
 
-  it('hay un set por cada tema curado, con sus palabras', () => {
+  it('there is one set per curated topic, with its words', () => {
     const topics = listSetsOfType(appStudySets, 'topic')
     expect(topics.map((set) => set.id)).toEqual(topicDefinitions.map((topic) => `topic-${topic.id}`))
     expect(getStudySet(appStudySets, 'topic-food')).toMatchObject({ name: 'Food & drink', type: 'topic' })
@@ -72,8 +72,8 @@ describe('sets de la app', () => {
   })
 })
 
-describe('un elemento en varios sets', () => {
-  it('苹果 está en HSK 1 y en «Food & drink», sin copiar la palabra', () => {
+describe('an item in several sets', () => {
+  it('苹果 is in HSK 1 and in "Food & drink", without copying the word', () => {
     const sets = getSetsWithItem(appStudySets, 'word:苹果').map((set) => set.id)
     expect(sets).toEqual(['hsk-1', 'topic-food'])
 
@@ -83,11 +83,11 @@ describe('un elemento en varios sets', () => {
     const [fromTopic] = getSetItems(getStudySet(appStudySets, 'topic-food')!, hskDictionary).filter(
       (item) => item.entry.id === '苹果',
     )
-    // Es el mismo objeto del diccionario: los sets solo guardan ids
+    // It is the same dictionary object: sets only store ids
     expect(fromHsk!.entry).toBe(fromTopic!.entry)
   })
 
-  it('鱼 está en tres sets', () => {
+  it('鱼 is in three sets', () => {
     expect(getSetsWithItem(appStudySets, 'word:鱼').map((set) => set.id)).toEqual([
       'hsk-2',
       'topic-food',
@@ -96,16 +96,16 @@ describe('un elemento en varios sets', () => {
   })
 })
 
-describe('modelo StudySet', () => {
+describe('StudySet model', () => {
   const dictionary = createDictionary(testCharacters, testWords)
 
-  it('crea un set HSK a partir del diccionario', () => {
+  it('creates an HSK set from the dictionary', () => {
     const set = createHskSet(dictionary, 1)
     expect(set).toMatchObject({ id: 'hsk-1', type: 'hsk', level: 1, name: 'HSK 1' })
     expect(set.itemIds).toEqual(['word:你好', 'word:好', 'word:谢谢', 'char:你', 'char:好', 'char:谢', 'char:了'])
   })
 
-  it('admite sets propios (CUSTOM) sin cambiar nada', () => {
+  it('supports custom sets (CUSTOM) without changing anything', () => {
     const custom: StudySet = {
       id: 'custom-forgotten',
       type: 'custom',
@@ -120,7 +120,7 @@ describe('modelo StudySet', () => {
     expect(validateStudySets([custom], dictionary)).toEqual([])
   })
 
-  it('la validación encuentra elementos que no existen, repetidos e ids duplicados', () => {
+  it('validation finds items that do not exist, repeats and duplicate ids', () => {
     const broken: StudySet = {
       id: 'hsk-1',
       type: 'topic',
@@ -129,13 +129,13 @@ describe('modelo StudySet', () => {
       itemIds: ['word:不存在', 'word:谢谢', 'word:谢谢'],
     }
     expect(validateStudySets([createHskSet(dictionary, 1), broken], dictionary)).toEqual([
-      'Set "hsk-1": id duplicado',
-      'Set "hsk-1": "word:不存在" no está en el dataset',
-      'Set "hsk-1": "word:谢谢" está repetido',
+      'Set "hsk-1": duplicate id',
+      'Set "hsk-1": "word:不存在" is not in the dataset',
+      'Set "hsk-1": "word:谢谢" is repeated',
     ])
   })
 
-  it('getSetItems ignora ids que ya no existen en el diccionario', () => {
+  it('getSetItems ignores ids that no longer exist in the dictionary', () => {
     const set: StudySet = { id: 'x', type: 'custom', name: 'x', description: 'x', itemIds: ['word:谢谢', 'word:不存在'] }
     expect(getSetItems(set, dictionary)).toHaveLength(1)
   })

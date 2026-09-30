@@ -2,31 +2,30 @@ import type { StudyItemId } from '../dictionary/studyItem.ts'
 import type { HskLevel } from '../dictionary/types.ts'
 
 /**
- * De dónde sale un set:
- * - `hsk`: un nivel HSK, calculado a partir del dataset.
- * - `topic`: un tema (comida, familia...), de una lista curada a mano (src/data/topics.ts).
- * - `custom`: creado por el usuario (features/customSets).
+ * Where a set comes from:
+ * - `hsk`: an HSK level, computed from the dataset.
+ * - `topic`: a topic (food, family...), from a hand-curated list (src/data/topics.ts).
+ * - `custom`: created by the user (features/customSets).
  */
 export type StudySetType = 'hsk' | 'topic' | 'custom'
 
 /**
- * Un conjunto de elementos para estudiar. Todos los tipos de set comparten
- * este modelo, así que la interfaz, el progreso y las sesiones funcionan
- * igual con cualquiera.
+ * A collection of items to study. All set types share this model, so the UI,
+ * progress and sessions work the same with any of them.
  *
- * Un set no copia las palabras: guarda sus ids. La misma palabra puede estar
- * en varios sets (苹果 en HSK 1 y en «Food») y su progreso es uno solo.
+ * A set does not copy the words: it stores their ids. The same word can be in
+ * several sets (苹果 in HSK 1 and in "Food") and it has a single progress.
  */
 export interface StudySet {
-  /** Único entre todos los sets: "hsk-1", "topic-food", "custom-..." */
+  /** Unique among all sets: "hsk-1", "topic-food", "custom-..." */
   id: string
   type: StudySetType
   name: string
   description: string
-  /** Solo en los sets HSK. */
+  /** Only in HSK sets. */
   level?: HskLevel
-  /** Un carácter decorativo que hace de icono (no lo leen los lectores de pantalla). */
+  /** A decorative character used as an icon (not read by screen readers). */
   icon?: string
-  /** Caracteres y palabras del set, en su orden de estudio. */
+  /** Characters and words of the set, in study order. */
   itemIds: readonly StudyItemId[]
 }

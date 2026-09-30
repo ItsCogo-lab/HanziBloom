@@ -16,11 +16,11 @@ const qi = { id: '企', hanzi: '企', pinyin: ['qǐ'], meanings: { en: ['to plan
 const qie = { id: '企鹅', hanzi: '企鹅', pinyin: 'qǐ é', meanings: { en: ['penguin'] }, traditional: '企鵝' }
 
 describe('parseManifest', () => {
-  it('acepta el manifiesto del formato 1', () => {
+  it('accepts the format 1 manifest', () => {
     expect(parseManifest(manifest)).toEqual(manifest)
   })
 
-  it('rechaza otro formato, versiones raras o manifiestos incompletos', () => {
+  it('rejects other formats, odd versions or incomplete manifests', () => {
     for (const malformed of [
       null,
       { ...manifest, format: 2 },
@@ -37,7 +37,7 @@ describe('parseManifest', () => {
 })
 
 describe('parseChunk', () => {
-  it('se queda con las entradas bien formadas de su trozo', () => {
+  it('keeps the well-formed entries of its chunk', () => {
     const chunk = parseChunk(
       {
         characters: [qi, { ...qi, pinyin: 'qǐ' }, { ...qi, hskLevel: 1 }],
@@ -48,21 +48,21 @@ describe('parseChunk', () => {
     expect(chunk).toEqual({ characters: [qi], words: [qie] })
   })
 
-  it('rechaza un trozo sin la forma esperada', () => {
+  it('rejects a chunk without the expected shape', () => {
     for (const malformed of [null, [], { characters: [] }, { words: [] }]) {
       expect(() => parseChunk(malformed, 0)).toThrow(expect.objectContaining({ kind: 'invalid' }))
     }
   })
 })
 
-describe('URLs del repositorio de datos', () => {
-  it('pide el manifiesto del formato 1 y los trozos de la carpeta de su versión', () => {
+describe('data repository URLs', () => {
+  it('requests the format 1 manifest and the chunks from its version folder', () => {
     const base = 'https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v1'
     expect(manifestUrl()).toBe(`${base}/manifest.json`)
     expect(chunkUrl('1.2.3', 7)).toBe(`${base}/1.2.3/dictionary/7.json`)
   })
 
-  it('no construye URLs con versiones o trozos inválidos', () => {
+  it('does not build URLs with invalid versions or chunks', () => {
     for (const [version, index] of [
       ['1.0.0/../../other', 0],
       ['latest', 0],
@@ -75,8 +75,8 @@ describe('URLs del repositorio de datos', () => {
   })
 })
 
-describe('fetchManifest y fetchChunk', () => {
-  it('descargan y validan', async () => {
+describe('fetchManifest and fetchChunk', () => {
+  it('download and validate', async () => {
     const fake = createFakeFetch([
       [manifestUrl(), jsonResponse(manifest)],
       [chunkUrl('1.0.0', penguin), jsonResponse({ characters: [qi], words: [qie] })],
@@ -88,7 +88,7 @@ describe('fetchManifest y fetchChunk', () => {
     expect(await fetchChunk('1.0.0', penguin, { fetchFn: fake.fetch })).toEqual({ characters: [qi], words: [qie] })
   })
 
-  it('el manifiesto se revalida siempre con el servidor (jsDelivr lo manda con max-age de 7 días)', async () => {
+  it('the manifest is always revalidated with the server (jsDelivr sends it with a 7-day max-age)', async () => {
     const calls: RequestInit[] = []
     const fetchFn = (async (_url: string, init: RequestInit) => {
       calls.push(init)
@@ -98,7 +98,7 @@ describe('fetchManifest y fetchChunk', () => {
     expect(calls[0]?.cache).toBe('no-cache')
   })
 
-  it('pasan los errores HTTP clasificados', async () => {
+  it('pass through classified HTTP errors', async () => {
     const fake = createFakeFetch([[/./, new Response('', { status: 503 })]])
     await expect(fetchManifest({ fetchFn: fake.fetch })).rejects.toMatchObject({ kind: 'http', status: 503 })
   })

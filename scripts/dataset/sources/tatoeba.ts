@@ -1,39 +1,39 @@
 /**
- * Adaptador de Tatoeba (frases CC BY 2.0 FR).
+ * Tatoeba adapter (CC BY 2.0 FR sentences).
  *
- * Responsabilidad: elegir frases de ejemplo en chino con traducción al inglés
- * para las palabras del dataset. Lee las exportaciones por idioma de
+ * Responsibility: choosing Chinese example sentences with an English translation
+ * for the dataset's words. Reads the per-language exports from
  * https://downloads.tatoeba.org/exports/per_language/:
  *
- * - cmn_sentences_detailed.tsv y eng_sentences_detailed.tsv:
- *   id, idioma, texto, usuario, fecha de alta, fecha de cambio.
- * - cmn-eng_links.tsv: pares de ids (frase china, traducción inglesa).
+ * - cmn_sentences_detailed.tsv and eng_sentences_detailed.tsv:
+ *   id, language, text, user, date added, date modified.
+ * - cmn-eng_links.tsv: id pairs (Chinese sentence, English translation).
  *
- * No se genera ni se modifica ninguna frase: se copian tal cual.
+ * No sentence is generated or modified: they are copied as is.
  */
 import type { ExampleSentence } from '../../../src/features/dictionary/types.ts'
 
 export interface TatoebaSentence {
   id: number
   text: string
-  /** Undefined si la frase es huérfana (sin autor). */
+  /** Undefined if the sentence is orphaned (no author). */
   author?: string
 }
 
-/** Tatoeba usa "\N" para los valores vacíos (frases huérfanas, sin autor). */
+/** Tatoeba uses "\N" for empty values (orphaned sentences, no author). */
 const NULL_VALUE = '\\N'
 
-/** Frases de ejemplo por palabra como máximo. */
+/** Maximum example sentences per word. */
 export const MAX_EXAMPLES_PER_WORD = 3
 
-/** Longitud máxima de una frase de ejemplo, en caracteres. Las cortas son más fáciles de leer. */
+/** Maximum length of an example sentence, in characters. Short ones are easier to read. */
 export const MAX_SENTENCE_LENGTH = 16
 
 const HAN = /\p{Script=Han}/u
-/** Letras latinas y dígitos: suelen ser nombres propios o cifras que distraen. */
+/** Latin letters and digits: usually proper nouns or numbers that distract. */
 const LATIN_OR_DIGIT = /[A-Za-z0-9Ａ-Ｚａ-ｚ０-９]/
 
-/** Lee una línea de `*_sentences_detailed.tsv`. */
+/** Reads a line of `*_sentences_detailed.tsv`. */
 export function parseSentenceLine(line: string): TatoebaSentence | undefined {
   const [id, , text, author] = line.split('\t')
   const numericId = Number(id)
@@ -41,7 +41,7 @@ export function parseSentenceLine(line: string): TatoebaSentence | undefined {
   return { id: numericId, text, ...(author && author !== NULL_VALUE && { author }) }
 }
 
-/** Lee una línea de `cmn-eng_links.tsv`: [id de la frase china, id de la traducción]. */
+/** Reads a line of `cmn-eng_links.tsv`: [Chinese sentence id, translation id]. */
 export function parseLinkLine(line: string): [number, number] | undefined {
   const [from, to] = line.split('\t').map(Number)
   if (!from || !to) return undefined
@@ -49,10 +49,10 @@ export function parseLinkLine(line: string): [number, number] | undefined {
 }
 
 /**
- * Si una frase sirve de ejemplo: corta, sin letras latinas ni cifras, y con
- * todos sus caracteres chinos dentro de los que se estudian (así el alumno
- * puede leerla entera). Las frases chinas huérfanas (sin autor) no se usan:
- * nadie responde de ellas en Tatoeba.
+ * Whether a sentence works as an example: short, with no Latin letters or digits, and
+ * with all its Chinese characters among those being studied (so the learner
+ * can read it in full). Orphaned Chinese sentences (no author) are not used:
+ * nobody vouches for them on Tatoeba.
  */
 export function isUsableSentence(text: string, knownCharacters: ReadonlySet<string>): boolean {
   const symbols = Array.from(text)
@@ -61,19 +61,19 @@ export function isUsableSentence(text: string, knownCharacters: ReadonlySet<stri
 }
 
 export interface ExampleInputs {
-  /** Palabras del dataset, en su orden. */
+  /** The dataset's words, in order. */
   words: readonly string[]
   knownCharacters: ReadonlySet<string>
   chinese: ReadonlyMap<number, TatoebaSentence>
   english: ReadonlyMap<number, TatoebaSentence>
-  /** Traducciones inglesas de cada frase china. */
+  /** English translations of each Chinese sentence. */
   translations: ReadonlyMap<number, readonly number[]>
 }
 
 /**
- * Elige hasta MAX_EXAMPLES_PER_WORD frases por palabra. Criterio
- * determinista: las más cortas primero y, a igual longitud, la de id más
- * bajo. Como traducción se usa la de id más bajo.
+ * Chooses up to MAX_EXAMPLES_PER_WORD sentences per word. Deterministic
+ * criterion: shortest first and, at equal length, the one with the lowest
+ * id. The translation with the lowest id is used.
  */
 export function selectExamples(inputs: ExampleInputs): ExampleSentence[] {
   const { words, knownCharacters, chinese, english, translations } = inputs

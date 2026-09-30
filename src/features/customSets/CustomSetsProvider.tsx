@@ -22,9 +22,9 @@ type CustomSetsProviderProps = {
 }
 
 /**
- * Igual que ProgressProvider: carga al arrancar y guarda en cada cambio. Es
- * el único sitio que sabe dónde se guardan los sets: cambiarlo por un
- * servidor no afectaría a las páginas.
+ * Same as ProgressProvider: loads on startup and saves on every change. It is
+ * the only place that knows where the sets are saved: switching it to a
+ * server would not affect the pages.
  */
 export function CustomSetsProvider({ children, storage }: CustomSetsProviderProps) {
   const [customSets, setCustomSets] = useState(() => loadCustomSets(storage))
@@ -46,7 +46,7 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
       },
       updateDetails: (setId, details) => update(setId, (set) => ({ ...set, ...details })),
       deleteSet: (setId) => setCustomSets((current) => deleteCustomSet(current, setId)),
-      // Solo se añaden elementos que existen en el diccionario (ya cargados: se han encontrado al buscar)
+      // Only items that exist in the dictionary are added (already loaded: they were found by searching)
       addItem: (setId, itemId) => {
         if (getStudyItem(dictionaryStore.getSnapshot(), itemId)) update(setId, (set) => addItem(set, itemId))
       },

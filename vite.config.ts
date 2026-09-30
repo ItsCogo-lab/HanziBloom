@@ -11,8 +11,8 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
-            // El dataset (src/data) va en su propio archivo: cambia poco, así
-            // que el navegador lo reutiliza de su caché aunque cambie el código.
+            // The dataset (src/data) goes in its own file: it rarely changes, so
+            // the browser reuses it from its cache even when the code changes.
             { name: 'dataset', test: /[\\/]src[\\/]data[\\/]/ },
           ],
         },

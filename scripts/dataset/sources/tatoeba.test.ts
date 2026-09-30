@@ -25,22 +25,22 @@ const chinese = sentences(cmnSentencesFixture)
 const english = sentences(engSentencesFixture)
 const translations = links(cmnEngLinksFixture)
 
-describe('adaptador de Tatoeba', () => {
-  it('lee las líneas de frases y de enlaces', () => {
+describe('Tatoeba adapter', () => {
+  it('reads sentence and link lines', () => {
     expect(chinese.get(8934441)).toEqual({ id: 8934441, text: '柠檬很酸。', author: 'iiujik' })
     expect(english.get(29487)).toEqual({ id: 29487, text: 'Lemon is sour.' })
     expect(parseLinkLine('8934441\t29487')).toEqual([8934441, 29487])
     expect(parseSentenceLine('x\tcmn\t\t\\N')).toBeUndefined()
   })
 
-  it('solo acepta frases cortas con caracteres conocidos y sin letras latinas', () => {
+  it('only accepts short sentences with known characters and no Latin letters', () => {
     const known = new Set(Array.from('柠檬很酸'))
     expect(isUsableSentence('柠檬很酸。', known)).toBe(true)
     expect(isUsableSentence('柠檬很酸，很好。', known)).toBe(false)
     expect(isUsableSentence('Tom很酸。', known)).toBe(false)
   })
 
-  it('elige para 柠檬 la frase de Tatoeba con su traducción y atribución', () => {
+  it('chooses the Tatoeba sentence for 柠檬 with its translation and attribution', () => {
     const examples = selectExamples({
       words: ['柠檬'],
       knownCharacters: new Set(Array.from('柠檬很酸')),
@@ -60,7 +60,7 @@ describe('adaptador de Tatoeba', () => {
     ])
   })
 
-  it('reúne en una frase todas las palabras para las que se eligió', () => {
+  it('gathers in one sentence all the words it was chosen for', () => {
     const examples = selectExamples({
       words: ['谢谢', '你'],
       knownCharacters: new Set(Array.from('谢你')),
@@ -73,7 +73,7 @@ describe('adaptador de Tatoeba', () => {
     ])
   })
 
-  it('no usa frases chinas huérfanas', () => {
+  it('does not use orphaned Chinese sentences', () => {
     const examples = selectExamples({
       words: ['你们'],
       knownCharacters: new Set(Array.from('你们好吗')),

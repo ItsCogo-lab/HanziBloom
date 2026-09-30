@@ -16,8 +16,8 @@ import { StudyLayout } from '../pages/study/StudyLayout.tsx'
 import { AppLayout } from './layout/AppLayout.tsx'
 
 /**
- * Mapa de rutas de la aplicación. Está separado de <App> para poder
- * probarlo en los tests con un MemoryRouter en lugar del router del navegador.
+ * The app's route map. It is kept separate from <App> so tests can
+ * exercise it with a MemoryRouter instead of the browser router.
  */
 export function AppRoutes() {
   return (
@@ -39,7 +39,7 @@ export function AppRoutes() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="progress" element={<ProgressPage />} />
         <Route path="settings" element={<SettingsPage />} />
-        {/* Direcciones antiguas: siguen funcionando */}
+        {/* Old URLs: they still work */}
         <Route path="practice" element={<Navigate to="/study/practice" replace />} />
         <Route path="vocabulary" element={<Navigate to="/dictionary?kind=word" replace />} />
         <Route path="characters" element={<Navigate to="/dictionary?kind=character" replace />} />

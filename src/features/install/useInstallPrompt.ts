@@ -10,11 +10,11 @@ import {
 import { getInstallPrompt, showInstallPrompt, subscribeToInstallPrompt } from './nativeInstallPrompt.ts'
 
 export type InstallPromptState = {
-  /** Cómo se puede instalar aquí; `undefined` si no se puede o ya está instalada. */
+  /** How it can be installed here; `undefined` if it can't or is already installed. */
   mode: InstallMode | undefined
-  /** La persona ya cerró el aviso (Ajustes sigue ofreciendo instalar). */
+  /** The person already dismissed the banner (Settings still offers installation). */
   dismissed: boolean
-  /** Abre el diálogo nativo del navegador (solo en modo `native`). */
+  /** Opens the browser's native dialog (only in `native` mode). */
   install: () => Promise<void>
   dismiss: () => void
 }
@@ -33,7 +33,7 @@ export function useInstallPrompt(): InstallPromptState {
     dismissed,
     install: async () => {
       const accepted = await showInstallPrompt()
-      // Si dice que no en el diálogo del navegador, no volvemos a insistir
+      // If they say no in the browser dialog, we don't ask again
       if (!accepted) dismiss()
     },
     dismiss,

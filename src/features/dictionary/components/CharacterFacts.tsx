@@ -14,8 +14,8 @@ type CharacterFactsProps = {
 }
 
 /**
- * Datos del carácter (tradicional, radical, trazos, componentes, nivel) y su
- * etimología. Cada fila aparece solo si el dataset tiene ese dato.
+ * Character facts (traditional, radical, strokes, components, level) and its
+ * etymology. Each row appears only if the dataset has that data.
  */
 export function CharacterFacts({ character, dictionary, opener }: CharacterFactsProps) {
   const link = (hanzi: string) => (

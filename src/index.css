@@ -1,36 +1,36 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens de HanziBloom.
- * Tailwind v4 genera utilidades a partir de estas variables:
+ * HanziBloom design tokens.
+ * Tailwind v4 generates utilities from these variables:
  * --color-ink → text-ink, bg-ink, border-ink...
- * Cambiar la identidad visual = cambiar estos valores, no los componentes.
+ * Changing the visual identity = changing these values, not the components.
  */
 @theme {
-  /* Papel cálido de fondo y tinta para el texto: pensado para sesiones largas */
+  /* Warm paper background and ink for text: designed for long sessions */
   --color-paper: #fbf8f3;
   --color-surface: #ffffff;
   --color-ink: #1f1d1a;
   --color-ink-muted: #5f5a52;
   --color-line: #e7e1d7;
 
-  /* Acento bermellón (朱红), con variante oscura para texto sobre fondo claro */
+  /* Vermilion accent (朱红), with a dark variant for text on a light background */
   --color-accent: #b4412f;
   --color-accent-strong: #8f3222;
   --color-accent-soft: #f6e4df;
-  /* Texto sobre un fondo de color (botones, la ficha de la partícula) */
+  /* Text on a colored background (buttons, the particle chip) */
   --color-on-accent: #ffffff;
-  /* Velo detrás de un panel que se abre encima del contenido */
+  /* Scrim behind a panel that opens over the content */
   --color-backdrop: rgb(31 29 26 / 0.3);
 
-  /* Estados de respuesta */
+  /* Answer states */
   --color-success: #2f7d4f;
   --color-danger: #b3261e;
 
   /*
-   * Colores de los tonos (rojo, naranja, verde, azul, gris). Todos tienen un
-   * contraste de 4,5:1 o más sobre el fondo, como el texto normal. El color
-   * nunca es la única pista: el pinyin siempre lleva la marca de tono.
+   * Tone colors (red, orange, green, blue, gray). All have a contrast of
+   * 4.5:1 or more against the background, like normal text. Color is never
+   * the only cue: the pinyin always carries the tone mark.
    */
   --color-tone-1: #c62828;
   --color-tone-2: #b45309;
@@ -39,17 +39,17 @@
   --color-tone-5: #6b7280;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  /* Fuentes chinas del sistema: sin descargas y funciona sin conexión */
+  /* System Chinese fonts: no downloads and works offline */
   --font-hanzi: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
 }
 
 /*
- * Tema oscuro: los mismos tokens con otros valores, así que ningún componente
- * necesita clases «dark:». Fondo de piedra de tinta (墨) en vez de negro puro,
- * que cansa menos. Todos los textos (tonos incluidos) tienen un contraste de
- * 4,5:1 o más sobre el fondo, la superficie y el fondo suave del acento. El
- * acento y los tonos se aclaran; sobre un relleno de acento el texto pasa a
- * ser oscuro. El tema lo pone index.html (y luego la app) en <html data-theme>.
+ * Dark theme: the same tokens with other values, so no component needs
+ * "dark:" classes. Inkstone (墨) background instead of pure black, which is
+ * less tiring. All text (tones included) has a contrast of 4.5:1 or more
+ * against the background, the surface and the soft accent background. The
+ * accent and the tones get lighter; on an accent fill the text turns dark.
+ * The theme is set on <html data-theme> by index.html (and then the app).
  */
 html[data-theme='dark'] {
   color-scheme: dark;
@@ -77,9 +77,9 @@ html[data-theme='dark'] {
 }
 
 /*
- * Alto de la barra de navegación inferior en móvil, más la franja del sistema
- * en los iPhone sin botón (safe-area). Lo usan el contenido y los botones fijos
- * para no quedar tapados.
+ * Height of the bottom navigation bar on mobile, plus the system strip on
+ * iPhones without a home button (safe-area). Content and fixed buttons use it
+ * so they don't get covered.
  */
 :root {
   --mobile-nav-height: calc(3.5rem + env(safe-area-inset-bottom));
@@ -88,25 +88,25 @@ html[data-theme='dark'] {
 @layer base {
   html {
     @apply bg-paper font-sans text-ink antialiased;
-    /* En móvil, al mover el foco el navegador deja sitio para la barra inferior fija */
+    /* On mobile, when moving focus the browser leaves room for the fixed bottom bar */
     @apply scroll-pb-24 md:scroll-pb-0;
-    /* Sin el recuadro gris que pinta el móvil al tocar un enlace o botón */
+    /* No gray box painted by mobile browsers when tapping a link or button */
     -webkit-tap-highlight-color: transparent;
-    /* Que el navegador no agrande el texto por su cuenta al girar el móvil */
+    /* Stop the browser from enlarging text on its own when the phone is rotated */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
   /*
-   * En móvil todo va un poco más apretado: con la raíz a 15px, textos,
-   * márgenes y paddings (todos en rem) se reducen a la vez y en proporción.
+   * On mobile everything is a bit tighter: with the root at 15px, text,
+   * margins and paddings (all in rem) shrink together and in proportion.
    */
   @media (width < 48rem) {
     html {
       font-size: 15px;
     }
 
-    /* Safari en iPhone hace zoom al escribir en un campo de menos de 16px (en px, no en rem) */
+    /* Safari on iPhone zooms in when typing in a field under 16px (in px, not rem) */
     input,
     select,
     textarea {
@@ -114,7 +114,7 @@ html[data-theme='dark'] {
     }
   }
 
-  /* Foco siempre visible al navegar con teclado */
+  /* Focus always visible when navigating with the keyboard */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }

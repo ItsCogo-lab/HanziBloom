@@ -3,8 +3,8 @@ import type { LoadChunk } from '../features/dictionary/dictionaryStore.ts'
 import type { Character, Word } from '../features/dictionary/types.ts'
 
 /*
- * Entradas reales del diccionario completo (HanziDict 1.0.0), copiadas tal
- * cual: 企鹅 no está en HSK 1-4, ni sus caracteres 企 y 鹅.
+ * Real entries from the full dictionary (HanziDict 1.0.0), copied verbatim:
+ * 企鹅 is not in HSK 1-4, nor are its characters 企 and 鹅.
  */
 export const qiCharacter: Character = {
   id: '企',
@@ -33,7 +33,7 @@ export const eCharacter: Character = {
 
 export const qieWord: Word = { id: '企鹅', hanzi: '企鹅', pinyin: 'qǐ é', meanings: { en: ['penguin'] }, traditional: '企鵝' }
 
-/** Un diccionario completo de prueba, repartido en trozos como el de verdad. */
+/** A test full dictionary, split into chunks like the real one. */
 export function createChunkLoader(
   characters: readonly Character[] = [qiCharacter, eCharacter],
   words: readonly Word[] = [qieWord],

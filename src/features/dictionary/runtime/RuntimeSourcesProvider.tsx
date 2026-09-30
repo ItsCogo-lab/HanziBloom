@@ -5,20 +5,20 @@ import { RuntimeSourcesContext } from './runtimeSourcesContext.ts'
 
 type RuntimeSourcesProviderProps = {
   children: ReactNode
-  /** Dónde se guardan las respuestas; por defecto IndexedDB. */
+  /** Where responses are stored; IndexedDB by default. */
   cache?: DictionaryCache
-  /** Por defecto, el fetch del navegador. Los tests pasan uno falso. */
+  /** By default, the browser's fetch. Tests pass a fake one. */
   fetchFn?: typeof fetch
 }
 
-/** Da a la app el servicio que consulta las fuentes externas (diccionario completo, trazos, frases). */
+/** Gives the app the service that queries external sources (full dictionary, strokes, sentences). */
 export function RuntimeSourcesProvider({ children, cache, fetchFn }: RuntimeSourcesProviderProps) {
   const [sources] = useState(() => {
     const store = cache ?? createBrowserCache()
     return {
       resources: createResourceService(store),
       cache: store,
-      // Sin enlazar, algunos navegadores lanzan "Illegal invocation"
+      // Without binding, some browsers throw "Illegal invocation"
       fetchFn: fetchFn ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init)),
     }
   })

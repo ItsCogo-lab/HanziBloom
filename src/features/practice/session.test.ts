@@ -19,25 +19,25 @@ import type { Exercise } from './types.ts'
 const pool = listStudyItems(createDictionary(testCharacters, testWords))
 
 describe('createSessionExercises', () => {
-  it('crea tantos ejercicios como el tamaño pedido, sin repetir elementos', () => {
+  it('creates as many exercises as the requested size, without repeating items', () => {
     const exercises = createSessionExercises(pool, { size: 5, random: seededRandom(1) })
 
     expect(exercises).toHaveLength(5)
     expect(new Set(exercises.map((exercise) => exercise.item)).size).toBe(5)
   })
 
-  it('crea menos ejercicios si no hay elementos suficientes', () => {
+  it('creates fewer exercises if there are not enough items', () => {
     expect(createSessionExercises(pool, { size: 100, random: seededRandom(1) })).toHaveLength(pool.length)
   })
 
-  it('con la misma semilla crea la misma sesión', () => {
+  it('creates the same session with the same seed', () => {
     const first = createSessionExercises(pool, { size: 4, random: seededRandom(3) })
     const second = createSessionExercises(pool, { size: 4, random: seededRandom(3) })
 
     expect(first).toEqual(second)
   })
 
-  it('omite los elementos para los que ningún ejercicio se puede construir', () => {
+  it('skips items for which no exercise can be built', () => {
     const onlyWords: ExerciseDefinition = {
       type: 'flashcard',
       canBuild: (item) => item.kind === 'word',
@@ -55,7 +55,7 @@ describe('selectSessionItems', () => {
   const thursday = new Date(2026, 9, 1, 10, 0)
   const ids = (items: readonly StudyItem[]) => items.map(getStudyItemId).toSorted()
 
-  // 你 y 好 se fallaron (pendientes ya); 谢 y 了 se acertaron (pendientes desde mañana)
+  // 你 and 好 were missed (already due); 谢 and 了 were answered correctly (due from tomorrow)
   let progress = createEmptyProgress()
   for (const [id, correct] of [
     ['char:你', false],
@@ -66,22 +66,22 @@ describe('selectSessionItems', () => {
     progress = recordAnswer(progress, id, correct, monday)
   }
 
-  it('pone primero los repasos pendientes', () => {
+  it('puts due reviews first', () => {
     expect(ids(selectSessionItems(pool, progress, monday, 2, seededRandom(1)))).toEqual(['char:你', 'char:好'])
   })
 
-  it('después los elementos nuevos', () => {
+  it('then the new items', () => {
     expect(ids(selectSessionItems(pool, progress, monday, 5, seededRandom(1)))).toEqual(
       ['char:你', 'char:好', 'word:你好', 'word:好', 'word:谢谢'].toSorted(),
     )
   })
 
-  it('y, si faltan, los que aún no tocaban', () => {
+  it('and, if still short, the ones not yet due', () => {
     expect(selectSessionItems(pool, progress, monday, 100, seededRandom(1))).toHaveLength(pool.length)
   })
 
-  it('los básicos nunca son pendientes y van detrás de todo lo demás', () => {
-    // 你 era un fallo pendiente, pero con HSK 3 pasa a básico
+  it('basic items are never due and go after everything else', () => {
+    // 你 was a due miss, but with HSK 3 it becomes basic
     const withBasic = applyHskLevel(progress, [{ itemId: 'char:你', hskLevel: 1 }], 3, monday)
     const items = pool.filter((item) => withBasic.items[getStudyItemId(item)] !== undefined)
 
@@ -90,7 +90,7 @@ describe('selectSessionItems', () => {
     )
   })
 
-  it('cuando llega su fecha, los acertados también son repasos pendientes', () => {
+  it('when their date arrives, correctly answered items are also due reviews', () => {
     expect(ids(selectSessionItems(pool, progress, thursday, 4, seededRandom(1)))).toEqual(
       ['char:你', 'char:好', 'char:谢', 'char:了'].toSorted(),
     )
@@ -100,7 +100,7 @@ describe('selectSessionItems', () => {
 describe('sessionReducer', () => {
   const exercises: Exercise[] = pool.slice(0, 2).map((item) => ({ type: 'flashcard', item }))
 
-  it('al responder, guarda el resultado y pasa al siguiente ejercicio', () => {
+  it('on answering, stores the result and moves to the next exercise', () => {
     const state = sessionReducer(createSessionState(exercises), { type: 'answer', correct: true })
 
     expect(state.currentIndex).toBe(1)
@@ -108,7 +108,7 @@ describe('sessionReducer', () => {
     expect(getCurrentExercise(state)).toBe(exercises[1])
   })
 
-  it('termina cuando se han respondido todos los ejercicios', () => {
+  it('finishes when all exercises have been answered', () => {
     let state = createSessionState(exercises)
     state = sessionReducer(state, { type: 'answer', correct: true })
     expect(isSessionFinished(state)).toBe(false)
@@ -118,7 +118,7 @@ describe('sessionReducer', () => {
     expect(getCurrentExercise(state)).toBeUndefined()
   })
 
-  it('ignora respuestas cuando la sesión ya ha terminado', () => {
+  it('ignores answers once the session has finished', () => {
     const finished = { ...createSessionState(exercises), currentIndex: 2 }
 
     expect(sessionReducer(finished, { type: 'answer', correct: true })).toBe(finished)
@@ -126,7 +126,7 @@ describe('sessionReducer', () => {
 })
 
 describe('summarizeResults', () => {
-  it('cuenta aciertos y fallos', () => {
+  it('counts correct and wrong answers', () => {
     const summary = summarizeResults([
       { itemId: 'char:你', exerciseType: 'flashcard', correct: true },
       { itemId: 'word:好', exerciseType: 'flashcard', correct: false },
@@ -136,7 +136,7 @@ describe('summarizeResults', () => {
     expect(summary).toEqual({ total: 3, correct: 2, wrong: 1 })
   })
 
-  it('funciona con una sesión vacía', () => {
+  it('works with an empty session', () => {
     expect(summarizeResults([])).toEqual({ total: 0, correct: 0, wrong: 0 })
   })
 })

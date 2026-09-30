@@ -8,16 +8,16 @@ type ToneHanziProps = {
   entry: Character | Word
   className?: string
   /**
-   * `false` para no colorear aunque el ajuste esté activado: en un ejercicio
-   * que pregunta la pronunciación, el color daría la respuesta.
+   * `false` to skip coloring even if the setting is on: in an exercise
+   * that asks for the pronunciation, the color would give away the answer.
    */
   showTones?: boolean
 }
 
 /**
- * El hanzi de una entrada con cada carácter coloreado según su tono
- * (getCharacterTones). Los caracteres sin tono seguro quedan del color
- * normal. El color es un apoyo visual: el pinyin con marcas va siempre al lado.
+ * An entry's hanzi with each character colored by its tone
+ * (getCharacterTones). Characters without a certain tone keep the normal
+ * color. Color is a visual aid: the pinyin with marks is always alongside.
  */
 export function ToneHanzi({ entry, className = '', showTones = true }: ToneHanziProps) {
   const { toneColors } = useSettings().settings

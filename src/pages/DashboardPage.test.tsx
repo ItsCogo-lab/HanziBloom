@@ -14,13 +14,13 @@ function renderDashboard(progress: ProgressData = createEmptyProgress()) {
   renderWithProviders(<DashboardPage />, { storage })
 }
 
-/** Valor de una cifra del resumen, buscándola por su etiqueta. */
+/** Value of a summary figure, found by its label. */
 function getStat(label: string) {
   return screen.getByText(label, { selector: 'dt' }).nextElementSibling?.textContent
 }
 
 describe('DashboardPage', () => {
-  it('a un usuario nuevo le da la bienvenida y todo a cero', () => {
+  it('welcomes a new user with everything at zero', () => {
     renderDashboard()
 
     expect(screen.getByText(/start your first session/)).toBeInTheDocument()
@@ -30,10 +30,10 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
-  it('muestra los repasos pendientes, lo estudiado y la racha', () => {
+  it('shows due reviews, what was studied and the streak', () => {
     const now = new Date()
-    let progress = recordAnswer(createEmptyProgress(), 'char:你', false, now) // pendiente hoy
-    progress = recordAnswer(progress, 'word:谢谢', true, now) // pendiente mañana
+    let progress = recordAnswer(createEmptyProgress(), 'char:你', false, now) // due today
+    progress = recordAnswer(progress, 'word:谢谢', true, now) // due tomorrow
 
     renderDashboard(progress)
 
@@ -45,7 +45,7 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('progressbar', { name: /^Words: 1 of 1196 studied/ })).toBeInTheDocument()
   })
 
-  it('sin repasos pendientes propone aprender elementos nuevos', () => {
+  it('with no due reviews suggests learning new items', () => {
     renderDashboard(recordAnswer(createEmptyProgress(), 'char:你', true, new Date()))
 
     expect(screen.getByText(/teach you new items/)).toBeInTheDocument()

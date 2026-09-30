@@ -2,27 +2,27 @@ import type { Tone } from '../../lib/tones.ts'
 import type { StudyItemId } from '../dictionary/studyItem.ts'
 
 /**
- * Un set creado por el usuario, tal como se guarda. Solo guarda ids de
- * elementos del diccionario: nunca copia ni cambia hanzi, pinyin ni
- * significados, que siguen saliendo del dataset. Es JSON puro, así que se
- * puede exportar o mandar a un servidor más adelante sin cambiarlo.
+ * A set created by the user, as it is saved. It only stores dictionary item
+ * ids: it never copies or changes hanzi, pinyin or meanings, which still come
+ * from the dataset. It is plain JSON, so it can be exported or sent to a
+ * server later without changing it.
  */
 export interface CustomSet {
-  /** "custom-" + un id aleatorio; único entre todos los sets. */
+  /** "custom-" + a random id; unique among all sets. */
   id: string
   name: string
-  /** Opcional: puede estar vacía. */
+  /** Optional: may be empty. */
   description: string
   itemIds: StudyItemId[]
   /**
-   * Significados propios del usuario para elementos de este set. Son notas
-   * suyas: el significado del diccionario no cambia, y el mismo elemento en
-   * otro set tiene sus propias notas.
+   * The user's own meanings for items in this set. They are the user's notes:
+   * the dictionary meaning does not change, and the same item in another set
+   * has its own notes.
    */
   meanings: Partial<Record<StudyItemId, string>>
-  /** Frases de ejemplo del usuario. Como los significados, solo existen en este set. */
+  /** The user's example sentences. Like the meanings, they only exist in this set. */
   sentences: CustomSentence[]
-  /** Fechas ISO 8601. */
+  /** ISO 8601 dates. */
   createdAt: string
   updatedAt: string
 }
@@ -33,34 +33,34 @@ export interface CustomSetDetails {
 }
 
 /**
- * Un trozo de una frase: un carácter chino con su lectura, o un texto que no
- * es chino (puntuación, espacios, letras), que se muestra tal cual y sin tono.
+ * A token of a sentence: a Chinese character with its reading, or non-Chinese
+ * text (punctuation, spaces, letters), which is shown as is and without tone.
  */
 export interface SentenceToken {
   text: string
-  /** Solo en caracteres chinos: la sílaba con marca de tono ("píng"). */
+  /** Only on Chinese characters: the syllable with a tone mark ("píng"). */
   pinyin?: string
-  /** El tono de esa sílaba; falta si no se puede saber. */
+  /** The tone of that syllable; missing if it cannot be known. */
   tone?: Tone
   /**
-   * El motor de pinyin no puede asegurar la lectura en este contexto (un
-   * carácter con varias lecturas fuera de una palabra conocida). Se muestra
-   * marcado y sin color hasta que el usuario elige entre `candidates`.
+   * The pinyin engine cannot be sure of the reading in this context (a
+   * character with several readings outside a known word). It is shown
+   * marked and without color until the user picks among `candidates`.
    */
   uncertain?: boolean
-  /** Lecturas posibles del carácter, para que el usuario elija. */
+  /** Possible readings of the character, for the user to pick from. */
   candidates?: string[]
 }
 
 /**
- * Una frase del usuario. Solo escribe el chino; el pinyin y los tonos se
- * generan y se guardan aparte (en `tokens`), para no depender del motor al
- * mostrarla.
+ * A user sentence. The user only writes the Chinese; the pinyin and tones are
+ * generated and saved separately (in `tokens`), so displaying it does not
+ * depend on the engine.
  */
 export interface CustomSentence {
-  /** "sentence-" + un id aleatorio. */
+  /** "sentence-" + a random id. */
   id: string
-  /** El elemento del set al que acompaña; si falta, es una frase del set. */
+  /** The set item it belongs to; if missing, it is a sentence of the whole set. */
   itemId?: StudyItemId
   chinese: string
   tokens: SentenceToken[]

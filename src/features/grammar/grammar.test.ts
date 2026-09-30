@@ -18,7 +18,7 @@ function word(hanzi: string, pinyin: string): Word {
 const ids = (points: { id: string }[]) => points.map((point) => point.id)
 
 describe('getGrammarPoints', () => {
-  it('da todos los usos de la partícula en la ficha del carácter, sea cual sea su lectura', () => {
+  it('gives every use of the particle on the character entry, whatever its reading', () => {
     expect(ids(getGrammarPoints({ kind: 'character', entry: character('了', ['le', 'liǎo']) }))).toEqual([
       'le-completion',
       'le-change',
@@ -28,27 +28,27 @@ describe('getGrammarPoints', () => {
     ])
   })
 
-  it('en una palabra, solo si se lee como la partícula (sin contar el tono)', () => {
+  it('on a word, only if it is read as the particle (ignoring tone)', () => {
     expect(ids(getGrammarPoints({ kind: 'word', entry: word('得', 'de') }))).toEqual(['de-degree'])
     expect(getGrammarPoints({ kind: 'word', entry: word('得', 'děi') })).toEqual([])
     expect(getGrammarPoints({ kind: 'word', entry: word('地', 'dì') })).toEqual([])
     expect(ids(getGrammarPoints({ kind: 'word', entry: word('过', 'guò') }))).toEqual(['guo-experience'])
   })
 
-  it('no da nada para entradas que no son partículas', () => {
+  it("gives nothing for entries that aren't particles", () => {
     expect(getGrammarPoints({ kind: 'word', entry: word('的确', 'díquè') })).toEqual([])
     expect(getGrammarPoints({ kind: 'character', entry: character('好', ['hǎo']) })).toEqual([])
   })
 })
 
-describe('notas de gramática de la app', () => {
+describe("the app's grammar notes", () => {
   const tatoeba = new Map(
     [hsk1Examples, hsk2Examples, hsk3Examples, hsk4Examples].flatMap((set) =>
       set.sentences.map((sentence) => [sentence.tatoebaId, sentence] as const),
     ),
   )
 
-  it('tienen ids únicos, enlace a la Grammar Wiki y ejemplos', () => {
+  it('have unique ids, a Grammar Wiki link and examples', () => {
     expect(new Set(ids([...grammarPoints])).size).toBe(grammarPoints.length)
     for (const point of grammarPoints) {
       expect(point.reference.url).toMatch(/^https:\/\/resources\.allsetlearning\.com\/chinese\/grammar\/ASG\w+$/)
@@ -57,7 +57,7 @@ describe('notas de gramática de la app', () => {
     }
   })
 
-  it('usan frases de Tatoeba copiadas tal cual de public/examples/ que contienen la partícula', () => {
+  it('use Tatoeba sentences copied verbatim from public/examples/ that contain the particle', () => {
     for (const point of grammarPoints) {
       for (const example of point.examples) {
         const source = tatoeba.get(example.tatoebaId)

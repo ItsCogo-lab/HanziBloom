@@ -12,7 +12,7 @@ export function isChineseCharacter(character: string): boolean {
 
 export type SentenceProblem = 'emptySentence' | 'noChinese' | 'sentenceTooLong'
 
-/** La frase ya limpia, o el problema que tiene. Debe tener al menos un carácter chino. */
+/** The sentence, already cleaned up, or the problem with it. It must have at least one Chinese character. */
 export function validateSentence(chinese: string): { chinese: string } | { problem: SentenceProblem } {
   const trimmed = chinese.trim()
   if (trimmed === '') return { problem: 'emptySentence' }
@@ -22,9 +22,9 @@ export function validateSentence(chinese: string): { chinese: string } | { probl
 }
 
 /**
- * Parte una frase en trozos: cada carácter chino por separado y el resto
- * (puntuación, espacios, letras) en trozos de texto tal cual. Unir los
- * `text` devuelve siempre la frase original.
+ * Splits a sentence into tokens: each Chinese character separately and the
+ * rest (punctuation, spaces, letters) in text chunks as is. Joining the
+ * `text` values always gives back the original sentence.
  */
 export function splitSentence(chinese: string): SentenceToken[] {
   const tokens: SentenceToken[] = []
@@ -50,7 +50,7 @@ export function createSentence(
   return { id, ...input, createdAt: date, updatedAt: date }
 }
 
-/** Añade una frase al set. Un id repetido no se añade (los ids son únicos). */
+/** Adds a sentence to the set. A repeated id is not added (ids are unique). */
 export function addSentence(set: CustomSet, sentence: CustomSentence): CustomSet {
   if (set.sentences.some((other) => other.id === sentence.id)) return set
   if (sentence.itemId !== undefined && !set.itemIds.includes(sentence.itemId)) return set
@@ -75,12 +75,12 @@ export function deleteSentence(set: CustomSet, sentenceId: string): CustomSet {
   return { ...set, sentences: set.sentences.filter((sentence) => sentence.id !== sentenceId) }
 }
 
-/** Las frases que acompañan a un elemento del set. */
+/** The sentences attached to a set item. */
 export function getItemSentences(set: CustomSet, itemId: StudyItemId): CustomSentence[] {
   return set.sentences.filter((sentence) => sentence.itemId === itemId)
 }
 
-/** El usuario elige la lectura de un carácter dudoso entre las posibles: ya no es dudoso. */
+/** The user picks the reading of an uncertain character among the possible ones: it is no longer uncertain. */
 export function chooseReading(tokens: readonly SentenceToken[], index: number, reading: string): SentenceToken[] {
   return tokens.map((token, i) => {
     if (i !== index || !token.uncertain || !token.candidates?.includes(reading)) return token
@@ -89,7 +89,7 @@ export function chooseReading(tokens: readonly SentenceToken[], index: number, r
   })
 }
 
-/** Cuántos caracteres de la frase tienen la lectura sin confirmar. */
+/** How many characters of the sentence have an unconfirmed reading. */
 export function countUncertain(tokens: readonly SentenceToken[]): number {
   return tokens.filter((token) => token.uncertain).length
 }

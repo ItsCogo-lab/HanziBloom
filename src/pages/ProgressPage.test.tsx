@@ -19,14 +19,14 @@ function getStat(label: string) {
 }
 
 describe('ProgressPage', () => {
-  it('sin respuestas invita a practicar', () => {
+  it('with no answers invites the user to practice', () => {
     renderProgressPage(createEmptyProgress())
 
     expect(screen.getByText(/No statistics yet/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Start session' })).toHaveAttribute('href', '/study/practice')
   })
 
-  it('muestra totales, rachas, actividad reciente, estados y los más fallados', () => {
+  it('shows totals, streaks, recent activity, states and the most missed', () => {
     const today = new Date()
     const yesterday = addDays(today, -1)
     let progress = createEmptyProgress()
@@ -43,14 +43,14 @@ describe('ProgressPage', () => {
     expect(getStat('Longest streak')).toBe('2')
 
     const lastDays = screen.getByRole('table', { name: 'Last 7 days' })
-    // Cabecera + 7 días; el último es hoy, con 3 respuestas y 2 aciertos
+    // Header + 7 days; the last one is today, with 3 answers and 2 correct
     const rows = within(lastDays).getAllByRole('row')
     expect(rows).toHaveLength(8)
     expect(within(rows[7]!).getAllByRole('cell').map((cell) => cell.textContent)).toEqual(['3', '2'])
 
     const byStatus = screen.getByRole('table', { name: 'By status' })
     const wordsRow = within(byStatus).getByRole('rowheader', { name: 'Words' }).closest('tr')!
-    // 1196 palabras: 1195 nuevas, 1 aprendiendo (谢谢), 0 dominadas
+    // 1196 words: 1195 new, 1 learning (谢谢), 0 mastered
     expect(within(wordsRow).getAllByRole('cell').map((cell) => cell.textContent)).toEqual(['1195', '1', '0'])
 
     const mostMissed = screen.getByRole('table', { name: 'Most missed' })

@@ -4,51 +4,51 @@ import { cleanMeaning, createCedictIndex, findEntries, readingOf, traditionalOf,
 
 const index = createCedictIndex(cedictFixture)
 
-describe('adaptador de CC-CEDICT', () => {
-  it('agrupa por simplificado y pasa el pinyin a marcas de tono', () => {
+describe('CC-CEDICT adapter', () => {
+  it('groups by simplified form and converts the pinyin to tone marks', () => {
     expect(index.get('柠檬')).toEqual([{ traditional: '檸檬', simplified: '柠檬', pinyin: 'níng méng', english: ['lemon'] }])
   })
 
-  it('busca por hanzi y pinyin sin mezclar nombres propios', () => {
+  it('looks up by hanzi and pinyin without mixing in proper nouns', () => {
     const entries = findEntries(index, '柠檬', 'níng méng')
     expect(usableMeanings(entries)).toEqual(['lemon'])
     expect(traditionalOf(entries)).toBe('檸檬')
   })
 
-  it('respeta la forma tradicional preferida (里 → 裡)', () => {
+  it('respects the preferred traditional form (里 → 裡)', () => {
     expect(findEntries(index, '里', 'lǐ').map((entry) => entry.traditional)).toEqual(['裡'])
   })
 
-  it('ignora las entradas que solo son notas al elegir la forma tradicional', () => {
+  it('ignores entries that are only notes when choosing the traditional form', () => {
     const entries = index.get('里')!.filter((entry) => entry.pinyin === 'lǐ')
     expect(entries.map((entry) => entry.traditional)).toEqual(['裏', '裡'])
     expect(traditionalOf(entries)).toBe('裡')
   })
 
-  it('no elige forma tradicional si CC-CEDICT da dos (回 y 迴)', () => {
+  it('does not choose a traditional form if CC-CEDICT gives two (回 and 迴)', () => {
     expect(traditionalOf(findEntries(index, '回', 'huí'))).toBeUndefined()
   })
 
-  it('conserva las notas si una lectura solo tiene notas (柠: "used in 柠檬")', () => {
+  it('keeps the notes if a reading only has notes (柠: "used in 柠檬")', () => {
     expect(usableMeanings(findEntries(index, '柠', 'níng'))).toEqual(['used in 柠檬'])
   })
 
-  it('limpia la notación interna', () => {
+  it('cleans up the internal notation', () => {
     expect(cleanMeaning('used in 檸檬|柠檬[ning2 meng2]')).toBe('used in 柠檬')
   })
 
-  it('encuentra la lectura de un carácter dentro de una palabra', () => {
+  it('finds the reading of a character within a word', () => {
     expect(readingOf(index, '好', 'hǎo')).toBe('hǎo')
     expect(readingOf(index, '柠', 'níng')).toBe('níng')
     expect(readingOf(index, '柠', 'nìng')).toBeUndefined()
   })
 
-  it('acepta el tono neutro de CC-CEDICT donde la lista HSK pone el tono (关系 guān xì)', () => {
+  it("accepts CC-CEDICT's neutral tone where the HSK list has the tone (关系 guān xì)", () => {
     expect(usableMeanings(findEntries(index, '关系', 'guān xì'))).toEqual(['relation', 'relationship'])
     expect(findEntries(index, '关系', 'guǎn xì')).toEqual([])
   })
 
-  it('usa las lecturas que CC-CEDICT anota con "also pr." (钥 yào)', () => {
+  it('uses the readings CC-CEDICT marks with "also pr." (钥 yào)', () => {
     expect(readingOf(index, '钥', 'yào')).toBe('yào')
     expect(usableMeanings(findEntries(index, '钥', 'yào'))).toEqual(['key'])
     expect(readingOf(index, '钥', 'yǎo')).toBeUndefined()

@@ -4,9 +4,9 @@ import { chooseReading } from '../sentences.ts'
 import type { CustomSentence, SentenceToken } from '../types.ts'
 
 /**
- * Para cada carácter dudoso de una frase, un desplegable con sus lecturas
- * posibles (las del motor de pinyin). El usuario elige; nunca escribe pinyin
- * a mano, así no se cuela una sílaba inventada.
+ * For each uncertain character of a sentence, a dropdown with its possible
+ * readings (the pinyin engine's). The user picks one; they never type pinyin
+ * by hand, so no made-up syllable slips in.
  */
 export function PronunciationReview({
   sentence,

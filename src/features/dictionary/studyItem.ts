@@ -2,20 +2,20 @@ import { getCharacter, getCharactersOfWord, getWord, getWordsWithCharacter, type
 import type { Character, Word } from './types.ts'
 
 /**
- * Algo que se puede estudiar: un carácter o una palabra.
+ * Something that can be studied: a character or a word.
  *
- * Es una "unión discriminada": el campo `kind` indica cuál de los dos es, y
- * TypeScript sabe qué tipo tiene `entry` después de comprobar `kind`.
- * Los ejercicios y el progreso trabajarán con StudyItem para no duplicar
- * lógica entre caracteres y palabras.
+ * It's a "discriminated union": the `kind` field says which of the two it is, and
+ * TypeScript knows what type `entry` has after checking `kind`.
+ * Exercises and progress will work with StudyItem so as not to duplicate
+ * logic between characters and words.
  */
 export type StudyItem = { kind: 'character'; entry: Character } | { kind: 'word'; entry: Word }
 
 /**
- * Identificador único de un elemento de estudio, p. ej. "char:好" o "word:好".
+ * Unique identifier of a study item, e.g. "char:好" or "word:好".
  *
- * Hace falta el prefijo porque 好 es a la vez un carácter y una palabra de
- * HSK 1, y su progreso se registra por separado.
+ * The prefix is needed because 好 is both a character and a word in
+ * HSK 1, and their progress is tracked separately.
  */
 export type StudyItemId = `char:${string}` | `word:${string}`
 
@@ -23,7 +23,7 @@ export function getStudyItemId(item: StudyItem): StudyItemId {
   return item.kind === 'character' ? `char:${item.entry.id}` : `word:${item.entry.id}`
 }
 
-/** Todos los caracteres y palabras del diccionario como elementos de estudio. */
+/** All characters and words in the dictionary as study items. */
 export function listStudyItems(dictionary: Dictionary): StudyItem[] {
   return [
     ...[...dictionary.characters.values()].map((entry): StudyItem => ({ kind: 'character', entry })),
@@ -31,7 +31,7 @@ export function listStudyItems(dictionary: Dictionary): StudyItem[] {
   ]
 }
 
-/** Busca un elemento por su id ("char:好" o "word:你好"). */
+/** Finds an item by its id ("char:好" or "word:你好"). */
 export function getStudyItem(dictionary: Dictionary, id: StudyItemId): StudyItem | undefined {
   if (id.startsWith('char:')) {
     const entry = getCharacter(dictionary, id.slice('char:'.length))
@@ -42,10 +42,10 @@ export function getStudyItem(dictionary: Dictionary, id: StudyItemId): StudyItem
 }
 
 /**
- * Elementos relacionados: los caracteres de una palabra, o las palabras en
- * las que aparece un carácter (primero las de HSK 1-4). La palabra con el
- * mismo hanzi que el carácter (谁 carácter y 谁 palabra) no se incluye: no
- * aporta nada.
+ * Related items: a word's characters, or the words in which a character
+ * appears (HSK 1-4 ones first). The word with the same hanzi as the
+ * character (谁 character and 谁 word) isn't included: it adds
+ * nothing.
  */
 export function getRelatedItems(dictionary: Dictionary, item: StudyItem): StudyItem[] {
   if (item.kind === 'word') {

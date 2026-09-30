@@ -1,11 +1,11 @@
 /*
- * Secuencias de descripción ideográfica (IDS) de Unicode, el formato de
- * `decomposition` en Make Me a Hanzi: "⿰木宁" = 木 a la izquierda de 宁.
- * Cada operador (⿰, ⿱...) va seguido de sus 2 o 3 componentes, que pueden
- * ser a su vez otra secuencia: "⿰亻⿱夂彡". "？" marca un componente desconocido.
+ * Unicode Ideographic Description Sequences (IDS), the format of
+ * `decomposition` in Make Me a Hanzi: "⿰木宁" = 木 to the left of 宁.
+ * Each operator (⿰, ⿱...) is followed by its 2 or 3 components, which can
+ * themselves be another sequence: "⿰亻⿱夂彡". "？" marks an unknown component.
  */
 
-/** Número de componentes que sigue a cada operador IDS. */
+/** Number of components that follow each IDS operator. */
 const OPERATOR_ARITY: Record<string, number> = {
   '⿰': 2, '⿱': 2, '⿲': 3, '⿳': 3, '⿴': 2, '⿵': 2, '⿶': 2, '⿷': 2,
   '⿸': 2, '⿹': 2, '⿺': 2, '⿻': 2, '⿼': 2, '⿽': 2, '⿾': 1, '⿿': 1, '㇯': 2,
@@ -14,8 +14,8 @@ const OPERATOR_ARITY: Record<string, number> = {
 const UNKNOWN_COMPONENT = '？'
 
 /**
- * Lee una secuencia a partir de `start` y devuelve dónde termina, o -1 si
- * está incompleta.
+ * Reads a sequence starting at `start` and returns where it ends, or -1 if
+ * it's incomplete.
  */
 function parseFrom(symbols: readonly string[], start: number): number {
   const symbol = symbols[start]
@@ -30,15 +30,15 @@ function parseFrom(symbols: readonly string[], start: number): number {
   return next
 }
 
-/** Si una descomposición es una secuencia IDS completa y bien formada. */
+/** Whether a decomposition is a complete, well-formed IDS sequence. */
 export function isValidIds(decomposition: string): boolean {
   const symbols = Array.from(decomposition)
   return symbols.length > 0 && parseFrom(symbols, 0) === symbols.length
 }
 
 /**
- * Componentes de una descomposición, en orden y sin repetir, sin operadores
- * ni componentes desconocidos: "⿰木宁" → [木, 宁]; "⿰亻⿱夂彡" → [亻, 夂, 彡].
+ * Components of a decomposition, in order and without repeats, with no operators
+ * or unknown components: "⿰木宁" → [木, 宁]; "⿰亻⿱夂彡" → [亻, 夂, 彡].
  */
 export function getComponents(decomposition: string): string[] {
   const components = Array.from(decomposition).filter(

@@ -6,7 +6,7 @@ type ButtonLinkProps = ComponentProps<typeof Link> & {
   variant?: ButtonVariant
 }
 
-/** Enlace de navegación con aspecto de botón (p. ej. «Empezar sesión»). */
+/** Navigation link that looks like a button (e.g. "Start session"). */
 export function ButtonLink({ variant, className = '', ...props }: ButtonLinkProps) {
   return <Link className={`${buttonClasses(variant)} ${className}`} {...props} />
 }

@@ -1,13 +1,13 @@
 import { t } from '../../../i18n/index.ts'
 import type { SetSessionType } from '../sessionItems.ts'
 
-/** Icono y textos de cada tipo de sesión: no se distinguen solo por el color. */
+/** Icon and texts for each session type: they are not told apart by color alone. */
 const SESSION_TYPES = {
   learn: { icon: '新', nameKey: 'session.learn', descriptionKey: 'session.learnDescription' },
   study: { icon: '复', nameKey: 'session.study', descriptionKey: 'session.studyDescription' },
 } as const
 
-/** «新 Learn · Learn new vocabulary» o «复 Study · Review vocabulary you've already learned». */
+/** "新 Learn · Learn new vocabulary" or "复 Study · Review vocabulary you've already learned". */
 export function SessionTypeLabel({ type, as: Heading = 'p' }: { type: SetSessionType; as?: 'p' | 'h2' | 'h3' }) {
   const { icon, nameKey, descriptionKey } = SESSION_TYPES[type]
   return (

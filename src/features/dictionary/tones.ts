@@ -2,16 +2,16 @@ import { getSyllableTone, splitSyllables, type Tone } from '../../lib/tones.ts'
 import type { Character, Word } from './types.ts'
 
 /**
- * Tono de cada carácter de una entrada, en orden. `undefined` donde no se
- * puede saber con seguridad; en ese caso el carácter se pinta sin color.
+ * Tone of each character in an entry, in order. `undefined` where it can't
+ * be known for sure; in that case the character is drawn without color.
  *
- * - Palabras: el pinyin de la lista HSK tiene una sílaba por carácter
- *   (你好 → nǐ hǎo), así que cada carácter toma el tono de su sílaba en
- *   ESA palabra. Así un carácter con varias lecturas (长 cháng / zhǎng)
- *   se colorea según cómo se lee en cada palabra.
- * - Caracteres sueltos: si todas sus lecturas tienen el mismo tono, ese; si
- *   no (了: le, liǎo), no se elige ninguno.
- * - Si el número de sílabas no coincide con el de caracteres, ninguno.
+ * - Words: the HSK list pinyin has one syllable per character
+ *   (你好 → nǐ hǎo), so each character takes the tone of its syllable in
+ *   THAT word. That way a character with several readings (长 cháng / zhǎng)
+ *   is colored according to how it's read in each word.
+ * - Standalone characters: if all their readings have the same tone, that one;
+ *   if not (了: le, liǎo), none is chosen.
+ * - If the number of syllables doesn't match the number of characters, none.
  */
 export function getCharacterTones(entry: Character | Word): (Tone | undefined)[] {
   const characters = Array.from(entry.hanzi)

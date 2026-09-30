@@ -10,8 +10,8 @@ type HanziLinkProps = {
 }
 
 /**
- * Un carácter que se menciona en otra ficha (radical, componente...). Si está
- * en el diccionario, enlaza a su ficha y muestra su pinyin; si no, solo el hanzi.
+ * A character mentioned on another entry page (radical, component...). If it's
+ * in the dictionary, links to its entry page and shows its pinyin; if not, just the hanzi.
  */
 export function HanziLink({ hanzi, dictionary, opener }: HanziLinkProps) {
   const character = getCharacter(dictionary, hanzi)

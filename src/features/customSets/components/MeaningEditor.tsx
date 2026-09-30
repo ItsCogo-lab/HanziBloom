@@ -11,7 +11,7 @@ type MeaningEditorProps = {
   onCancel: () => void
 }
 
-/** Formulario del significado propio de un elemento. */
+/** Form for an item's custom meaning. */
 export function MeaningEditor({ item, initial, onSave, onCancel }: MeaningEditorProps) {
   const [meaning, setMeaning] = useState(initial)
   const [problem, setProblem] = useState<MeaningProblem>()

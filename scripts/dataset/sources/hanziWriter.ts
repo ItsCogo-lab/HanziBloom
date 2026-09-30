@@ -1,27 +1,27 @@
 /**
- * Adaptador de hanzi-writer-data (Arphic Public License), el paquete npm con
- * los trazos de cada carácter que usa la librería Hanzi Writer.
+ * hanzi-writer-data adapter (Arphic Public License), the npm package with
+ * each character's strokes used by the Hanzi Writer library.
  *
- * Responsabilidad: saber si hay datos de trazos para un carácter, cuántos
- * trazos tienen (para comprobar el número de Unihan) y copiarlos a public/.
+ * Responsibility: knowing whether there is stroke data for a character, how many
+ * strokes it has (to check Unihan's count) and copying it to public/.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export interface StrokeData {
-  /** El JSON tal cual, para copiarlo sin cambios. */
+  /** The JSON as is, to copy it unchanged. */
   json: string
   strokeCount: number
 }
 
-/** Cuenta los trazos de un JSON de hanzi-writer-data. */
+/** Counts the strokes in a hanzi-writer-data JSON. */
 export function countStrokes(json: string): number {
   const data: { strokes?: unknown } = JSON.parse(json)
-  if (!Array.isArray(data.strokes)) throw new Error('hanzi-writer-data: falta la lista "strokes"')
+  if (!Array.isArray(data.strokes)) throw new Error('hanzi-writer-data: missing the "strokes" list')
   return data.strokes.length
 }
 
-/** Lee los trazos de un carácter del paquete instalado, si existen. */
+/** Reads a character's strokes from the installed package, if they exist. */
 export function readStrokeData(packageDir: string, hanzi: string): StrokeData | undefined {
   const path = join(packageDir, `${hanzi}.json`)
   if (!existsSync(path)) return undefined

@@ -19,7 +19,7 @@ import { memoryStorage } from '../test/memoryStorage.ts'
 const now = new Date(2026, 8, 28)
 const ITEM_IDS = ['word:苹果', 'word:机场', 'word:学习'] as const
 
-/** El set de la verificación final: «My Chinese» con 苹果, 机场 y 学习, un significado y una frase. */
+/** The final verification set: "My Chinese" with 苹果, 机场 and 学习, a meaning and a sentence. */
 function savedMyChinese(): KeyValueStorage {
   let set = createCustomSet({ name: 'My Chinese', description: '' }, 'custom-mine', now)
   for (const itemId of ITEM_IDS) set = addItem(set, itemId)
@@ -56,7 +56,7 @@ async function answerCurrentExercise(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'Continue' }))
 }
 
-describe('Learn y Study con un set propio', () => {
+describe('Learn and Study with a custom set', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
   })
@@ -64,7 +64,7 @@ describe('Learn y Study con un set propio', () => {
     vi.unstubAllGlobals()
   })
 
-  it('la página del set ofrece Learn con sus 3 elementos y Study vacío', () => {
+  it('the set page offers Learn with its 3 items and an empty Study', () => {
     renderAt('/study/sets/custom-mine', savedMyChinese())
 
     expect(screen.getByRole('heading', { level: 1, name: 'My Chinese' })).toBeInTheDocument()
@@ -72,7 +72,7 @@ describe('Learn y Study con un set propio', () => {
     expect(screen.getByText("You haven't learned any words from this set yet.")).toBeInTheDocument()
   })
 
-  it('se aprende, se repasa y se repasa igualmente, siempre con los elementos del set', async () => {
+  it('learns, reviews and reviews anyway, always with the set items', async () => {
     const user = userEvent.setup()
     const storage = savedMyChinese()
     renderAt('/study/practice?set=custom-mine&mode=learn', storage)
@@ -81,7 +81,7 @@ describe('Learn y Study con un set propio', () => {
     for (let i = 1; i <= 3; i++) {
       expect(screen.getByText(`Item ${i} of 3`)).toBeInTheDocument()
       shown.push(document.querySelector('.text-7xl')!.textContent!)
-      // Las notas del usuario acompañan a la ficha oficial
+      // The user's notes accompany the official entry
       if (shown.at(-1) === '学习') {
         expect(screen.getByRole('heading', { name: 'My notes in My Chinese' })).toBeInTheDocument()
         expect(screen.getByText('wǒ měi tiān xué xí zhōng wén。')).toBeInTheDocument()
@@ -91,7 +91,7 @@ describe('Learn y Study con un set propio', () => {
     expect(shown.toSorted()).toEqual(['学习', '机场', '苹果'].toSorted())
     expect(Object.keys(loadProgress(storage).items).toSorted()).toEqual([...ITEM_IDS].toSorted())
 
-    // Study: lo aprendido toca repasarlo hoy
+    // Study: what was learned is due for review today
     await user.click(screen.getByRole('link', { name: 'Review them now' }))
     expect(screen.getByText('Card 1 of 3')).toBeInTheDocument()
     for (let i = 0; i < 3; i++) await answerCurrentExercise(user)
@@ -99,7 +99,7 @@ describe('Learn y Study con un set propio', () => {
     expect(Object.keys(loadProgress(storage).items)).toHaveLength(3)
   })
 
-  it('el diccionario funciona dentro de la sesión del set propio', async () => {
+  it('the dictionary works inside the custom set session', async () => {
     const user = userEvent.setup()
     renderAt('/study/practice?set=custom-mine&mode=learn', savedMyChinese())
 
@@ -112,7 +112,7 @@ describe('Learn y Study con un set propio', () => {
     expect(screen.getByText('Item 1 of 3')).toBeInTheDocument()
   })
 
-  it('Learn y Study funcionan con palabras de fuera de HSK', async () => {
+  it('Learn and Study work with non-HSK words', async () => {
     const user = userEvent.setup()
     const storage = memoryStorage()
     saveCustomSets([addItem(createCustomSet({ name: 'Zoo', description: '' }, 'custom-zoo', now), 'word:企鹅')], storage)
@@ -129,12 +129,12 @@ describe('Learn y Study con un set propio', () => {
     expect(screen.getByRole('heading', { name: 'Session complete' })).toBeInTheDocument()
   })
 
-  it('la ficha del diccionario lista el set propio y su contenido oficial no cambia', () => {
+  it('the dictionary entry lists the custom set and its official content does not change', () => {
     renderAt(`/vocabulary/${encodeURIComponent('机场')}`, savedMyChinese())
 
     const inSets = screen.getByRole('heading', { name: 'In study sets' }).parentElement!
     expect(within(inSets).getByRole('link', { name: 'My Chinese' })).toBeInTheDocument()
-    // Sin ?set=, la ficha es la del diccionario sin notas del usuario
+    // Without ?set=, the entry is the dictionary one without the user's notes
     expect(screen.queryByText('airport when travelling')).not.toBeInTheDocument()
     expect(getStudyItem(hskDictionary, 'word:机场')?.entry.meanings.en).not.toContain('airport when travelling')
   })

@@ -1,11 +1,11 @@
 /**
- * Función que devuelve un número entre 0 (incluido) y 1 (excluido), como
- * Math.random. Se pasa como parámetro para que los tests puedan usar una
- * secuencia fija y obtener siempre el mismo resultado.
+ * Function that returns a number between 0 (inclusive) and 1 (exclusive), like
+ * Math.random. It is passed as a parameter so tests can use a fixed sequence
+ * and always get the same result.
  */
 export type RandomFn = () => number
 
-/** Devuelve una copia desordenada del array (algoritmo de Fisher-Yates). */
+/** Returns a shuffled copy of the array (Fisher-Yates algorithm). */
 export function shuffle<T>(items: readonly T[], random: RandomFn = Math.random): T[] {
   const result = [...items]
   for (let i = result.length - 1; i > 0; i--) {
@@ -15,7 +15,7 @@ export function shuffle<T>(items: readonly T[], random: RandomFn = Math.random):
   return result
 }
 
-/** Elige `count` elementos distintos al azar (o todos, si hay menos). */
+/** Picks `count` distinct elements at random (or all of them, if there are fewer). */
 export function sample<T>(items: readonly T[], count: number, random: RandomFn = Math.random): T[] {
   return shuffle(items, random).slice(0, count)
 }

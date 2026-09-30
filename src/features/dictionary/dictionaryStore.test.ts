@@ -9,7 +9,7 @@ import { testCharacters, testWords } from './testData.ts'
 const base = createDictionary(testCharacters, testWords)
 
 describe('createDictionaryStore', () => {
-  it('empieza con HSK y no pide nada para elementos de HSK', async () => {
+  it('starts with HSK and requests nothing for HSK items', async () => {
     const load = createChunkLoader()
     const store = createDictionaryStore(base, load)
 
@@ -20,7 +20,7 @@ describe('createDictionaryStore', () => {
     expect(store.hasItems(['word:企鹅'])).toBe(false)
   })
 
-  it('carga solo los trozos de la palabra y de sus caracteres, una vez', async () => {
+  it('loads only the chunks of the word and its characters, once', async () => {
     const load = createChunkLoader()
     const store = createDictionaryStore(base, load)
     const before = store.getSnapshot()
@@ -31,11 +31,11 @@ describe('createDictionaryStore', () => {
     expect(store.getSnapshot()).not.toBe(before)
     expect(getStudyItem(store.getSnapshot(), 'word:企鹅')?.entry).toEqual(qieWord)
     expect(getStudyItem(store.getSnapshot(), 'char:鹅')?.entry.meanings.en).toEqual(['goose'])
-    // El diccionario HSK no cambia
+    // The HSK dictionary does not change
     expect(getStudyItem(base, 'word:企鹅')).toBeUndefined()
   })
 
-  it('avisa a quien escucha cuando llega un trozo', async () => {
+  it('notifies listeners when a chunk arrives', async () => {
     const store = createDictionaryStore(base, createChunkLoader())
     let calls = 0
     const unsubscribe = store.subscribe(() => calls++)
@@ -44,7 +44,7 @@ describe('createDictionaryStore', () => {
     expect(calls).toBe(2)
   })
 
-  it('carga todo para buscar: HSK primero y luego los trozos en orden', async () => {
+  it('loads everything for search: HSK first, then the chunks in order', async () => {
     const load = createChunkLoader()
     const store = createDictionaryStore(base, load)
     expect(store.isComplete()).toBe(false)
@@ -59,7 +59,7 @@ describe('createDictionaryStore', () => {
     expect(store.getItems()).toBe(store.getItems())
   })
 
-  it('si un trozo falla, se puede volver a pedir', async () => {
+  it('if a chunk fails, it can be requested again', async () => {
     let fail = true
     const working = createChunkLoader()
     const store = createDictionaryStore(base, async (index) => {

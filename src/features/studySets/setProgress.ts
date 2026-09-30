@@ -3,15 +3,15 @@ import { summarizeItemIds, type ItemsSummary } from '../progress/stats.ts'
 import type { StudySet } from './types.ts'
 
 export interface SetProgress extends ItemsSummary {
-  /** Proporción dominada (0-1): lo que muestra la barra de progreso del set. */
+  /** Mastered ratio (0-1): what the set's progress bar shows. */
   ratio: number
 }
 
 /**
- * Progreso de un set. No se guarda en ningún sitio: se calcula en cada
- * momento a partir del progreso de cada elemento (el mismo que usa el SRS).
- * Así un elemento que está en varios sets cuenta en todos a la vez y no hay
- * dos datos que puedan contradecirse.
+ * Progress of a set. It is not stored anywhere: it is computed on the fly
+ * from each item's progress (the same one the SRS uses). This way an item
+ * that is in several sets counts in all of them at once and there are no
+ * two pieces of data that could contradict each other.
  */
 export function getSetProgress(set: StudySet, progress: ProgressData, now: Date): SetProgress {
   const summary = summarizeItemIds(set.itemIds, progress, now)

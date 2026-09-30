@@ -12,7 +12,7 @@ import { SentenceView } from './SentenceView.tsx'
 
 const small = 'px-3 py-1.5 text-sm'
 
-/** Notas de un elemento en un set propio, editables: su significado propio y sus frases. */
+/** Editable notes of an item in a custom set: its custom meaning and its sentences. */
 export function CustomItemNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
   return (
     <div className="flex flex-col gap-3">
@@ -100,7 +100,7 @@ function SentenceNotes({ set, item }: { set: CustomSet; item: StudyItem }) {
   )
 }
 
-/** Una frase del set: se ve con su pinyin y tonos, y se puede editar, borrar o revisar su pronunciación. */
+/** A set sentence: shown with its pinyin and tones, and can be edited, deleted or have its pronunciation reviewed. */
 function SentenceNote({ set, sentence }: { set: CustomSet; sentence: CustomSentence }) {
   const { updateSentence, deleteSentence } = useCustomSets()
   const [editing, setEditing] = useState(false)

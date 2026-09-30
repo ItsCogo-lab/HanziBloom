@@ -9,7 +9,7 @@ type MyStudiesProviderProps = {
   storage?: KeyValueStorage
 }
 
-/** Igual que ProgressProvider: carga al arrancar y guarda en cada cambio. */
+/** Same as ProgressProvider: loads at startup and saves on every change. */
 export function MyStudiesProvider({ children, storage }: MyStudiesProviderProps) {
   const [myStudies, setMyStudies] = useState(() => loadMyStudies(storage))
 

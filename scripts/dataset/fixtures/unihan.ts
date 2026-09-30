@@ -1,8 +1,8 @@
 /*
- * Datos reales de Unicode para los tests, en el formato de los archivos de
- * Unihan.zip y de CJKRadicals.txt (Unicode License v3). Los valores de 柠
- * (U+67E0) se comprobaron en la consulta oficial de Unihan de unicode.org, y
- * las líneas de radicales, en CJKRadicals.txt de Unicode 18.0.
+ * Real Unicode data for the tests, in the format of the Unihan.zip and
+ * CJKRadicals.txt files (Unicode License v3). The values for 柠
+ * (U+67E0) were checked in the official Unihan lookup on unicode.org, and
+ * the radical lines in Unicode 18.0's CJKRadicals.txt.
  */
 export const unihanIrgSourcesFixture = ['U+67E0\tkRSUnicode\t75.5', 'U+67E0\tkTotalStrokes\t9'].join('\n')
 

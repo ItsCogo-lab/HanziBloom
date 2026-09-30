@@ -7,11 +7,11 @@ import { useRuntimeSources } from './runtime/runtimeSourcesContext.ts'
 
 type DictionaryProviderProps = {
   children: ReactNode
-  /** De dónde salen los trozos del diccionario completo; por defecto, el repositorio de datos. */
+  /** Where the full dictionary chunks come from; by default, the data repository. */
   loadChunk?: LoadChunk
 }
 
-/** Da a toda la app el mismo diccionario: HSK 1-4 más lo que se vaya cargando del completo. */
+/** Gives the whole app the same dictionary: HSK 1-4 plus whatever loads from the full one. */
 export function DictionaryProvider({ children, loadChunk }: DictionaryProviderProps) {
   const sources = useRuntimeSources()
   const [store] = useState(() =>

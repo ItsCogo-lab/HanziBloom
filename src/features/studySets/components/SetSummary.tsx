@@ -12,7 +12,7 @@ export function SetItemCount({ set }: { set: StudySet }) {
   return <>{parts.join(' · ')}</>
 }
 
-/** Etiqueta «Studying» para los sets que están en My Studies. */
+/** "Studying" label for the sets that are in My Studies. */
 export function StudyingBadge() {
   return (
     <span className="inline-block shrink-0 rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">

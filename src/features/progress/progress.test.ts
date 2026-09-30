@@ -15,7 +15,7 @@ const monday = new Date(2026, 8, 28, 10, 0)
 const tuesday = new Date(2026, 8, 29, 9, 0)
 
 describe('recordAnswer', () => {
-  it('crea el progreso de un elemento nuevo', () => {
+  it('creates progress for a new item', () => {
     const progress = recordAnswer(createEmptyProgress(), 'char:你', true, monday)
 
     expect(progress.items['char:你']).toEqual({
@@ -29,7 +29,7 @@ describe('recordAnswer', () => {
     })
   })
 
-  it('acumula respuestas y aplica la repetición espaciada', () => {
+  it('accumulates answers and applies spaced repetition', () => {
     let progress = recordAnswer(createEmptyProgress(), 'word:你好', true, monday)
     progress = recordAnswer(progress, 'word:你好', true, tuesday)
     expect(progress.items['word:你好']).toMatchObject({ timesSeen: 2, timesCorrect: 2, masteryLevel: 2 })
@@ -38,7 +38,7 @@ describe('recordAnswer', () => {
     expect(progress.items['word:你好']).toMatchObject({ timesSeen: 3, timesWrong: 1, masteryLevel: 0 })
   })
 
-  it('suma las respuestas a la actividad de cada día', () => {
+  it("adds answers to each day's activity", () => {
     let progress = recordAnswer(createEmptyProgress(), 'char:你', true, monday)
     progress = recordAnswer(progress, 'char:好', false, monday)
     progress = recordAnswer(progress, 'char:你', true, tuesday)
@@ -49,7 +49,7 @@ describe('recordAnswer', () => {
     })
   })
 
-  it('no modifica el progreso anterior', () => {
+  it('does not modify the previous progress', () => {
     const empty = createEmptyProgress()
     recordAnswer(empty, 'char:你', true, monday)
 
@@ -58,7 +58,7 @@ describe('recordAnswer', () => {
 })
 
 describe('getItemStatus', () => {
-  it('distingue nuevo, en aprendizaje y dominado', () => {
+  it('distinguishes new, learning and mastered', () => {
     const progress = recordAnswer(createEmptyProgress(), 'char:你', true, monday)
     const item = progress.items['char:你']!
 
@@ -69,7 +69,7 @@ describe('getItemStatus', () => {
 })
 
 describe('isDue', () => {
-  it('un elemento acertado hoy toca mañana; uno fallado, hoy mismo', () => {
+  it('an item answered correctly today is due tomorrow; a missed one, today', () => {
     let progress = recordAnswer(createEmptyProgress(), 'char:你', true, monday)
     progress = recordAnswer(progress, 'char:好', false, monday)
 
@@ -83,7 +83,7 @@ describe('isDue', () => {
 describe('introduceItem', () => {
   const now = new Date(2026, 8, 28, 12)
 
-  it('marca el elemento como aprendido, con su primer repaso hoy, sin contar como respuesta', () => {
+  it('marks the item as learned, with its first review today, without counting as an answer', () => {
     const progress = introduceItem(createEmptyProgress(), 'word:你好', now)
 
     expect(isLearned(progress, 'word:你好')).toBe(true)
@@ -93,7 +93,7 @@ describe('introduceItem', () => {
     expect(progress.activity).toEqual({})
   })
 
-  it('no toca un elemento que ya tenía progreso', () => {
+  it('leaves an item that already had progress alone', () => {
     const progress = recordAnswer(createEmptyProgress(), 'word:你好', true, now)
 
     expect(introduceItem(progress, 'word:你好', now)).toBe(progress)
@@ -103,7 +103,7 @@ describe('introduceItem', () => {
 describe('markItemKnown', () => {
   const now = new Date(2026, 8, 28, 12)
 
-  it('lo marca como dominado y no toca repasarlo hasta dentro de 30 días', () => {
+  it("marks it as mastered and it isn't due for review for 30 days", () => {
     const progress = markItemKnown(createEmptyProgress(), 'word:你好', now)
     const item = progress.items['word:你好']
 
@@ -115,7 +115,7 @@ describe('markItemKnown', () => {
     expect(progress.activity).toEqual({})
   })
 
-  it('si luego se falla, vuelve a repasarse como cualquier otro', () => {
+  it('if it is later missed, it is reviewed again like any other', () => {
     let progress = markItemKnown(createEmptyProgress(), 'word:你好', now)
     progress = recordAnswer(progress, 'word:你好', false, new Date(2026, 9, 28, 9))
 
@@ -123,7 +123,7 @@ describe('markItemKnown', () => {
     expect(getItemStatus(progress.items['word:你好'])).toBe('learning')
   })
 
-  it('no toca un elemento que ya tenía progreso', () => {
+  it('leaves an item that already had progress alone', () => {
     const progress = introduceItem(createEmptyProgress(), 'word:你好', now)
 
     expect(markItemKnown(progress, 'word:你好', now)).toBe(progress)
@@ -140,7 +140,7 @@ describe('applyHskLevel', () => {
   ] as const
   const in30Days = new Date(2026, 9, 28)
 
-  it('con HSK 3, marca como dominado hasta HSK 3 y deja HSK 1 como básico', () => {
+  it('with HSK 3, marks up to HSK 3 as mastered and leaves HSK 1 as basic', () => {
     const progress = applyHskLevel(createEmptyProgress(), items, 3, now)
 
     expect(progress.items['word:你好']).toMatchObject({ masteryLevel: 5, basic: true })
@@ -154,7 +154,7 @@ describe('applyHskLevel', () => {
     expect(progress.activity).toEqual({})
   })
 
-  it('reparte los primeros repasos en días distintos a partir de los 30 días', () => {
+  it('spreads the first reviews across different days from 30 days on', () => {
     const progress = applyHskLevel(createEmptyProgress(), items, 1, now)
     const withTwo = applyHskLevel(createEmptyProgress(), items, 2, now)
 
@@ -162,7 +162,7 @@ describe('applyHskLevel', () => {
     expect(withTwo.items['word:认识']?.nextReviewAt).toBe(new Date(2026, 9, 29).toISOString())
   })
 
-  it('no toca lo que ya se estudiaba dentro del nivel, pero sí lo básico', () => {
+  it('leaves items already being studied within the level alone, but not basic ones', () => {
     let progress = recordAnswer(createEmptyProgress(), 'word:经常', false, now)
     progress = recordAnswer(progress, 'word:你好', false, now)
     progress = applyHskLevel(progress, items, 3, now)
@@ -171,13 +171,13 @@ describe('applyHskLevel', () => {
     expect(progress.items['word:你好']).toMatchObject({ masteryLevel: 5, timesWrong: 1, basic: true })
   })
 
-  it('al bajar de nivel, lo marcado solo por el nivel vuelve a ser nuevo', () => {
+  it('when lowering the level, items marked only by the level become new again', () => {
     let progress = applyHskLevel(createEmptyProgress(), items, 3, now)
     progress = applyHskLevel(progress, items, 2, now)
 
     expect(progress.items['word:经常']).toBeUndefined()
     expect(getItemStatus(progress.items['word:认识'])).toBe('mastered')
-    // Con HSK 2, HSK 1 ya no es básico: sigue dominado y se repasa de vez en cuando
+    // With HSK 2, HSK 1 is no longer basic: it stays mastered and is reviewed now and then
     expect(progress.items['word:你好']?.basic).toBeUndefined()
     expect(getItemStatus(progress.items['word:你好'])).toBe('mastered')
 
@@ -185,7 +185,7 @@ describe('applyHskLevel', () => {
     expect(progress.items).toEqual({})
   })
 
-  it('al bajar de nivel, lo ya respondido se conserva y lo que era básico vuelve a repasarse de vez en cuando', () => {
+  it('when lowering the level, answered items are kept and basic ones are reviewed now and then again', () => {
     let progress = recordAnswer(createEmptyProgress(), 'word:你好', true, now)
     progress = applyHskLevel(progress, items, 3, now)
     progress = recordAnswer(progress, 'word:经常', true, now)
@@ -198,7 +198,7 @@ describe('applyHskLevel', () => {
     expect(progress.items['word:认识']).toBeUndefined()
   })
 
-  it('no borra lo marcado en Learn como ya dominado', () => {
+  it("doesn't remove items marked as already mastered in Learn", () => {
     let progress = markItemKnown(createEmptyProgress(), 'word:经常', now)
     progress = applyHskLevel(progress, items, 3, now)
     progress = applyHskLevel(progress, items, 1, now)
@@ -206,7 +206,7 @@ describe('applyHskLevel', () => {
     expect(getItemStatus(progress.items['word:经常'])).toBe('mastered')
   })
 
-  it('un básico que se falla pierde la marca y vuelve a la repetición normal', () => {
+  it('a missed basic item loses the flag and returns to normal repetition', () => {
     let progress = applyHskLevel(createEmptyProgress(), items, 3, now)
     progress = recordAnswer(progress, 'word:你好', false, now)
 

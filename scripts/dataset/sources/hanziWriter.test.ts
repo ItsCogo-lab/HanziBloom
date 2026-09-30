@@ -6,21 +6,21 @@ import { countStrokes, readStrokeData } from './hanziWriter.ts'
 
 const packageDir = join(dirname(fileURLToPath(import.meta.url)), '../../../node_modules/hanzi-writer-data')
 
-describe('adaptador de hanzi-writer-data', () => {
-  it('lee los trazos de 柠 del paquete instalado', () => {
+describe('hanzi-writer-data adapter', () => {
+  it('reads the strokes of 柠 from the installed package', () => {
     expect(readStrokeData(packageDir, '柠')?.strokeCount).toBe(9)
   })
 
-  it('devuelve undefined si no hay datos del carácter', () => {
+  it('returns undefined if there is no data for the character', () => {
     expect(readStrokeData(packageDir, 'A')).toBeUndefined()
   })
 
-  it('cuenta los trazos o falla si el formato no es el esperado', () => {
+  it('counts the strokes or fails if the format is not the expected one', () => {
     expect(countStrokes(JSON.stringify({ strokes: ['M 0 0', 'M 1 1'], medians: [] }))).toBe(2)
     expect(() => countStrokes('{}')).toThrow(/strokes/)
   })
 
-  it('nombra los archivos por punto de código', () => {
+  it('names the files by code point', () => {
     expect(strokeFileName('柠')).toBe('67e0.json')
   })
 })

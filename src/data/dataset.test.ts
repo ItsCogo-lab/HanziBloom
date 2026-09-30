@@ -4,26 +4,26 @@ import { validateDictionaryData } from '../features/dictionary/validation.ts'
 import { allCharacters, allWords } from './index.ts'
 
 describe('dataset', () => {
-  it('no tiene errores de coherencia', () => {
+  it('has no consistency errors', () => {
     expect(validateDictionaryData(allCharacters, allWords)).toEqual([])
   })
 
   /*
-   * Palabras por nivel en la lista de clem109/hsk-vocabulary. No son
-   * exactamente las oficiales (150/150/300/600): HSK 2 pierde 打篮球 (no está
-   * en CC-CEDICT), HSK 3 viene con 299 y HSK 4 con 601, de las que 3 son
-   * repeticiones (等, 对, 过). Ver docs/DATA_CONFLICTS.md.
+   * Words per level in the clem109/hsk-vocabulary list. They are not
+   * exactly the official counts (150/150/300/600): HSK 2 loses 打篮球 (not
+   * in CC-CEDICT), HSK 3 comes with 299 and HSK 4 with 601, of which 3 are
+   * repeats (等, 对, 过). See docs/DATA_CONFLICTS.md.
    */
   it.each([
     [1, 150],
     [2, 149],
     [3, 299],
     [4, 598],
-  ])('HSK %i tiene %i palabras', (level, count) => {
+  ])('HSK %i has %i words', (level, count) => {
     expect(allWords.filter((word) => word.hskLevel === level)).toHaveLength(count)
   })
 
-  it('separa los homógrafos de la lista HSK en palabras distintas', () => {
+  it('splits the HSK list homographs into separate words', () => {
     const dictionary = createDictionary(allCharacters, allWords)
     expect(getWord(dictionary, '长[cháng]')?.meanings.en[0]).toMatch(/length|long/)
     expect(getWord(dictionary, '长[zhǎng]')).toMatchObject({ pinyin: 'zhǎng', hskLevel: 2 })
@@ -31,18 +31,18 @@ describe('dataset', () => {
     expect(getCharacter(dictionary, '长')?.pinyin).toEqual(['cháng', 'zhǎng'])
   })
 
-  it('da un nivel HSK a cada entrada', () => {
+  it('gives every entry an HSK level', () => {
     const withoutLevel = [...allCharacters, ...allWords].filter((entry) => entry.hskLevel === undefined)
     expect(withoutLevel.map((entry) => entry.id)).toEqual([])
   })
 
-  it('incluye todos los caracteres de las palabras', () => {
+  it('includes every character of the words', () => {
     const charactersInWords = new Set(allWords.flatMap((word) => Array.from(word.hanzi)))
 
     expect(allCharacters).toHaveLength(charactersInWords.size)
   })
 
-  it('tiene los datos esperados en entradas conocidas', () => {
+  it('has the expected data in known entries', () => {
     const dictionary = createDictionary(allCharacters, allWords)
 
     expect(getWord(dictionary, '谢谢')).toMatchObject({ pinyin: 'xiè xie', meanings: { en: ['to thank', 'thanks', 'thank you'] } })

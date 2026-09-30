@@ -7,34 +7,34 @@ const IPAD = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.
 const ANDROID = 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36'
 
 describe('isIos', () => {
-  it('reconoce el iPhone y el iPad, que se presenta como un Mac táctil', () => {
+  it('recognizes the iPhone and the iPad, which presents itself as a touch Mac', () => {
     expect(isIos({ userAgent: IPHONE, maxTouchPoints: 5 })).toBe(true)
     expect(isIos({ userAgent: IPAD, maxTouchPoints: 5 })).toBe(true)
   })
 
-  it('no confunde un Mac ni un Android con iOS', () => {
+  it("doesn't mistake a Mac or an Android for iOS", () => {
     expect(isIos({ userAgent: IPAD, maxTouchPoints: 0 })).toBe(false)
     expect(isIos({ userAgent: ANDROID, maxTouchPoints: 5 })).toBe(false)
   })
 })
 
 describe('getInstallMode', () => {
-  it('usa el diálogo del navegador cuando lo hay', () => {
+  it('uses the browser dialog when there is one', () => {
     expect(getInstallMode({ standalone: false, ios: false, hasNativePrompt: true })).toBe('native')
   })
 
-  it('explica los pasos de Safari en iOS', () => {
+  it('explains the Safari steps on iOS', () => {
     expect(getInstallMode({ standalone: false, ios: true, hasNativePrompt: false })).toBe('ios')
   })
 
-  it('no ofrece nada si ya está instalada o el navegador no sabe instalar', () => {
+  it("offers nothing if already installed or the browser can't install", () => {
     expect(getInstallMode({ standalone: true, ios: true, hasNativePrompt: true })).toBeUndefined()
     expect(getInstallMode({ standalone: false, ios: false, hasNativePrompt: false })).toBeUndefined()
   })
 })
 
-describe('aviso cerrado', () => {
-  it('se recuerda una vez cerrado', () => {
+describe('dismissed banner', () => {
+  it('is remembered once dismissed', () => {
     const storage = memoryStorage()
     expect(isInstallPromptDismissed(storage)).toBe(false)
     dismissInstallPrompt(storage)

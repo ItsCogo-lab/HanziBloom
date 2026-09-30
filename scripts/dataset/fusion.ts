@@ -1,11 +1,11 @@
 /**
- * Fusión: combina lo que devuelve cada adaptador en las entradas del dataset.
+ * Fusion: combines what each adapter returns into the dataset entries.
  *
- * Reglas:
- * - Cada campo tiene UNA fuente dueña (FIELD_SOURCES). Ninguna otra fuente
- *   lo rellena, ni siquiera cuando la dueña no tiene el dato: entonces el
- *   campo se queda vacío.
- * - Todo es determinista: mismo orden de entrada, mismo resultado.
+ * Rules:
+ * - Each field has ONE owning source (FIELD_SOURCES). No other source
+ *   fills it, not even when the owner lacks the data: the field is then
+ *   left empty.
+ * - Everything is deterministic: same input order, same result.
  */
 import { getWordId } from '../../src/features/dictionary/dictionary.ts'
 import type { Character, HskLevel, Word } from '../../src/features/dictionary/types.ts'
@@ -14,7 +14,7 @@ import type { HskWord } from './sources/hsk.ts'
 import type { MakeMeAHanziCharacter } from './sources/makemeahanzi.ts'
 import type { UnihanCharacter } from './sources/unihan.ts'
 
-/** Qué fuente manda en cada campo. Documentado también en docs/DATA_SOURCES.md. */
+/** Which source rules each field. Also documented in docs/DATA_SOURCES.md. */
 export const FIELD_SOURCES = {
   character: {
     hskLevel: 'HSK list',
@@ -36,24 +36,24 @@ export const FIELD_SOURCES = {
   },
 } as const
 
-/** Una entrada de HSK 1-4: siempre tiene nivel. */
+/** An HSK 1-4 entry: it always has a level. */
 export type HskEntry<T extends Character | Word> = T & { hskLevel: HskLevel }
 
 export interface BaseEntries {
   characters: HskEntry<Character>[]
   words: HskEntry<Word>[]
   problems: string[]
-  /** Entradas repetidas en la lista HSK (mismo hanzi y pinyin) que se han juntado en una. */
+  /** Repeated entries in the HSK list (same hanzi and pinyin) that were merged into one. */
   duplicates: string[]
   /**
-   * Palabras de la lista HSK que no están en CC-CEDICT con ese pinyin. Se
-   * dejan fuera (no hay de dónde sacar su significado) y se listan en
+   * HSK list words that are not in CC-CEDICT with that pinyin. They are
+   * left out (there is nowhere to take their meaning from) and listed in
    * docs/DATA_CONFLICTS.md.
    */
   leftOut: string[]
 }
 
-/** Las palabras de un nivel de la lista HSK. */
+/** The words of one level of the HSK list. */
 export interface HskLevelList {
   level: HskLevel
   words: readonly HskWord[]
@@ -64,24 +64,24 @@ function capitalize(text: string): string {
 }
 
 /**
- * Palabras y caracteres de todos los niveles a partir de la lista HSK y
- * CC-CEDICT. Los niveles se leen en orden (1, 2, 3...).
+ * Words and characters of every level from the HSK list and CC-CEDICT.
+ * Levels are read in order (1, 2, 3...).
  *
- * - Palabras: las de la lista, con los significados de CC-CEDICT para ese
- *   mismo hanzi y pinyin. Si la lista repite una palabra con el mismo pinyin
- *   (等 děng en HSK 4, con dos sentidos), se guarda una vez, en su primer
- *   nivel. Si la repite con otro pinyin (长 cháng / zhǎng), son dos palabras
- *   con ids distintos (getWordId).
- * - Caracteres: todos los que aparecen en las palabras, con las lecturas con
- *   las que se usan en ellas. Su nivel es el de la primera palabra en la que
- *   aparecen.
+ * - Words: those in the list, with CC-CEDICT's meanings for that same
+ *   hanzi and pinyin. If the list repeats a word with the same pinyin
+ *   (等 děng in HSK 4, with two senses), it is stored once, at its first
+ *   level. If it repeats it with another pinyin (长 cháng / zhǎng), they are
+ *   two words with different ids (getWordId).
+ * - Characters: all those appearing in the words, with the readings they
+ *   are used with there. Their level is that of the first word they
+ *   appear in.
  */
 export function buildBaseEntries(levels: readonly HskLevelList[], cedict: CedictIndex): BaseEntries {
   const problems: string[] = []
   const duplicates: string[] = []
   const leftOut: string[] = []
 
-  // Primero se quitan las repeticiones exactas, para saber qué hanzi tienen varias pronunciaciones
+  // Exact repeats are removed first, to know which hanzi have several pronunciations
   const seen = new Set<string>()
   const entries: (HskWord & { level: HskLevel })[] = []
   for (const { level, words } of levels) {
@@ -118,18 +118,18 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
   }
 
   const readingsByCharacter = new Map<string, { level: HskLevel; readings: string[] }>()
-  // Caracteres que aparecen en nombres propios (汉语 Hàn yǔ, 中国 Zhōng guó):
-  // para ellos también sirven las entradas en mayúscula (汉 "Han; Chinese").
+  // Characters that appear in proper nouns (汉语 Hàn yǔ, 中国 Zhōng guó):
+  // capitalized entries also apply to them (汉 "Han; Chinese").
   const properNounCharacters = new Set<string>()
-  // Caracteres que también aparecen en minúscula (京 en 北京 Běi jīng, pero
-  // Jīng en 京剧): sus significados generales van antes que los del nombre propio.
+  // Characters that also appear in lowercase (京 in 北京 Běi jīng, but
+  // Jīng in 京剧): their general meanings go before the proper-noun ones.
   const commonNounCharacters = new Set<string>()
 
   for (const { hanzi, pinyin, hskLevel: level } of words) {
     const characters = Array.from(hanzi)
     const syllables = pinyin.split(/\s+/)
     if (characters.length !== syllables.length) {
-      problems.push(`Palabra ${hanzi} [${pinyin}]: no hay una sílaba por carácter`)
+      problems.push(`Word ${hanzi} [${pinyin}]: not one syllable per character`)
       continue
     }
     characters.forEach((character, index) => {
@@ -139,7 +139,7 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
 
       const reading = readingOf(cedict, character, syllable.toLowerCase())
       if (!reading) {
-        problems.push(`Carácter ${character} [${syllable}] (en ${hanzi}): sin lectura en CC-CEDICT`)
+        problems.push(`Character ${character} [${syllable}] (in ${hanzi}): no reading in CC-CEDICT`)
         return
       }
       const known = readingsByCharacter.get(character) ?? { level, readings: [] }
@@ -161,26 +161,26 @@ export function buildBaseEntries(levels: readonly HskLevelList[], cedict: Cedict
   return { characters, words, problems, duplicates, leftOut }
 }
 
-/** Lo que cada fuente sabe de un carácter. Una fuente sin datos para él queda undefined. */
+/** What each source knows about a character. A source with no data for it is undefined. */
 export interface CharacterSources {
   unihan?: UnihanCharacter
   makeMeAHanzi?: MakeMeAHanziCharacter
   /**
-   * Número de trazos según hanzi-writer-data. Manda sobre el de Unihan para
-   * que coincida con la animación, que dibuja la forma simplificada.
+   * Stroke count according to hanzi-writer-data. It overrides Unihan's so
+   * it matches the animation, which draws the simplified form.
    */
   hanziWriterStrokeCount?: number
   /**
-   * Número Kangxi (según Unihan) del radical que da Make Me a Hanzi. Sirve
-   * para comparar radicales escritos en otra forma: 亻 y 人 son el radical 9.
+   * Kangxi number (according to Unihan) of the radical Make Me a Hanzi gives.
+   * Used to compare radicals written in another form: 亻 and 人 are radical 9.
    */
   makeMeAHanziRadicalNumber?: number
 }
 
 /**
- * Añade a un carácter los campos de las demás fuentes, cada uno de su fuente
- * dueña. Solo se copian valores que existen: nunca se escribe undefined ni
- * se toma el dato de otra fuente.
+ * Adds the other sources' fields to a character, each from its owning
+ * source. Only existing values are copied: undefined is never written and
+ * data is never taken from another source.
  */
 export function enrichCharacter(base: Character, sources: CharacterSources): Character {
   const { unihan, makeMeAHanzi, hanziWriterStrokeCount } = sources
@@ -196,9 +196,9 @@ export function enrichCharacter(base: Character, sources: CharacterSources): Cha
 }
 
 /**
- * Compara lo que dicen dos fuentes sobre el mismo dato. No corrige nada: el
- * dataset usa siempre la fuente dueña y aquí solo se avisa del desacuerdo
- * para que una persona lo revise.
+ * Compares what two sources say about the same data point. It corrects nothing:
+ * the dataset always uses the owning source, and this only flags the
+ * disagreement so a person can review it.
  */
 export function crossCheckCharacter(hanzi: string, sources: CharacterSources): string[] {
   const { unihan, makeMeAHanzi, hanziWriterStrokeCount, makeMeAHanziRadicalNumber } = sources
@@ -206,7 +206,7 @@ export function crossCheckCharacter(hanzi: string, sources: CharacterSources): s
   if (unihan?.strokeCount !== undefined && hanziWriterStrokeCount !== undefined) {
     if (unihan.strokeCount !== hanziWriterStrokeCount) {
       conflicts.push(
-        `${hanzi}: Unihan dice ${unihan.strokeCount} trazos y hanzi-writer-data tiene ${hanziWriterStrokeCount}. Se usa el de hanzi-writer-data.`,
+        `${hanzi}: Unihan says ${unihan.strokeCount} strokes and hanzi-writer-data has ${hanziWriterStrokeCount}. Using hanzi-writer-data's.`,
       )
     }
   }
@@ -217,44 +217,44 @@ export function crossCheckCharacter(hanzi: string, sources: CharacterSources): s
     unihan.radicalNumber !== makeMeAHanziRadicalNumber
   ) {
     conflicts.push(
-      `${hanzi}: el radical es ${unihan.radical} en Unihan y ${makeMeAHanzi.radical} en Make Me a Hanzi. Se usa el de Unihan.`,
+      `${hanzi}: the radical is ${unihan.radical} in Unihan and ${makeMeAHanzi.radical} in Make Me a Hanzi. Using Unihan's.`,
     )
   }
   return conflicts
 }
 
 export interface FullEntries {
-  /** Caracteres de CC-CEDICT que no están en HSK 1-4, sin nivel. */
+  /** CC-CEDICT characters that are not in HSK 1-4, without a level. */
   characters: Character[]
-  /** Palabras de CC-CEDICT que no están en HSK 1-4, sin nivel. */
+  /** CC-CEDICT words that are not in HSK 1-4, without a level. */
   words: Word[]
-  /** Palabras que se dejan fuera, con el motivo (se listan en docs/DATA_CONFLICTS.md). */
+  /** Words left out, with the reason (listed in docs/DATA_CONFLICTS.md). */
   leftOut: string[]
 }
 
 const HAN_ONLY = /^\p{Script=Han}+$/u
-/** CC-CEDICT escribe "xx5" cuando no conoce la lectura (々). Sin lectura no hay entrada. */
+/** CC-CEDICT writes "xx5" when it doesn't know the reading (々). No reading, no entry. */
 const UNKNOWN_READING = /xx/
 
 /**
- * El resto de CC-CEDICT, para el diccionario completo. Complementa a
- * buildBaseEntries: lo que ya está en HSK 1-4 no se repite.
+ * The rest of CC-CEDICT, for the full dictionary. Complements
+ * buildBaseEntries: what is already in HSK 1-4 is not repeated.
  *
- * - Solo entradas escritas enteras con caracteres chinos (se quedan fuera
- *   "T恤", "110" o "%") y con lectura conocida (no "xx5").
- * - Una entrada de un solo carácter es un carácter; si tiene varias lecturas,
- *   el carácter las lleva todas. Si alguna está en minúscula, las de nombre
- *   propio (surname Xxx) no cuentan como lectura, pero sus significados sí
- *   van detrás.
- * - Las de dos o más caracteres son palabras: una por cada pinyin distinto
- *   (mayúsculas incluidas: 苹果 píng guǒ ya está en HSK, 苹果 Píng guǒ
- *   «Apple» entra aquí).
- * - Las palabras que ya usa HSK (las mismas entradas que eligió
- *   buildBaseEntries con findEntries) no se repiten.
- * - Id: el hanzi, o el hanzi con su pinyin si hay otra palabra con el
- *   mismo hanzi (en HSK o aquí).
- * - Una palabra con un carácter que no tiene entrada propia se deja fuera:
- *   su ficha no podría enseñar ese carácter.
+ * - Only entries written entirely in Chinese characters ("T恤", "110" or
+ *   "%" are left out) and with a known reading (not "xx5").
+ * - A single-character entry is a character; if it has several readings,
+ *   the character carries them all. If any is lowercase, the proper-noun
+ *   ones (surname Xxx) don't count as readings, but their meanings do
+ *   go after.
+ * - Entries of two or more characters are words: one per distinct pinyin
+ *   (capitalization included: 苹果 píng guǒ is already in HSK, 苹果 Píng guǒ
+ *   "Apple" goes here).
+ * - Words already used by HSK (the same entries buildBaseEntries chose
+ *   with findEntries) are not repeated.
+ * - Id: the hanzi, or the hanzi with its pinyin if there is another word
+ *   with the same hanzi (in HSK or here).
+ * - A word with a character that has no entry of its own is left out:
+ *   its entry card could not teach that character.
  */
 export function buildFullEntries(cedict: CedictIndex, hsk: Pick<BaseEntries, 'characters' | 'words'>): FullEntries {
   const hskCharacters = new Set(hsk.characters.map((character) => character.hanzi))
@@ -262,12 +262,12 @@ export function buildFullEntries(cedict: CedictIndex, hsk: Pick<BaseEntries, 'ch
   const leftOut: string[] = []
 
   const characters: Character[] = []
-  // Palabras agrupadas por hanzi y pinyin, en el orden de CC-CEDICT
+  // Words grouped by hanzi and pinyin, in CC-CEDICT order
   const groups = new Map<string, { hanzi: string; pinyin: string; entries: CedictEntry[] }>()
   for (const [hanzi, allEntries] of cedict) {
     if (!HAN_ONLY.test(hanzi)) continue
     const entries = allEntries.filter((entry) => !UNKNOWN_READING.test(entry.pinyin))
-    if (entries.length < allEntries.length) leftOut.push(`${hanzi}: CC-CEDICT no conoce su lectura`)
+    if (entries.length < allEntries.length) leftOut.push(`${hanzi}: CC-CEDICT does not know its reading`)
     if (Array.from(hanzi).length === 1) {
       if (hskCharacters.has(hanzi)) continue
       const common = entries.filter((entry) => entry.pinyin === entry.pinyin.toLowerCase())
@@ -290,11 +290,11 @@ export function buildFullEntries(cedict: CedictIndex, hsk: Pick<BaseEntries, 'ch
   const kept = [...groups.values()].filter(({ hanzi, pinyin, entries }) => {
     const missing = Array.from(hanzi).filter((character) => !knownCharacters.has(character))
     if (missing.length > 0) {
-      leftOut.push(`${hanzi} [${pinyin}]: sin entrada para ${missing.join(', ')}`)
+      leftOut.push(`${hanzi} [${pinyin}]: no entry for ${missing.join(', ')}`)
       return false
     }
     if (usableMeanings(entries).length === 0) {
-      leftOut.push(`${hanzi} [${pinyin}]: sin significados`)
+      leftOut.push(`${hanzi} [${pinyin}]: no meanings`)
       return false
     }
     return true

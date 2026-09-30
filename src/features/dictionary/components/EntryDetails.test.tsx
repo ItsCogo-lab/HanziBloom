@@ -28,13 +28,13 @@ function renderCharacter(entry = ningCharacter, fetchFn?: typeof fetch) {
   )
 }
 
-/** Valor de una fila "etiqueta → valor" de la ficha. */
+/** Value of a "label → value" row on the entry page. */
 function fact(label: string): HTMLElement {
   return screen.getByText(label, { selector: 'dt' }).nextElementSibling as HTMLElement
 }
 
-describe('EntryDetails de un carácter', () => {
-  it('muestra los datos integrados de 柠', () => {
+describe('EntryDetails for a character', () => {
+  it('shows the integrated data for 柠', () => {
     renderCharacter()
 
     expect(screen.getByText('níng')).toBeInTheDocument()
@@ -47,7 +47,7 @@ describe('EntryDetails de un carácter', () => {
     expect(fact('HSK level')).toHaveTextContent('HSK 1')
   })
 
-  it('muestra la etimología pictofonética', () => {
+  it('shows the pictophonetic etymology', () => {
     renderCharacter()
 
     const etymology = screen.getByRole('heading', { name: 'Etymology' }).parentElement!
@@ -56,7 +56,7 @@ describe('EntryDetails de un carácter', () => {
     expect(fact('Sound from')).toHaveTextContent('宁')
   })
 
-  it('lista las palabras relacionadas con tradicional, pinyin, significado y nivel', () => {
+  it('lists related words with traditional, pinyin, meaning and level', () => {
     renderCharacter()
 
     const link = screen.getByRole('link', { name: /柠檬/ })
@@ -64,7 +64,7 @@ describe('EntryDetails de un carácter', () => {
     expect(link).toHaveAttribute('href', '/vocabulary/%E6%9F%A0%E6%AA%AC')
   })
 
-  it('enlaza los componentes que están en el diccionario', () => {
+  it('links the components that are in the dictionary', () => {
     const withComponent = { ...ningCharacter, decomposition: '⿰好你' }
     renderCharacter(withComponent)
 
@@ -74,7 +74,7 @@ describe('EntryDetails de un carácter', () => {
     )
   })
 
-  it('oculta las secciones sin datos', () => {
+  it('hides sections without data', () => {
     renderCharacter(testCharacters[1]!)
 
     for (const label of ['Traditional', 'Radical', 'Strokes', 'Components']) {
@@ -84,7 +84,7 @@ describe('EntryDetails de un carácter', () => {
     expect(screen.queryByRole('heading', { name: 'Stroke order' })).not.toBeInTheDocument()
   })
 
-  it('carga los trazos de jsDelivr, también fuera de HSK', async () => {
+  it('loads strokes from jsDelivr, also outside HSK', async () => {
     const fake = createFakeFetch([[JSDELIVR_NING, jsonResponse(strokes)]])
     const { hskLevel: _level, ...outsideHsk } = ningCharacter
     renderCharacter(outsideHsk, fake.fetch)
@@ -94,7 +94,7 @@ describe('EntryDetails de un carácter', () => {
     expect(fake.requested).not.toContain('/strokes/67e0.json')
   })
 
-  it('sin conexión con jsDelivr usa la copia local de HSK', async () => {
+  it('without a connection to jsDelivr uses the local HSK copy', async () => {
     const fake = createFakeFetch([['/strokes/67e0.json', jsonResponse(strokes)]])
     renderCharacter(ningCharacter, fake.fetch)
 
@@ -102,7 +102,7 @@ describe('EntryDetails de un carácter', () => {
     expect(fake.requested).toEqual(expect.arrayContaining([JSDELIVR_NING, '/strokes/67e0.json']))
   })
 
-  it('sin conexión y sin copia local dice que los trazos no están disponibles', async () => {
+  it('without a connection or local copy says strokes are unavailable', async () => {
     const { hskLevel: _level, ...outsideHsk } = ningCharacter
     renderCharacter(outsideHsk)
 
@@ -110,7 +110,7 @@ describe('EntryDetails de un carácter', () => {
     expect(await screen.findByText('Example sentences unavailable offline.')).toBeInTheDocument()
   })
 
-  it('no muestra el orden de trazos ni frases si las fuentes no los tienen', async () => {
+  it('does not show stroke order or sentences if the sources lack them', async () => {
     const fake = createFakeFetch([[/./, new Response('', { status: 404 })]])
     renderCharacter(ningCharacter, fake.fetch)
 
@@ -119,15 +119,15 @@ describe('EntryDetails de un carácter', () => {
     expect(screen.queryByRole('heading', { name: 'Example sentences' })).not.toBeInTheDocument()
   })
 
-  it('muestra frases de Tatoeba en tiempo de ejecución con su atribución', async () => {
+  it('shows Tatoeba sentences at runtime with their attribution', async () => {
     const fake = createFakeFetch([['https://api.tatoeba.org/v1/sentences?', jsonResponse(ningResponse)]])
     renderCharacter(ningCharacter, fake.fetch)
 
     expect(await screen.findByRole('heading', { name: 'Example sentences' })).toBeInTheDocument()
     await expectSentenceWithPinyin('柠檬很酸。', 'níng méng hěn suān。')
-    // La traducción directa de id más bajo
+    // The direct translation with the lowest id
     expect(screen.getByText('Lemon is sour.')).toBeInTheDocument()
-    // Las frases en tradicional no contienen 柠 tal cual
+    // Sentences in traditional don't contain 柠 as is
     expect(screen.queryByText('檸檬是酸的。')).not.toBeInTheDocument()
     expect(screen.getAllByRole('listitem').filter((li) => li.textContent?.includes('Tatoeba #'))).toHaveLength(3)
     expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toHaveAttribute(
@@ -138,7 +138,7 @@ describe('EntryDetails de un carácter', () => {
     expect(fake.requested).not.toContain('/examples/hsk1.json')
   })
 
-  it('sin conexión con Tatoeba usa las frases locales de HSK', async () => {
+  it('without a connection to Tatoeba uses the local HSK sentences', async () => {
     const fake = createFakeFetch([['/examples/hsk1.json', jsonResponse(testExampleSet)]])
     renderCharacter(ningCharacter, fake.fetch)
 
@@ -147,7 +147,7 @@ describe('EntryDetails de un carácter', () => {
     expect(screen.getByRole('link', { name: 'Tatoeba #8934441 by iiujik' })).toBeInTheDocument()
   })
 
-  it('muestra las notas de gramática de una partícula con su ejemplo y el enlace a la Grammar Wiki', () => {
+  it('shows a particle\'s grammar notes with its example and the Grammar Wiki link', () => {
     renderCharacter(testCharacters.find((character) => character.hanzi === '了')!)
 
     const grammar = screen.getByRole('heading', { name: 'Grammar' }).parentElement!
@@ -160,20 +160,20 @@ describe('EntryDetails de un carácter', () => {
     )
   })
 
-  it('no muestra notas de gramática si no es una partícula', () => {
+  it('does not show grammar notes if it is not a particle', () => {
     renderCharacter()
     expect(screen.queryByRole('heading', { name: 'Grammar' })).not.toBeInTheDocument()
   })
 })
 
-/** La frase de ejemplo, ya con el pinyin del motor debajo (el chino va en un span por carácter). */
+/** The example sentence, with the engine's pinyin underneath (the Chinese goes in one span per character). */
 async function expectSentenceWithPinyin(chinese: string, pinyin: string) {
   const pinyinLine = await screen.findByText(pinyin)
   expect(pinyinLine.previousElementSibling).toHaveTextContent(chinese)
 }
 
-describe('EntryDetails de una palabra', () => {
-  it('muestra la forma tradicional', () => {
+describe('EntryDetails for a word', () => {
+  it('shows the traditional form', () => {
     renderWithProviders(
       <EntryDetails
         item={{ kind: 'word', entry: ningmengWord }}

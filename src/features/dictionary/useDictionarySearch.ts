@@ -3,37 +3,37 @@ import { useSearchableItems, type SearchableItems } from './dictionaryContext.ts
 import { searchItems } from './search.ts'
 import type { StudyItem } from './studyItem.ts'
 
-/** Espera desde la última tecla antes de buscar. */
+/** Wait after the last keystroke before searching. */
 export const SEARCH_DEBOUNCE_MS = 200
-/** Búsquedas recientes que se recuerdan (por versión del diccionario cargado). */
+/** Recent searches remembered (per loaded dictionary version). */
 const CACHED_SEARCHES = 30
 
 const HAN = /\p{Script=Han}/u
 
 /**
- * Longitud mínima de una búsqueda: un hanzi basta; en pinyin o inglés hacen
- * falta dos letras, porque una sola coincide con decenas de miles de entradas.
+ * Minimum search length: one hanzi is enough; in pinyin or English two
+ * letters are needed, because a single one matches tens of thousands of entries.
  */
 export function isLongEnough(query: string): boolean {
   const text = query.trim()
   return HAN.test(text) || Array.from(text).length >= 2
 }
 
-/** El valor, pero solo cuando lleva `delayMs` sin cambiar. */
+/** The value, but only once it has gone `delayMs` without changing. */
 export function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value)
   useEffect(() => {
-    // Cada tecla cancela la espera anterior: solo se busca lo último que se escribió
+    // Each keystroke cancels the previous wait: only the latest input is searched
     const timer = setTimeout(() => setDebounced(value), delayMs)
     return () => clearTimeout(timer)
   }, [value, delayMs])
   return debounced
 }
 
-// Resultados por lista de elementos (cambia cuando llega el diccionario completo) y búsqueda
+// Results per item list (changes when the full dictionary arrives) and query
 const resultCache = new WeakMap<readonly StudyItem[], Map<string, StudyItem[]>>()
 
-/** Busca con caché: repetir una búsqueda reciente (borrar y volver a escribir) no vuelve a recorrer todo. */
+/** Cached search: repeating a recent search (deleting and retyping) doesn't walk through everything again. */
 export function cachedSearch(items: readonly StudyItem[], query: string, limit: number): StudyItem[] {
   let cache = resultCache.get(items)
   if (!cache) {
@@ -43,7 +43,7 @@ export function cachedSearch(items: readonly StudyItem[], query: string, limit: 
   const key = `${limit}|${query.trim().toLowerCase()}`
   const cached = cache.get(key)
   if (cached) {
-    // Pasa al final: la más reciente
+    // Move to the end: the most recent
     cache.delete(key)
     cache.set(key, cached)
     return cached
@@ -57,18 +57,18 @@ export function cachedSearch(items: readonly StudyItem[], query: string, limit: 
 export interface DictionarySearch {
   results: StudyItem[]
   /**
-   * 'idle': sin búsqueda. 'too-short': falta texto. 'pending': esperando a que
-   * se deje de escribir. 'ready': resultados de lo escrito.
+   * 'idle': no search. 'too-short': not enough text. 'pending': waiting for
+   * typing to stop. 'ready': results for what was typed.
    */
   status: 'idle' | 'too-short' | 'pending' | 'ready'
-  /** Si ya se busca en todo el diccionario o todavía solo en HSK 1-4. */
+  /** Whether the whole dictionary is searched yet or still only HSK 1-4. */
   dictionary: SearchableItems['status']
 }
 
 /**
- * Búsqueda del diccionario para los buscadores de la app: espera a que se
- * deje de escribir, pide una longitud mínima, recuerda las búsquedas recientes
- * y mantiene el orden de siempre (exactas primero, HSK antes que el resto).
+ * Dictionary search for the app's search boxes: waits for typing to stop,
+ * requires a minimum length, remembers recent searches and keeps the usual
+ * order (exact first, HSK before the rest).
  */
 export function useDictionarySearch(
   query: string,

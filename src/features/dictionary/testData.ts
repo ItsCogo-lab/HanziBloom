@@ -1,8 +1,8 @@
 import type { Character, ExampleSet, Word } from './types.ts'
 
 /*
- * Datos pequeños SOLO para tests. El dataset real de HSK 1 llegará en la
- * fase 5 con sus fuentes documentadas.
+ * Small data for tests ONLY. The real HSK 1 dataset will arrive in
+ * phase 5 with its sources documented.
  */
 
 export const testCharacters: Character[] = [
@@ -19,10 +19,10 @@ export const testWords: Word[] = [
 ]
 
 /*
- * 柠 y 柠檬, la referencia de la ficha estilo Tofu. No están en HSK 1, así que
- * no aparecen en el dataset de la app. Estos objetos son exactamente lo que
- * genera el pipeline a partir de líneas reales de CC-CEDICT, Unihan y Make Me
- * a Hanzi: scripts/dataset/fusion.test.ts comprueba que coinciden.
+ * 柠 and 柠檬, the reference for the Tofu-style entry page. They aren't in HSK 1, so
+ * they don't appear in the app's dataset. These objects are exactly what the
+ * pipeline generates from real lines of CC-CEDICT, Unihan and Make Me
+ * a Hanzi: scripts/dataset/fusion.test.ts checks that they match.
  */
 export const ningCharacter: Character = {
   id: '柠',
@@ -47,7 +47,7 @@ export const ningmengWord: Word = {
   traditional: '檸檬',
 }
 
-/** Un archivo de ejemplos con la frase real de Tatoeba 8934441 (CC BY 2.0 FR). */
+/** An examples file with the real Tatoeba sentence 8934441 (CC BY 2.0 FR). */
 export const testExampleSet: ExampleSet = {
   source: 'Tatoeba',
   license: 'CC BY 2.0 FR',

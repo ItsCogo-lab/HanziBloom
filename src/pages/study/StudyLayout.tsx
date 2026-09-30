@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router'
 import { PageHeader } from '../../components/ui/PageHeader.tsx'
 import { t, type MessageKey } from '../../i18n/index.ts'
 
-/** Pestañas de la sección Study. Añadir una = añadir una entrada y su <Route>. */
+/** Tabs of the Study section. Adding one = adding an entry and its <Route>. */
 const STUDY_TABS: readonly { path: string; labelKey: MessageKey }[] = [
   { path: '/study', labelKey: 'study.myStudies' },
   { path: '/study/hsk', labelKey: 'study.hsk' },
@@ -10,7 +10,7 @@ const STUDY_TABS: readonly { path: string; labelKey: MessageKey }[] = [
   { path: '/study/custom', labelKey: 'study.custom' },
 ]
 
-/** Sección Study: My Studies, sets HSK y sets por temas. */
+/** Study section: My Studies, HSK sets and topic sets. */
 export function StudyLayout() {
   return (
     <>

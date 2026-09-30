@@ -4,7 +4,7 @@ import { TONES } from '../../lib/tones.ts'
 import type { CustomSentence, CustomSet, SentenceToken } from './types.ts'
 
 export const CUSTOM_SETS_STORAGE_KEY = 'hanzivocab.customSets'
-/** Versión del formato guardado, igual que en progress/storage.ts. */
+/** Version of the saved format, same as in progress/storage.ts. */
 const CURRENT_VERSION = 1
 
 export function saveCustomSets(sets: readonly CustomSet[], storage?: KeyValueStorage): boolean {
@@ -12,9 +12,9 @@ export function saveCustomSets(sets: readonly CustomSet[], storage?: KeyValueSto
 }
 
 /**
- * Carga los sets del usuario. Un set con formato incorrecto se descarta y,
- * dentro de un set, lo que no tenga forma válida se ignora: un dato roto no
- * debe romper la interfaz.
+ * Loads the user's sets. A set with an invalid format is discarded and,
+ * within a set, anything without a valid shape is ignored: broken data must
+ * not break the UI.
  */
 export function loadCustomSets(storage?: KeyValueStorage): CustomSet[] {
   const saved = readJson(CUSTOM_SETS_STORAGE_KEY, storage)
@@ -48,7 +48,7 @@ function parseCustomSet(value: unknown): CustomSet | undefined {
   }
 }
 
-/** Solo significados de texto no vacío y de elementos que están en el set. */
+/** Only non-empty text meanings for items that are in the set. */
 function parseMeanings(value: unknown, itemIds: readonly StudyItemId[]): CustomSet['meanings'] {
   const meanings: CustomSet['meanings'] = {}
   if (!isRecord(value)) return meanings
@@ -64,7 +64,7 @@ export function isStudyItemId(value: unknown): value is StudyItemId {
   return typeof value === 'string' && (value.startsWith('char:') || value.startsWith('word:')) && value.length > 5
 }
 
-/** Frases con forma válida, id único y trozos que forman exactamente la frase. */
+/** Sentences with a valid shape, a unique id and tokens that form exactly the sentence. */
 function parseSentences(value: unknown, itemIds: readonly StudyItemId[]): CustomSentence[] {
   if (!Array.isArray(value)) return []
   const sentences: CustomSentence[] = []

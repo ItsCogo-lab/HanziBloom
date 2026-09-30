@@ -9,22 +9,22 @@ const entry = {
   source: 'test@1',
 }
 
-describe('caché del diccionario', () => {
-  it('en memoria guarda y devuelve entradas', async () => {
+describe('dictionary cache', () => {
+  it('in memory stores and returns entries', async () => {
     const cache = createMemoryCache()
     expect(await cache.get('strokes:柠')).toBeUndefined()
     await cache.set(entry)
     expect(await cache.get('strokes:柠')).toEqual(entry)
   })
 
-  it('en IndexedDB guarda entradas que sobreviven a abrir la base de datos de nuevo', async () => {
+  it('in IndexedDB stores entries that survive reopening the database', async () => {
     const factory = new IDBFactory()
     await createIndexedDbCache(factory).set(entry)
     expect(await createIndexedDbCache(factory).get('strokes:柠')).toEqual(entry)
     expect(await createIndexedDbCache(factory).get('strokes:柚')).toBeUndefined()
   })
 
-  it('si IndexedDB falla, se comporta como si no hubiera nada guardado', async () => {
+  it('if IndexedDB fails, behaves as if nothing were stored', async () => {
     const broken = {
       open: () => {
         throw new Error('blocked')

@@ -7,25 +7,25 @@ import { getStudyItemId, type StudyItem } from '../studyItem.ts'
 import { EntryLabel } from './EntryLabel.tsx'
 import { EntryLink, type EntryOpener } from './EntryLink.tsx'
 
-/** Resultados que se muestran de golpe; el resto, con «Show more». */
+/** Results shown at once; the rest, with "Show more". */
 const PAGE_SIZE = 50
 
 type DictionarySearchProps = {
-  /** Solo caracteres o solo palabras; sin él, los dos. */
+  /** Only characters or only words; without it, both. */
   kind?: StudyItem['kind']
   query: string
   onQueryChange: (query: string) => void
   opener: EntryOpener
-  /** Sin búsqueda, lista HSK 1-4 (la página) o no muestra nada (el panel de estudio). */
+  /** With no search, lists HSK 1-4 (the page) or shows nothing (the study panel). */
   listAllWhenEmpty?: boolean
   inputRef?: Ref<HTMLInputElement>
 }
 
 /**
- * Buscador del diccionario: hanzi, pinyin (con o sin tonos) o inglés. Lo usan
- * la página Dictionary y el panel de las sesiones de estudio. Al empezar a
- * buscar se descarga el diccionario completo (una vez) y, hasta que llega, se
- * busca en HSK 1-4. Se busca cuando se deja de escribir (useDictionarySearch).
+ * Dictionary search box: hanzi, pinyin (with or without tones) or English. Used
+ * by the Dictionary page and the study sessions panel. When searching starts
+ * the full dictionary is downloaded (once) and, until it arrives, HSK 1-4
+ * is searched. Searches run when typing stops (useDictionarySearch).
  */
 export function DictionarySearch({
   kind,
@@ -44,11 +44,11 @@ export function DictionarySearch({
     [baseItems, kind, listAllWhenEmpty],
   )
   const results = hasQuery ? search.results : allItems
-  // Mientras se escribe se siguen viendo los resultados anteriores
+  // While typing, the previous results stay visible
   const showCount = hasQuery
     ? search.status === 'ready' || (search.status === 'pending' && results.length > 0)
     : listAllWhenEmpty
-  // El número de resultados visibles vuelve a PAGE_SIZE con cada búsqueda nueva
+  // The number of visible results resets to PAGE_SIZE with each new search
   const [shown, setShown] = useState({ query, count: PAGE_SIZE })
   const count = shown.query === query ? shown.count : PAGE_SIZE
 

@@ -20,7 +20,7 @@ function renderSentence(chinese: string, settings = DEFAULT_SETTINGS) {
 }
 
 describe('SentenceView', () => {
-  it('colorea cada carácter por su tono y deja la puntuación sin color', () => {
+  it('colors each character by its tone and leaves punctuation uncolored', () => {
     const container = renderSentence('我每天学习中文。')
 
     const colored = [...container.querySelectorAll('[data-tone]')]
@@ -31,14 +31,14 @@ describe('SentenceView', () => {
     expect(screen.getByText('。')).not.toHaveAttribute('data-tone')
   })
 
-  it('siempre muestra el pinyin, también sin colores', () => {
+  it('always shows the pinyin, also without colors', () => {
     const container = renderSentence('我在机场等你。', { ...DEFAULT_SETTINGS, toneColors: false })
 
     expect(container.querySelectorAll('[data-tone]')).toHaveLength(0)
     expect(screen.getByText('wǒ zài jī chǎng děng nǐ。')).toBeInTheDocument()
   })
 
-  it('marca los caracteres dudosos con «?», sin color, y lo explica', () => {
+  it('marks uncertain characters with "?", without color, and explains it', () => {
     const container = renderSentence('他长得很高。')
 
     expect([...container.querySelectorAll('[data-tone]')].map((span) => span.textContent)).toEqual(['他', '很', '高'])
@@ -46,7 +46,7 @@ describe('SentenceView', () => {
     expect(screen.getByText(/2 pronunciations couldn't be determined/)).toBeInTheDocument()
   })
 
-  it('añade los números de tono si el usuario lo pide', () => {
+  it('adds tone numbers if the user asks for them', () => {
     renderSentence('你好。', { ...DEFAULT_SETTINGS, toneNumbers: true })
     expect(screen.getByText('(ni3 hao3)')).toBeInTheDocument()
   })

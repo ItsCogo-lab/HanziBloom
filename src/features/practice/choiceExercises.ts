@@ -4,19 +4,19 @@ import { shuffle } from '../../lib/random.ts'
 import type { ExerciseDefinition } from './exerciseDefinitions.ts'
 import type { ChoiceExercise, ChoiceExerciseType } from './types.ts'
 
-/** Opciones por pregunta: la correcta y tres distractores. */
+/** Options per question: the correct one and three distractors. */
 export const CHOICE_OPTION_COUNT = 4
 
-/** Longitud orientativa del texto de significado de una opción. */
+/** Approximate length of an option's meaning text. */
 const MAX_MEANING_LABEL_LENGTH = 40
 
-// --- Textos que se muestran --------------------------------------------------
+// --- Displayed texts ---------------------------------------------------------
 
 /**
- * Guarda el resultado de `compute` para cada entrada del diccionario. Elegir
- * distractores compara un elemento con todo el dataset (más de 2000
- * entradas), así que los textos derivados se calculan una sola vez.
- * WeakMap: si una entrada deja de existir, su valor se libera.
+ * Caches the result of `compute` for each dictionary entry. Picking
+ * distractors compares an item against the whole dataset (more than 2000
+ * entries), so the derived texts are computed only once.
+ * WeakMap: if an entry stops existing, its value is released.
  */
 function memoizeByEntry<T>(compute: (item: StudyItem) => T): (item: StudyItem) => T {
   const cache = new WeakMap<object, T>()
@@ -27,10 +27,10 @@ function memoizeByEntry<T>(compute: (item: StudyItem) => T): (item: StudyItem) =
 }
 
 /**
- * Significados que se pueden mostrar sin revelar la respuesta. Algunas
- * entradas de CC-CEDICT citan el propio hanzi ("eldest (as in 大姐)"): se
- * quita el paréntesis que lo cita y, si aun así lo cita ("used in 漂亮"),
- * se descarta ese significado.
+ * Meanings that can be shown without revealing the answer. Some CC-CEDICT
+ * entries quote the hanzi itself ("eldest (as in 大姐)"): the parenthesis
+ * quoting it is removed and, if it still quotes it ("used in 漂亮"), that
+ * meaning is discarded.
  */
 export function getMeaningClues(item: StudyItem): string[] {
   const characters = Array.from(item.entry.hanzi)
@@ -42,7 +42,7 @@ export function getMeaningClues(item: StudyItem): string[] {
   })
 }
 
-/** Texto corto con los primeros significados: siempre el primero y, si caben, más. */
+/** Short text with the first meanings: always the first one and, if they fit, more. */
 export const getMeaningLabel = memoizeByEntry((item: StudyItem): string => {
   const label: string[] = []
   for (const meaning of getMeaningClues(item)) {
@@ -52,27 +52,27 @@ export const getMeaningLabel = memoizeByEntry((item: StudyItem): string => {
   return label.join('; ')
 })
 
-/** Lecturas de pinyin: una en las palabras; una o varias en los caracteres. */
+/** Pinyin readings: one for words; one or more for characters. */
 export function getReadings(item: StudyItem): readonly string[] {
   return item.kind === 'word' ? [item.entry.pinyin] : item.entry.pinyin
 }
 
 /**
- * Pinyin de una opción. En los caracteres con varias lecturas (了: le, liǎo)
- * se muestra solo la primera: si la opción correcta fuera la única con una
- * lista, se adivinaría por el formato.
+ * Pinyin of an option. For characters with several readings (了: le, liǎo)
+ * only the first one is shown: if the correct option were the only one with
+ * a list, it could be guessed from the format.
  */
 export function getPinyinLabel(item: StudyItem): string {
   return getReadings(item)[0] ?? ''
 }
 
-// --- Cuándo dos elementos se confunden ----------------------------------------
+// --- When two items get confused ---------------------------------------------
 
 function normalize(text: string): string {
   return text.toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
-/** Significados sueltos: "to love; to like (sth)" → "to love", "to like". */
+/** Individual meanings: "to love; to like (sth)" → "to love", "to like". */
 const getGlosses = memoizeByEntry((item: StudyItem): ReadonlySet<string> => {
   const glosses = getMeanings(item.entry.meanings)
     .flatMap((meaning) => meaning.split(';'))
@@ -92,12 +92,12 @@ function sharesReading(a: StudyItem, b: StudyItem): boolean {
 }
 
 interface ChoiceRules {
-  /** ¿Se puede preguntar por este elemento o usarlo como opción? */
+  /** Can this item be asked about or used as an option? */
   isUsable(item: StudyItem): boolean
   /**
-   * ¿Serían ambiguos juntos en la misma pregunta? Si un distractor también
-   * fuera una respuesta válida (un sinónimo, una lectura compartida), la
-   * pregunta tendría dos respuestas correctas.
+   * Would they be ambiguous together in the same question? If a distractor
+   * were also a valid answer (a synonym, a shared reading), the question
+   * would have two correct answers.
    */
   conflict(a: StudyItem, b: StudyItem): boolean
 }
@@ -113,17 +113,17 @@ const CHOICE_RULES: Record<ChoiceExerciseType, ChoiceRules> = {
   },
 }
 
-// --- Distractores y definiciones ---------------------------------------------
+// --- Distractors and definitions ---------------------------------------------
 
 function hanziLength(item: StudyItem): number {
   return Array.from(item.entry.hanzi).length
 }
 
 /**
- * Elige los distractores (respuestas incorrectas) recorriendo `pool` en orden.
- * Solo usa elementos del mismo tipo (carácter o palabra) que no se confundan
- * con la respuesta ni entre sí. Prefiere los de la misma longitud: una palabra
- * de dos caracteres entre opciones de uno se adivinaría sin saberla.
+ * Picks the distractors (wrong answers) walking `pool` in order. It only uses
+ * items of the same kind (character or word) that cannot be confused with the
+ * answer or with each other. It prefers ones of the same length: a
+ * two-character word among one-character options could be guessed without knowing it.
  */
 export function pickDistractors(
   type: ChoiceExerciseType,
@@ -137,7 +137,7 @@ export function pickDistractors(
   const candidates = pool
     .filter((candidate) => candidate.kind === item.kind && getStudyItemId(candidate) !== itemId)
     .filter((candidate) => isUsable(candidate) && !conflict(item, candidate))
-    // sort es estable: entre los de igual longitud se mantiene el orden de `pool`
+    // sort is stable: among equal lengths the `pool` order is kept
     .sort((a, b) => Math.abs(hanziLength(a) - length) - Math.abs(hanziLength(b) - length))
 
   const distractors: StudyItem[] = []
@@ -154,7 +154,7 @@ function createChoiceDefinition(type: ChoiceExerciseType): ExerciseDefinition<Ch
     canBuild: (item, pool) =>
       CHOICE_RULES[type].isUsable(item) && pickDistractors(type, item, pool).length === CHOICE_OPTION_COUNT - 1,
     build: (item, pool, random) => {
-      // Se baraja el pool para que los distractores cambien de una sesión a otra
+      // The pool is shuffled so the distractors change from one session to another
       const distractors = pickDistractors(type, item, shuffle(pool, random))
       return { type, item, options: shuffle([item, ...distractors], random) }
     },
@@ -165,7 +165,7 @@ export const meaningChoiceDefinition = createChoiceDefinition('meaning-choice')
 export const pinyinChoiceDefinition = createChoiceDefinition('pinyin-choice')
 export const hanziChoiceDefinition = createChoiceDefinition('hanzi-choice')
 
-/** ¿Es esta opción la respuesta correcta? */
+/** Is this option the correct answer? */
 export function isCorrectOption(exercise: ChoiceExercise, option: StudyItem): boolean {
   return getStudyItemId(option) === getStudyItemId(exercise.item)
 }

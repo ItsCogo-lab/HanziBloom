@@ -2,8 +2,8 @@ import { allCharacters, allWords } from '../../data/index.ts'
 import { createDictionary } from './dictionary.ts'
 import { listStudyItems } from './studyItem.ts'
 
-/** El diccionario de la app, construido una sola vez con todo el dataset. */
+/** The app's dictionary, built once from the whole dataset. */
 export const hskDictionary = createDictionary(allCharacters, allWords)
 
-/** Todos los caracteres y palabras del dataset como elementos de estudio. */
+/** All characters and words in the dataset as study items. */
 export const hskStudyItems = listStudyItems(hskDictionary)

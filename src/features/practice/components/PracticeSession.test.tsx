@@ -32,7 +32,7 @@ async function answer(user: ReturnType<typeof userEvent.setup>, buttonName: stri
 }
 
 describe('PracticeSession', () => {
-  it('muestra los ejercicios uno a uno con el progreso', async () => {
+  it('shows the exercises one by one with the progress', async () => {
     const user = userEvent.setup()
     renderSession()
 
@@ -43,11 +43,11 @@ describe('PracticeSession', () => {
 
     expect(screen.getByText('Card 2 of 2')).toBeInTheDocument()
     expect(screen.getByText('谢谢')).toBeInTheDocument()
-    // La tarjeta nueva empieza sin revelar
+    // The new card starts unrevealed
     expect(screen.getByRole('button', { name: 'Show answer' })).toBeInTheDocument()
   })
 
-  it('al terminar muestra el resumen con lo que hay que repasar', async () => {
+  it('at the end shows the summary with what needs reviewing', async () => {
     const user = userEvent.setup()
     renderSession()
 
@@ -61,7 +61,7 @@ describe('PracticeSession', () => {
     expect(screen.queryByText('你')).not.toBeInTheDocument()
   })
 
-  it('avisa de cada respuesta en cuanto se da, para guardarla', async () => {
+  it('reports each answer as soon as it is given, so it can be saved', async () => {
     const user = userEvent.setup()
     const onResult = vi.fn()
     renderSession({ onResult })
@@ -74,7 +74,7 @@ describe('PracticeSession', () => {
     expect(onResult).toHaveBeenCalledTimes(2)
   })
 
-  it('funciona igual con ejercicios de opción múltiple', async () => {
+  it('works the same with multiple-choice exercises', async () => {
     const user = userEvent.setup()
     const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
     renderSession({ sessionExercises: [{ type: 'pinyin-choice', item: characters[0]!, options: characters }] }) // 你
@@ -86,7 +86,7 @@ describe('PracticeSession', () => {
     expect(screen.getByText('你')).toBeInTheDocument()
   })
 
-  it('«Practice again» pide una sesión nueva', async () => {
+  it('"Practice again" requests a new session', async () => {
     const user = userEvent.setup()
     const onRestart = vi.fn()
     renderSession({ onRestart })
@@ -100,9 +100,9 @@ describe('PracticeSession', () => {
   })
 })
 
-describe('PracticeSession: diccionario sin salir de la sesión', () => {
+describe('PracticeSession: dictionary without leaving the session', () => {
   beforeEach(() => {
-    // Las fichas piden trazos y frases al abrirse; aquí no hay servidor
+    // Entry pages request strokes and sentences when opened; there is no server here
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
   })
   afterEach(() => {
@@ -113,10 +113,10 @@ describe('PracticeSession: diccionario sin salir de la sesión', () => {
     return screen.getByRole('dialog', { name: 'Dictionary' })
   }
 
-  it('abre el diccionario, busca un carácter y al cerrar sigue en la misma tarjeta', async () => {
+  it('opens the dictionary, searches a character and on close stays on the same card', async () => {
     const user = userEvent.setup()
     renderSession()
-    await answer(user, 'I knew it') // pasa a la tarjeta 2: 谢谢
+    await answer(user, 'I knew it') // moves to card 2: 谢谢
     await user.click(screen.getByRole('button', { name: 'Show answer' }))
 
     await user.click(screen.getByRole('button', { name: 'Dictionary' }))
@@ -126,35 +126,35 @@ describe('PracticeSession: diccionario sin salir de la sesión', () => {
     await user.type(search, '你')
     const results = await within(getPanel()).findByRole('list', { name: 'Results' })
     await user.click(within(results).getAllByRole('button')[0]!)
-    // La ficha se abre dentro del panel, sin cambiar de página
+    // The entry opens inside the panel, without changing page
     expect(within(getPanel()).getByRole('heading', { name: 'Meanings' })).toBeInTheDocument()
     expect(within(getPanel()).getByText(hanzi('你'), { selector: '.text-7xl' })).toBeInTheDocument()
 
     await user.click(within(getPanel()).getByRole('button', { name: 'Close' }))
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    // La sesión sigue exactamente igual: tarjeta 2, con la respuesta revelada
+    // The session is exactly the same: card 2, with the answer revealed
     expect(screen.getByText('Card 2 of 2')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'I knew it' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dictionary' })).toHaveFocus()
   })
 
-  it('consulta un carácter de la respuesta y al cerrar con Escape la respuesta elegida sigue ahí', async () => {
+  it('looks up a character from the answer and after closing with Escape the chosen answer is still there', async () => {
     const user = userEvent.setup()
     const onResult = vi.fn()
     const characters = testCharacters.map((entry) => ({ kind: 'character' as const, entry }))
     renderSession({ onResult, sessionExercises: [{ type: 'meaning-choice', item: characters[2]!, options: characters }] }) // 谢
 
-    await user.click(screen.getByRole('button', { name: 'good; well' })) // respuesta incorrecta
+    await user.click(screen.getByRole('button', { name: 'good; well' })) // wrong answer
     expect(screen.getByText('Not quite')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Look up 谢 in the dictionary' }))
     expect(within(getPanel()).getByRole('heading', { name: 'Meanings' })).toBeInTheDocument()
-    // Desde la ficha se puede seguir a otra (谢 → 谢谢) sin salir del panel
+    // From the entry you can follow on to another (谢 → 谢谢) without leaving the panel
     await user.click(within(getPanel()).getByRole('button', { name: /谢谢/ }))
     expect(within(getPanel()).getByText('thanks')).toBeInTheDocument()
     await user.click(within(getPanel()).getByRole('button', { name: 'Back' }))
-    // El panel usa el diccionario de la app: 谢 «to thank» y, entre sus palabras, 谢谢
+    // The panel uses the app's dictionary: 谢 "to thank" and, among its words, 谢谢
     expect(within(getPanel()).getAllByText('to thank')[0]).toBeInTheDocument()
 
     await user.keyboard('{Escape}')
@@ -162,19 +162,19 @@ describe('PracticeSession: diccionario sin salir de la sesión', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByText('Not quite')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /good; well/ })).toBeDisabled()
-    // Consultar no cuenta como respuesta: solo se guarda al pulsar Continue
+    // Looking up does not count as an answer: it is only saved on pressing Continue
     expect(onResult).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Continue' }))
     expect(onResult).toHaveBeenCalledWith({ itemId: 'char:谢', exerciseType: 'meaning-choice', correct: false })
   })
 
-  it('no ofrece consultar el elemento antes de responder, para no dar la respuesta', () => {
+  it('does not offer to look up the item before answering, so as not to give away the answer', () => {
     renderSession()
     expect(screen.queryByRole('button', { name: /^Look up/ })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dictionary' })).toBeInTheDocument()
   })
 
-  it('en una palabra ofrece consultar la palabra y cada carácter', async () => {
+  it('for a word offers to look up the word and each character', async () => {
     const user = userEvent.setup()
     renderSession({ sessionExercises: [{ type: 'flashcard', item: { kind: 'word', entry: testWords[0]! } }] }) // 你好
     await user.click(screen.getByRole('button', { name: 'Show answer' }))

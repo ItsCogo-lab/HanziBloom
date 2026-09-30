@@ -3,7 +3,7 @@ import { getMeanings } from './dictionary.ts'
 import type { StudyItem } from './studyItem.ts'
 import type { Character, Word } from './types.ts'
 
-/** Pinyin comparable: sin tonos, sin espacios y sin números de tono ("nǐ hǎo", "ni3 hao3" → "nihao"). */
+/** Comparable pinyin: no tone marks, no spaces and no tone numbers ("nǐ hǎo", "ni3 hao3" → "nihao"). */
 function normalizePinyin(text: string): string {
   return removeToneMarks(text).replace(/[\s\d]/g, '')
 }
@@ -11,15 +11,15 @@ function normalizePinyin(text: string): string {
 const HAN = /\p{Script=Han}/u
 
 /**
- * ¿Coincide la entrada con lo que el usuario busca? Se puede buscar por
- * hanzi (好), por pinyin con o sin tonos (hǎo, hao, hao3) o por significado
- * en inglés (good).
+ * Does the entry match what the user is searching for? You can search by
+ * hanzi (好), by pinyin with or without tones (hǎo, hao, hao3) or by English
+ * meaning (good).
  */
 export function matchesSearch(entry: Character | Word, query: string): boolean {
   return query.trim() === '' || getSearchRank(entry, query) !== undefined
 }
 
-/** Textos de una entrada ya preparados para comparar. Se calculan una vez por entrada. */
+/** An entry's texts, prepared for comparison. Computed once per entry. */
 interface SearchFields {
   readings: string[]
   meanings: string[]
@@ -41,22 +41,22 @@ function getSearchFields(entry: Character | Word): SearchFields {
 }
 
 /**
- * Lo bien que coincide una entrada con la búsqueda: cuanto más bajo, mejor.
- * `undefined` si no coincide.
+ * How well an entry matches the search: the lower, the better.
+ * `undefined` if it doesn't match.
  *
- * 0. hanzi exacto (果)       1. empieza por él (果汁)      2. lo contiene (苹果)
- * 3. pinyin exacto (guo)    4. pinyin que empieza por él  5. pinyin que lo contiene
- * 6. significado que es exactamente eso ("apple") o lo tiene como palabra entera
- * 7. significado que lo contiene ("apples", "pineapple")
+ * 0. exact hanzi (果)       1. starts with it (果汁)       2. contains it (苹果)
+ * 3. exact pinyin (guo)     4. pinyin starting with it    5. pinyin containing it
+ * 6. meaning that is exactly that ("apple") or has it as a whole word
+ * 7. meaning that contains it ("apples", "pineapple")
  */
 export function getSearchRank(entry: Character | Word, query: string): number | undefined {
   return createMatcher(query)(entry)
 }
 
 /**
- * Prepara la búsqueda una vez (texto normalizado, expresión regular) y
- * devuelve la función que puntúa cada entrada. Con el diccionario completo
- * son más de 100.000 entradas por búsqueda.
+ * Prepares the search once (normalized text, regular expression) and
+ * returns the function that scores each entry. With the full dictionary
+ * that's over 100,000 entries per search.
  */
 function createMatcher(query: string): (entry: Character | Word) => number | undefined {
   const text = query.trim().toLowerCase()
@@ -78,7 +78,7 @@ function createMatcher(query: string): (entry: Character | Word) => number | und
     if (pinyin !== '') {
       if (readings.includes(pinyin)) return 3
       if (readings.some((reading) => reading.startsWith(pinyin))) return 4
-      // Contener solo cuenta con 2 letras o más: si no, "a" coincidiría con casi todo
+      // Containing only counts with 2 or more letters: otherwise "a" would match almost everything
       if (pinyin.length > 1 && readings.some((reading) => reading.includes(pinyin))) return 5
     }
     if (meanings.some((meaning) => meaning === text || wholeWord.test(meaning))) return 6
@@ -92,11 +92,10 @@ function escapeRegExp(text: string): string {
 }
 
 /**
- * Busca en el diccionario y ordena: primero las coincidencias exactas y
- * luego las parciales (tier); dentro de cada grupo, lo que está en HSK 1-4
- * antes que el resto, y después por lo bien que coincide (getSearchRank), los
- * caracteres antes que las palabras, el nivel HSK (fuera de HSK, las más
- * cortas primero) y el orden del dataset.
+ * Searches the dictionary and sorts: exact matches first, then partial
+ * ones (tier); within each group, HSK 1-4 entries before the rest, then by
+ * how well it matches (getSearchRank), characters before words, HSK level
+ * (outside HSK, shortest first) and dataset order.
  */
 export function searchItems(items: readonly StudyItem[], query: string, limit = Infinity): StudyItem[] {
   const rankOf = createMatcher(query)
@@ -118,15 +117,15 @@ export function searchItems(items: readonly StudyItem[], query: string, limit = 
 }
 
 /**
- * Coincidencias exactas (hanzi, pinyin o significado entero: 0, 3 y 6)
- * antes que las parciales. Así «bank» da primero 银行 y no palabras cuyo
- * pinyin empieza por «bank» (版刻 bǎn kè).
+ * Exact matches (hanzi, pinyin or whole meaning: 0, 3 and 6) before
+ * partial ones. That way "bank" gives 银行 first and not words whose
+ * pinyin starts with "bank" (版刻 bǎn kè).
  */
 function tier(rank: number): number {
   return rank === 0 || rank === 3 || rank === 6 ? 0 : 1
 }
 
-/** Lo que está en HSK 1-4 va antes que el resto del diccionario. */
+/** HSK 1-4 entries go before the rest of the dictionary. */
 function outsideHsk(item: StudyItem): number {
   return item.entry.hskLevel === undefined ? 1 : 0
 }
@@ -135,7 +134,7 @@ function levelOrder(item: StudyItem): number {
   return item.entry.hskLevel ?? 0
 }
 
-/** Fuera de HSK, las palabras cortas primero: suelen ser las más comunes. */
+/** Outside HSK, short words first: they tend to be the most common. */
 function lengthOutsideHsk(item: StudyItem): number {
   return item.entry.hskLevel === undefined ? item.entry.hanzi.length : 0
 }

@@ -6,10 +6,10 @@ import { useInstallPrompt } from '../useInstallPrompt.ts'
 import { IosInstallSteps } from './IosInstallSteps.tsx'
 
 /**
- * Aviso para añadir la app a la pantalla de inicio. Sale sobre la barra de
- * navegación, no bloquea nada y, una vez cerrado, no vuelve (Ajustes sigue
- * ofreciendo instalar). No aparece durante una sesión, para no tapar los botones,
- * ni en Ajustes, que ya tiene su propia sección para instalar.
+ * Prompt to add the app to the home screen. It appears above the navigation
+ * bar, blocks nothing and, once dismissed, doesn't come back (Settings still
+ * offers installation). It doesn't appear during a session, so it won't cover
+ * the buttons, nor in Settings, which already has its own install section.
  */
 export function InstallBanner() {
   const titleId = useId()

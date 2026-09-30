@@ -5,7 +5,7 @@ import { listSetsOfType } from '../../features/studySets/studySets.ts'
 import type { StudySetType } from '../../features/studySets/types.ts'
 import { t } from '../../i18n/index.ts'
 
-/** Lista de sets de un tipo (HSK o temas). Los sets nuevos aparecen solos. */
+/** List of sets of one type (HSK or topics). New sets show up automatically. */
 export function SetListPage({ type }: { type: Exclude<StudySetType, 'custom'> }) {
   const sets = listSetsOfType(useStudySets(), type)
   return (

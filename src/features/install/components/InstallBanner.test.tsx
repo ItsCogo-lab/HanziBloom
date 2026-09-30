@@ -6,7 +6,7 @@ import { isInstallPromptDismissed } from '../install.ts'
 import { listenForInstallPrompt } from '../nativeInstallPrompt.ts'
 import { InstallBanner } from './InstallBanner.tsx'
 
-/** Imita el evento que lanza Chrome cuando la app se puede instalar. */
+/** Mimics the event Chrome fires when the app can be installed. */
 function fireInstallPrompt(outcome: 'accepted' | 'dismissed') {
   const event = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
     prompt: vi.fn(async () => {}),
@@ -33,12 +33,12 @@ beforeEach(() => {
 afterEach(() => stopListening())
 
 describe('InstallBanner', () => {
-  it('no sale si el navegador no ofrece instalar', () => {
+  it("doesn't show if the browser doesn't offer installation", () => {
     renderBanner()
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
   })
 
-  it('abre el diálogo del navegador al pulsar Install', async () => {
+  it('opens the browser dialog when Install is clicked', async () => {
     const user = userEvent.setup()
     renderBanner()
     const event = fireInstallPrompt('accepted')
@@ -47,11 +47,11 @@ describe('InstallBanner', () => {
     await user.click(screen.getByRole('button', { name: 'Install' }))
 
     expect(event.prompt).toHaveBeenCalledOnce()
-    // Cada evento solo sirve una vez: el aviso desaparece
+    // Each event can only be used once: the banner disappears
     expect(screen.queryByRole('complementary', { name: 'Install HanziBloom' })).not.toBeInTheDocument()
   })
 
-  it('no vuelve a salir una vez cerrado', async () => {
+  it("doesn't show again once dismissed", async () => {
     const user = userEvent.setup()
     renderBanner()
     fireInstallPrompt('accepted')
@@ -62,7 +62,7 @@ describe('InstallBanner', () => {
     expect(isInstallPromptDismissed()).toBe(true)
   })
 
-  it('en iPhone explica cómo añadirla desde Safari', async () => {
+  it('on iPhone explains how to add it from Safari', async () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' })
     renderBanner()
 
@@ -70,7 +70,7 @@ describe('InstallBanner', () => {
     expect(screen.getByText('Choose "Add to Home Screen".')).toBeInTheDocument()
   })
 
-  it('no tapa los botones durante una sesión', () => {
+  it("doesn't cover the buttons during a session", () => {
     renderBanner('/study/practice?set=hsk-1&mode=learn')
     fireInstallPrompt('accepted')
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()

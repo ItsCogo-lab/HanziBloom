@@ -17,7 +17,7 @@ const characterExercise: FlashcardExercise = {
 }
 
 describe('Flashcard', () => {
-  it('muestra el hanzi y oculta la respuesta hasta pulsar «Show answer»', () => {
+  it('shows the hanzi and hides the answer until "Show answer" is pressed', () => {
     renderWithProviders(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={() => {}} onLookUp={() => {}} />)
 
     expect(screen.getByText('你好')).toBeInTheDocument()
@@ -25,7 +25,7 @@ describe('Flashcard', () => {
     expect(screen.queryByRole('button', { name: 'I knew it' })).not.toBeInTheDocument()
   })
 
-  it('al revelar muestra pinyin, significado y los caracteres de la palabra', async () => {
+  it('on reveal shows pinyin, meaning and the characters of the word', async () => {
     const user = userEvent.setup()
     renderWithProviders(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={() => {}} onLookUp={() => {}} />)
 
@@ -38,7 +38,7 @@ describe('Flashcard', () => {
     expect(screen.getByRole('group', { name: 'Answer' })).toHaveFocus()
   })
 
-  it('en un carácter muestra las palabras donde aparece', async () => {
+  it('for a character shows the words it appears in', async () => {
     const user = userEvent.setup()
     renderWithProviders(<Flashcard exercise={characterExercise} dictionary={dictionary} onAnswer={() => {}} onLookUp={() => {}} />)
 
@@ -47,14 +47,14 @@ describe('Flashcard', () => {
     expect(screen.getByText('Appears in')).toBeInTheDocument()
     const related = screen.getByText('Appears in').nextElementSibling as HTMLElement
     expect(related).toHaveTextContent('你好')
-    // La palabra 好 es el mismo carácter: no se muestra como relacionada
+    // The word 好 is the same character: it is not shown as related
     expect(within(related).queryByText(hanzi('好'))).not.toBeInTheDocument()
   })
 
   it.each([
     ['I knew it', true],
     ["I didn't know", false],
-  ])('«%s» responde %s', async (buttonName, expected) => {
+  ])('"%s" answers %s', async (buttonName, expected) => {
     const user = userEvent.setup()
     const onAnswer = vi.fn()
     renderWithProviders(<Flashcard exercise={wordExercise} dictionary={dictionary} onAnswer={onAnswer} onLookUp={() => {}} />)

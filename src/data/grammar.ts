@@ -1,22 +1,22 @@
 import type { GrammarPoint } from '../features/grammar/types.ts'
 
 /**
- * Notas de gramática de las partículas más comunes de HSK 1-4.
+ * Grammar notes for the most common HSK 1-4 particles.
  *
- * CURADO A MANO, como topics.ts. Criterios (docs/DATA_SOURCES.md, «Notas de
- * gramática»):
+ * CURATED BY HAND, like topics.ts. Criteria (docs/DATA_SOURCES.md, "Grammar
+ * notes"):
  *
- * - Los usos y su nivel siguen la Chinese Grammar Wiki de AllSet Learning,
- *   pero las explicaciones son propias: la wiki es CC BY-NC-SA 3.0 (no
- *   comercial), así que no se copia su texto ni sus frases. Cada punto
- *   enlaza a su página.
- * - Los ejemplos son frases de Tatoeba (CC BY 2.0 FR) que ya están en
- *   public/examples/, copiadas tal cual con su id y su autor. Un test
- *   comprueba que existen y que contienen la partícula.
- * - Si no hay frases de Tatoeba para un uso, ese uso no entra (por eso no
- *   está el 呢 de acción en curso).
+ * - The usages and their levels follow AllSet Learning's Chinese Grammar Wiki,
+ *   but the explanations are our own: the wiki is CC BY-NC-SA 3.0 (non-
+ *   commercial), so neither its text nor its sentences are copied. Each point
+ *   links to its page.
+ * - The examples are Tatoeba sentences (CC BY 2.0 FR) already in
+ *   public/examples/, copied as is with their id and author. A test
+ *   checks that they exist and contain the particle.
+ * - If there are no Tatoeba sentences for a usage, that usage is left out (which
+ *   is why the ongoing-action 呢 is missing).
  *
- * Añadir un punto = añadir un objeto a esta lista.
+ * Adding a point = adding an object to this list.
  */
 const WIKI = 'https://resources.allsetlearning.com/chinese/grammar/'
 

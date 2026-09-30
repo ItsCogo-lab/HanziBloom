@@ -1,6 +1,6 @@
 /*
- * Líneas reales de Make Me a Hanzi (dictionary.txt, commit bddc96d), copiadas tal
- * cual para los tests. Licencia LGPL 3.0 o posterior.
+ * Real Make Me a Hanzi lines (dictionary.txt, commit bddc96d), copied as
+ * is for the tests. LGPL 3.0 or later license.
  */
 export const makeMeAHanziFixture = [
   "{\"character\":\"好\",\"definition\":\"good, excellent, fine; proper, suitable; well\",\"pinyin\":[\"hǎo\"],\"decomposition\":\"⿰女子\",\"etymology\":{\"type\":\"ideographic\",\"hint\":\"A woman 女 with a son 子\"},\"radical\":\"女\",\"matches\":[[0],[0],[0],[1],[1],[1]]}",

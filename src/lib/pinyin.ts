@@ -8,11 +8,11 @@ const TONE_MARKS: Record<string, readonly string[]> = {
 }
 
 /**
- * Convierte una sílaba con tono numérico ("hao3", "lü4", "lu:4", "de5")
- * a pinyin con marca de tono ("hǎo", "lǜ", "lǜ", "de").
+ * Converts a syllable with a numeric tone ("hao3", "lü4", "lu:4", "de5")
+ * to pinyin with a tone mark ("hǎo", "lǜ", "lǜ", "de").
  *
- * Regla de dónde va la marca: sobre la "a" o la "e" si existen; en "ou",
- * sobre la "o"; si no, sobre la última vocal.
+ * Rule for where the mark goes: on the "a" or "e" if present; in "ou", on
+ * the "o"; otherwise, on the last vowel.
  */
 export function numberedSyllableToToneMarks(syllable: string): string {
   const match = /^([a-zü:]+)([1-5])$/i.exec(syllable.replace(/u:|v/gi, 'ü'))
@@ -34,14 +34,14 @@ export function numberedSyllableToToneMarks(syllable: string): string {
   return letters.slice(0, index) + withCase + letters.slice(index + 1)
 }
 
-/** Convierte pinyin numérico de varias sílabas: "ni3 hao3" → "nǐ hǎo". */
+/** Converts multi-syllable numbered pinyin: "ni3 hao3" → "nǐ hǎo". */
 export function numberedPinyinToToneMarks(pinyin: string): string {
   return pinyin.split(' ').map(numberedSyllableToToneMarks).join(' ')
 }
 
 /**
- * Quita las marcas de tono y pasa a minúsculas: "Nǐ hǎo" → "ni hao".
- * La "ü" se mantiene porque distingue sílabas (lü ≠ lu).
+ * Removes tone marks and lowercases: "Nǐ hǎo" → "ni hao".
+ * The "ü" is kept because it distinguishes syllables (lü ≠ lu).
  */
 export function removeToneMarks(pinyin: string): string {
   return pinyin

@@ -5,25 +5,25 @@ export const RuntimeSourcesContext = createContext<RuntimeSources | null>(null)
 
 export function useRuntimeSources(): RuntimeSources {
   const sources = use(RuntimeSourcesContext)
-  if (!sources) throw new Error('useRuntimeSources debe usarse dentro de <RuntimeSourcesProvider>')
+  if (!sources) throw new Error('useRuntimeSources must be used within <RuntimeSourcesProvider>')
   return sources
 }
 
 export type RuntimeData<T> = Availability<T> | { status: 'loading' }
 
 /**
- * Carga un dato con el servicio del diccionario cuando cambia `key`. Cancela
- * la petición si la ficha se cierra o cambia antes de que llegue, y se
- * actualiza sola si llega una versión más nueva de un dato caducado.
+ * Loads data with the dictionary service when `key` changes. Cancels
+ * the request if the entry page closes or changes before it arrives, and
+ * updates itself if a newer version of expired data arrives.
  */
 export function useRuntimeData<T>(
   key: string,
   load: (sources: RuntimeSources, options: LoadOptions<T>) => Promise<Availability<T>>,
 ): RuntimeData<T> {
   const sources = useRuntimeSources()
-  // Se guarda con su clave para no mostrar el dato de otra ficha
+  // Stored with its key so as not to show another entry page's data
   const [result, setResult] = useState<{ key: string; value: Availability<T> }>()
-  // Quien llama crea `load` en cada render; solo se vuelve a cargar cuando cambia `key`
+  // The caller creates `load` on every render; it only reloads when `key` changes
   const loadRef = useRef(load)
   useEffect(() => {
     loadRef.current = load

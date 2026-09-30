@@ -1,13 +1,13 @@
 /**
- * `fetch` falso para los tests: nunca sale a internet. Cada URL se responde
- * con la primera regla que coincide; sin regla, falla como sin conexión.
+ * Fake `fetch` for tests: never goes to the internet. Each URL is answered
+ * by the first matching rule; with no rule, it fails as if offline.
  */
 
 type Reply = Response | (() => Response | Promise<Response>)
 
 export interface FakeFetch {
   fetch: typeof fetch
-  /** URLs pedidas, en orden. */
+  /** Requested URLs, in order. */
   requested: string[]
 }
 
@@ -33,5 +33,5 @@ export function createFakeFetch(routes: [match: string | RegExp, reply: Reply][]
   return { fetch: fetchFn as typeof fetch, requested }
 }
 
-/** Sin conexión: todas las peticiones fallan. Es lo que usan los tests por defecto. */
+/** Offline: every request fails. This is what tests use by default. */
 export const offlineFetch: typeof fetch = createFakeFetch().fetch

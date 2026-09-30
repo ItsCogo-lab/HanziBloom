@@ -12,85 +12,85 @@ const validCharacter: Character = {
 }
 
 describe('validateDictionaryData', () => {
-  it('no encuentra problemas en datos correctos', () => {
+  it('finds no problems in correct data', () => {
     expect(validateDictionaryData(testCharacters, testWords)).toEqual([])
   })
 
-  it('detecta ids duplicados', () => {
+  it('detects duplicate ids', () => {
     expect(validateDictionaryData([validCharacter, validCharacter], [])).toEqual([
-      'Carácter "你": id duplicado',
+      'Character "你": duplicate id',
     ])
   })
 
-  it('detecta un id distinto del hanzi', () => {
+  it('detects an id different from the hanzi', () => {
     expect(validateDictionaryData([{ ...validCharacter, id: 'ni' }], [])).toContain(
-      'Carácter "ni": el id debe ser igual al hanzi',
+      'Character "ni": the id must equal the hanzi',
     )
   })
 
-  it('detecta un carácter con más de un hanzi', () => {
+  it('detects a character with more than one hanzi', () => {
     expect(validateDictionaryData([{ ...validCharacter, id: '你好', hanzi: '你好' }], [])).toEqual([
-      'Carácter "你好": debe ser un solo carácter',
+      'Character "你好": must be a single character',
     ])
   })
 
-  it('detecta pinyin y significados vacíos', () => {
+  it('detects empty pinyin and meanings', () => {
     const problems = validateDictionaryData([{ ...validCharacter, pinyin: [], meanings: { en: [' '] } }], [])
 
-    expect(problems).toEqual(['Carácter "你": falta el pinyin', 'Carácter "你": falta el significado en inglés'])
+    expect(problems).toEqual(['Character "你": missing pinyin', 'Character "你": missing English meaning'])
   })
 
-  it('detecta un número de trazos no válido', () => {
+  it('detects an invalid stroke count', () => {
     expect(validateDictionaryData([{ ...validCharacter, strokeCount: 0 }], [])).toEqual([
-      'Carácter "你": número de trazos no válido',
+      'Character "你": invalid stroke count',
     ])
   })
 
-  it('detecta palabras con caracteres que no están en el dataset', () => {
+  it('detects words with characters that are not in the dataset', () => {
     const word: Word = { id: '你们', hanzi: '你们', pinyin: 'nǐmen', meanings: { en: ['you (plural)'] }, hskLevel: 1 }
 
     expect(validateDictionaryData([validCharacter], [word])).toEqual([
-      'Palabra "你们": el carácter "们" no está en el dataset',
+      'Word "你们": the character "们" is not in the dataset',
     ])
   })
 })
 
-describe('validateDictionaryData con los datos de las fuentes', () => {
+describe('validateDictionaryData with the source data', () => {
   const ningmengCharacters = [ningCharacter, { ...ningCharacter, id: '檬', hanzi: '檬' }]
 
-  it('acepta la ficha completa de 柠', () => {
+  it('accepts the full entry for 柠', () => {
     expect(validateDictionaryData(ningmengCharacters, [ningmengWord])).toEqual([])
   })
 
   it.each([
-    [{ hskLevel: 7 }, 'nivel HSK no válido'],
-    [{ radicalNumber: 215 }, 'número de radical no válido'],
-    [{ radicalNumber: 0 }, 'número de radical no válido'],
-    [{ radical: '木木' }, 'radical no válido'],
-    [{ traditional: [] }, 'forma tradicional no válida'],
-    [{ decomposition: '⿰木' }, 'descomposición no válida'],
-    [{ etymology: { type: 'other' } }, 'tipo de etimología no válido'],
-    [{ etymology: { type: 'pictophonetic', semantic: '木木' } }, 'componente de la etimología no válido'],
-    [{ strokeCount: 2.5 }, 'número de trazos no válido'],
-  ])('detecta %o', (change, problem) => {
+    [{ hskLevel: 7 }, 'invalid HSK level'],
+    [{ radicalNumber: 215 }, 'invalid radical number'],
+    [{ radicalNumber: 0 }, 'invalid radical number'],
+    [{ radical: '木木' }, 'invalid radical'],
+    [{ traditional: [] }, 'invalid traditional form'],
+    [{ decomposition: '⿰木' }, 'invalid decomposition'],
+    [{ etymology: { type: 'other' } }, 'invalid etymology type'],
+    [{ etymology: { type: 'pictophonetic', semantic: '木木' } }, 'invalid etymology component'],
+    [{ strokeCount: 2.5 }, 'invalid stroke count'],
+  ])('detects %o', (change, problem) => {
     const character = { ...ningCharacter, ...change } as Character
-    expect(validateDictionaryData([character], [])).toEqual([`Carácter "柠": ${problem}`])
+    expect(validateDictionaryData([character], [])).toEqual([`Character "柠": ${problem}`])
   })
 
-  it('detecta caracteres que no son chinos', () => {
+  it('detects characters that are not Chinese', () => {
     expect(validateDictionaryData([{ ...validCharacter, id: 'a', hanzi: 'a' }], [])).toEqual([
-      'Carácter "a": no es un carácter chino',
+      'Character "a": not a Chinese character',
     ])
   })
 
-  it('detecta valores vacíos que no deberían haberse guardado', () => {
+  it('detects empty values that should not have been saved', () => {
     const character = { ...ningCharacter, radical: undefined, decomposition: null } as unknown as Character
-    expect(validateDictionaryData([character], [])).toEqual(['Carácter "柠": campos vacíos (radical, decomposition)'])
+    expect(validateDictionaryData([character], [])).toEqual(['Character "柠": empty fields (radical, decomposition)'])
   })
 
-  it('detecta una forma tradicional de palabra con otra longitud', () => {
+  it('detects a word traditional form with a different length', () => {
     expect(validateDictionaryData(ningmengCharacters, [{ ...ningmengWord, traditional: '檸' }])).toEqual([
-      'Palabra "柠檬": forma tradicional no válida',
+      'Word "柠檬": invalid traditional form',
     ])
   })
 })
@@ -99,30 +99,30 @@ describe('validateExampleSet', () => {
   const sentence = testExampleSet.sentences[0]!
   const withSentence = (change: object): ExampleSet => ({ ...testExampleSet, sentences: [{ ...sentence, ...change }] })
 
-  it('acepta frases correctas', () => {
+  it('accepts correct sentences', () => {
     expect(validateExampleSet(testExampleSet, [ningmengWord])).toEqual([])
   })
 
-  it('detecta ids de Tatoeba no válidos y frases repetidas', () => {
+  it('detects invalid Tatoeba ids and repeated sentences', () => {
     expect(validateExampleSet(withSentence({ tatoebaId: -1 }), [ningmengWord])).toEqual([
-      'Frase -1: id de Tatoeba no válido',
+      'Sentence -1: invalid Tatoeba id',
     ])
     const repeated = { ...testExampleSet, sentences: [sentence, sentence] }
-    expect(validateExampleSet(repeated, [ningmengWord])).toEqual(['Frase 8934441: repetida'])
+    expect(validateExampleSet(repeated, [ningmengWord])).toEqual(['Sentence 8934441: repeated'])
   })
 
-  it('detecta palabras que no existen o que no están en la frase', () => {
-    expect(validateExampleSet(testExampleSet, [])).toEqual(['Frase 8934441: la palabra "柠檬" no está en el dataset'])
+  it('detects words that do not exist or are not in the sentence', () => {
+    expect(validateExampleSet(testExampleSet, [])).toEqual(['Sentence 8934441: the word "柠檬" is not in the dataset'])
     expect(validateExampleSet(withSentence({ zh: '很酸。' }), [ningmengWord])).toEqual([
-      'Frase 8934441: no contiene la palabra "柠檬"',
+      'Sentence 8934441: does not contain the word "柠檬"',
     ])
   })
 
-  it('detecta textos o autores vacíos', () => {
+  it('detects empty texts or authors', () => {
     expect(validateExampleSet(withSentence({ en: '', author: ' ' }), [ningmengWord])).toEqual([
-      'Frase 8934441: falta el texto',
-      'Frase 8934441: falta el autor',
-      'Frase 8934441: campos vacíos (author, en)',
+      'Sentence 8934441: missing text',
+      'Sentence 8934441: missing author',
+      'Sentence 8934441: empty fields (author, en)',
     ])
   })
 })

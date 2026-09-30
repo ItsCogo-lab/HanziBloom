@@ -1,28 +1,28 @@
-/** Una frase de ejemplo de Tatoeba, copiada tal cual de public/examples/ (un test lo comprueba). */
+/** A Tatoeba example sentence, copied verbatim from public/examples/ (a test checks this). */
 export interface GrammarExample {
   tatoebaId: number
   zh: string
   en: string
-  /** Autor de la frase china en Tatoeba: su licencia pide citarlo. */
+  /** Author of the Chinese sentence on Tatoeba: its license requires attribution. */
   author: string
 }
 
 /**
- * Un uso gramatical de una partícula: 了 tiene dos (acción terminada y
- * cambio de estado), 吗 uno.
+ * A grammatical use of a particle: 了 has two (completed action and
+ * change of state), 吗 has one.
  */
 export interface GrammarPoint {
   id: string
-  /** La partícula, tal como se escribe: "的". */
+  /** The particle, as written: "的". */
   particle: string
-  /** Su pinyin como partícula, sin tono (son átonas): "de". */
+  /** Its pinyin as a particle, without tone (they are unstressed): "de". */
   pinyin: string
   title: string
-  /** Estructura de la frase: "Verb + 过 + Object". */
+  /** Sentence pattern: "Verb + 过 + Object". */
   pattern: string
-  /** Explicación original en inglés (no copiada de la Grammar Wiki, ver DATA_SOURCES.md). */
+  /** Original English explanation (not copied from the Grammar Wiki, see DATA_SOURCES.md). */
   explanation: string
   examples: readonly GrammarExample[]
-  /** Página de la Chinese Grammar Wiki sobre este punto, para ampliar. */
+  /** Chinese Grammar Wiki page on this point, for further reading. */
   reference: { title: string; url: string }
 }

@@ -1,6 +1,6 @@
 /*
- * Líneas reales de CC-CEDICT (edición 2025-12-13, paquete cedict-json), copiadas
- * tal cual para los tests. Licencia CC BY-SA 4.0.
+ * Real CC-CEDICT lines (2025-12-13 edition, cedict-json package), copied
+ * as is for the tests. CC BY-SA 4.0 license.
  */
 export const cedictFixture = JSON.stringify([
   { traditional: '檸', simplified: '柠', pinyin: 'ning2', english: ['used in 檸檬|柠檬[ning2 meng2]'] },

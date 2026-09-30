@@ -1,14 +1,14 @@
 type StatCardProps = {
   label: string
   value: number | string
-  /** Texto pequeño junto al valor, p. ej. "of 328". */
+  /** Small text next to the value, e.g. "of 328". */
   detail?: string
 }
 
 /**
- * Una cifra destacada con su etiqueta. Se usa dentro de un <dl>: la etiqueta
- * es el término (<dt>) y la cifra su definición (<dd>), así los lectores de
- * pantalla leen "Day streak: 5".
+ * A highlighted figure with its label. Used inside a <dl>: the label is the
+ * term (<dt>) and the figure its definition (<dd>), so screen readers read
+ * "Day streak: 5".
  */
 export function StatCard({ label, value, detail }: StatCardProps) {
   return (

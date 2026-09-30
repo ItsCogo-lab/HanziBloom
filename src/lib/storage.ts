@@ -1,13 +1,12 @@
 /**
- * Lectura y escritura de JSON en localStorage sin que la app se rompa.
+ * Reading and writing JSON in localStorage without breaking the app.
  *
- * localStorage puede fallar: en modo privado de algunos navegadores lanza un
- * error al acceder, se puede llenar, o puede contener datos corruptos. En
- * todos esos casos se sigue funcionando (sin guardar) en lugar de mostrar una
- * pantalla en blanco.
+ * localStorage can fail: in some browsers' private mode it throws on access,
+ * it can fill up, or it can hold corrupt data. In all those cases the app
+ * keeps working (without saving) instead of showing a blank screen.
  */
 
-/** Lo mínimo que usamos de localStorage. En los tests se puede pasar otro objeto. */
+/** The minimum we use from localStorage. Tests can pass another object. */
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
 export function getBrowserStorage(): KeyValueStorage | undefined {
@@ -18,7 +17,7 @@ export function getBrowserStorage(): KeyValueStorage | undefined {
   }
 }
 
-/** Devuelve el valor guardado ya parseado, o `undefined` si no hay o no es JSON válido. */
+/** Returns the stored value already parsed, or `undefined` if there is none or it isn't valid JSON. */
 export function readJson(key: string, storage = getBrowserStorage()): unknown {
   try {
     const text = storage?.getItem(key)
@@ -28,7 +27,7 @@ export function readJson(key: string, storage = getBrowserStorage()): unknown {
   }
 }
 
-/** Guarda el valor como JSON. Devuelve `false` si no se ha podido guardar. */
+/** Saves the value as JSON. Returns `false` if it couldn't be saved. */
 export function writeJson(key: string, value: unknown, storage = getBrowserStorage()): boolean {
   try {
     if (!storage) return false
@@ -39,7 +38,7 @@ export function writeJson(key: string, value: unknown, storage = getBrowserStora
   }
 }
 
-/** Comprueba que un valor es un objeto normal (no null ni un array). */
+/** Checks that a value is a plain object (not null or an array). */
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

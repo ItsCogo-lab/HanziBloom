@@ -4,20 +4,20 @@ import { DEFAULT_SESSION_SIZE } from '../practice/session.ts'
 import { HSK_LEVELS } from '../studySets/studySets.ts'
 import { isThemePreference, type ThemePreference } from './theme.ts'
 
-/** Tamaños de sesión que se pueden elegir en Ajustes. */
+/** Session sizes that can be chosen in Settings. */
 export const SESSION_SIZE_OPTIONS = [5, 10, 20] as const
 
 export type SessionSize = (typeof SESSION_SIZE_OPTIONS)[number]
 
 export interface Settings {
   sessionSize: SessionSize
-  /** Colorear los caracteres según el tono de su pronunciación. */
+  /** Color characters by the tone of their pronunciation. */
   toneColors: boolean
-  /** Mostrar también el pinyin con números de tono ("ni3 hao3"). */
+  /** Also show pinyin with tone numbers ("ni3 hao3"). */
   toneNumbers: boolean
-  /** Tema de colores: el del sistema, claro u oscuro. */
+  /** Color theme: system, light or dark. */
   theme: ThemePreference
-  /** Nivel HSK que el usuario dice tener (ver applyHskLevel), o `null` si no ha indicado ninguno. */
+  /** HSK level the user says they have (see applyHskLevel), or `null` if they haven't given one. */
   hskLevel: HskLevel | null
 }
 
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hskLevel: null,
 }
 
-/** El script de index.html lee el tema de esta misma clave antes de cargar la app. */
+/** The index.html script reads the theme from this same key before the app loads. */
 export const SETTINGS_STORAGE_KEY = 'hanzivocab.settings'
 const CURRENT_VERSION = 1
 
@@ -38,9 +38,9 @@ export function saveSettings(settings: Settings, storage?: KeyValueStorage): boo
 }
 
 /**
- * Carga los ajustes; cualquier valor que falte o no sea válido toma su valor
- * por defecto. Así los ajustes guardados antes de existir una opción siguen
- * sirviendo sin cambiar de versión.
+ * Loads settings; any missing or invalid value takes its default. That way
+ * settings saved before an option existed keep working without a version
+ * change.
  */
 export function loadSettings(storage?: KeyValueStorage): Settings {
   const saved = readJson(SETTINGS_STORAGE_KEY, storage)

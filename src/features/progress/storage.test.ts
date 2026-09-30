@@ -6,7 +6,7 @@ import { loadProgress, saveProgress } from './storage.ts'
 const now = new Date(2026, 8, 28, 10, 0)
 
 describe('saveProgress / loadProgress', () => {
-  it('guarda el progreso y lo recupera igual', () => {
+  it('saves progress and loads it back unchanged', () => {
     const storage = memoryStorage()
     const progress = recordAnswer(createEmptyProgress(), 'char:你', true, now)
 
@@ -14,26 +14,26 @@ describe('saveProgress / loadProgress', () => {
     expect(loadProgress(storage)).toEqual(progress)
   })
 
-  it('guarda la versión del formato', () => {
+  it('saves the format version', () => {
     const storage = memoryStorage()
     saveProgress(createEmptyProgress(), storage)
 
     expect(JSON.parse(storage.getItem('hanzivocab.progress')!)).toMatchObject({ version: 1 })
   })
 
-  it('sin datos guardados empieza de cero', () => {
+  it('starts from scratch with no saved data', () => {
     expect(loadProgress(memoryStorage())).toEqual(createEmptyProgress())
   })
 
   it.each([
-    ['JSON roto', '{oops'],
-    ['otra versión', JSON.stringify({ version: 99, items: {}, activity: {} })],
-    ['sin items', JSON.stringify({ version: 1, activity: {} })],
-  ])('con datos no válidos (%s) empieza de cero', (_case, saved) => {
+    ['broken JSON', '{oops'],
+    ['another version', JSON.stringify({ version: 99, items: {}, activity: {} })],
+    ['no items', JSON.stringify({ version: 1, activity: {} })],
+  ])('starts from scratch with invalid data (%s)', (_case, saved) => {
     expect(loadProgress(memoryStorage({ 'hanzivocab.progress': saved }))).toEqual(createEmptyProgress())
   })
 
-  it('descarta solo las entradas que están mal', () => {
+  it('discards only the bad entries', () => {
     const good = recordAnswer(createEmptyProgress(), 'char:你', true, now)
     const saved = {
       version: 1,

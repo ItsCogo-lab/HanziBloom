@@ -12,13 +12,13 @@ import {
 const lemon = tatoebaTranslation(1, 'Lemon.', 'CK')
 
 describe('parseSentencesResponse', () => {
-  it('rechaza una respuesta sin data', () => {
+  it('rejects a response without data', () => {
     for (const malformed of [null, [], {}, { data: 'x' }]) {
       expect(() => parseSentencesResponse(malformed)).toThrow(expect.objectContaining({ kind: 'invalid' }))
     }
   })
 
-  it('descarta frases y traducciones mal formadas o en otro idioma', () => {
+  it('drops malformed sentences and translations or those in another language', () => {
     const parsed = parseSentencesResponse({
       data: [
         { id: 'x', text: '柠檬。', lang: 'cmn' },
@@ -34,7 +34,7 @@ describe('parseSentencesResponse', () => {
 describe('toExampleSentences', () => {
   const convert = (data: unknown[]) => toExampleSentences('柠', parseSentencesResponse({ data }))
 
-  it('normaliza al modelo de la app, con la traducción directa de id más bajo', () => {
+  it('normalizes to the app model, with the direct translation with the lowest id', () => {
     expect(convert(ningResponse.data)[0]).toEqual({
       tatoebaId: 8934441,
       zh: '柠檬很酸。',
@@ -46,7 +46,7 @@ describe('toExampleSentences', () => {
     })
   })
 
-  it('solo deja frases atribuibles, aprobadas, cortas y con traducción directa', () => {
+  it('keeps only attributable, approved, short sentences with a direct translation', () => {
     const unapproved = { ...tatoebaSentence(4, '柠檬。', 'a', [lemon]), is_unapproved: true }
     const otherLicense = { ...tatoebaSentence(5, '柠檬。', 'a', [lemon]), license: 'CC0 1.0' }
     const result = convert([
@@ -66,7 +66,7 @@ describe('toExampleSentences', () => {
 })
 
 describe('fetchTatoebaExamples', () => {
-  it('busca el término exacto, en chino, con traducción inglesa y las frases más cortas primero', async () => {
+  it('searches the exact term, in Chinese, with English translation and shortest sentences first', async () => {
     const fake = createFakeFetch([['https://api.tatoeba.org/', jsonResponse(ningResponse)]])
     const result = await fetchTatoebaExamples('柠', { fetchFn: fake.fetch })
     expect(result.source).toBe(TATOEBA_SOURCE)
@@ -82,7 +82,7 @@ describe('fetchTatoebaExamples', () => {
     })
   })
 
-  it('no manda a Tatoeba texto que no sea un término chino corto', async () => {
+  it('does not send Tatoeba text that is not a short Chinese term', async () => {
     const fake = createFakeFetch([['https://api.tatoeba.org/', jsonResponse(ningResponse)]])
     for (const term of ['hello', '柠'.repeat(13)]) {
       await expect(fetchTatoebaExamples(term, { fetchFn: fake.fetch })).rejects.toMatchObject({ kind: 'invalid' })
@@ -91,10 +91,10 @@ describe('fetchTatoebaExamples', () => {
     expect(new URL(tatoebaSearchUrl('a"b\\c')).searchParams.get('q')).toBe('"abc"')
   })
 
-  it('pasa los 429 y los errores de red como errores clasificados', async () => {
+  it('passes 429s and network errors through as classified errors', async () => {
     const limited = createFakeFetch([[/./, new Response('', { status: 429, headers: { 'Retry-After': '5' } })]])
     await expect(fetchTatoebaExamples('柚', { fetchFn: limited.fetch })).rejects.toMatchObject({ kind: 'rate-limit' })
-    // Después del 429 no se vuelve a llamar hasta que pase el tiempo pedido
+    // After the 429 no further calls until the requested time has passed
     await expect(fetchTatoebaExamples('柚', { fetchFn: limited.fetch })).rejects.toMatchObject({ kind: 'rate-limit' })
     expect(limited.requested).toHaveLength(1)
   })
