@@ -171,13 +171,39 @@ describe('applyHskLevel', () => {
     expect(progress.items['word:你好']).toMatchObject({ masteryLevel: 5, timesWrong: 1, basic: true })
   })
 
-  it('al bajar de nivel, lo que era básico vuelve a repasarse de vez en cuando', () => {
+  it('al bajar de nivel, lo marcado solo por el nivel vuelve a ser nuevo', () => {
     let progress = applyHskLevel(createEmptyProgress(), items, 3, now)
+    progress = applyHskLevel(progress, items, 2, now)
+
+    expect(progress.items['word:经常']).toBeUndefined()
+    expect(getItemStatus(progress.items['word:认识'])).toBe('mastered')
+    // Con HSK 2, HSK 1 ya no es básico: sigue dominado y se repasa de vez en cuando
+    expect(progress.items['word:你好']?.basic).toBeUndefined()
+    expect(getItemStatus(progress.items['word:你好'])).toBe('mastered')
+
+    progress = applyHskLevel(progress, items, null, now)
+    expect(progress.items).toEqual({})
+  })
+
+  it('al bajar de nivel, lo ya respondido se conserva y lo que era básico vuelve a repasarse de vez en cuando', () => {
+    let progress = recordAnswer(createEmptyProgress(), 'word:你好', true, now)
+    progress = applyHskLevel(progress, items, 3, now)
+    progress = recordAnswer(progress, 'word:经常', true, now)
     progress = applyHskLevel(progress, items, null, now)
 
     expect(progress.items['word:你好']?.basic).toBeUndefined()
     expect(getItemStatus(progress.items['word:你好'])).toBe('mastered')
     expect(isDue(progress.items['word:你好'], in30Days)).toBe(true)
+    expect(progress.items['word:经常']).toMatchObject({ timesCorrect: 1 })
+    expect(progress.items['word:认识']).toBeUndefined()
+  })
+
+  it('no borra lo marcado en Learn como ya dominado', () => {
+    let progress = markItemKnown(createEmptyProgress(), 'word:经常', now)
+    progress = applyHskLevel(progress, items, 3, now)
+    progress = applyHskLevel(progress, items, 1, now)
+
+    expect(getItemStatus(progress.items['word:经常'])).toBe('mastered')
   })
 
   it('un básico que se falla pierde la marca y vuelve a la repetición normal', () => {

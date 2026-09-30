@@ -23,7 +23,7 @@ export function createEmptyProgress(): ProgressData {
  */
 export function recordAnswer(progress: ProgressData, itemId: StudyItemId, correct: boolean, now: Date): ProgressData {
   const previous = progress.items[itemId]
-  // Sin la marca `basic`: un elemento básico que se responde vuelve al SRS normal
+  // Sin las marcas `basic` ni `fromLevel`: lo respondido ya es progreso propio
   const item: ItemProgress = {
     itemId,
     timesSeen: (previous?.timesSeen ?? 0) + 1,
@@ -86,8 +86,9 @@ const LEVEL_SPREAD_DAYS = 30
  *   markItemKnown), con los primeros repasos repartidos en 30 días más.
  * - Lo que está BASIC_LEVEL_GAP niveles o más por debajo es básico: dominado
  *   y sin repasos, aunque ya se estuviera estudiando.
- * - Lo que era básico y deja de serlo (bajó el nivel) vuelve a repasarse de
- *   vez en cuando como dominado.
+ * - Al bajar de nivel, lo que quedó por encima y solo se había marcado por el
+ *   nivel (`fromLevel`, nunca respondido) vuelve a ser nuevo. Lo que era
+ *   básico y ya se estudiaba vuelve a repasarse de vez en cuando como dominado.
  *
  * Lo demás no se toca. Como las demás funciones, devuelve un objeto nuevo.
  */
@@ -108,12 +109,15 @@ export function applyHskLevel(
 
     if (isBasic) {
       if (existing?.basic) continue
-      updated[itemId] = { ...(existing ?? newItem(itemId, now)), masteryLevel: MAX_MASTERY_LEVEL, basic: true }
+      const base = existing ?? { ...newItem(itemId, now), fromLevel: true as const }
+      updated[itemId] = { ...base, masteryLevel: MAX_MASTERY_LEVEL, basic: true }
+    } else if (!isKnown && existing?.fromLevel) {
+      delete updated[itemId]
     } else if (existing?.basic) {
       const { basic: _basic, ...rest } = existing
       updated[itemId] = { ...rest, ...knownSchedule() }
     } else if (isKnown && !existing) {
-      updated[itemId] = { ...newItem(itemId, now), ...knownSchedule() }
+      updated[itemId] = { ...newItem(itemId, now), ...knownSchedule(), fromLevel: true }
     }
   }
   return { ...progress, items: updated }
