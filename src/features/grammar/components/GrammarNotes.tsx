@@ -2,6 +2,7 @@ import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { t } from '../../../i18n/index.ts'
 import { ExampleText } from '../../dictionary/components/ExampleSentences.tsx'
 import { tatoebaSentenceUrl } from '../../dictionary/examples.ts'
+import type { EntryOpener } from '../../dictionary/components/EntryLink.tsx'
 import type { StudyItem } from '../../dictionary/studyItem.ts'
 import { getGrammarPoints } from '../grammar.ts'
 import type { GrammarPoint } from '../types.ts'
@@ -11,7 +12,7 @@ import type { GrammarPoint } from '../types.ts'
  * them, nothing is shown. Each note links to its Chinese Grammar Wiki page
  * and each sentence, to Tatoeba.
  */
-export function GrammarNotes({ item }: { item: StudyItem }) {
+export function GrammarNotes({ item, opener }: { item: StudyItem; opener: EntryOpener }) {
   const points = getGrammarPoints(item)
   if (points.length === 0) return null
 
@@ -21,7 +22,7 @@ export function GrammarNotes({ item }: { item: StudyItem }) {
       <ul className="flex flex-col gap-4">
         {points.map((point) => (
           <li key={point.id}>
-            <GrammarCard point={point} />
+            <GrammarCard point={point} opener={opener} />
           </li>
         ))}
       </ul>
@@ -31,7 +32,7 @@ export function GrammarNotes({ item }: { item: StudyItem }) {
 }
 
 /** One use of the word: header, pattern, explanation, examples and link. */
-function GrammarCard({ point }: { point: GrammarPoint }) {
+function GrammarCard({ point, opener }: { point: GrammarPoint; opener: EntryOpener }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-accent/30 border-l-4 border-l-accent bg-accent-soft">
       <div className="flex flex-col gap-3 p-4">
@@ -52,7 +53,7 @@ function GrammarCard({ point }: { point: GrammarPoint }) {
       <ul className="divide-y divide-line border-t border-accent/20 bg-surface">
         {point.examples.map((example) => (
           <li key={example.tatoebaId} className="px-4 py-3">
-            <ExampleText chinese={example.zh} />
+            <ExampleText chinese={example.zh} opener={opener} />
             <p>{example.en}</p>
             <p className="text-sm text-ink-muted">
               <a

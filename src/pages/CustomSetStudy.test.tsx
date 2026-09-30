@@ -15,6 +15,7 @@ import { loadProgress } from '../features/progress/storage.ts'
 import type { KeyValueStorage } from '../lib/storage.ts'
 import { createChunkLoader } from '../test/dictionaryChunks.ts'
 import { memoryStorage } from '../test/memoryStorage.ts'
+import { paragraphWithText } from '../test/text.ts'
 
 const now = new Date(2026, 8, 28)
 const ITEM_IDS = ['word:苹果', 'word:机场', 'word:学习'] as const
@@ -91,7 +92,7 @@ describe('Learn and Study with a custom set', () => {
       // The user's notes accompany the official entry
       if (shown.at(-1) === '学习') {
         expect(screen.getByRole('heading', { name: 'My notes in My Chinese' })).toBeInTheDocument()
-        expect(screen.getByText('wǒ měi tiān xué xí zhōng wén。')).toBeInTheDocument()
+        expect(screen.getByText(paragraphWithText('wǒ měi tiān xué xí zhōng wén。'))).toBeInTheDocument()
       }
       await user.click(screen.getByRole('button', { name: "I've learned it" }))
     }

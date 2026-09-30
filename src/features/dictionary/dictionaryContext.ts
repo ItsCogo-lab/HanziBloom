@@ -75,3 +75,28 @@ export function useSearchableItems(active: boolean): SearchableItems {
   if (store.isComplete()) return { items: store.getItems(), status: 'complete' }
   return { items: store.baseItems, status: failed ? 'error' : 'loading' }
 }
+
+/**
+ * Loads the entries needed to split this text into words (those starting
+ * with each of its characters). 'error' means it can only be split with what
+ * had loaded, such as HSK 1-4.
+ */
+export function useLoadText(text: string): LoadStatus {
+  const store = useDictionaryStore()
+  useDictionary()
+  const [result, setResult] = useState<{ text: string; status: LoadStatus }>()
+
+  useEffect(() => {
+    let cancelled = false
+    store.loadText(text).then(
+      () => !cancelled && setResult({ text, status: 'ready' }),
+      () => !cancelled && setResult({ text, status: 'error' }),
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [store, text])
+
+  if (store.hasText(text)) return 'ready'
+  return result?.text === text ? result.status : 'loading'
+}

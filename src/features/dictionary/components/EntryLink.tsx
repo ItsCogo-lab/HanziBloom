@@ -14,20 +14,23 @@ type EntryLinkProps = {
   item: StudyItem
   opener: EntryOpener
   className?: string
+  /** A second link to an entry that's already linked nearby: hidden from keyboards and screen readers. */
+  decorative?: boolean
   children: ReactNode
 }
 
 /** A link to an entry page, or a button if the entry opens without navigating. */
-export function EntryLink({ item, opener, className, children }: EntryLinkProps) {
+export function EntryLink({ item, opener, className, decorative = false, children }: EntryLinkProps) {
+  const hidden = decorative ? ({ tabIndex: -1, 'aria-hidden': true } as const) : {}
   if ('onOpen' in opener) {
     return (
-      <button type="button" className={`text-left ${className ?? ''}`} onClick={() => opener.onOpen(item)}>
+      <button type="button" className={`text-left ${className ?? ''}`} onClick={() => opener.onOpen(item)} {...hidden}>
         {children}
       </button>
     )
   }
   return (
-    <Link to={opener.getHref(item)} className={className}>
+    <Link to={opener.getHref(item)} className={className} {...hidden}>
       {children}
     </Link>
   )

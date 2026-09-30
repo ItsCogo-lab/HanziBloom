@@ -4,10 +4,13 @@ import { AnnotatedSentence } from '../../customSets/components/SentenceView.tsx'
 import { processSentence } from '../../customSets/sentenceProcessing.ts'
 import type { SentenceToken } from '../../customSets/types.ts'
 import { t } from '../../../i18n/index.ts'
+import { useDictionaryStore, useLoadText } from '../dictionaryContext.ts'
 import { tatoebaSentenceUrl } from '../examples.ts'
 import { loadExamples, type Examples } from '../runtime/dictionaryService.ts'
 import { useRuntimeData } from '../runtime/runtimeSourcesContext.ts'
+import { segmentSentence } from '../segmentation.ts'
 import { getStudyItemId, type StudyItem } from '../studyItem.ts'
+import type { EntryOpener } from './EntryLink.tsx'
 
 /**
  * Example sentences from Tatoeba, with their pinyin and each sentence's link
@@ -15,7 +18,7 @@ import { getStudyItemId, type StudyItem } from '../studyItem.ts'
  * runtime, or the local HSK sentences). If there are no sentences, nothing
  * is shown; if they couldn't be fetched, it says so.
  */
-export function ExampleSentences({ item }: { item: StudyItem }) {
+export function ExampleSentences({ item, opener }: { item: StudyItem; opener: EntryOpener }) {
   const itemId = getStudyItemId(item)
   const examples = useRuntimeData<Examples>(itemId, (sources, options) => loadExamples(sources, item, options))
 
@@ -36,7 +39,7 @@ export function ExampleSentences({ item }: { item: StudyItem }) {
       <ul className="flex flex-col gap-4">
         {sentences.map((example) => (
           <li key={`${itemId}-${example.tatoebaId}`}>
-            <ExampleText chinese={example.zh} />
+            <ExampleText chinese={example.zh} opener={opener} />
             <p>{example.en}</p>
             <p className="text-sm text-ink-muted">
               <a
@@ -62,8 +65,11 @@ export function ExampleSentences({ item }: { item: StudyItem }) {
  * the same engine as for custom sentences is used (pinyin-pro checked against
  * CC-CEDICT): whatever it can't be sure of is marked with "?" and no color.
  * While the engine loads, or if it fails, only the Chinese is shown.
+ *
+ * Once the entries it needs from the full dictionary have loaded, the
+ * sentence is split into words and each one opens its entry.
  */
-export function ExampleText({ chinese }: { chinese: string }) {
+export function ExampleText({ chinese, opener }: { chinese: string; opener: EntryOpener }) {
   const [annotated, setAnnotated] = useState<{ chinese: string; tokens: SentenceToken[] }>()
   useEffect(() => {
     let active = true
@@ -76,6 +82,19 @@ export function ExampleText({ chinese }: { chinese: string }) {
     }
   }, [chinese])
 
-  if (annotated?.chinese === chinese) return <AnnotatedSentence tokens={annotated.tokens} />
+  const store = useDictionaryStore()
+  // Re-renders as the chunks arrive, with more words to split the sentence with
+  const status = useLoadText(chinese)
+  const tokens = annotated?.chinese === chinese ? annotated.tokens : undefined
+  let words
+  if (tokens && status !== 'loading') {
+    // The reading of each character, to pick among homographs
+    const readings = tokens.flatMap((token) =>
+      Array.from(token.text, () => (token.uncertain ? undefined : token.pinyin)),
+    )
+    words = segmentSentence(chinese, store.wordIndex, readings)
+  }
+
+  if (tokens) return <AnnotatedSentence tokens={tokens} links={words && { words, opener }} />
   return <HanziText className="text-xl">{chinese}</HanziText>
 }

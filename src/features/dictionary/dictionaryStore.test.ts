@@ -72,4 +72,19 @@ describe('createDictionaryStore', () => {
     await store.loadItems(['word:企鹅'])
     expect(store.hasItems(['word:企鹅'])).toBe(true)
   })
+
+  it('loads the chunks of every character of a text and indexes their entries by hanzi', async () => {
+    const load = createChunkLoader()
+    const store = createDictionaryStore(base, load)
+    expect(store.wordIndex.find('你好').map((item) => item.kind)).toEqual(['word'])
+    expect(store.wordIndex.find('好').map((item) => item.kind)).toEqual(['character', 'word'])
+    expect(store.hasText('我看企鹅。')).toBe(false)
+
+    await store.loadText('我看企鹅。')
+
+    expect(load.requested).toEqual(['我', '看', '企', '鹅'].map(getChunkIndex))
+    expect(store.hasText('我看企鹅。')).toBe(true)
+    expect(store.wordIndex.find('企鹅')[0]?.entry).toEqual(qieWord)
+    expect(store.wordIndex.longest()).toBe(2)
+  })
 })

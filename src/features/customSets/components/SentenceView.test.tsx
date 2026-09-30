@@ -28,7 +28,9 @@ describe('SentenceView', () => {
       '我3', '每3', '天1', '学2', '习2', '中1', '文2',
     ])
     expect(colored[0]).toHaveClass('text-tone-3')
-    expect(screen.getByText('。')).not.toHaveAttribute('data-tone')
+    expect(screen.getByText('。', { selector: 'span' })).not.toHaveAttribute('data-tone')
+    // The pinyin is colored like the characters
+    expect(screen.getByText('wǒ')).toHaveClass('text-tone-3')
   })
 
   it('always shows the pinyin, also without colors', () => {
