@@ -1,6 +1,6 @@
 /**
  * Publicación del diccionario completo en el repositorio de datos
- * (ItsCogo-lab/HanziVocab-Data), del que la app lo lee en tiempo de ejecución
+ * (ItsCogo-lab/HanziDict), del que la app lo lee en tiempo de ejecución
  * a través de jsDelivr. Ver docs/DATA_SOURCES.md, «Repositorio de datos».
  *
  * Contenido del repositorio:
@@ -57,9 +57,9 @@ export function createManifest(version: string, generatedAt: string): DataManife
 /** Versiones anteriores que se conservan, para quien aún tenga en caché un manifiesto antiguo. */
 const KEPT_PREVIOUS_VERSIONS = 2
 
-const README = (manifest: DataManifest) => `# HanziVocab-Data
+const README = (manifest: DataManifest) => `# HanziDict
 
-Datos del diccionario completo de [HanziVocab](https://github.com/ItsCogo-lab/HanziVocab),
+Datos del diccionario completo de [HanziBloom](https://github.com/ItsCogo-lab/HanziBloom),
 que la app lee en tiempo de ejecución a través de jsDelivr. **No se edita a
 mano**: se genera con \`npm run data:build\` en el repositorio de la app y se
 publica con \`npm run data:release\` (o el workflow «Publish data»).
@@ -73,7 +73,7 @@ Versión actual: **${manifest.version}** (generada el ${manifest.generatedAt}).
   HSK 1-4 (que va dentro de la app). Cada entrada está en el archivo del punto
   de código de su primer carácter módulo ${CHUNK_COUNT}.
 
-La app pide \`https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v${manifest.format}/manifest.json\`
+La app pide \`https://cdn.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v${manifest.format}/manifest.json\`
 y después los trozos de la carpeta de esa versión. Una carpeta de versión no se
 modifica nunca: una versión nueva es una carpeta nueva y un manifiesto nuevo.
 Se conservan las ${KEPT_PREVIOUS_VERSIONS} versiones anteriores. Un cambio de formato incompatible

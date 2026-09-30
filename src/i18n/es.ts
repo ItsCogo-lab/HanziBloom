@@ -6,7 +6,7 @@ import type { MessageKey } from './en.ts'
  * El tipo obliga a tener exactamente las mismas claves que en.ts.
  */
 export const es: Record<MessageKey, string> = {
-  'app.name': 'HanziVocab',
+  'app.name': 'HanziBloom',
   'app.tagline': 'Aprende y practica caracteres y vocabulario chino.',
   'app.skipToContent': 'Saltar al contenido',
   'app.mainNavigation': 'Navegación principal',
@@ -101,7 +101,7 @@ export const es: Record<MessageKey, string> = {
   'dictionary.examplesUnavailable': 'Frases de ejemplo no disponibles sin conexión.',
   'grammar.title': 'Gramática',
   'grammar.learnMore': 'Más en la Chinese Grammar Wiki:',
-  'grammar.credits': 'Explicaciones escritas para HanziVocab siguiendo la Chinese Grammar Wiki de AllSet Learning. Frases de ejemplo de Tatoeba, con licencia CC BY 2.0 FR.',
+  'grammar.credits': 'Explicaciones escritas para HanziBloom siguiendo la Chinese Grammar Wiki de AllSet Learning. Frases de ejemplo de Tatoeba, con licencia CC BY 2.0 FR.',
   'dictionary.yourProgress': 'Tu progreso',
   'dictionary.notStudied': 'Aún no lo has estudiado. Aparecerá en tus sesiones de práctica.',
   'dictionary.timesSeen': 'Veces visto',
@@ -318,14 +318,14 @@ export const es: Record<MessageKey, string> = {
   'notFound.description': 'La dirección que has abierto no existe.',
   'notFound.backHome': 'Volver al inicio',
 
-  'install.title': 'Instala HanziVocab',
+  'install.title': 'Instala HanziBloom',
   'install.description': 'Añádela a tu pantalla de inicio para abrirla como una app, a pantalla completa y con un toque.',
   'install.install': 'Instalar',
   'install.notNow': 'Ahora no',
   'install.gotIt': 'Entendido',
   'install.iosStepShare': 'Toca el botón Compartir de Safari.',
   'install.iosStepAdd': 'Elige «Añadir a pantalla de inicio».',
-  'install.installed': 'HanziVocab está instalada en este dispositivo.',
+  'install.installed': 'HanziBloom está instalada en este dispositivo.',
   'install.unavailable': 'Este navegador no puede instalar apps web. Prueba con Chrome en Android o Safari en iPhone.',
   'settings.appearance': 'Apariencia',
   'settings.theme': 'Tema',

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens de HanziVocab.
+ * Design tokens de HanziBloom.
  * Tailwind v4 genera utilidades a partir de estas variables:
  * --color-ink → text-ink, bg-ink, border-ink...
  * Cambiar la identidad visual = cambiar estos valores, no los componentes.

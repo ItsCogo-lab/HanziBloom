@@ -1,11 +1,11 @@
 name: Publish data
 
 # Regenera el diccionario completo desde sus fuentes y lo publica como una
-# versión nueva en ItsCogo-lab/HanziVocab-Data, de donde lo lee la app a través
+# versión nueva en ItsCogo-lab/HanziDict, de donde lo lee la app a través
 # de jsDelivr. La app no cambia ni se vuelve a compilar.
 #
 # Necesita el secreto DATA_REPO_TOKEN: un token de GitHub (fine-grained) con
-# permiso «Contents: Read and write» solo sobre ItsCogo-lab/HanziVocab-Data.
+# permiso «Contents: Read and write» solo sobre ItsCogo-lab/HanziDict.
 
 on:
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
       - run: npm run data:validate
       - uses: actions/checkout@v4
         with:
-          repository: ItsCogo-lab/HanziVocab-Data
+          repository: ItsCogo-lab/HanziDict
           token: ${{ secrets.DATA_REPO_TOKEN }}
           path: data-repo
       - name: Preparar la versión
@@ -52,4 +52,4 @@ jobs:
           git push
       - name: Avisar a jsDelivr del manifiesto nuevo
         # Sin esto, jsDelivr puede servir el manifiesto anterior hasta 12 horas
-        run: curl -sSf "https://purge.jsdelivr.net/gh/ItsCogo-lab/HanziVocab-Data@main/v1/manifest.json"
+        run: curl -sSf "https://purge.jsdelivr.net/gh/ItsCogo-lab/HanziDict@main/v1/manifest.json"

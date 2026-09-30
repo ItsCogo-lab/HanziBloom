@@ -1,4 +1,4 @@
-# HanziVocab
+# HanziBloom
 
 Aplicación web para aprender y practicar caracteres (hanzi) y vocabulario chino:
 reconocimiento, pinyin, significado, repetición espaciada y, más adelante, escritura

@@ -6,7 +6,7 @@
  * claves, y TypeScript lo comprueba.
  */
 export const en = {
-  'app.name': 'HanziVocab',
+  'app.name': 'HanziBloom',
   'app.tagline': 'Learn and practice Chinese characters and vocabulary.',
   'app.skipToContent': 'Skip to content',
   'app.mainNavigation': 'Main navigation',
@@ -101,7 +101,7 @@ export const en = {
   'dictionary.examplesUnavailable': 'Example sentences unavailable offline.',
   'grammar.title': 'Grammar',
   'grammar.learnMore': 'Learn more in the Chinese Grammar Wiki:',
-  'grammar.credits': 'Explanations written for HanziVocab, following the Chinese Grammar Wiki by AllSet Learning. Example sentences from Tatoeba, licensed CC BY 2.0 FR.',
+  'grammar.credits': 'Explanations written for HanziBloom, following the Chinese Grammar Wiki by AllSet Learning. Example sentences from Tatoeba, licensed CC BY 2.0 FR.',
   'dictionary.yourProgress': 'Your progress',
   'dictionary.notStudied': 'Not studied yet. It will come up in your practice sessions.',
   'dictionary.timesSeen': 'Times seen',
@@ -318,14 +318,14 @@ export const en = {
   'notFound.description': 'The address you opened does not exist.',
   'notFound.backHome': 'Back to home',
 
-  'install.title': 'Install HanziVocab',
+  'install.title': 'Install HanziBloom',
   'install.description': 'Add it to your home screen to open it like an app, full screen and in one tap.',
   'install.install': 'Install',
   'install.notNow': 'Not now',
   'install.gotIt': 'Got it',
   'install.iosStepShare': 'Tap the Share button in Safari.',
   'install.iosStepAdd': 'Choose "Add to Home Screen".',
-  'install.installed': 'HanziVocab is installed on this device.',
+  'install.installed': 'HanziBloom is installed on this device.',
   'install.unavailable': 'This browser cannot install web apps. Try Chrome on Android or Safari on iPhone.',
   'settings.appearance': 'Appearance',
   'settings.theme': 'Theme',

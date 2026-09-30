@@ -48,7 +48,7 @@ describe('InstallBanner', () => {
 
     expect(event.prompt).toHaveBeenCalledOnce()
     // Cada evento solo sirve una vez: el aviso desaparece
-    expect(screen.queryByRole('complementary', { name: 'Install HanziVocab' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'Install HanziBloom' })).not.toBeInTheDocument()
   })
 
   it('no vuelve a salir una vez cerrado', async () => {
@@ -66,7 +66,7 @@ describe('InstallBanner', () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' })
     renderBanner()
 
-    expect(screen.getByRole('complementary', { name: 'Install HanziVocab' })).toBeInTheDocument()
+    expect(screen.getByRole('complementary', { name: 'Install HanziBloom' })).toBeInTheDocument()
     expect(screen.getByText('Choose "Add to Home Screen".')).toBeInTheDocument()
   })
 

@@ -153,5 +153,5 @@ dist-ssr
 # Fuentes descargadas para generar el dataset
 scripts/dataset/.cache
 
-# Diccionario completo generado por data:build, para publicar en HanziVocab-data
+# Diccionario completo generado por data:build, para publicar en HanziDict
 data-release

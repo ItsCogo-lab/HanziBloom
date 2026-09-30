@@ -6,7 +6,7 @@ import { createRateLimiter, fetchJson, SourceError, type FetchOptions } from './
  * Adaptador del diccionario completo (CC-CEDICT con Unihan y Make Me a Hanzi).
  * No hay ninguna API pública de estas fuentes (ver docs/DATA_SOURCES.md), así
  * que los datos se generan con `npm run data:build` y se publican en un
- * repositorio aparte, ItsCogo-lab/HanziVocab-Data, que jsDelivr sirve con CORS
+ * repositorio aparte, ItsCogo-lab/HanziDict, que jsDelivr sirve con CORS
  * desde su rama main:
  *
  * - `v1/manifest.json`: qué versión de los datos es la actual.
@@ -18,7 +18,7 @@ import { createRateLimiter, fetchJson, SourceError, type FetchOptions } from './
  * datos nuevos van en v2/, sin romper las versiones anteriores de la app).
  */
 
-export const DATA_REPOSITORY = 'ItsCogo-lab/HanziVocab-Data'
+export const DATA_REPOSITORY = 'ItsCogo-lab/HanziDict'
 /** Versión mayor del formato que entiende esta app. */
 export const DATA_FORMAT = 1
 const BASE_URL = `https://cdn.jsdelivr.net/gh/${DATA_REPOSITORY}@main/v${DATA_FORMAT}`
