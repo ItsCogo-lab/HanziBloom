@@ -5,7 +5,7 @@ import { loadProgress, PROGRESS_STORAGE_KEY, saveProgress } from '../progress/st
 import { DEFAULT_SETTINGS, saveSettings, SETTINGS_STORAGE_KEY } from '../settings/settings.ts'
 import { mergeSnapshots, normalizeSnapshot, readSnapshot, writeSnapshot } from './snapshot.ts'
 
-/** Como hace jsonb: las mismas claves en otro orden. */
+/** Like jsonb does: the same keys in a different order. */
 function reorderKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(reorderKeys)
   if (typeof value !== 'object' || value === null) return value
@@ -17,7 +17,7 @@ function reorderKeys(value: unknown): unknown {
 }
 
 describe('normalizeSnapshot', () => {
-  it('lo bajado de la nube, al volver a guardarlo, no cambia', () => {
+  it('downloaded data does not change when saved again', () => {
     const original = memoryStorage()
     saveProgress(recordAnswer(createEmptyProgress(), 'char:你', true, new Date(2026, 8, 28)), original)
     saveSettings({ ...DEFAULT_SETTINGS, sessionSize: 20 }, original)
@@ -26,7 +26,7 @@ describe('normalizeSnapshot', () => {
     const device = memoryStorage()
     writeSnapshot(normalizeSnapshot(fromCloud), device)
     const before = device.getItem(PROGRESS_STORAGE_KEY)
-    // Lo que hace el Provider al montarse
+    // What the Provider does when it mounts
     saveProgress(loadProgress(device), device)
 
     expect(device.getItem(PROGRESS_STORAGE_KEY)).toBe(before)
@@ -35,7 +35,7 @@ describe('normalizeSnapshot', () => {
 })
 
 describe('mergeSnapshots', () => {
-  it('los ajustes de este dispositivo ganan a los de la nube', () => {
+  it("this device's settings win over the cloud's", () => {
     const local = memoryStorage()
     saveSettings({ ...DEFAULT_SETTINGS, sessionSize: 5 }, local)
     const remote = memoryStorage()

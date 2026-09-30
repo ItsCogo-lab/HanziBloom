@@ -10,25 +10,25 @@ import { createSupabaseCloud, getSupabaseConfig, loadSupabaseClient, type Supaba
 
 const DEFAULT_CONFIG = getSupabaseConfig()
 
-/** Espera tras el último cambio antes de subirlo: una sesión de práctica cambia el progreso en cada respuesta. */
+/** Wait after the last change before uploading: a practice session changes progress on every answer. */
 const PUSH_DELAY_MS = 3000
 
 type AccountProviderProps = {
-  /** Recibe el almacenamiento que deben usar los datos del usuario. */
+  /** Receives the storage the user's data should use. */
   children: (storage: KeyValueStorage | undefined) => ReactNode
   storage?: KeyValueStorage
-  /** Proyecto de Supabase; por defecto el de `.env.*`. `null` desactiva las cuentas. */
+  /** Supabase project; defaults to the one in `.env.*`. `null` turns accounts off. */
   config?: SupabaseConfig | null
 }
 
 /**
- * Cuenta opcional y sincronización. Sin sesión, todo sigue en localStorage
- * como siempre. Con sesión, cada cambio de los datos del usuario se sube a
- * Supabase (agrupados) y, al entrar o volver a la app, se bajan los cambios
- * de otros dispositivos (ver sync/syncUserData).
+ * Optional account and sync. Signed out, everything stays in localStorage as
+ * before. Signed in, every change to the user's data is uploaded to Supabase
+ * (batched) and, on sign-in or when returning to the app, changes from other
+ * devices are downloaded (see sync/syncUserData).
  *
- * Los Providers de datos cargan una sola vez al montarse, así que cuando la
- * sincronización cambia lo guardado se vuelven a montar con otra `key`.
+ * The data Providers load only once when they mount, so when a sync changes
+ * what is stored they are remounted with a new `key`.
  */
 export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: AccountProviderProps) {
   const baseStorage = storage ?? getBrowserStorage()
@@ -65,15 +65,17 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
         if (localChanged) setDataVersion((version) => version + 1)
         setSyncStatus('synced')
       } while (runAgain.current)
-    } catch {
-      // Sin conexión o Supabase caído: los cambios quedan marcados y se suben la próxima vez
+    } catch (error) {
+      // Offline or Supabase down: changes stay marked as pending and upload next time.
+      // Logged so the cause (e.g. a missing table) shows in the browser console.
+      console.error('Sync failed', error)
       setSyncStatus('error')
     } finally {
       running.current = false
     }
   }, [baseStorage])
 
-  // Cada cambio de los datos del usuario se apunta y, con sesión, se sube al rato
+  // Every change to the user's data is recorded and, when signed in, uploaded shortly after
   const handleChange = useCallback(
     (key: string) => {
       if (!isSyncedKey(key)) return
@@ -85,8 +87,8 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
     },
     [baseStorage, sync],
   )
-  // El almacenamiento se crea una sola vez; el aviso de cambios pasa por
-  // `listener` para usar siempre la última versión de handleChange
+  // The storage is created once; change events go through `listener` so the
+  // latest handleChange is always used
   const [listener] = useState(createListener)
   useEffect(() => listener.set(handleChange), [listener, handleChange])
   const userStorage = useMemo(
@@ -94,8 +96,8 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
     [baseStorage, listener],
   )
 
-  // Carga Supabase y escucha la sesión. Al volver de Google o del email, la
-  // librería canjea el ?code= de la URL y avisa aquí con la sesión nueva.
+  // Load Supabase and listen to the session. When returning from Google or the
+  // email link, the library exchanges the ?code= in the URL and reports the new session here.
   useEffect(() => {
     if (!config) return
     let unsubscribe: (() => void) | undefined
@@ -121,7 +123,7 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
     }
   }, [config])
 
-  // Con sesión: sincroniza ahora, y otra vez cada vez que se vuelve a la app
+  // Signed in: sync now, and again every time the user comes back to the app
   useEffect(() => {
     if (!client || !user) {
       session.current = null
@@ -162,7 +164,7 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
       },
       signOut: async () => {
         if (!client) return
-        // Antes de salir se sube lo pendiente. Los datos se quedan en este navegador.
+        // Upload anything pending before signing out. The data stays in this browser.
         clearTimeout(pushTimer.current)
         await sync()
         await client.auth.signOut()
@@ -179,7 +181,7 @@ export function AccountProvider({ children, storage, config = DEFAULT_CONFIG }: 
   )
 }
 
-/** Una función que se puede cambiar sin cambiar su referencia. */
+/** A function whose behaviour can change without changing its reference. */
 function createListener() {
   let handler = (_key: string) => {}
   return {
@@ -190,12 +192,12 @@ function createListener() {
   }
 }
 
-/** Adonde vuelve el usuario tras iniciar sesión: el inicio de la app. */
+/** Where the user lands after signing in: the app's home page. */
 function appUrl(): string {
   return new URL(import.meta.env.BASE_URL, window.location.origin).href
 }
 
-/** Quita el ?code= de un solo uso que deja el inicio de sesión, para que no se quede en la barra de direcciones. */
+/** Removes the one-time ?code= left by sign-in, so it doesn't stay in the address bar. */
 function removeAuthCodeFromUrl() {
   const url = new URL(window.location.href)
   if (!url.searchParams.has('code')) return

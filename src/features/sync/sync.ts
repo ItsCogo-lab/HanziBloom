@@ -2,16 +2,16 @@ import type { KeyValueStorage } from '../../lib/storage.ts'
 import { mergeSnapshots, normalizeSnapshot, readSnapshot, writeSnapshot, type Snapshot } from './snapshot.ts'
 import { loadSyncState, planSync, saveSyncState } from './syncState.ts'
 
-/** La copia de los datos del usuario en la nube. */
+/** The cloud copy of the user's data. */
 export interface CloudCopy {
   data: Snapshot
   updatedAt: string
 }
 
-/** Dónde se guarda la copia. En la app es Supabase; en los tests, un objeto en memoria. */
+/** Where the copy is stored. In the app it is Supabase; in tests, an in-memory object. */
 export interface CloudStore {
   load: (userId: string) => Promise<CloudCopy | null>
-  /** Guarda la copia y devuelve su nuevo `updatedAt`. */
+  /** Saves the copy and returns its new `updatedAt`. */
   save: (userId: string, data: Snapshot) => Promise<string>
 }
 
@@ -20,15 +20,15 @@ type SyncOptions = {
   userId: string
   storage?: KeyValueStorage
   /**
-   * Cuántos cambios locales ha habido desde que arrancó la app. Si cambia
-   * mientras se espera a la red, lo nuevo aún no está subido.
+   * How many local changes there have been since the app started. If it
+   * changes while waiting for the network, the new changes aren't uploaded yet.
    */
   changeCount: () => number
 }
 
 /**
- * Una sincronización completa (ver planSync). Devuelve `true` si ha cambiado
- * los datos locales, para que la app los vuelva a cargar.
+ * One full sync (see planSync). Returns `true` if it changed the local data,
+ * so the app reloads it.
  */
 export async function syncUserData({ cloud, userId, storage, changeCount }: SyncOptions): Promise<boolean> {
   const countAtStart = changeCount()

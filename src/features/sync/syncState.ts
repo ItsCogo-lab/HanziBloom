@@ -1,21 +1,21 @@
 /**
- * Qué sabe este dispositivo de la última sincronización, y qué hacer en la
- * siguiente. Se guarda en localStorage junto al resto de datos.
+ * What this device knows about the last sync, and what to do on the next
+ * one. Stored in localStorage next to the rest of the data.
  */
 import { getBrowserStorage, isRecord, readJson, writeJson, type KeyValueStorage } from '../../lib/storage.ts'
 
 export const SYNC_STATE_STORAGE_KEY = 'hanzivocab.sync'
 
 export interface SyncState {
-  /** Cuenta con la que se sincronizó este dispositivo. */
+  /** Account this device synced with. */
   userId: string
   /**
-   * `updated_at` de la copia en la nube la última vez que la subimos o
-   * bajamos. Si la nube tiene otro valor, otro dispositivo ha subido cambios.
-   * Solo se compara por igualdad, así que no importa si los relojes difieren.
+   * `updated_at` of the cloud copy the last time we uploaded or downloaded
+   * it. If the cloud has a different value, another device uploaded changes.
+   * It is only compared for equality, so clock differences don't matter.
    */
   syncedAt: string
-  /** Hay cambios locales que aún no se han subido. */
+  /** There are local changes that haven't been uploaded yet. */
   dirty: boolean
 }
 
@@ -28,11 +28,11 @@ export function loadSyncState(storage?: KeyValueStorage): SyncState | null {
 }
 
 /**
- * - `push`: subir lo local (la nube está vacía o no ha cambiado).
- * - `pull`: bajar la nube (otro dispositivo subió cambios y aquí no hay nada nuevo).
- * - `merge`: los dos lados tienen cambios, o es la primera vez que este
- *   dispositivo usa esta cuenta: se juntan y se sube el resultado.
- * - `none`: todo está al día.
+ * - `push`: upload local data (the cloud is empty or hasn't changed).
+ * - `pull`: download the cloud (another device uploaded changes and there is nothing new here).
+ * - `merge`: both sides changed, or this device uses this account for the
+ *   first time: combine them and upload the result.
+ * - `none`: everything is up to date.
  */
 export type SyncAction = 'push' | 'pull' | 'merge' | 'none'
 
@@ -47,17 +47,17 @@ export function saveSyncState(state: SyncState, storage?: KeyValueStorage): void
   writeJson(SYNC_STATE_STORAGE_KEY, state, storage)
 }
 
-/** Apunta que hay cambios sin subir, por si se cierra la app antes de subirlos. */
+/** Records that there are changes to upload, in case the app closes first. */
 export function markSyncDirty(storage?: KeyValueStorage): void {
   const state = loadSyncState(storage)
   if (state && !state.dirty) saveSyncState({ ...state, dirty: true }, storage)
 }
 
-/** Al cerrar sesión: la próxima cuenta que entre juntará sus datos con los de aquí. */
+/** On sign-out: the next account to sign in will merge its data with the data here. */
 export function clearSyncState(storage = getBrowserStorage()): void {
   try {
     storage?.removeItem(SYNC_STATE_STORAGE_KEY)
   } catch {
-    // Sin almacenamiento no hay nada que borrar
+    // No storage, nothing to remove
   }
 }

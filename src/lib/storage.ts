@@ -44,7 +44,7 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-/** Almacenamiento en memoria con la misma forma que localStorage (para tests y para combinar datos). */
+/** In-memory storage with the same shape as localStorage (for tests and for merging data). */
 export function createMemoryStorage(initial: Record<string, string> = {}): KeyValueStorage {
   const values = new Map(Object.entries(initial))
   return {
