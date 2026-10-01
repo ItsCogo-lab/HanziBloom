@@ -4,7 +4,39 @@
     <meta charset="UTF-8" />
     <!-- viewport-fit=cover: the app uses the whole screen and respects the system bars with env(safe-area-inset-*) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Learn and practice Chinese characters and vocabulary." />
+    <meta
+      name="description"
+      content="VividHanzi is a free web app to learn Chinese characters (hanzi) and HSK vocabulary: flashcards, spaced repetition, pinyin, stroke-order writing practice and a full Chinese-English dictionary."
+    />
+    <!--
+      Search engines and link previews. VITE_SITE_URL is the public address
+      of the site (no trailing slash): the Deploy workflow takes it from GitHub
+      Pages, so it follows a custom domain without code changes.
+    -->
+    <link rel="canonical" href="%VITE_SITE_URL%/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VividHanzi" />
+    <meta property="og:title" content="VividHanzi · Learn Chinese characters" />
+    <meta
+      property="og:description"
+      content="Learn hanzi and HSK vocabulary with flashcards, spaced repetition and writing practice."
+    />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "VividHanzi",
+        "url": "%VITE_SITE_URL%/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any",
+        "inLanguage": "en",
+        "description": "Learn Chinese characters (hanzi) and HSK vocabulary with flashcards, spaced repetition and writing practice.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+      }
+    </script>
     <meta name="theme-color" content="#fbf8f3" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- Install to the home screen: manifest (Android, desktop) and Safari tags (iPhone) -->
@@ -12,7 +44,7 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="VividHanzi" />
-    <title>VividHanzi</title>
+    <title>VividHanzi · Learn Chinese characters (hanzi)</title>
     <!--
       Light or dark theme before painting anything, so there is no flash of
       the wrong theme. Reads the setting the app stores (features/settings)
