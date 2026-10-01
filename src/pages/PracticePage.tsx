@@ -14,6 +14,7 @@ import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { LearnSession } from '../features/practice/components/LearnSession.tsx'
 import { PracticeSession } from '../features/practice/components/PracticeSession.tsx'
 import { createSessionExercises } from '../features/practice/session.ts'
+import { selectWritingItems, WRITING_MIN_LEVEL } from '../features/practice/writing.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { getDifficultItems } from '../features/progress/stats.ts'
 import type { ProgressData } from '../features/progress/types.ts'
@@ -46,7 +47,8 @@ function createPracticeSession(pool: readonly StudyItem[], progress: ProgressDat
  * Study sessions. With a set, the URL sets the session context:
  * /study/practice?set=hsk-1&mode=learn (new vocabulary) or &mode=study
  * (review of what was learned; &scope=all includes what is not due yet).
- * With ?focus=difficult, a session with the difficult items (see isDifficult).
+ * With ?focus=difficult, a session with the difficult items (see isDifficult);
+ * with ?focus=writing, a writing-only session (see selectWritingItems).
  * Without a set, the mixed session over all vocabulary. The `key` makes
  * changing set or type create a new session.
  */
@@ -55,6 +57,7 @@ export function PracticePage() {
   const studySets = useStudySets()
   const setId = searchParams.get('set')
   if (searchParams.get('focus') === 'difficult') return <DifficultPractice />
+  if (searchParams.get('focus') === 'writing') return <WritingPractice />
   if (setId === null) return <Practice />
 
   const set = getStudySet(studySets, setId)
@@ -138,6 +141,64 @@ function DifficultSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
         <p className="text-lg">{t('practice.difficultEmpty')}</p>
         <ButtonLink to="/progress" variant="secondary">
           {t('nav.progress')}
+        </ButtonLink>
+      </Card>
+    )
+  }
+
+  return (
+    <PracticeSession
+      key={session.id}
+      exercises={session.exercises}
+      dictionary={dictionary}
+      onResult={recordResult}
+      onRestart={() => setSession(createSession(progress))}
+    />
+  )
+}
+
+/**
+ * Practice writing: only writing exercises, whenever the user wants, with
+ * everything they can already read (any set, so entries may need loading).
+ * It doesn't depend on the Settings switch, which is about Study sessions.
+ */
+function WritingPractice() {
+  const { progress } = useProgress()
+  const [itemIds] = useState(() =>
+    Object.values(progress.items)
+      .filter((item) => item !== undefined)
+      .filter((item) => item.masteryLevel >= WRITING_MIN_LEVEL)
+      .map((item) => item.itemId),
+  )
+
+  return (
+    <>
+      <PageHeader title={t('practice.writingTitle')} description={t('practice.writingDescription')} />
+      <LoadEntries itemIds={itemIds}>
+        <WritingSession itemIds={itemIds} />
+      </LoadEntries>
+    </>
+  )
+}
+
+function WritingSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
+  const dictionary = useDictionary()
+  const { progress, recordResult } = useProgress()
+  const { sessionSize } = useSettings().settings
+  const createSession = (current: ProgressData) => {
+    nextSessionId += 1
+    const pool = itemIds.flatMap((itemId) => getStudyItem(dictionary, itemId) ?? [])
+    const items = selectWritingItems(pool, current, new Date(), sessionSize)
+    return { id: nextSessionId, exercises: items.map((item) => ({ type: 'writing' as const, item })) }
+  }
+  const [session, setSession] = useState(() => createSession(progress))
+
+  if (session.exercises.length === 0) {
+    return (
+      <Card className="mx-auto flex max-w-xl flex-col items-start gap-4">
+        <p className="text-lg">{t('practice.writingEmpty')}</p>
+        <ButtonLink to="/study" variant="secondary">
+          {t('nav.study')}
         </ButtonLink>
       </Card>
     )

@@ -177,8 +177,8 @@ describe('createSessionExercises with writing', () => {
   const monday = new Date(2026, 8, 28, 10, 0)
   const thursday = new Date(2026, 9, 1, 10, 0)
   const thanks = pool.find((item) => item.kind === 'word' && item.entry.id === '谢谢')!
-  // Read right twice: 谢谢 can now be written, and its recognition is due again on Thursday
-  const progress = [monday, monday].reduce((result, date) => recordAnswer(result, 'word:谢谢', true, date), createEmptyProgress())
+  // Read right once: 谢谢 can now be written, and its recognition is due again on Thursday
+  const progress = recordAnswer(createEmptyProgress(), 'word:谢谢', true, monday)
 
   it('writes an item when it is its turn to be written', () => {
     const [exercise] = createSessionExercises([thanks], { progress, now: thursday, writing: true, distractorPool: pool })
