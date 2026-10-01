@@ -16,7 +16,12 @@ export function CustomSetListPage() {
           </h2>
           <p className="text-ink-muted">{t('custom.intro')}</p>
         </div>
-        <ButtonLink to="/study/custom/new">{t('custom.create')}</ButtonLink>
+        <div className="flex flex-wrap gap-2">
+          <ButtonLink to="/study/custom/import" variant="secondary">
+            {t('custom.import')}
+          </ButtonLink>
+          <ButtonLink to="/study/custom/new">{t('custom.create')}</ButtonLink>
+        </div>
       </div>
       {sets.length === 0 ? (
         <p className="text-ink-muted">{t('custom.empty')}</p>

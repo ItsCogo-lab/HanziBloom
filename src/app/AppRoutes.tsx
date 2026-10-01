@@ -9,6 +9,7 @@ import { ProgressPage } from '../pages/ProgressPage.tsx'
 import { SettingsPage } from '../pages/SettingsPage.tsx'
 import { CreateCustomSetPage } from '../pages/study/CreateCustomSetPage.tsx'
 import { CustomSetListPage } from '../pages/study/CustomSetListPage.tsx'
+import { ImportCustomSetPage } from '../pages/study/ImportCustomSetPage.tsx'
 import { MyStudiesPage } from '../pages/study/MyStudiesPage.tsx'
 import { SetDetailPage } from '../pages/study/SetDetailPage.tsx'
 import { SetListPage } from '../pages/study/SetListPage.tsx'
@@ -31,6 +32,7 @@ export function AppRoutes() {
           <Route path="custom" element={<CustomSetListPage />} />
         </Route>
         <Route path="study/custom/new" element={<CreateCustomSetPage />} />
+        <Route path="study/custom/import" element={<ImportCustomSetPage />} />
         <Route path="study/sets/:setId" element={<SetDetailPage />} />
         <Route path="study/practice" element={<PracticePage />} />
         <Route path="dictionary" element={<DictionaryPage />} />

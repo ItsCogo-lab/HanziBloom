@@ -39,9 +39,9 @@ export function CustomSetsProvider({ children, storage }: CustomSetsProviderProp
       setCustomSets((current) => updateCustomSet(current, setId, new Date(), change))
     return {
       customSets,
-      createSet: (details) => {
+      createSet: (details, itemIds) => {
         const id = createCustomSetId()
-        setCustomSets((current) => [...current, createCustomSet(details, id, new Date())])
+        setCustomSets((current) => [...current, createCustomSet(details, id, new Date(), itemIds)])
         return id
       },
       updateDetails: (setId, details) => update(setId, (set) => ({ ...set, ...details })),

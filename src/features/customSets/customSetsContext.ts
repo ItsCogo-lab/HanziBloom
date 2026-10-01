@@ -4,8 +4,11 @@ import type { CustomSentence, CustomSet, CustomSetDetails } from './types.ts'
 
 export interface CustomSetsContextValue {
   customSets: readonly CustomSet[]
-  /** Creates a set and returns its id. The data must already be validated (validateDetails). */
-  createSet: (details: CustomSetDetails) => string
+  /**
+   * Creates a set and returns its id. The data must already be validated
+   * (validateDetails); `itemIds` (an imported set) must exist in the dictionary.
+   */
+  createSet: (details: CustomSetDetails, itemIds?: readonly StudyItemId[]) => string
   updateDetails: (setId: string, details: CustomSetDetails) => void
   deleteSet: (setId: string) => void
   addItem: (setId: string, itemId: StudyItemId) => void

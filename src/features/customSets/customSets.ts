@@ -29,9 +29,14 @@ export function createCustomSetId(): string {
   return `custom-${crypto.randomUUID()}`
 }
 
-export function createCustomSet(details: CustomSetDetails, id: string, now: Date): CustomSet {
+export function createCustomSet(
+  details: CustomSetDetails,
+  id: string,
+  now: Date,
+  itemIds: readonly StudyItemId[] = [],
+): CustomSet {
   const date = now.toISOString()
-  return { id, ...details, itemIds: [], meanings: {}, sentences: [], createdAt: date, updatedAt: date }
+  return { id, ...details, itemIds: [...new Set(itemIds)], meanings: {}, sentences: [], createdAt: date, updatedAt: date }
 }
 
 /** Applies `change` to the set with that id and updates its date. The others do not change. */
