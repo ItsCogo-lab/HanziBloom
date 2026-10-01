@@ -59,7 +59,7 @@ const KEPT_PREVIOUS_VERSIONS = 2
 
 const README = (manifest: DataManifest) => `# HanziDict
 
-Full dictionary data for [HanziBloom](https://github.com/ItsCogo-lab/HanziBloom),
+Full dictionary data for [VividHanzi](https://github.com/ItsCogo-lab/VividHanzi),
 which the app reads at runtime via jsDelivr. **Not edited by
 hand**: it is generated with \`npm run data:build\` in the app repository and
 published with \`npm run data:release\` (or the "Publish data" workflow).

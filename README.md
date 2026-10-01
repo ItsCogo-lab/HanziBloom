@@ -1,4 +1,4 @@
-# HanziBloom
+# VividHanzi
 
 A web app for learning and practicing Chinese characters (hanzi) and vocabulary:
 recognition, pinyin, meaning, spaced repetition and, later, writing

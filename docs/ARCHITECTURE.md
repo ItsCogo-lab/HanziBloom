@@ -1,4 +1,4 @@
-# HanziBloom Architecture
+# VividHanzi Architecture
 
 This document covers the initial analysis (Phase 1), the proposed architecture and
 the MVP technical plan. It is a living document: when a decision changes, it is
@@ -294,10 +294,10 @@ paddings use small values that grow from `sm:`. Form fields
 are a fixed 16 px so Safari does not zoom when typing.
 
 It can be installed as an app (`public/manifest.webmanifest`). `start_url` and
-`scope` are relative (`./`), so they work the same at `/` and at `/HanziBloom/`.
-The logo (`public/logo.svg`, and with a background in `public/favicon.svg` and
-`public/icons/`) is a five-petal flower: each petal is the dot stroke
-(丶) of 汉 from hanzi-writer-data, painted with the color of one of the five tones.
+`scope` are relative (`./`), so they work the same at `/` and at `/VividHanzi/`.
+The logo (`public/logo.svg` and `public/favicon.svg`, and on a cream
+background in `public/icons/`) is a hand of four study cards in the tone
+colors, with 学 ("to study") from hanzi-writer-data on the red front card.
 It is a drawing, not a font, so it looks the same everywhere.
 
 The localStorage keys (`hanzivocab.*`) and the IndexedDB database

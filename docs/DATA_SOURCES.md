@@ -1,6 +1,6 @@
 # Data sources
 
-All of HanziBloom's linguistic data comes from open sources. Nothing is
+All of VividHanzi's linguistic data comes from open sources. Nothing is
 written by hand or generated with AI. There are two ways it reaches the app:
 
 - **Generated with a script** (`npm run data:build`): HSK 1-4 and the local

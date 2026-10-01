@@ -1,4 +1,4 @@
--- Cloud copy of each HanziBloom user's data.
+-- Cloud copy of each VividHanzi user's data.
 -- Run once in Supabase → SQL Editor.
 --
 -- One row per user with the same JSON the app stores in localStorage

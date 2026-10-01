@@ -65,5 +65,5 @@ state) keep the app's old name on purpose, so saved progress survives.
    `https://itscogo-lab.github.io` and `http://localhost:5173`; redirect URI
    `https://<project>.supabase.co/auth/v1/callback`.
 4. Supabase → Authentication → URL Configuration: site URL
-   `https://itscogo-lab.github.io/HanziBloom/`; redirect URLs
-   `https://itscogo-lab.github.io/HanziBloom/**` and `http://localhost:5173/**`.
+   `https://itscogo-lab.github.io/VividHanzi/`; redirect URLs
+   `https://itscogo-lab.github.io/VividHanzi/**` and `http://localhost:5173/**`.
