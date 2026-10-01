@@ -44,7 +44,14 @@ export function DashboardPage() {
       <PageHeader
         title={t('nav.dashboard')}
         description={t('dashboard.description')}
-        actions={<ButtonLink to="/study/practice">{t('dashboard.startSession')}</ButtonLink>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink to="/study/practice?focus=writing" variant="secondary">
+              {t('dashboard.practiceWriting')}
+            </ButtonLink>
+            <ButtonLink to="/study/practice">{t('dashboard.startSession')}</ButtonLink>
+          </div>
+        }
       />
 
       <div className="flex flex-col gap-4 sm:gap-6">

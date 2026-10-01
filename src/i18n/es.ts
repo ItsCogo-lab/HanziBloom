@@ -51,6 +51,10 @@ export const es: Record<MessageKey, string> = {
   'practice.difficultTitle': 'Elementos difíciles',
   'practice.difficultDescription': 'Una sesión con lo que más fallas.',
   'practice.difficultEmpty': 'Ahora mismo no tienes elementos difíciles.',
+  'practice.writingTitle': 'Practicar escritura',
+  'practice.writingDescription': 'Escribe trazo a trazo las palabras que ya sabes leer.',
+  'practice.writingEmpty': 'Todavía no hay nada que escribir. Cuando aciertes una palabra en Study, podrás practicar su escritura aquí.',
+  'dashboard.practiceWriting': 'Practicar escritura',
   'stats.item': 'Elemento',
   'stats.mistakes': 'Fallos',
 

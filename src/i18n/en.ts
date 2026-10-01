@@ -51,6 +51,10 @@ export const en = {
   'practice.difficultTitle': 'Difficult items',
   'practice.difficultDescription': 'A session with the items you miss most often.',
   'practice.difficultEmpty': 'You have no difficult items right now.',
+  'practice.writingTitle': 'Practice writing',
+  'practice.writingDescription': 'Write the words you can already read, stroke by stroke.',
+  'practice.writingEmpty': 'Nothing to write yet. Once you get a word right in Study, you can practice writing it here.',
+  'dashboard.practiceWriting': 'Practice writing',
   'stats.item': 'Item',
   'stats.mistakes': 'Mistakes',
 

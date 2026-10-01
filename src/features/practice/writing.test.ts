@@ -4,7 +4,7 @@ import type { Word } from '../dictionary/types.ts'
 import { testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, recordAnswer, recordWritingAnswer } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
-import { canWrite, gradeWriting, isWritingDue, NO_HELP } from './writing.ts'
+import { canWrite, gradeWriting, isWritingDue, NO_HELP, selectWritingItems } from './writing.ts'
 
 const monday = new Date(2026, 8, 28, 10, 0)
 const thursday = new Date(2026, 9, 1, 10, 0)
@@ -24,9 +24,10 @@ function readRight(item: StudyItem, times: number, progress = createEmptyProgres
 const thanks: StudyItem = { kind: 'word', entry: testWords[2]! } // 谢谢
 
 describe('canWrite', () => {
-  it('only once the item can be read: recognition level 2 or more', () => {
-    expect(canWrite(thanks, readRight(thanks, 1))).toBe(false)
-    expect(canWrite(thanks, readRight(thanks, 2))).toBe(true)
+  it('only once the item can be read: answered right at least once', () => {
+    expect(canWrite(thanks, createEmptyProgress())).toBe(false)
+    expect(canWrite(thanks, recordAnswer(createEmptyProgress(), 'word:谢谢', false, monday))).toBe(false)
+    expect(canWrite(thanks, readRight(thanks, 1))).toBe(true)
   })
 
   it('only hanzi, at most 4 of them, and with a meaning to show', () => {
@@ -43,7 +44,7 @@ describe('canWrite', () => {
 
 describe('isWritingDue', () => {
   it('when never written, or when its writing review is due', () => {
-    const progress = readRight(thanks, 2)
+    const progress = readRight(thanks, 1)
     expect(isWritingDue(thanks, progress, monday)).toBe(true)
 
     const written = recordWritingAnswer(progress, 'word:谢谢', true, monday) // next writing review: tomorrow
@@ -53,6 +54,32 @@ describe('isWritingDue', () => {
 
   it('never for an item that cannot be written yet', () => {
     expect(isWritingDue(thanks, createEmptyProgress(), monday)).toBe(false)
+  })
+})
+
+describe('selectWritingItems', () => {
+  const [hello, water, tea] = ['你好', '水', '茶'].map((hanzi) => word(hanzi))
+
+  it('only items that can be written, due ones first, at most `size`', () => {
+    let progress = readRight(hello!, 1, readRight(water!, 1, readRight(tea!, 1)))
+    progress = recordWritingAnswer(progress, 'word:茶', true, monday) // 茶: next writing review tomorrow
+    const unread = word('人')
+
+    expect(selectWritingItems([unread, tea!, water!, hello!], progress, monday, 10)).toHaveLength(3)
+    const firstTwo = selectWritingItems([tea!, water!, hello!], progress, monday, 2)
+    expect(firstTwo.map((item) => item.entry.hanzi).sort()).toEqual(['你好', '水'])
+  })
+
+  it('prefers items the user studied over items only marked known by level', () => {
+    const marked: ProgressData = {
+      ...readRight(water!, 1),
+      items: {
+        ...readRight(water!, 1).items,
+        'word:你好': { ...readRight(hello!, 5).items['word:你好']!, fromLevel: true },
+      },
+    }
+    const [first] = selectWritingItems([hello!, water!], marked, monday, 1)
+    expect(first?.entry.hanzi).toBe('水')
   })
 })
 

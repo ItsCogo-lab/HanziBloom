@@ -82,6 +82,25 @@ describe('PracticePage: difficult items', () => {
   })
 })
 
+describe('PracticePage: practice writing', () => {
+  it('only asks to write items already read right', () => {
+    const storage = memoryStorage()
+    let progress = recordAnswer(createEmptyProgress(), 'word:谢谢', true, new Date())
+    progress = recordAnswer(progress, 'word:你好', false, new Date())
+    saveProgress(progress, storage)
+    renderWithProviders(<PracticePage />, { storage, path: '/study/practice?focus=writing' })
+
+    expect(screen.getByRole('heading', { name: 'Practice writing' })).toBeInTheDocument()
+    expect(screen.getByText(/^Card 1 of 1$/)).toBeInTheDocument()
+    expect(screen.getByText('Write it')).toBeInTheDocument()
+  })
+
+  it('with nothing to write says so', () => {
+    renderWithProviders(<PracticePage />, { path: '/study/practice?focus=writing' })
+    expect(screen.getByText(/^Nothing to write yet/)).toBeInTheDocument()
+  })
+})
+
 describe('PracticePage: Learn and Study of a set', () => {
   const colorIds = topicDefinitions.find((topic) => topic.id === 'colors')!.words.map((word) => `word:${word}` as const)
   const now = new Date()
