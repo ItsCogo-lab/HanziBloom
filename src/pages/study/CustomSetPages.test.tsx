@@ -255,4 +255,36 @@ describe('Custom sets', () => {
     // The dictionary does not change: 长 still has its two readings
     expect(getStudyItem(hskDictionary, 'char:长')?.entry.pinyin).toEqual(['cháng', 'zhǎng'])
   })
+  it('imports a set pasted from an AI as JSON, leaving out words not in the dictionary', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom', storage)
+    await user.click(screen.getByRole('link', { name: 'Import set' }))
+    expect((screen.getByRole('textbox', { name: 'Make it with AI' }) as HTMLTextAreaElement).value).toContain('"words"')
+
+    const json = '{"name": "Zoo and fruit", "description": "From an AI", "words": [{"hanzi": "苹果"}, {"hanzi": "企鹅", "pinyin": "qi3 e2"}, {"hanzi": "火龙果"}]}'
+    await user.click(screen.getByRole('textbox', { name: 'Paste the set' }))
+    await user.paste(json)
+    await user.click(screen.getByRole('button', { name: 'Check words' }))
+
+    expect(await screen.findByText('2 of 3 words found in the dictionary')).toBeInTheDocument()
+    expect(within(screen.getByRole('list', { name: 'Words to import' })).getAllByRole('listitem')).toHaveLength(2)
+    expect(screen.getByText(/left out: 火龙果/)).toBeInTheDocument()
+    expect(screen.getByLabelText('Name')).toHaveValue('Zoo and fruit')
+
+    await user.click(screen.getByRole('button', { name: 'Create set with 2 words' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Zoo and fruit' })).toBeInTheDocument()
+    expect(loadCustomSets(storage)[0]).toMatchObject({ description: 'From an AI', itemIds: ['word:苹果', 'word:企鹅'] })
+  })
+
+  it('imports a plain list, asking for the name', async () => {
+    const user = userEvent.setup()
+    const storage = memoryStorage()
+    renderAt('/study/custom/import', storage)
+    await user.type(screen.getByRole('textbox', { name: 'Paste the set' }), '机场{Enter}学习')
+    await user.click(screen.getByRole('button', { name: 'Check words' }))
+    await user.type(await screen.findByLabelText('Name'), 'Travel')
+    await user.click(screen.getByRole('button', { name: 'Create set with 2 words' }))
+    expect(loadCustomSets(storage)[0]).toMatchObject({ name: 'Travel', itemIds: ['word:机场', 'word:学习'] })
+  })
 })
