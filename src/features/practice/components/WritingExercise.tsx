@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Card } from '../../../components/ui/Card.tsx'
+import { HanziText } from '../../../components/ui/HanziText.tsx'
 import { Kbd } from '../../../components/ui/Kbd.tsx'
 import { t } from '../../../i18n/index.ts'
 import { formatPinyin, type Dictionary } from '../../dictionary/dictionary.ts'
@@ -10,9 +11,14 @@ import { ToneHanzi } from '../../dictionary/components/ToneHanzi.tsx'
 import { getMeaningLabel } from '../choiceExercises.ts'
 import { useSessionShortcuts } from '../shortcuts.ts'
 import type { WritingExercise as WritingExerciseType } from '../types.ts'
+import { useElementWidth } from '../useElementWidth.ts'
 import { gradeWriting, NO_HELP, type WritingHelp } from '../writing.ts'
 import { LookUpButtons } from './LookUpButtons.tsx'
 import { WritingPad, type WritingPadHandle } from './WritingPad.tsx'
+
+/** Below this width (a phone in portrait) only the character being written gets a pad, as big as fits. */
+const NARROW_WIDTH = 560
+const MAX_NARROW_PAD = 360
 
 type WritingExerciseProps = {
   exercise: WritingExerciseType
@@ -32,8 +38,9 @@ type WritingExerciseProps = {
 export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLookUp }: WritingExerciseProps) {
   const { item } = exercise
   const characters = Array.from(item.entry.hanzi)
-  // Smaller boxes for words, so two fit side by side on a phone
-  const size = characters.length === 1 ? 240 : 150
+  const padsRef = useRef<HTMLDivElement>(null)
+  const width = useElementWidth(padsRef)
+  const isNarrow = width !== undefined && width < NARROW_WIDTH
   const [current, setCurrent] = useState(0)
   const [help, setHelp] = useState<WritingHelp>(NO_HELP)
   const [unavailable, setUnavailable] = useState(false)
@@ -42,6 +49,8 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
   const feedbackId = useId()
   const isDone = current >= characters.length
   const isCorrect = isDone && gradeWriting(help)
+  // Once all are written, the last pad stays on screen with its character drawn
+  const shown = Math.min(current, characters.length - 1)
 
   const hint = () => {
     setHelp((previous) => ({ ...previous, hintUsed: true }))
@@ -52,6 +61,11 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
     padRef.current?.reveal()
   }
   const next = () => onAnswer(isCorrect)
+  const onMistake = (misses: number) =>
+    setHelp((previous) => ({ ...previous, maxMissesOnStroke: Math.max(previous.maxMissesOnStroke, misses) }))
+  const hasLocalCopy = item.entry.hskLevel !== undefined
+  // On wider screens all the pads sit side by side, smaller for words
+  const wideSize = characters.length === 1 ? 240 : 150
 
   useSessionShortcuts(isDone ? { Enter: next, ' ': next } : unavailable ? {} : { h: hint, H: hint })
 
@@ -71,28 +85,46 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
         <h2 className="text-lg text-ink-muted">{t('writing.question')}</h2>
       </div>
 
-      <ol aria-label={t('writing.characters')} className="flex flex-wrap justify-center gap-3">
-        {characters.map((character, index) => (
-          <li key={index}>
-            {index <= current ? (
-              <WritingPad
-                ref={index === current ? padRef : undefined}
-                hanzi={character}
-                hasLocalCopy={item.entry.hskLevel !== undefined}
-                size={size}
-                onMistake={(misses) =>
-                  setHelp((previous) => ({ ...previous, maxMissesOnStroke: Math.max(previous.maxMissesOnStroke, misses) }))
-                }
-                onDone={() => setCurrent(index + 1)}
-                onUnavailable={() => setUnavailable(true)}
-              />
-            ) : (
-              // Characters still to write: an empty box
-              <div aria-hidden="true" className="rounded-xl border border-dashed border-line" style={{ width: size, height: size }} />
+      <div ref={padsRef}>
+        {isNarrow ? (
+          <div className="flex flex-col items-center gap-3">
+            {characters.length > 1 && (
+              <CharacterProgress characters={characters} current={current} />
             )}
-          </li>
-        ))}
-      </ol>
+            <WritingPad
+              key={shown}
+              ref={padRef}
+              hanzi={characters[shown]!}
+              hasLocalCopy={hasLocalCopy}
+              size={Math.min(width, MAX_NARROW_PAD)}
+              onMistake={onMistake}
+              onDone={() => setCurrent(shown + 1)}
+              onUnavailable={() => setUnavailable(true)}
+            />
+          </div>
+        ) : (
+          <ol aria-label={t('writing.characters')} className="flex flex-wrap justify-center gap-3">
+            {characters.map((character, index) => (
+              <li key={index}>
+                {index <= current ? (
+                  <WritingPad
+                    ref={index === current ? padRef : undefined}
+                    hanzi={character}
+                    hasLocalCopy={hasLocalCopy}
+                    size={wideSize}
+                    onMistake={onMistake}
+                    onDone={() => setCurrent(index + 1)}
+                    onUnavailable={() => setUnavailable(true)}
+                  />
+                ) : (
+                  // Characters still to write: an empty box
+                  <div aria-hidden="true" className="rounded-xl border border-dashed border-line" style={{ width: wideSize, height: wideSize }} />
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
 
       {unavailable ? (
         <div className="flex justify-center">
@@ -124,7 +156,7 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
           </Button>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           <Button variant="secondary" aria-keyshortcuts="H" onClick={hint}>
             {t('writing.hint')} <Kbd>H</Kbd>
           </Button>
@@ -134,5 +166,27 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
         </div>
       )}
     </Card>
+  )
+}
+
+/**
+ * On a phone, where only one pad fits: the word's characters as small boxes,
+ * written ones filled in and the one being written marked.
+ */
+function CharacterProgress({ characters, current }: { characters: string[]; current: number }) {
+  return (
+    <ol aria-label={t('writing.characters')} className="flex gap-2">
+      {characters.map((character, index) => (
+        <li
+          key={index}
+          aria-current={index === current ? 'step' : undefined}
+          className={`flex size-10 items-center justify-center rounded-lg border text-2xl ${
+            index === current ? 'border-2 border-accent' : index < current ? 'border-line' : 'border-dashed border-line'
+          }`}
+        >
+          {index < current && <HanziText>{character}</HanziText>}
+        </li>
+      ))}
+    </ol>
   )
 }
