@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createDictionary } from '../../dictionary/dictionary.ts'
@@ -144,5 +144,39 @@ describe('WritingExercise', () => {
     await user.click(await screen.findByRole('button', { name: 'Skip this one' }))
     expect(onSkip).toHaveBeenCalledOnce()
     expect(onAnswer).not.toHaveBeenCalled()
+  })
+
+  it('on a phone in portrait it shows one big pad and the word as small boxes', async () => {
+    // A 340 px wide pad area, as on a phone
+    class FakeResizeObserver {
+      onResize: ResizeObserverCallback
+      constructor(onResize: ResizeObserverCallback) {
+        this.onResize = onResize
+      }
+      observe() {
+        this.onResize([{ contentRect: { width: 340 } } as ResizeObserverEntry], this as unknown as ResizeObserver)
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
+    try {
+      renderExercise()
+      const pad = await screen.findByRole('img', { name: 'Writing box: draw the strokes here' })
+      expect(pad).toHaveStyle({ width: '340px' })
+      const boxes = within(screen.getByRole('list', { name: 'Characters to write' })).getAllByRole('listitem')
+      expect(boxes).toHaveLength(2)
+      expect(boxes[0]).toHaveAttribute('aria-current', 'step')
+
+      await write(0)
+      expect((await writerFor(1)).hanzi).toBe('谢')
+      expect(screen.getAllByRole('img', { name: 'Writing box: draw the strokes here' })).toHaveLength(1)
+      expect(boxes[0]).toHaveTextContent('谢')
+      expect(boxes[1]).toHaveAttribute('aria-current', 'step')
+
+      await write(1)
+      expect(screen.getByText('Correct!')).toBeInTheDocument()
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })
