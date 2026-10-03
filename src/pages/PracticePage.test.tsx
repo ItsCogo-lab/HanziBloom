@@ -92,7 +92,8 @@ describe('PracticePage: practice writing', () => {
 
     expect(screen.getByRole('heading', { name: 'Practice writing' })).toBeInTheDocument()
     expect(screen.getByText(/^Card 1 of 1$/)).toBeInTheDocument()
-    expect(screen.getByText('Write it')).toBeInTheDocument()
+    // The whole word, or sometimes only one of its characters
+    expect(screen.getByText(/^(Write it|Write the missing character)$/)).toBeInTheDocument()
   })
 
   it('with nothing to write says so', () => {

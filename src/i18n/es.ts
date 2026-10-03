@@ -382,6 +382,7 @@ export const es: Record<MessageKey, string> = {
   'settings.themeHint': 'Sistema sigue el modo claro u oscuro de tu dispositivo.',
   'settings.app': 'App',
   'writing.question': 'Escríbelo',
+  'writing.questionOne': 'Escribe el carácter que falta',
   'writing.characters': 'Caracteres para escribir',
   'writing.pad': 'Casilla de escritura: dibuja aquí los trazos',
   'writing.hint': 'Pista',

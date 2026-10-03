@@ -33,24 +33,33 @@ type WritingExerciseProps = {
  * Writing exercise: from the meaning and pinyin, the user writes the hanzi
  * one character at a time. Written characters stay in their box. When all
  * are done it is graded (gradeWriting) and the answer is shown, as in a
- * choice question.
+ * choice question. With `only`, a single character of the word is written
+ * and the others are shown.
  */
 export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLookUp }: WritingExerciseProps) {
-  const { item } = exercise
+  const { item, only } = exercise
   const characters = Array.from(item.entry.hanzi)
+  // Indexes of the characters to write, in order
+  const targets = only === undefined ? characters.map((_, index) => index) : [only]
   const padsRef = useRef<HTMLDivElement>(null)
   const width = useElementWidth(padsRef)
   const isNarrow = width !== undefined && width < NARROW_WIDTH
-  const [current, setCurrent] = useState(0)
+  // How many of the targets are written
+  const [written, setWritten] = useState(0)
   const [help, setHelp] = useState<WritingHelp>(NO_HELP)
   const [unavailable, setUnavailable] = useState(false)
   const padRef = useRef<WritingPadHandle>(null)
   const continueRef = useRef<HTMLButtonElement>(null)
   const feedbackId = useId()
-  const isDone = current >= characters.length
+  const isDone = written >= targets.length
   const isCorrect = isDone && gradeWriting(help)
-  // Once all are written, the last pad stays on screen with its character drawn
-  const shown = Math.min(current, characters.length - 1)
+  // The character being written; once all are, the last one stays on screen drawn
+  const shown = targets[Math.min(written, targets.length - 1)]!
+  const boxState = (index: number): BoxState => {
+    const position = targets.indexOf(index)
+    if (position === -1) return 'given'
+    return position < written ? 'written' : position === written ? 'current' : 'pending'
+  }
 
   const hint = () => {
     setHelp((previous) => ({ ...previous, hintUsed: true }))
@@ -64,7 +73,7 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
   const onMistake = (misses: number) =>
     setHelp((previous) => ({ ...previous, maxMissesOnStroke: Math.max(previous.maxMissesOnStroke, misses) }))
   const hasLocalCopy = item.entry.hskLevel !== undefined
-  // On wider screens all the pads sit side by side, smaller for words
+  // On wider screens all the boxes sit side by side, smaller for words
   const wideSize = characters.length === 1 ? 240 : 150
 
   useSessionShortcuts(isDone ? { Enter: next, ' ': next } : unavailable ? {} : { h: hint, H: hint })
@@ -82,15 +91,13 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
         </p>
         <p className="text-2xl font-medium">{getMeaningLabel(item)}</p>
         <PinyinText pinyin={formatPinyin(item.entry)} className="text-lg text-accent-strong" />
-        <h2 className="text-lg text-ink-muted">{t('writing.question')}</h2>
+        <h2 className="text-lg text-ink-muted">{t(only === undefined ? 'writing.question' : 'writing.questionOne')}</h2>
       </div>
 
       <div ref={padsRef}>
         {isNarrow ? (
           <div className="flex flex-col items-center gap-3">
-            {characters.length > 1 && (
-              <CharacterProgress characters={characters} current={current} />
-            )}
+            {characters.length > 1 && <CharacterProgress characters={characters} boxState={boxState} />}
             <WritingPad
               key={shown}
               ref={padRef}
@@ -98,30 +105,41 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
               hasLocalCopy={hasLocalCopy}
               size={Math.min(width, MAX_NARROW_PAD)}
               onMistake={onMistake}
-              onDone={() => setCurrent(shown + 1)}
+              onDone={() => setWritten((previous) => previous + 1)}
               onUnavailable={() => setUnavailable(true)}
             />
           </div>
         ) : (
           <ol aria-label={t('writing.characters')} className="flex flex-wrap justify-center gap-3">
-            {characters.map((character, index) => (
-              <li key={index}>
-                {index <= current ? (
-                  <WritingPad
-                    ref={index === current ? padRef : undefined}
-                    hanzi={character}
-                    hasLocalCopy={hasLocalCopy}
-                    size={wideSize}
-                    onMistake={onMistake}
-                    onDone={() => setCurrent(index + 1)}
-                    onUnavailable={() => setUnavailable(true)}
-                  />
-                ) : (
-                  // Characters still to write: an empty box
-                  <div aria-hidden="true" className="rounded-xl border border-dashed border-line" style={{ width: wideSize, height: wideSize }} />
-                )}
-              </li>
-            ))}
+            {characters.map((character, index) => {
+              const state = boxState(index)
+              return (
+                <li key={index}>
+                  {state === 'written' || state === 'current' ? (
+                    <WritingPad
+                      ref={state === 'current' ? padRef : undefined}
+                      hanzi={character}
+                      hasLocalCopy={hasLocalCopy}
+                      size={wideSize}
+                      onMistake={onMistake}
+                      onDone={() => setWritten((previous) => previous + 1)}
+                      onUnavailable={() => setUnavailable(true)}
+                    />
+                  ) : state === 'given' ? (
+                    // A character of the word that isn't asked: shown as is
+                    <div
+                      className="flex items-center justify-center rounded-xl border border-line text-ink-muted"
+                      style={{ width: wideSize, height: wideSize, fontSize: wideSize * 0.6 }}
+                    >
+                      <HanziText>{character}</HanziText>
+                    </div>
+                  ) : (
+                    // Characters still to write: an empty box
+                    <div aria-hidden="true" className="rounded-xl border border-dashed border-line" style={{ width: wideSize, height: wideSize }} />
+                  )}
+                </li>
+              )
+            })}
           </ol>
         )}
       </div>
@@ -169,24 +187,30 @@ export function WritingExercise({ exercise, dictionary, onAnswer, onSkip, onLook
   )
 }
 
+/** How each character of the word appears: shown as context, written, being written or still to write. */
+type BoxState = 'given' | 'written' | 'current' | 'pending'
+
 /**
  * On a phone, where only one pad fits: the word's characters as small boxes,
- * written ones filled in and the one being written marked.
+ * written and given ones filled in and the one being written marked.
  */
-function CharacterProgress({ characters, current }: { characters: string[]; current: number }) {
+function CharacterProgress({ characters, boxState }: { characters: string[]; boxState: (index: number) => BoxState }) {
   return (
     <ol aria-label={t('writing.characters')} className="flex gap-2">
-      {characters.map((character, index) => (
-        <li
-          key={index}
-          aria-current={index === current ? 'step' : undefined}
-          className={`flex size-10 items-center justify-center rounded-lg border text-2xl ${
-            index === current ? 'border-2 border-accent' : index < current ? 'border-line' : 'border-dashed border-line'
-          }`}
-        >
-          {index < current && <HanziText>{character}</HanziText>}
-        </li>
-      ))}
+      {characters.map((character, index) => {
+        const state = boxState(index)
+        return (
+          <li
+            key={index}
+            aria-current={state === 'current' ? 'step' : undefined}
+            className={`flex size-10 items-center justify-center rounded-lg border text-2xl ${
+              state === 'current' ? 'border-2 border-accent' : state === 'pending' ? 'border-dashed border-line' : 'border-line'
+            } ${state === 'given' ? 'text-ink-muted' : ''}`}
+          >
+            {(state === 'written' || state === 'given') && <HanziText>{character}</HanziText>}
+          </li>
+        )
+      })}
     </ol>
   )
 }

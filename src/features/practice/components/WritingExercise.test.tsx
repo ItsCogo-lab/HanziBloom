@@ -50,11 +50,11 @@ const exercise: WritingExerciseType = { type: 'writing', item: { kind: 'word', e
 const strokes = { strokes: ['M 0 0 L 1 1'], medians: [[[0, 0], [1, 1]]] }
 const online = createFakeFetch([[/hanzi-writer-data/, () => jsonResponse(strokes)]]).fetch
 
-function renderExercise({ fetchFn = online } = {}) {
+function renderExercise({ fetchFn = online, only }: { fetchFn?: typeof online; only?: number } = {}) {
   const onAnswer = vi.fn()
   const onSkip = vi.fn()
   renderWithProviders(
-    <WritingExercise exercise={exercise} dictionary={dictionary} onAnswer={onAnswer} onSkip={onSkip} onLookUp={() => {}} />,
+    <WritingExercise exercise={{ ...exercise, only }} dictionary={dictionary} onAnswer={onAnswer} onSkip={onSkip} onLookUp={() => {}} />,
     { fetchFn },
   )
   return { onAnswer, onSkip }
@@ -178,5 +178,19 @@ describe('WritingExercise', () => {
     } finally {
       vi.unstubAllGlobals()
     }
+  })
+
+  it('can ask for only one character of the word, showing the others', async () => {
+    const user = userEvent.setup()
+    const { onAnswer } = renderExercise({ only: 1 })
+
+    expect(screen.getByText('Write the missing character')).toBeInTheDocument()
+    expect(screen.getByText('谢')).toBeInTheDocument()
+    expect(screen.getAllByRole('img', { name: 'Writing box: draw the strokes here' })).toHaveLength(1)
+
+    await write(0)
+    expect(screen.getByText('Correct!')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(onAnswer).toHaveBeenCalledExactlyOnceWith(true)
   })
 })

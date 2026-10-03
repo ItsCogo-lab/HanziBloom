@@ -4,7 +4,7 @@ import type { Word } from '../dictionary/types.ts'
 import { testWords } from '../dictionary/testData.ts'
 import { createEmptyProgress, recordAnswer, recordWritingAnswer } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
-import { canWrite, gradeWriting, isWritingDue, NO_HELP, selectWritingItems } from './writing.ts'
+import { canWrite, createWritingExercise, gradeWriting, isWritingDue, NO_HELP, selectWritingItems } from './writing.ts'
 
 const monday = new Date(2026, 8, 28, 10, 0)
 const thursday = new Date(2026, 9, 1, 10, 0)
@@ -80,6 +80,19 @@ describe('selectWritingItems', () => {
     }
     const [first] = selectWritingItems([hello!, water!], marked, monday, 1)
     expect(first?.entry.hanzi).toBe('水')
+  })
+})
+
+describe('createWritingExercise', () => {
+  it('a word sometimes asks for only one of its characters, picked at random', () => {
+    expect(createWritingExercise(thanks, () => 0.9)).toEqual({ type: 'writing', item: thanks })
+    const values = [0.1, 0.7]
+    expect(createWritingExercise(thanks, () => values.shift()!)).toEqual({ type: 'writing', item: thanks, only: 1 })
+  })
+
+  it('a single character is always written whole', () => {
+    const character: StudyItem = { kind: 'word', entry: { ...testWords[2]!, hanzi: '谢' } }
+    expect(createWritingExercise(character, () => 0)).toEqual({ type: 'writing', item: character })
   })
 })
 

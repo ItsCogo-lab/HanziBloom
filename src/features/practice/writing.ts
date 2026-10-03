@@ -3,6 +3,7 @@ import { getStudyItemId, type StudyItem } from '../dictionary/studyItem.ts'
 import { isDue } from '../progress/progress.ts'
 import type { ProgressData } from '../progress/types.ts'
 import { getMeaningLabel } from './choiceExercises.ts'
+import type { WritingExercise } from './types.ts'
 
 /** Longer words (chengyu, names) are not asked in writing. */
 export const MAX_WRITING_LENGTH = 4
@@ -13,6 +14,9 @@ export const MAX_WRITING_LENGTH = 4
  * word is written from the day after it is first answered right.
  */
 export const WRITING_MIN_LEVEL = 1
+
+/** How often a word asks for only one of its characters (the rest are shown). */
+export const ONE_CHARACTER_CHANCE = 0.5
 
 /** Misses on one stroke after which Hanzi Writer shows it as a hint. */
 export const AUTO_HINT_AFTER_MISSES = 3
@@ -43,6 +47,16 @@ export function isWritingDue(item: StudyItem, progress: ProgressData, now: Date)
   if (!canWrite(item, progress)) return false
   const writing = progress.writing[getStudyItemId(item)]
   return writing === undefined || isDue(writing, now)
+}
+
+/**
+ * The writing exercise for an item. A word sometimes asks for only one of
+ * its characters, picked at random, with the rest shown as context.
+ */
+export function createWritingExercise(item: StudyItem, random: RandomFn = Math.random): WritingExercise {
+  const length = Array.from(item.entry.hanzi).length
+  if (length < 2 || random() >= ONE_CHARACTER_CHANCE) return { type: 'writing', item }
+  return { type: 'writing', item, only: Math.floor(random() * length) }
 }
 
 /**

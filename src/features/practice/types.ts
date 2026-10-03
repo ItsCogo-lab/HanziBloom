@@ -29,6 +29,11 @@ export interface ChoiceExercise {
 export interface WritingExercise {
   type: 'writing'
   item: StudyItem
+  /**
+   * In a word, the index of the only character to write; the others are
+   * shown. Without it, the whole word is written.
+   */
+  only?: number
 }
 
 /**

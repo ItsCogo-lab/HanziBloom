@@ -4,7 +4,7 @@ import type { ProgressData } from '../progress/types.ts'
 import { shuffle, type RandomFn } from '../../lib/random.ts'
 import { EXERCISE_DEFINITIONS, type ExerciseDefinition } from './exerciseDefinitions.ts'
 import type { Exercise, ExerciseResult } from './types.ts'
-import { isWritingDue } from './writing.ts'
+import { createWritingExercise, isWritingDue } from './writing.ts'
 
 export const DEFAULT_SESSION_SIZE = 10
 
@@ -49,7 +49,7 @@ export function createSessionExercises(
   const exercises: Exercise[] = []
   for (const item of selectSessionItems(pool, progress, now, size, random)) {
     if (writing && isWritingDue(item, progress, now)) {
-      exercises.push({ type: 'writing', item })
+      exercises.push(createWritingExercise(item, random))
       continue
     }
     const candidates = definitions.filter((definition) => definition.canBuild(item, distractorPool))

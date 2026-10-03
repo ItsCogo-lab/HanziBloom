@@ -382,6 +382,7 @@ export const en = {
   'settings.themeHint': 'System follows the light or dark mode of your device.',
   'settings.app': 'App',
   'writing.question': 'Write it',
+  'writing.questionOne': 'Write the missing character',
   'writing.characters': 'Characters to write',
   'writing.pad': 'Writing box: draw the strokes here',
   'writing.hint': 'Hint',

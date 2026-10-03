@@ -14,7 +14,7 @@ import { useMyStudies } from '../features/myStudies/myStudiesContext.ts'
 import { LearnSession } from '../features/practice/components/LearnSession.tsx'
 import { PracticeSession } from '../features/practice/components/PracticeSession.tsx'
 import { createSessionExercises } from '../features/practice/session.ts'
-import { selectWritingItems, WRITING_MIN_LEVEL } from '../features/practice/writing.ts'
+import { createWritingExercise, selectWritingItems, WRITING_MIN_LEVEL } from '../features/practice/writing.ts'
 import { useProgress } from '../features/progress/progressContext.ts'
 import { getDifficultItems } from '../features/progress/stats.ts'
 import type { ProgressData } from '../features/progress/types.ts'
@@ -189,7 +189,7 @@ function WritingSession({ itemIds }: { itemIds: readonly StudyItemId[] }) {
     nextSessionId += 1
     const pool = itemIds.flatMap((itemId) => getStudyItem(dictionary, itemId) ?? [])
     const items = selectWritingItems(pool, current, new Date(), sessionSize)
-    return { id: nextSessionId, exercises: items.map((item) => ({ type: 'writing' as const, item })) }
+    return { id: nextSessionId, exercises: items.map((item) => createWritingExercise(item)) }
   }
   const [session, setSession] = useState(() => createSession(progress))
 
